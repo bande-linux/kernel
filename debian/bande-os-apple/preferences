@@ -1,0 +1,4 @@
+Explanation: Debian's own kernels can't drive the Mac mini M2; Bande's apple-arm64-16k flavour can.
+Package: linux-image-* linux-binary-* linux-modules-* linux-base-*
+Pin: release o=Debian
+Pin-Priority: -1
