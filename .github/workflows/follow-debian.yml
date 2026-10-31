@@ -13,12 +13,9 @@ on:
         description: Test-build this Debian linux version (any suite) instead of testing's; never published
         default: ''
 
-concurrency:
-  group: follow-debian
-  cancel-in-progress: false
-
 permissions:
   contents: read
+  actions: read
 
 jobs:
   check:
@@ -38,13 +35,18 @@ jobs:
         env:
           FORCE: ${{ inputs.force }}
           TEST_VERSION: ${{ inputs.debian_version }}
+          GH_TOKEN: ${{ github.token }}
         run: |
           debian=${TEST_VERSION:-$(scripts/debian-version.sh)}
           version=$(scripts/version.sh "$debian")
           published=$(scripts/published.sh)
           build=true
-          [ "$published" != "$version" ] || [ "$FORCE" = true ] || [ -n "$TEST_VERSION" ] || build=false
-          echo "Debian testing: linux $debian; ours: $version; published: ${published:-none}; build: $build"
+          built=$(gh api "repos/$GITHUB_REPOSITORY/actions/artifacts?name=bande-version-$version" \
+            --jq '[.artifacts[] | select(.expired | not)] | length')
+          if [ -z "$TEST_VERSION" ] && [ "$FORCE" != true ] && { [ "$published" = "$version" ] || [ "$built" -gt 0 ]; }; then
+            build=false
+          fi
+          echo "Debian: linux $debian; ours: $version; published: ${published:-none}; built: $built; build: $build"
           {
             echo "debian=$debian"
             echo "version=$version"
@@ -54,6 +56,9 @@ jobs:
   build:
     needs: check
     if: needs.check.outputs.build == 'true'
+    concurrency:
+      group: follow-debian-${{ inputs.debian_version || 'testing' }}
+      cancel-in-progress: false
     runs-on: ubuntu-24.04-arm
     timeout-minutes: 360
     permissions:
