@@ -72,7 +72,6 @@ jobs:
           mkdir -p "$RUNNER_TEMP/work" "$RUNNER_TEMP/out"
           docker run -d --name build -v "$PWD:/repo" -v "$RUNNER_TEMP/work:/work" -v "$RUNNER_TEMP/out:/out" \
             debian:testing sleep infinity
-          docker exec build git config --global --add safe.directory /repo
 
       - name: Fetch Debian's source
         run: docker exec build /repo/scripts/build.sh fetch "$DEBIAN_VERSION" /work
