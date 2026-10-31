@@ -1,0 +1,460 @@
+From 4af55bbe731f8db129091d3bba40e6187ab5e543 Mon Sep 17 00:00:00 2001
+From: Sasha Finkelstein <k@chaosmail.tech>
+Date: Thu, 4 Jun 2026 14:11:26 +0200
+Subject: [PATCH] dts: apple: t[603x,8122]: Add MCA and supporting nodes
+
+Signed-off-by: Sasha Finkelstein <k@chaosmail.tech>
+(cherry picked from commit 86610d5d68c4d274217294263e9b7d4b402d301f)
+---
+ arch/arm64/boot/dts/apple/t6030-pmgr.dtsi     |  4 ++
+ arch/arm64/boot/dts/apple/t6030.dtsi          | 64 +++++++++++++++++
+ arch/arm64/boot/dts/apple/t6031-base.dtsi     | 10 +++
+ arch/arm64/boot/dts/apple/t6031-die0.dtsi     | 45 ++++++++++++
+ arch/arm64/boot/dts/apple/t6031-dieX.dtsi     |  9 +++
+ arch/arm64/boot/dts/apple/t6031-pmgr.dtsi     |  4 ++
+ arch/arm64/boot/dts/apple/t6032-j575d.dts     |  5 ++
+ .../arm64/boot/dts/apple/t603x-j514-j516.dtsi |  4 ++
+ arch/arm64/boot/dts/apple/t8122-jxxx.dtsi     |  4 ++
+ arch/arm64/boot/dts/apple/t8122-pmgr.dtsi     |  4 ++
+ arch/arm64/boot/dts/apple/t8122.dtsi          | 68 +++++++++++++++++++
+ 11 files changed, 221 insertions(+)
+
+diff --git a/arch/arm64/boot/dts/apple/t6030-pmgr.dtsi b/arch/arm64/boot/dts/apple/t6030-pmgr.dtsi
+index 932388ea13c9..70b75372784e 100644
+--- a/arch/arm64/boot/dts/apple/t6030-pmgr.dtsi
++++ b/arch/arm64/boot/dts/apple/t6030-pmgr.dtsi
+@@ -552,6 +552,7 @@ ps_mca0: power-controller@308 {
+ 		#reset-cells = <0>;
+ 		label = "mca0";
+ 		power-domains = <&ps_sio_adma>, <&ps_audio_p>;
++		apple,externally-clocked;
+ 	};
+ 
+ 	ps_dcs0: power-controller@320 {
+@@ -669,6 +670,7 @@ ps_mca1: power-controller@388 {
+ 		#reset-cells = <0>;
+ 		label = "mca1";
+ 		power-domains = <&ps_sio_adma>, <&ps_audio_p>;
++		apple,externally-clocked;
+ 	};
+ 
+ 	ps_mca2: power-controller@390 {
+@@ -678,6 +680,7 @@ ps_mca2: power-controller@390 {
+ 		#reset-cells = <0>;
+ 		label = "mca2";
+ 		power-domains = <&ps_sio_adma>, <&ps_audio_p>;
++		apple,externally-clocked;
+ 	};
+ 
+ 	ps_mca3: power-controller@398 {
+@@ -687,6 +690,7 @@ ps_mca3: power-controller@398 {
+ 		#reset-cells = <0>;
+ 		label = "mca3";
+ 		power-domains = <&ps_sio_adma>, <&ps_audio_p>;
++		apple,externally-clocked;
+ 	};
+ 
+ 	ps_ioa1: power-controller@3a0 {
+diff --git a/arch/arm64/boot/dts/apple/t6030.dtsi b/arch/arm64/boot/dts/apple/t6030.dtsi
+index f66eac1da3ea..be03c16a11a4 100644
+--- a/arch/arm64/boot/dts/apple/t6030.dtsi
++++ b/arch/arm64/boot/dts/apple/t6030.dtsi
+@@ -424,6 +424,16 @@ clk_200m: clock-200m {
+ 		clock-output-names = "clk_200m";
+ 	};
+ 
++	/*
++	 * This is a fabulated representation of the input clock
++	 * to NCO since we don't know the true clock tree.
++	 */
++	nco_clkref: clock-ref-nco {
++		compatible = "fixed-clock";
++		#clock-cells = <0>;
++		clock-output-names = "nco_ref";
++	};
++
+ 	reserved-memory {
+ 		#address-cells = <2>;
+ 		#size-cells = <2>;
+@@ -559,6 +569,53 @@ spi1: spi@289104000 {
+ 			status = "disabled";
+ 		};
+ 
++		sio_dart: iommu@289004000 {
++			compatible = "apple,t6030-dart", "apple,t8110-dart";
++			reg = <0x2 0x89004000 0x0 0x4000>;
++			interrupt-parent = <&aic>;
++			interrupts = <AIC_IRQ 901 IRQ_TYPE_LEVEL_HIGH>;
++			#iommu-cells = <1>;
++			power-domains = <&ps_sio>;
++		};
++
++		admac: dma-controller@28b200000 {
++			compatible = "apple,t6030-admac", "apple,t8103-admac";
++			reg = <0x2 0x8b200000 0x0 0x34000>;
++			#dma-cells = <1>;
++			dma-channels = <24>;
++			interrupts-extended = <0>,
++					      <&aic AIC_IRQ 888 IRQ_TYPE_LEVEL_HIGH>,
++					      <0>,
++					      <0>;
++			iommus = <&sio_dart 2>;
++			power-domains = <&ps_sio_adma>;
++			resets = <&ps_audio_p>;
++		};
++
++		mca: mca@28b400000 {
++			compatible = "apple,t6030-mca", "apple,t8103-mca";
++			reg = <0x2 0x8b400000 0x0 0x10000>,
++			      <0x2 0x8b300000 0x0 0x20000>;
++			clocks = <&nco 0>, <&nco 1>, <&nco 2>, <&nco 3>;
++			dmas = <&admac 0>, <&admac 1>, <&admac 2>, <&admac 3>,
++			       <&admac 4>, <&admac 5>, <&admac 6>, <&admac 7>,
++			       <&admac 8>, <&admac 9>, <&admac 10>, <&admac 11>,
++			       <&admac 12>, <&admac 13>, <&admac 14>, <&admac 15>;
++			dma-names = "tx0a", "rx0a", "tx0b", "rx0b",
++				    "tx1a", "rx1a", "tx1b", "rx1b",
++				    "tx2a", "rx2a", "tx2b", "rx2b",
++				    "tx3a", "rx3a", "tx3b", "rx3b";
++			interrupt-parent = <&aic>;
++			interrupts = <AIC_IRQ 881 IRQ_TYPE_LEVEL_HIGH>,
++				     <AIC_IRQ 882 IRQ_TYPE_LEVEL_HIGH>,
++				     <AIC_IRQ 883 IRQ_TYPE_LEVEL_HIGH>,
++				     <AIC_IRQ 884 IRQ_TYPE_LEVEL_HIGH>;
++			power-domains = <&ps_audio_p>, <&ps_mca0>, <&ps_mca1>,
++					<&ps_mca2>, <&ps_mca3>;
++			resets = <&ps_audio_p>;
++			#sound-dai-cells = <1>;
++		};
++
+ 		serial0: serial@289200000 {
+ 			compatible = "apple,s5l-uart";
+ 			reg = <0x2 0x89200000 0x0 0x1000>;
+@@ -662,6 +719,13 @@ pmgr: power-management@350700000 {
+ 			/* child nodes are added in t6030-pmgr.dtsi */
+ 		};
+ 
++		nco: clock-controller@350044000 {
++			compatible = "apple,t6030-nco", "apple,t8103-nco";
++			reg = <0x3 0x50044000 0x0 0x14000>;
++			clocks = <&nco_clkref>;
++			#clock-cells = <1>;
++		};
++
+ 		aic: interrupt-controller@351000000 {
+ 			compatible = "apple,t6030-aic3", "apple,t8122-aic3";
+ 			#interrupt-cells = <3>;
+diff --git a/arch/arm64/boot/dts/apple/t6031-base.dtsi b/arch/arm64/boot/dts/apple/t6031-base.dtsi
+index 55891125010e..4bf7ce8535ca 100644
+--- a/arch/arm64/boot/dts/apple/t6031-base.dtsi
++++ b/arch/arm64/boot/dts/apple/t6031-base.dtsi
+@@ -487,6 +487,16 @@ clk_200m: clock-200m {
+ 		clock-output-names = "clk_200m";
+ 	};
+ 
++	/*
++	 * This is a fabulated representation of the input clock
++	 * to NCO since we don't know the true clock tree.
++	 */
++	nco_clkref: clock-ref-nco {
++		compatible = "fixed-clock";
++		#clock-cells = <0>;
++		clock-output-names = "nco_ref";
++	};
++
+ 	reserved-memory {
+ 		#address-cells = <2>;
+ 		#size-cells = <2>;
+diff --git a/arch/arm64/boot/dts/apple/t6031-die0.dtsi b/arch/arm64/boot/dts/apple/t6031-die0.dtsi
+index 90d0f83c81b4..46b1e2ffc8c2 100644
+--- a/arch/arm64/boot/dts/apple/t6031-die0.dtsi
++++ b/arch/arm64/boot/dts/apple/t6031-die0.dtsi
+@@ -7,6 +7,13 @@
+  */
+ 
+ &SOC_NODE {
++	nco: clock-controller@29003c000 {
++		compatible = "apple,t6031-nco", "apple,t8103-nco";
++		reg = <0x2 0x9003c000 0x0 0x14000>;
++		clocks = <&nco_clkref>;
++		#clock-cells = <1>;
++	};
++
+ 	aic: interrupt-controller@292400000 {
+ 		compatible = "apple,t6031-aic3", "apple,t8122-aic3";
+ 		#interrupt-cells = <4>;
+@@ -315,6 +322,44 @@ serial0: serial@391200000 {
+ 		status = "disabled";
+ 	};
+ 
++	admac: dma-controller@393200000 {
++		compatible = "apple,t6031-admac", "apple,t8103-admac";
++		reg = <0x3 0x93200000 0x0 0x34000>;
++		#dma-cells = <1>;
++		dma-channels = <24>;
++		interrupts-extended = <0>,
++				      <&aic AIC_IRQ 0 1325 IRQ_TYPE_LEVEL_HIGH>,
++				      <0>,
++				      <0>;
++		iommus = <&sio_dart 2>;
++		power-domains = <&ps_sio_adma>;
++		resets = <&ps_audio_p>;
++	};
++
++	mca: mca@393400000 {
++		compatible = "apple,t6031-mca", "apple,t8103-mca";
++		reg = <0x3 0x93400000 0x0 0x10000>,
++		      <0x3 0x93300000 0x0 0x20000>;
++		clocks = <&nco 0>, <&nco 1>, <&nco 2>, <&nco 3>;
++		dmas = <&admac 0>, <&admac 1>, <&admac 2>, <&admac 3>,
++		       <&admac 4>, <&admac 5>, <&admac 6>, <&admac 7>,
++		       <&admac 8>, <&admac 9>, <&admac 10>, <&admac 11>,
++		       <&admac 12>, <&admac 13>, <&admac 14>, <&admac 15>;
++		dma-names = "tx0a", "rx0a", "tx0b", "rx0b",
++			    "tx1a", "rx1a", "tx1b", "rx1b",
++			    "tx2a", "rx2a", "tx2b", "rx2b",
++			    "tx3a", "rx3a", "tx3b", "rx3b";
++		interrupt-parent = <&aic>;
++		interrupts = <AIC_IRQ 0 1318 IRQ_TYPE_LEVEL_HIGH>,
++			     <AIC_IRQ 0 1319 IRQ_TYPE_LEVEL_HIGH>,
++			     <AIC_IRQ 0 1320 IRQ_TYPE_LEVEL_HIGH>,
++			     <AIC_IRQ 0 1321 IRQ_TYPE_LEVEL_HIGH>;
++		power-domains = <&ps_audio_p>, <&ps_mca0>, <&ps_mca1>,
++				<&ps_mca2>, <&ps_mca3>;
++		resets = <&ps_audio_p>;
++		#sound-dai-cells = <1>;
++	};
++
+ 	pcie0: pcie@580000000 {
+ 		compatible = "apple,t6031-pcie", "apple,t6020-pcie";
+ 		device_type = "pci";
+diff --git a/arch/arm64/boot/dts/apple/t6031-dieX.dtsi b/arch/arm64/boot/dts/apple/t6031-dieX.dtsi
+index 293557158029..89f201787b03 100644
+--- a/arch/arm64/boot/dts/apple/t6031-dieX.dtsi
++++ b/arch/arm64/boot/dts/apple/t6031-dieX.dtsi
+@@ -92,6 +92,15 @@ DIE_NODE(pinctrl_aop): pinctrl@2a8824000 {
+ 				<AIC_IRQ DIE_NO 601 IRQ_TYPE_LEVEL_HIGH>;
+ 	};
+ 
++	DIE_NODE(sio_dart): iommu@391004000 {
++		compatible = "apple,t6031-dart", "apple,t8110-dart";
++		reg = <0x3 0x91004000 0x0 0x4000>;
++		interrupt-parent = <&aic>;
++		interrupts = <AIC_IRQ DIE_NO 1338 IRQ_TYPE_LEVEL_HIGH>;
++		#iommu-cells = <1>;
++		power-domains = <&DIE_NODE(ps_sio)>;
++	};
++
+ 	DIE_NODE(pinctrl_ap): pinctrl@2b3000000 {
+ 		compatible = "apple,t6031-pinctrl", "apple,t8103-pinctrl";
+ 		reg = <0x2 0xb3000000 0x0 0x4000>;
+diff --git a/arch/arm64/boot/dts/apple/t6031-pmgr.dtsi b/arch/arm64/boot/dts/apple/t6031-pmgr.dtsi
+index f80ee5f7ebcf..02e62cda7852 100644
+--- a/arch/arm64/boot/dts/apple/t6031-pmgr.dtsi
++++ b/arch/arm64/boot/dts/apple/t6031-pmgr.dtsi
+@@ -765,6 +765,7 @@ DIE_NODE(ps_mca0): power-controller@4e8 {
+ 		#reset-cells = <0>;
+ 		label = DIE_LABEL(mca0);
+ 		power-domains = <&DIE_NODE(ps_audio_p)>, <&DIE_NODE(ps_sio_adma)>;
++		apple,externally-clocked;
+ 	};
+ 
+ 	DIE_NODE(ps_mca1): power-controller@4f0 {
+@@ -774,6 +775,7 @@ DIE_NODE(ps_mca1): power-controller@4f0 {
+ 		#reset-cells = <0>;
+ 		label = DIE_LABEL(mca1);
+ 		power-domains = <&DIE_NODE(ps_audio_p)>, <&DIE_NODE(ps_sio_adma)>;
++		apple,externally-clocked;
+ 	};
+ 
+ 	DIE_NODE(ps_mca2): power-controller@4f8 {
+@@ -783,6 +785,7 @@ DIE_NODE(ps_mca2): power-controller@4f8 {
+ 		#reset-cells = <0>;
+ 		label = DIE_LABEL(mca2);
+ 		power-domains = <&DIE_NODE(ps_audio_p)>, <&DIE_NODE(ps_sio_adma)>;
++		apple,externally-clocked;
+ 	};
+ 
+ 	DIE_NODE(ps_mca3): power-controller@500 {
+@@ -792,6 +795,7 @@ DIE_NODE(ps_mca3): power-controller@500 {
+ 		#reset-cells = <0>;
+ 		label = DIE_LABEL(mca3);
+ 		power-domains = <&DIE_NODE(ps_audio_p)>, <&DIE_NODE(ps_sio_adma)>;
++		apple,externally-clocked;
+ 	};
+ 
+ 	DIE_NODE(ps_msr1): power-controller@508 {
+diff --git a/arch/arm64/boot/dts/apple/t6032-j575d.dts b/arch/arm64/boot/dts/apple/t6032-j575d.dts
+index 028507bd5594..fb96cc16031d 100644
+--- a/arch/arm64/boot/dts/apple/t6032-j575d.dts
++++ b/arch/arm64/boot/dts/apple/t6032-j575d.dts
+@@ -45,4 +45,9 @@ &serial0 {
+ 	status = "okay";
+ };
+ 
++
++&nco_clkref {
++	clock-frequency = <900000000>;
++};
++
+ #include "spi1-nvram.dtsi"
+diff --git a/arch/arm64/boot/dts/apple/t603x-j514-j516.dtsi b/arch/arm64/boot/dts/apple/t603x-j514-j516.dtsi
+index f31615604750..fbd492b8d79b 100644
+--- a/arch/arm64/boot/dts/apple/t603x-j514-j516.dtsi
++++ b/arch/arm64/boot/dts/apple/t603x-j514-j516.dtsi
+@@ -67,6 +67,10 @@ &fpwm0 {
+ 	status = "okay";
+ };
+ 
++&nco_clkref {
++	clock-frequency = <900000000>;
++};
++
+ /* PCIe devices */
+ 
+ /*
+diff --git a/arch/arm64/boot/dts/apple/t8122-jxxx.dtsi b/arch/arm64/boot/dts/apple/t8122-jxxx.dtsi
+index 38952bc4fb98..34a9465ba61a 100644
+--- a/arch/arm64/boot/dts/apple/t8122-jxxx.dtsi
++++ b/arch/arm64/boot/dts/apple/t8122-jxxx.dtsi
+@@ -73,4 +73,8 @@ bluetooth0: bluetooth@0,1 {
+ 	};
+ };
+ 
++&nco_clkref {
++	clock-frequency = <900000000>;
++};
++
+ #include "spi1-nvram.dtsi"
+diff --git a/arch/arm64/boot/dts/apple/t8122-pmgr.dtsi b/arch/arm64/boot/dts/apple/t8122-pmgr.dtsi
+index d3b3f9e71860..6c7182d72481 100644
+--- a/arch/arm64/boot/dts/apple/t8122-pmgr.dtsi
++++ b/arch/arm64/boot/dts/apple/t8122-pmgr.dtsi
+@@ -657,6 +657,7 @@ ps_mca0: power-controller@398 {
+ 		#reset-cells = <0>;
+ 		label = "mca0";
+ 		power-domains = <&ps_sio_adma>, <&ps_audio_p>;
++		apple,externally-clocked;
+ 	};
+ 
+ 	ps_mca1: power-controller@3a0 {
+@@ -666,6 +667,7 @@ ps_mca1: power-controller@3a0 {
+ 		#reset-cells = <0>;
+ 		label = "mca1";
+ 		power-domains = <&ps_sio_adma>, <&ps_audio_p>;
++		apple,externally-clocked;
+ 	};
+ 
+ 	ps_mca2: power-controller@3a8 {
+@@ -675,6 +677,7 @@ ps_mca2: power-controller@3a8 {
+ 		#reset-cells = <0>;
+ 		label = "mca2";
+ 		power-domains = <&ps_sio_adma>, <&ps_audio_p>;
++		apple,externally-clocked;
+ 	};
+ 
+ 	ps_trace_fab: power-controller@3b0 {
+@@ -692,6 +695,7 @@ ps_mca3: power-controller@3b8 {
+ 		#reset-cells = <0>;
+ 		label = "mca3";
+ 		power-domains = <&ps_sio_adma>, <&ps_audio_p>;
++		apple,externally-clocked;
+ 	};
+ 
+ 	ps_ioa1: power-controller@3c0 {
+diff --git a/arch/arm64/boot/dts/apple/t8122.dtsi b/arch/arm64/boot/dts/apple/t8122.dtsi
+index 1452711f64ad..f9ac4d4b9fc8 100644
+--- a/arch/arm64/boot/dts/apple/t8122.dtsi
++++ b/arch/arm64/boot/dts/apple/t8122.dtsi
+@@ -354,6 +354,16 @@ clk_200m: clock-200m {
+ 		clock-output-names = "clk_200m";
+ 	};
+ 
++	/*
++	 * This is a fabulated representation of the input clock
++	 * to NCO since we don't know the true clock tree.
++	 */
++	nco_clkref: clock-ref-nco {
++		compatible = "fixed-clock";
++		#clock-cells = <0>;
++		clock-output-names = "nco_ref";
++	};
++
+ 	soc {
+ 		compatible = "simple-bus";
+ 		#address-cells = <2>;
+@@ -446,6 +456,15 @@ i2c4: i2c@2a1020000 {
+ 			status = "disabled";
+ 		};
+ 
++		sio_dart: iommu@2a1004000 {
++			compatible = "apple,t8122-dart", "apple,t8110-dart";
++			reg = <0x2 0xa1004000 0x0 0x4000>;
++			interrupt-parent = <&aic>;
++			interrupts = <AIC_IRQ 792 IRQ_TYPE_LEVEL_HIGH>;
++			#iommu-cells = <1>;
++			power-domains = <&ps_sio_cpu>;
++		};
++
+ 		fpwm1: pwm@2a1044000 {
+ 			compatible = "apple,t8122-fpwm", "apple,s5l-fpwm";
+ 			reg = <0x2 0xa1044000 0x0 0x4000>;
+@@ -485,6 +504,55 @@ serial0: serial@2a1200000 {
+ 			status = "disabled";
+ 		};
+ 
++		admac: dma-controller@2a3200000 {
++			compatible = "apple,t8122-admac", "apple,t8103-admac";
++			reg = <0x2 0xa3200000 0x0 0x34000>;
++			dma-channels = <24>;
++			interrupts-extended = <0>,
++					      <&aic AIC_IRQ 779 IRQ_TYPE_LEVEL_HIGH>,
++					      <0>,
++					      <0>;
++			#dma-cells = <1>;
++			iommus = <&sio_dart 2>;
++			power-domains = <&ps_sio_adma>;
++			resets = <&ps_audio_p>;
++		};
++
++		mca: i2s@2a3400000 {
++			compatible = "apple,t8122-mca", "apple,t8103-mca";
++			reg = <0x2 0xa3400000 0x0 0x18000>,
++			      <0x2 0xa3300000 0x0 0x30000>;
++
++			interrupt-parent = <&aic>;
++			interrupts = <AIC_IRQ 772 IRQ_TYPE_LEVEL_HIGH>,
++				     <AIC_IRQ 773 IRQ_TYPE_LEVEL_HIGH>,
++				     <AIC_IRQ 774 IRQ_TYPE_LEVEL_HIGH>,
++				     <AIC_IRQ 775 IRQ_TYPE_LEVEL_HIGH>;
++
++			resets = <&ps_audio_p>;
++			clocks = <&nco 0>, <&nco 1>, <&nco 2>,
++				 <&nco 3>, <&nco 4>, <&nco 4>;
++			power-domains = <&ps_audio_p>, <&ps_mca0>, <&ps_mca1>,
++					<&ps_mca2>, <&ps_mca3>;
++			dmas = <&admac 0>, <&admac 1>, <&admac 2>, <&admac 3>,
++			       <&admac 4>, <&admac 5>, <&admac 6>, <&admac 7>,
++			       <&admac 8>, <&admac 9>, <&admac 10>, <&admac 11>,
++			       <&admac 12>, <&admac 13>, <&admac 14>, <&admac 15>;
++			dma-names = "tx0a", "rx0a", "tx0b", "rx0b",
++				    "tx1a", "rx1a", "tx1b", "rx1b",
++				    "tx2a", "rx2a", "tx2b", "rx2b",
++				    "tx3a", "rx3a", "tx3b", "rx3b";
++
++			#sound-dai-cells = <1>;
++		};
++
++		nco: clock-controller@2d0044000 {
++			compatible = "apple,t8122-nco", "apple,t8103-nco";
++			reg = <0x2 0xd0044000 0x0 0x14000>;
++			clocks = <&nco_clkref>;
++			#clock-cells = <1>;
++		};
++
+ 		aic: interrupt-controller@2d1000000 {
+ 			compatible = "apple,t8122-aic3";
+ 			#interrupt-cells = <3>;
+-- 
+2.47.3
+

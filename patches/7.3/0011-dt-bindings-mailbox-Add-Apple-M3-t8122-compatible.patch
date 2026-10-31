@@ -1,0 +1,30 @@
+From 588ac15fc0d111892cd1686768219860dc978bf5 Mon Sep 17 00:00:00 2001
+From: Michael Reeves <michael.reeves077@gmail.com>
+Date: Sat, 31 Jan 2026 13:37:01 +1100
+Subject: [PATCH] dt-bindings: mailbox: Add Apple M3 (t8122) compatible
+
+The mailbox on M3 (t8122) is compatible with asc-mailbox-v4,
+so add the t8122 compatible variant to enum section of the v4
+mailbox section.
+
+Signed-off-by: Michael Reeves <michael.reeves077@gmail.com>
+(cherry picked from commit 76bec7fee7c32aedca3a139c1b7894412a1e105c)
+---
+ Documentation/devicetree/bindings/mailbox/apple,mailbox.yaml | 1 +
+ 1 file changed, 1 insertion(+)
+
+diff --git a/Documentation/devicetree/bindings/mailbox/apple,mailbox.yaml b/Documentation/devicetree/bindings/mailbox/apple,mailbox.yaml
+index 28985cc62c25..946c909c6922 100644
+--- a/Documentation/devicetree/bindings/mailbox/apple,mailbox.yaml
++++ b/Documentation/devicetree/bindings/mailbox/apple,mailbox.yaml
+@@ -30,6 +30,7 @@ properties:
+           - enum:
+               - apple,t8103-asc-mailbox
+               - apple,t8112-asc-mailbox
++              - apple,t8122-asc-mailbox
+               - apple,t6000-asc-mailbox
+               - apple,t6020-asc-mailbox
+           - const: apple,asc-mailbox-v4
+-- 
+2.47.3
+

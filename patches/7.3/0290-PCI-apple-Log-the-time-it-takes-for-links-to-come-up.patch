@@ -1,0 +1,38 @@
+From 8a81654db6c21b59f5fd77db9a6a27e475353d7f Mon Sep 17 00:00:00 2001
+From: Hector Martin <marcan@marcan.st>
+Date: Thu, 18 May 2023 17:03:32 +0900
+Subject: [PATCH] PCI: apple: Log the time it takes for links to come up
+
+Signed-off-by: Hector Martin <marcan@marcan.st>
+(cherry picked from commit 40923b95f4c6947ff11f16603f7d22332369b4ed)
+---
+ drivers/pci/controller/pcie-apple.c | 9 ++++++++-
+ 1 file changed, 8 insertions(+), 1 deletion(-)
+
+diff --git a/drivers/pci/controller/pcie-apple.c b/drivers/pci/controller/pcie-apple.c
+index 8a7574d1f4b8..0a0c336503af 100644
+--- a/drivers/pci/controller/pcie-apple.c
++++ b/drivers/pci/controller/pcie-apple.c
+@@ -700,11 +700,18 @@ static int apple_pcie_setup_port(struct apple_pcie *pcie,
+ 
+ 	link_stat = readl_relaxed(port->base + PORT_LINKSTS);
+ 	if (!(link_stat & PORT_LINKSTS_UP)) {
++		unsigned long timeout, left;
+ 		/* start link training */
+ 		writel_relaxed(PORT_LTSSMCTL_START, port->base + PORT_LTSSMCTL);
+ 
+-		if (!wait_for_completion_timeout(&pcie->event, link_up_timeout * HZ / 1000))
++		timeout = link_up_timeout * HZ / 1000;
++		left = wait_for_completion_timeout(&pcie->event, timeout);
++		if (!left)
+ 			dev_warn(pcie->dev, "%pOF link didn't come up\n", np);
++		else
++			dev_info(pcie->dev, "%pOF link up after %ldms\n", np,
++				 (timeout - left) * 1000 / HZ);
++
+ 	}
+ 
+ 	return 0;
+-- 
+2.47.3
+

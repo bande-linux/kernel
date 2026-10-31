@@ -1,0 +1,26 @@
+From 4fbc5c8d4a46dde6c370723cbd6161583922936b Mon Sep 17 00:00:00 2001
+From: Janne Grunau <j@jannau.net>
+Date: Fri, 3 Apr 2026 14:27:09 +0200
+Subject: [PATCH] dt-bindings: spmi: apple,spmi: Add t8122-spmi compatible
+
+Signed-off-by: Janne Grunau <j@jannau.net>
+(cherry picked from commit 011ad46e14825bc947c460a99c830f86e73aad0e)
+---
+ Documentation/devicetree/bindings/spmi/apple,spmi.yaml | 1 +
+ 1 file changed, 1 insertion(+)
+
+diff --git a/Documentation/devicetree/bindings/spmi/apple,spmi.yaml b/Documentation/devicetree/bindings/spmi/apple,spmi.yaml
+index 3e5b14bc8c31..f7920dd3a59b 100644
+--- a/Documentation/devicetree/bindings/spmi/apple,spmi.yaml
++++ b/Documentation/devicetree/bindings/spmi/apple,spmi.yaml
+@@ -22,6 +22,7 @@ properties:
+               - apple,t6020-spmi
+               - apple,t8012-spmi
+               - apple,t8015-spmi
++              - apple,t8122-spmi
+           - const: apple,t8103-spmi
+       - items:
+           - enum:
+-- 
+2.47.3
+

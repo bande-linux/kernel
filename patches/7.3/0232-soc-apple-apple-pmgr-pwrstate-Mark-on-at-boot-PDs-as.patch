@@ -1,0 +1,36 @@
+From 57962f990cc4cba9fc8586920d88a8cbfa1fe08d Mon Sep 17 00:00:00 2001
+From: Hector Martin <marcan@marcan.st>
+Date: Tue, 25 Apr 2023 01:40:11 +0900
+Subject: [PATCH] soc: apple: apple-pmgr-pwrstate: Mark on-at-boot PDs as
+ wakeup
+
+The genpd core does not have a generic mechanism for skipping genpd
+shutdown on system sleep, but it does have the wakeup path mechanism
+that is essentially the same thing.
+
+Mark all PDs that are on at boot as potentially wakeup-relevant, which
+means they can *optionally* stay on. Drivers have to opt into this with
+device_set_wakeup_path() to actually force them to remain on.
+
+Signed-off-by: Hector Martin <marcan@marcan.st>
+(cherry picked from commit 3db228dd48cafb9502a68767333fdb6328342df8)
+---
+ drivers/pmdomain/apple/pmgr-pwrstate.c | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/drivers/pmdomain/apple/pmgr-pwrstate.c b/drivers/pmdomain/apple/pmgr-pwrstate.c
+index c7fb7252b1a5..a92db8cf88bb 100644
+--- a/drivers/pmdomain/apple/pmgr-pwrstate.c
++++ b/drivers/pmdomain/apple/pmgr-pwrstate.c
+@@ -289,7 +289,7 @@ static int apple_pmgr_ps_probe(struct platform_device *pdev)
+ 			active = apple_pmgr_ps_power_on(&ps->genpd) == 0;
+ 		}
+ 	} else if (active) {
+-		ps->genpd.flags |= GENPD_FLAG_DEFER_OFF;
++		ps->genpd.flags |= GENPD_FLAG_DEFER_OFF | GENPD_FLAG_ACTIVE_WAKEUP;
+ 	}
+ 
+ 	/* Turn on auto-PM if the domain is already on */
+-- 
+2.47.3
+

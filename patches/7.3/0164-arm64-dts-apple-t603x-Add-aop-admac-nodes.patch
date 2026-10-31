@@ -1,0 +1,310 @@
+From 2201987ce37ec45ec7abeb603babfc8ab790a2e6 Mon Sep 17 00:00:00 2001
+From: Sasha Finkelstein <k@chaosmail.tech>
+Date: Thu, 9 Jul 2026 22:59:34 +0200
+Subject: [PATCH] arm64: dts: apple: t603x: Add aop/admac nodes
+
+Signed-off-by: Sasha Finkelstein <k@chaosmail.tech>
+Signed-off-by: Janne Grunau <j@jannau.net>
+(cherry picked from commit 0e45f22936923741308057d980834e992885b644)
+---
+ arch/arm64/boot/dts/apple/t6030-j514s.dts     |  5 ++
+ arch/arm64/boot/dts/apple/t6030-j516s.dts     |  5 ++
+ arch/arm64/boot/dts/apple/t6030.dtsi          | 64 ++++++++++++++++++-
+ arch/arm64/boot/dts/apple/t6031-die0.dtsi     | 64 ++++++++++++++++++-
+ arch/arm64/boot/dts/apple/t6031-j514c.dts     |  5 ++
+ arch/arm64/boot/dts/apple/t6031-j516c.dts     |  5 ++
+ arch/arm64/boot/dts/apple/t6034-j514m.dts     |  5 ++
+ arch/arm64/boot/dts/apple/t6034-j516m.dts     |  5 ++
+ .../arm64/boot/dts/apple/t603x-j514-j516.dtsi | 16 +++++
+ 9 files changed, 172 insertions(+), 2 deletions(-)
+
+diff --git a/arch/arm64/boot/dts/apple/t6030-j514s.dts b/arch/arm64/boot/dts/apple/t6030-j514s.dts
+index 67da7fc9edc3..754638f93f23 100644
+--- a/arch/arm64/boot/dts/apple/t6030-j514s.dts
++++ b/arch/arm64/boot/dts/apple/t6030-j514s.dts
+@@ -68,6 +68,11 @@ &jack_codec {
+ 	interrupts-extended = <&pinctrl_ap 100 IRQ_TYPE_LEVEL_LOW>;
+ };
+ 
++&aop_audio {
++	apple,chassis-name = "J514";
++	apple,machine-kind = "MacBook Pro";
++};
++
+ &sound {
+ 	compatible = "apple,j514-macaudio", "apple,j314-macaudio", "apple,macaudio";
+ 	model = "MacBook Pro J514";
+diff --git a/arch/arm64/boot/dts/apple/t6030-j516s.dts b/arch/arm64/boot/dts/apple/t6030-j516s.dts
+index 91b932c935d7..bd955406ac68 100644
+--- a/arch/arm64/boot/dts/apple/t6030-j516s.dts
++++ b/arch/arm64/boot/dts/apple/t6030-j516s.dts
+@@ -68,6 +68,11 @@ &jack_codec {
+ 	interrupts-extended = <&pinctrl_ap 100 IRQ_TYPE_LEVEL_LOW>;
+ };
+ 
++&aop_audio {
++	apple,chassis-name = "J516";
++	apple,machine-kind = "MacBook Pro";
++};
++
+ &sound {
+ 	compatible = "apple,j516-macaudio", "apple,j316-macaudio", "apple,macaudio";
+ 	model = "MacBook Pro J516";
+diff --git a/arch/arm64/boot/dts/apple/t6030.dtsi b/arch/arm64/boot/dts/apple/t6030.dtsi
+index feadb9c30018..563ae349ae4b 100644
+--- a/arch/arm64/boot/dts/apple/t6030.dtsi
++++ b/arch/arm64/boot/dts/apple/t6030.dtsi
+@@ -581,7 +581,7 @@ sio_dart: iommu@289004000 {
+ 		};
+ 
+ 		admac: dma-controller@28b200000 {
+-			compatible = "apple,t6030-admac", "apple,t8103-admac";
++			compatible = "apple,t6030-admac", "apple,t8122-admac";
+ 			reg = <0x2 0x8b200000 0x0 0x34000>;
+ 			#dma-cells = <1>;
+ 			dma-channels = <24>;
+@@ -931,6 +931,68 @@ pinctrl_smc: pinctrl@36c820000 {
+ 				     <AIC_IRQ 551 IRQ_TYPE_LEVEL_HIGH>;
+ 		};
+ 
++		aop_mbox: mbox@374408000 {
++			compatible = "apple,t6030-asc-mailbox", "apple,asc-mailbox-v4";
++			reg = <0x3 0x74408000 0x0 0x4000>;
++			interrupt-parent = <&aic>;
++			interrupts = <AIC_IRQ 419 IRQ_TYPE_LEVEL_HIGH>,
++				<AIC_IRQ 420 IRQ_TYPE_LEVEL_HIGH>,
++				<AIC_IRQ 421 IRQ_TYPE_LEVEL_HIGH>,
++				<AIC_IRQ 422 IRQ_TYPE_LEVEL_HIGH>;
++			interrupt-names = "send-empty", "send-not-empty",
++				"recv-empty", "recv-not-empty";
++			#mbox-cells = <0>;
++			status = "disabled";
++		};
++
++		aop_dart: iommu@374818000 {
++			compatible = "apple,t6030-dart", "apple,t8110-dart";
++			reg = <0x3 0x74818000 0x0 0x4000>;
++			#iommu-cells = <1>;
++			interrupt-parent = <&aic>;
++			interrupts = <AIC_IRQ 439 IRQ_TYPE_LEVEL_HIGH>;
++			status = "disabled";
++		};
++
++		aop_admac: dma-controller@374980000 {
++			compatible = "apple,t6030-admac", "apple,t8122-admac";
++			reg = <0x3 0x74980000 0x0 0x34000>;
++			#dma-cells = <1>;
++			dma-channels = <16>;
++			interrupts-extended = <0>,
++					      <0>,
++					      <&aic AIC_IRQ 460 IRQ_TYPE_LEVEL_HIGH>,
++					      <0>;
++			iommus = <&aop_dart 10>;
++			status = "disabled";
++		};
++
++		aop: aop@374c00000 {
++			compatible = "apple,t6030-aop", "apple,t6020-aop";
++			reg = <0x3 0x74c00000 0x0 0x1e0000>,
++			      <0x3 0x74400000 0x0 0x6c000>;
++			mboxes = <&aop_mbox>;
++			mbox-names = "mbox";
++			iommus = <&aop_dart 0>;
++
++			status = "disabled";
++
++			aop_audio: audio {
++				compatible = "apple,t6030-aop-audio";
++				dmas = <&aop_admac 1>;
++				dma-names = "dma";
++			};
++
++			aop_als: als {
++				compatible = "apple,t6030-aop-als", "apple,t6020-aop-als", "apple,aop-als";
++				// intentionally empty
++			};
++
++			las {
++				compatible = "apple,t6030-aop-las", "apple,t6020-aop-las", "apple,aop-las";
++			};
++		};
++
+ 		pinctrl_aop: pinctrl@374824000 {
+ 			compatible = "apple,t6030-pinctrl", "apple,t8103-pinctrl";
+ 			reg = <0x3 0x74824000 0x0 0x4000>;
+diff --git a/arch/arm64/boot/dts/apple/t6031-die0.dtsi b/arch/arm64/boot/dts/apple/t6031-die0.dtsi
+index 8b99be94510e..2afb028b0990 100644
+--- a/arch/arm64/boot/dts/apple/t6031-die0.dtsi
++++ b/arch/arm64/boot/dts/apple/t6031-die0.dtsi
+@@ -162,6 +162,68 @@ pinctrl_smc: pinctrl@2a4820000 {
+ 				<AIC_IRQ 0 910 IRQ_TYPE_LEVEL_HIGH>;
+ 	};
+ 
++	aop_mbox: mbox@2a8408000 {
++		compatible = "apple,t6031-asc-mailbox", "apple,asc-mailbox-v4";
++		reg = <0x2 0xa8408000 0x0 0x4000>;
++		interrupt-parent = <&aic>;
++		interrupts = <AIC_IRQ 0 612 IRQ_TYPE_LEVEL_HIGH>,
++			<AIC_IRQ 0 613 IRQ_TYPE_LEVEL_HIGH>,
++			<AIC_IRQ 0 614 IRQ_TYPE_LEVEL_HIGH>,
++			<AIC_IRQ 0 615 IRQ_TYPE_LEVEL_HIGH>;
++		interrupt-names = "send-empty", "send-not-empty",
++			"recv-empty", "recv-not-empty";
++		#mbox-cells = <0>;
++		status = "disabled";
++	};
++
++	aop_dart: iommu@2a8818000 {
++		compatible = "apple,t6031-dart", "apple,t8110-dart";
++		reg = <0x2 0xa8818000 0x0 0x4000>;
++		#iommu-cells = <1>;
++		interrupt-parent = <&aic>;
++		interrupts = <AIC_IRQ 0 627 IRQ_TYPE_LEVEL_HIGH>;
++		status = "disabled";
++	};
++
++	aop_admac: dma-controller@2a8980000 {
++		compatible = "apple,t6031-admac", "apple,t8122-admac";
++		reg = <0x2 0xa8980000 0x0 0x34000>;
++		#dma-cells = <1>;
++		dma-channels = <16>;
++		interrupts-extended = <0>,
++				      <0>,
++				      <&aic AIC_IRQ 0 630 IRQ_TYPE_LEVEL_HIGH>,
++				      <0>;
++		iommus = <&aop_dart 10>;
++		status = "disabled";
++	};
++
++	aop: aop@2a8c00000 {
++		compatible = "apple,t6031-aop", "apple,t6020-aop";
++		reg = <0x2 0xa8c00000 0x0 0x2a0000>,
++		      <0x2 0xa8400000 0x0 0x6c000>;
++		mboxes = <&aop_mbox>;
++		mbox-names = "mbox";
++		iommus = <&aop_dart 0>;
++
++		status = "disabled";
++
++		aop_audio: audio {
++			compatible = "apple,t6031-aop-audio", "apple,t6030-aop-audio";
++			dmas = <&aop_admac 1>;
++			dma-names = "dma";
++		};
++
++		aop_als: als {
++			compatible = "apple,t6031-aop-als", "apple,aop-als";
++			// intentionally empty
++		};
++
++		las {
++			compatible = "apple,t6031-aop-las", "apple,aop-las";
++		};
++	};
++
+ 	mtp: mtp@2ac400000 {
+ 		compatible = "apple,t6031-mtp", "apple,t8122-rtk-helper-asc4", "apple,mtp", "apple,rtk-helper-asc4";
+ 		reg = <0x2 0xac400000 0x0 0x4000>,
+@@ -457,7 +519,7 @@ serial0: serial@391200000 {
+ 	};
+ 
+ 	admac: dma-controller@393200000 {
+-		compatible = "apple,t6031-admac", "apple,t8103-admac";
++		compatible = "apple,t6031-admac", "apple,t8122-admac";
+ 		reg = <0x3 0x93200000 0x0 0x34000>;
+ 		#dma-cells = <1>;
+ 		dma-channels = <24>;
+diff --git a/arch/arm64/boot/dts/apple/t6031-j514c.dts b/arch/arm64/boot/dts/apple/t6031-j514c.dts
+index 1bfb9f2c6392..ec53b88aebc9 100644
+--- a/arch/arm64/boot/dts/apple/t6031-j514c.dts
++++ b/arch/arm64/boot/dts/apple/t6031-j514c.dts
+@@ -29,6 +29,11 @@ &bluetooth0 {
+ 	brcm,board-type = "apple,texa";
+ };
+ 
++&aop_audio {
++	apple,chassis-name = "J514";
++	apple,machine-kind = "MacBook Pro";
++};
++
+ &sound {
+ 	compatible = "apple,j514-macaudio", "apple,j314-macaudio", "apple,macaudio";
+ 	model = "MacBook Pro J514";
+diff --git a/arch/arm64/boot/dts/apple/t6031-j516c.dts b/arch/arm64/boot/dts/apple/t6031-j516c.dts
+index a199b0b11814..9e447741cba7 100644
+--- a/arch/arm64/boot/dts/apple/t6031-j516c.dts
++++ b/arch/arm64/boot/dts/apple/t6031-j516c.dts
+@@ -29,6 +29,11 @@ &bluetooth0 {
+ 	brcm,board-type = "apple,jura";
+ };
+ 
++&aop_audio {
++	apple,chassis-name = "J516";
++	apple,machine-kind = "MacBook Pro";
++};
++
+ &sound {
+ 	compatible = "apple,j516-macaudio", "apple,j316-macaudio", "apple,macaudio";
+ 	model = "MacBook Pro J516";
+diff --git a/arch/arm64/boot/dts/apple/t6034-j514m.dts b/arch/arm64/boot/dts/apple/t6034-j514m.dts
+index 7ef946c9ea27..f9c2b6241c95 100644
+--- a/arch/arm64/boot/dts/apple/t6034-j514m.dts
++++ b/arch/arm64/boot/dts/apple/t6034-j514m.dts
+@@ -29,6 +29,11 @@ &bluetooth0 {
+ 	brcm,board-type = "apple,texa";
+ };
+ 
++&aop_audio {
++	apple,chassis-name = "J514";
++	apple,machine-kind = "MacBook Pro";
++};
++
+ &sound {
+ 	compatible = "apple,j514-macaudio", "apple,j314-macaudio", "apple,macaudio";
+ 	model = "MacBook Pro J514";
+diff --git a/arch/arm64/boot/dts/apple/t6034-j516m.dts b/arch/arm64/boot/dts/apple/t6034-j516m.dts
+index a2b5abed0747..22ad5251eaec 100644
+--- a/arch/arm64/boot/dts/apple/t6034-j516m.dts
++++ b/arch/arm64/boot/dts/apple/t6034-j516m.dts
+@@ -29,6 +29,11 @@ &bluetooth0 {
+ 	brcm,board-type = "apple,jura";
+ };
+ 
++&aop_audio {
++	apple,chassis-name = "J516";
++	apple,machine-kind = "MacBook Pro";
++};
++
+ &sound {
+ 	compatible = "apple,j516-macaudio", "apple,j316-macaudio", "apple,macaudio";
+ 	model = "MacBook Pro J516";
+diff --git a/arch/arm64/boot/dts/apple/t603x-j514-j516.dtsi b/arch/arm64/boot/dts/apple/t603x-j514-j516.dtsi
+index 8a595afceab5..ddb130730fbd 100644
+--- a/arch/arm64/boot/dts/apple/t603x-j514-j516.dtsi
++++ b/arch/arm64/boot/dts/apple/t603x-j514-j516.dtsi
+@@ -241,6 +241,22 @@ &pcie0_dart_1 {
+ 	status = "okay";
+ };
+ 
++&aop_mbox {
++	status = "okay";
++};
++
++&aop_dart {
++	status = "okay";
++};
++
++&aop_admac {
++	status = "okay";
++};
++
++&aop {
++	status = "okay";
++};
++
+ / {
+ 	sound: sound {
+ 		/* compatible is set per machine */
+-- 
+2.47.3
+

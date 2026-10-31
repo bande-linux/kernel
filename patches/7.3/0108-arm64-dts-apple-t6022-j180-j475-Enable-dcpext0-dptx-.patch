@@ -1,0 +1,100 @@
+From 39d4471bc4a0c25b0100a6a329f7b23a83fced1b Mon Sep 17 00:00:00 2001
+From: Janne Grunau <j@jannau.net>
+Date: Sat, 4 Nov 2023 22:33:29 +0100
+Subject: [PATCH] arm64: dts: apple: t6022-{j180,j475}: Enable
+ dcpext0/dptx-phy/dp2hdmi
+
+After all parts are in place enable dcpext on M2 Ultra Mac Pro and
+Studio. On the Mac Pro only the HDMI output connected to die1 is
+enabled.
+
+Signed-off-by: Janne Grunau <j@jannau.net>
+(cherry picked from commit 1fca1af85967ceb2cf9fe999253caf3d74f39a7f)
+---
+ arch/arm64/boot/dts/apple/t6022-j475d.dts  |  6 +++
+ arch/arm64/boot/dts/apple/t6022-jxxxd.dtsi | 43 ++++++++++++++++++++--
+ 2 files changed, 46 insertions(+), 3 deletions(-)
+
+diff --git a/arch/arm64/boot/dts/apple/t6022-j475d.dts b/arch/arm64/boot/dts/apple/t6022-j475d.dts
+index 225af57d776a..0f859a44f3ad 100644
+--- a/arch/arm64/boot/dts/apple/t6022-j475d.dts
++++ b/arch/arm64/boot/dts/apple/t6022-j475d.dts
+@@ -22,6 +22,7 @@ / {
+ 	aliases {
+ 		atcphy4 = &atcphy0_die1;
+ 		atcphy5 = &atcphy1_die1;
++		/delete-property/ dcp;
+ 	};
+ };
+ 
+@@ -29,6 +30,11 @@ &framebuffer0 {
+ 	power-domains = <&ps_dispext0_cpu0_die1>, <&ps_dptx_phy_ps_die1>;
+ };
+ 
++&dcpext0_die1 {
++	// J180 misses "function-dp2hdmi_pwr_en"
++	dp2hdmi-pwren-gpios = <&smc_gpio 25 GPIO_ACTIVE_HIGH>;
++};
++
+ /* enable PCIe port01 with SDHCI */
+ &port01 {
+ 	pwren-gpios = <&smc_gpio 22 GPIO_ACTIVE_HIGH>;
+diff --git a/arch/arm64/boot/dts/apple/t6022-jxxxd.dtsi b/arch/arm64/boot/dts/apple/t6022-jxxxd.dtsi
+index 5b7b41ce07c3..4edfce4ee5ed 100644
+--- a/arch/arm64/boot/dts/apple/t6022-jxxxd.dtsi
++++ b/arch/arm64/boot/dts/apple/t6022-jxxxd.dtsi
+@@ -9,11 +9,48 @@
+  * Copyright The Asahi Linux Contributors
+  */
+ 
+-/* disable unused display node */
++/ {
++	aliases {
++		dcpext4 = &dcpext0_die1;
++		disp0 = &display;
++	};
++};
++
++&lpdptxphy_die1 {
++	status = "okay";
++};
+ 
+ &display {
+-	status = "disabled";
+-	iommus = <>; /* <&dispext0_dart_die1 0>; */
++	iommus = <&dispext0_dart_die1 0 0x100 0x0 0x10 0x0>;
++};
++
++&dispext0_dart_die1 {
++	status = "okay";
++};
++
++&dcpext0_dart_die1 {
++	status = "okay";
++};
++
++&dcpext0_mbox_die1 {
++	status = "okay";
++};
++
++&dcpext0_die1 {
++	status = "okay";
++	apple,connector-type = "HDMI-A";
++
++	/*  HDMI HPD gpio, used as interrupt*/
++	hdmi-hpd-gpios = <&pinctrl_aop 41 GPIO_ACTIVE_HIGH>;
++
++	hdmi-pwren-gpios = <&smc_gpio 23 GPIO_ACTIVE_HIGH>;
++	// J180 misses "function-dp2hdmi_pwr_en"
++	// dp2hdmi-pwren-gpios = <&smc_gpio 25 GPIO_ACTIVE_HIGH>;
++
++	phys = <&lpdptxphy_die1>;
++	phy-names = "dp-phy";
++	apple,dptx-phy = <4>;
++	apple,dptx-die = <1>;
+ };
+ 
+ /* delete missing dcp0/disp0 */
+-- 
+2.47.3
+

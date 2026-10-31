@@ -1,0 +1,218 @@
+From 507377f6f1774e9cc068926d47bc64c2a0223e48 Mon Sep 17 00:00:00 2001
+From: Sasha Finkelstein <k@chaosmail.tech>
+Date: Tue, 2 Jun 2026 23:16:51 +0200
+Subject: [PATCH] dts: apple: Add SPI and NVRAM nodes
+
+Signed-off-by: Sasha Finkelstein <k@chaosmail.tech>
+(cherry picked from commit 3e28fcb51d0ae59c3dac8a65d77399e1c15e61fd)
+---
+ arch/arm64/boot/dts/apple/t6030.dtsi          | 28 +++++++++++++++++++
+ arch/arm64/boot/dts/apple/t6031-base.dtsi     |  7 +++++
+ arch/arm64/boot/dts/apple/t6031-die0.dtsi     | 14 ++++++++++
+ .../arm64/boot/dts/apple/t6031-gpio-pins.dtsi |  7 +++++
+ arch/arm64/boot/dts/apple/t6032-j575d.dts     |  2 ++
+ .../arm64/boot/dts/apple/t603x-j514-j516.dtsi |  2 ++
+ arch/arm64/boot/dts/apple/t8122-jxxx.dtsi     |  2 ++
+ arch/arm64/boot/dts/apple/t8122.dtsi          | 28 +++++++++++++++++++
+ 8 files changed, 90 insertions(+)
+
+diff --git a/arch/arm64/boot/dts/apple/t6030.dtsi b/arch/arm64/boot/dts/apple/t6030.dtsi
+index cbf63918c46b..a97b0bd91edb 100644
+--- a/arch/arm64/boot/dts/apple/t6030.dtsi
++++ b/arch/arm64/boot/dts/apple/t6030.dtsi
+@@ -405,6 +405,13 @@ clkref: clock-ref {
+ 		clock-output-names = "clkref";
+ 	};
+ 
++	clk_200m: clock-200m {
++		compatible = "fixed-clock";
++		#clock-cells = <0>;
++		clock-frequency = <200000000>;
++		clock-output-names = "clk_200m";
++	};
++
+ 	reserved-memory {
+ 		#address-cells = <2>;
+ 		#size-cells = <2>;
+@@ -526,6 +533,20 @@ fpwm0: pwm@289040000 {
+ 			status = "disabled";
+ 		};
+ 
++		spi1: spi@289104000 {
++			compatible = "apple,t6030-spi", "apple,t8103-spi";
++			reg = <0x2 0x89104000 0x0 0x4000>;
++			interrupt-parent = <&aic>;
++			interrupts = <AIC_IRQ 875 IRQ_TYPE_LEVEL_HIGH>;
++			#address-cells = <1>;
++			#size-cells = <0>;
++			clocks = <&clk_200m>;
++			pinctrl-0 = <&spi1_pins>;
++			pinctrl-names = "default";
++			power-domains = <&ps_spi1>;
++			status = "disabled";
++		};
++
+ 		serial0: serial@289200000 {
+ 			compatible = "apple,s5l-uart";
+ 			reg = <0x2 0x89200000 0x0 0x1000>;
+@@ -604,6 +625,13 @@ i2c8_pins: i2c8-pins {
+ 					 <APPLE_PINMUX(50, 1)>;
+ 			};
+ 
++			spi1_pins: spi1-pins {
++				pinmux = <APPLE_PINMUX(24, 1)>, /* SDI */
++					<APPLE_PINMUX(25, 1)>,  /* SDO */
++					<APPLE_PINMUX(26, 1)>,  /* SCK */
++					<APPLE_PINMUX(27, 1)>;  /* CS */
++			};
++
+ 			pcie_pins: pcie-pins {
+ 				// clkreq pins
+ 				pinmux = <APPLE_PINMUX(163, 1)>,
+diff --git a/arch/arm64/boot/dts/apple/t6031-base.dtsi b/arch/arm64/boot/dts/apple/t6031-base.dtsi
+index 060bd7ad766a..87b579410762 100644
+--- a/arch/arm64/boot/dts/apple/t6031-base.dtsi
++++ b/arch/arm64/boot/dts/apple/t6031-base.dtsi
+@@ -464,6 +464,13 @@ clkref: clock-ref {
+ 		clock-output-names = "clkref";
+ 	};
+ 
++	clk_200m: clock-200m {
++		compatible = "fixed-clock";
++		#clock-cells = <0>;
++		clock-frequency = <200000000>;
++		clock-output-names = "clk_200m";
++	};
++
+ 	reserved-memory {
+ 		#address-cells = <2>;
+ 		#size-cells = <2>;
+diff --git a/arch/arm64/boot/dts/apple/t6031-die0.dtsi b/arch/arm64/boot/dts/apple/t6031-die0.dtsi
+index 4524419dae62..90d0f83c81b4 100644
+--- a/arch/arm64/boot/dts/apple/t6031-die0.dtsi
++++ b/arch/arm64/boot/dts/apple/t6031-die0.dtsi
+@@ -285,6 +285,20 @@ fpwm0: pwm@391040000 {
+ 		status = "disabled";
+ 	};
+ 
++	spi1: spi@391104000 {
++		compatible = "apple,t6031-spi", "apple,t8103-spi";
++		reg = <0x3 0x91104000 0x0 0x4000>;
++		interrupt-parent = <&aic>;
++		interrupts = <AIC_IRQ 0 1312 IRQ_TYPE_LEVEL_HIGH>;
++		#address-cells = <1>;
++		#size-cells = <0>;
++		clocks = <&clk_200m>;
++		pinctrl-0 = <&spi1_pins>;
++		pinctrl-names = "default";
++		power-domains = <&ps_spi1>;
++		status = "disabled";
++	};
++
+ 	serial0: serial@391200000 {
+ 		compatible = "apple,s5l-uart";
+ 		reg = <0x3 0x91200000 0x0 0x4000>;
+diff --git a/arch/arm64/boot/dts/apple/t6031-gpio-pins.dtsi b/arch/arm64/boot/dts/apple/t6031-gpio-pins.dtsi
+index 863f64d8fc3f..b07aa5bc0dd0 100644
+--- a/arch/arm64/boot/dts/apple/t6031-gpio-pins.dtsi
++++ b/arch/arm64/boot/dts/apple/t6031-gpio-pins.dtsi
+@@ -51,6 +51,13 @@ i2c8_pins: i2c8-pins {
+ 			<APPLE_PINMUX(73, 1)>;
+ 	};
+ 
++	spi1_pins: spi1-pins {
++		pinmux = <APPLE_PINMUX(116, 1)>, /* SDI */
++			<APPLE_PINMUX(117, 1)>,  /* SDO */
++			<APPLE_PINMUX(118, 1)>,  /* SCK */
++			<APPLE_PINMUX(119, 1)>;  /* CS */
++	};
++
+ 	pcie_pins: pcie-pins {
+ 		pinmux = <APPLE_PINMUX(0, 1)>,
+ 			<APPLE_PINMUX(1, 1)>,
+diff --git a/arch/arm64/boot/dts/apple/t6032-j575d.dts b/arch/arm64/boot/dts/apple/t6032-j575d.dts
+index 56edfb1139fb..028507bd5594 100644
+--- a/arch/arm64/boot/dts/apple/t6032-j575d.dts
++++ b/arch/arm64/boot/dts/apple/t6032-j575d.dts
+@@ -44,3 +44,5 @@ memory@10000000000 {
+ &serial0 {
+ 	status = "okay";
+ };
++
++#include "spi1-nvram.dtsi"
+diff --git a/arch/arm64/boot/dts/apple/t603x-j514-j516.dtsi b/arch/arm64/boot/dts/apple/t603x-j514-j516.dtsi
+index 21ac19450024..f31615604750 100644
+--- a/arch/arm64/boot/dts/apple/t603x-j514-j516.dtsi
++++ b/arch/arm64/boot/dts/apple/t603x-j514-j516.dtsi
+@@ -108,3 +108,5 @@ sdhci0: mmc@0,0 {
+ &pcie0_dart_1 {
+ 	status = "okay";
+ };
++
++#include "spi1-nvram.dtsi"
+diff --git a/arch/arm64/boot/dts/apple/t8122-jxxx.dtsi b/arch/arm64/boot/dts/apple/t8122-jxxx.dtsi
+index 2d36782c920d..38952bc4fb98 100644
+--- a/arch/arm64/boot/dts/apple/t8122-jxxx.dtsi
++++ b/arch/arm64/boot/dts/apple/t8122-jxxx.dtsi
+@@ -72,3 +72,5 @@ bluetooth0: bluetooth@0,1 {
+ 		local-bd-address = [00 00 00 00 00 00];
+ 	};
+ };
++
++#include "spi1-nvram.dtsi"
+diff --git a/arch/arm64/boot/dts/apple/t8122.dtsi b/arch/arm64/boot/dts/apple/t8122.dtsi
+index 747939cb6a34..a7f55c5294ac 100644
+--- a/arch/arm64/boot/dts/apple/t8122.dtsi
++++ b/arch/arm64/boot/dts/apple/t8122.dtsi
+@@ -176,6 +176,13 @@ clkref: clock-ref {
+ 		clock-output-names = "clkref";
+ 	};
+ 
++	clk_200m: clock-200m {
++		compatible = "fixed-clock";
++		#clock-cells = <0>;
++		clock-frequency = <200000000>;
++		clock-output-names = "clk_200m";
++	};
++
+ 	soc {
+ 		compatible = "simple-bus";
+ 		#address-cells = <2>;
+@@ -265,6 +272,20 @@ fpwm1: pwm@2a1044000 {
+ 			status = "disabled";
+ 		};
+ 
++		spi1: spi@2a1104000 {
++			compatible = "apple,t8122-spi", "apple,t8103-spi";
++			reg = <0x2 0xa1104000 0x0 0x4000>;
++			interrupt-parent = <&aic>;
++			interrupts = <AIC_IRQ 766 IRQ_TYPE_LEVEL_HIGH>;
++			clocks = <&clk_200m>;
++			pinctrl-0 = <&spi1_pins>;
++			pinctrl-names = "default";
++			power-domains = <&ps_spi1>;
++			#address-cells = <1>;
++			#size-cells = <0>;
++			status = "disabled";
++		};
++
+ 		serial0: serial@2a1200000 {
+ 			compatible = "apple,s5l-uart";
+ 			reg = <0x2 0xa1200000 0x0 0x1000>;
+@@ -357,6 +378,13 @@ i2c4_pins: i2c4-pins {
+ 					 <APPLE_PINMUX(148, 1)>;
+ 			};
+ 
++			spi1_pins: spi1-pins {
++				pinmux = <APPLE_PINMUX(46, 1)>,
++					<APPLE_PINMUX(47, 1)>,
++					<APPLE_PINMUX(48, 1)>,
++					<APPLE_PINMUX(49, 1)>;
++			};
++
+ 			pcie_pins: pcie-pins {
+ 				// clkreq pins
+ 				pinmux = <APPLE_PINMUX(183, 1)>,
+-- 
+2.47.3
+

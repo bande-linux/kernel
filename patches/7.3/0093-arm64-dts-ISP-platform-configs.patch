@@ -1,0 +1,458 @@
+From 32defbd68c175ac6d3a83477f52d3055e7453d79 Mon Sep 17 00:00:00 2001
+From: Asahi Lina <lina@asahilina.net>
+Date: Thu, 28 Sep 2023 02:02:43 +0900
+Subject: [PATCH] arm64: dts: ISP platform configs
+
+Signed-off-by: Asahi Lina <lina@asahilina.net>
+(cherry picked from commit 6ee2b8d4647495d2db0953955cc1266e99399f3d)
+---
+ arch/arm64/boot/dts/apple/isp-common.dtsi     | 43 +++++++++
+ arch/arm64/boot/dts/apple/isp-imx248.dtsi     | 22 +++++
+ arch/arm64/boot/dts/apple/isp-imx364.dtsi     | 71 ++++++++++++++
+ .../arm64/boot/dts/apple/isp-imx558-cfg0.dtsi | 92 +++++++++++++++++++
+ arch/arm64/boot/dts/apple/isp-imx558.dtsi     | 50 ++++++++++
+ .../arm64/boot/dts/apple/t600x-j314-j316.dtsi |  5 +
+ .../arm64/boot/dts/apple/t602x-j414-j416.dtsi |  7 ++
+ arch/arm64/boot/dts/apple/t8103-j293.dts      |  5 +
+ arch/arm64/boot/dts/apple/t8103-j313.dts      |  5 +
+ arch/arm64/boot/dts/apple/t8103-j456.dts      |  6 ++
+ arch/arm64/boot/dts/apple/t8103-j457.dts      |  6 ++
+ arch/arm64/boot/dts/apple/t8112-j413.dts      |  6 ++
+ arch/arm64/boot/dts/apple/t8112-j415.dts      |  6 ++
+ arch/arm64/boot/dts/apple/t8112-j493.dts      |  5 +
+ 14 files changed, 329 insertions(+)
+
+diff --git a/arch/arm64/boot/dts/apple/isp-common.dtsi b/arch/arm64/boot/dts/apple/isp-common.dtsi
+new file mode 100644
+index 000000000000..09564eedc035
+--- /dev/null
++++ b/arch/arm64/boot/dts/apple/isp-common.dtsi
+@@ -0,0 +1,43 @@
++// SPDX-License-Identifier: GPL-2.0+ OR MIT
++/*
++ * Common ISP configuration for Apple silicon platforms.
++ *
++ * Copyright The Asahi Linux Contributors
++ */
++
++/ {
++	aliases {
++		isp = &isp;
++	};
++
++	reserved-memory {
++		#address-cells = <2>;
++		#size-cells = <2>;
++		ranges;
++
++		isp_heap: isp-heap@0 {
++			compatible = "apple,asc-mem";
++			/* Filled in by bootloder */
++			reg = <0 0 0 0>;
++			no-map;
++		};
++	};
++};
++
++&isp {
++	memory-region = <&isp_heap>;
++	memory-region-names = "heap";
++	status = "okay";
++};
++
++&isp_dart0 {
++	status = "okay";
++};
++
++&isp_dart1 {
++	status = "okay";
++};
++
++&isp_dart2 {
++	status = "okay";
++};
+diff --git a/arch/arm64/boot/dts/apple/isp-imx248.dtsi b/arch/arm64/boot/dts/apple/isp-imx248.dtsi
+new file mode 100644
+index 000000000000..acad3ecf0331
+--- /dev/null
++++ b/arch/arm64/boot/dts/apple/isp-imx248.dtsi
+@@ -0,0 +1,22 @@
++// SPDX-License-Identifier: GPL-2.0+ OR MIT
++/*
++ * ISP configuration for platforms with IMX248 sensor.
++ *
++ * Copyright The Asahi Linux Contributors
++ */
++
++#include "isp-common.dtsi"
++
++&isp {
++	apple,temporal-filter = <0>;
++
++	sensor-presets {
++		/* 1280x720 */
++		preset0 {
++			apple,config-index = <0>;
++			apple,input-size = <1296 736>;
++			apple,output-size = <1280 720>;
++			apple,crop = <8 8 1280 720>;
++		};
++	};
++};
+diff --git a/arch/arm64/boot/dts/apple/isp-imx364.dtsi b/arch/arm64/boot/dts/apple/isp-imx364.dtsi
+new file mode 100644
+index 000000000000..55484d865236
+--- /dev/null
++++ b/arch/arm64/boot/dts/apple/isp-imx364.dtsi
+@@ -0,0 +1,71 @@
++// SPDX-License-Identifier: GPL-2.0+ OR MIT
++/*
++ * ISP configuration for platforms with IMX364 sensor.
++ *
++ * Copyright The Asahi Linux Contributors
++ */
++
++#include "isp-common.dtsi"
++
++&isp {
++	apple,temporal-filter = <0>;
++
++	sensor-presets {
++		/* 1920x1080 */
++		preset0 {
++			apple,config-index = <0>;
++			apple,input-size = <1920 1080>;
++			apple,output-size = <1920 1080>;
++			apple,crop = <0 0 1920 1080>;
++		};
++		/* 1440x720 (4:3) */
++		preset1 {
++			apple,config-index = <0>;
++			apple,input-size = <1920 1080>;
++			apple,output-size = <1440 1080>;
++			apple,crop = <240 0 1440 1080>;
++		};
++		/* 1280x720 (16:9) */
++		preset2 {
++			apple,config-index = <0>;
++			apple,input-size = <1920 1080>;
++			apple,output-size = <1280 720>;
++			apple,crop = <0 0 1920 1080>;
++		};
++		/* 960x720 (4:3) */
++		preset3{
++			apple,config-index = <0>;
++			apple,input-size = <1920 1080>;
++			apple,output-size = <960 720>;
++			apple,crop = <240 0 1440 1080>;
++		};
++		/* 960x540 (16:9) */
++		preset4 {
++			apple,config-index = <0>;
++			apple,input-size = <1920 1080>;
++			apple,output-size = <960 540>;
++			apple,crop = <0 0 1920 1080>;
++		};
++		/* 640x480 (4:3) */
++		preset5 {
++			apple,config-index = <0>;
++			apple,input-size = <1920 1080>;
++			apple,output-size = <640 480>;
++			apple,crop = <240 0 1440 1080>;
++		};
++		/* 640x360 (16:9) */
++		preset6 {
++			apple,config-index = <0>;
++			apple,input-size = <1920 1080>;
++			apple,output-size = <640 360>;
++			apple,crop = <0 0 1920 1080>;
++		};
++		/* 320x180 (16:9) */
++		preset7 {
++			apple,config-index = <0>;
++			apple,input-size = <1920 1080>;
++			apple,output-size = <320 180>;
++			apple,crop = <0 0 1920 1080>;
++		};
++	};
++};
+diff --git a/arch/arm64/boot/dts/apple/isp-imx558-cfg0.dtsi b/arch/arm64/boot/dts/apple/isp-imx558-cfg0.dtsi
+new file mode 100644
+index 000000000000..729b97829cbb
+--- /dev/null
++++ b/arch/arm64/boot/dts/apple/isp-imx558-cfg0.dtsi
+@@ -0,0 +1,92 @@
++// SPDX-License-Identifier: GPL-2.0+ OR MIT
++/*
++ * ISP configuration for platforms with IMX558 sensor in
++ * config #0 mode.
++ *
++ * These platforms enable MLVNR for all configs except
++ * #0, which we don't support. Config #0 is an uncropped
++ * square 1920x1920 sensor, with dark corners.
++ * Therefore, we synthesize common resolutions by using
++ * crop/scale while always choosing config #0.
++ *
++ * Copyright The Asahi Linux Contributors
++ */
++
++#include "isp-common.dtsi"
++
++&isp {
++	apple,temporal-filter = <0>;
++
++	sensor-presets {
++		/* 1920x1080 */
++		preset0 {
++			apple,config-index = <0>;
++			apple,input-size = <1920 1920>;
++			apple,output-size = <1920 1080>;
++			apple,crop = <0 420 1920 1080>;
++		};
++		/* 1080x1920 */
++		preset1 {
++			apple,config-index = <0>;
++			apple,input-size = <1920 1920>;
++			apple,output-size = <1080 1920>;
++			apple,crop = <420 0 1080 1920>;
++		};
++		/* 1920x1440 */
++		preset2 {
++			apple,config-index = <0>;
++			apple,input-size = <1920 1920>;
++			apple,output-size = <1920 1440>;
++			apple,crop = <0 240 1920 1440>;
++		};
++		/* 1440x1920 */
++		preset3 {
++			apple,config-index = <0>;
++			apple,input-size = <1920 1920>;
++			apple,output-size = <1440 1920>;
++			apple,crop = <240 0 1440 1920>;
++		};
++		/* 1280x720 */
++		preset4 {
++			apple,config-index = <0>;
++			apple,input-size = <1920 1920>;
++			apple,output-size = <1280 720>;
++			apple,crop = <0 420 1920 1080>;
++		};
++		/* 720x1280 */
++		preset5 {
++			apple,config-index = <0>;
++			apple,input-size = <1920 1920>;
++			apple,output-size = <720 1280>;
++			apple,crop = <420 0 1080 1920>;
++		};
++		/* 1280x960 */
++		preset6 {
++			apple,config-index = <0>;
++			apple,input-size = <1920 1920>;
++			apple,output-size = <1280 960>;
++			apple,crop = <0 240 1920 1440>;
++		};
++		/* 960x1280 */
++		preset7 {
++			apple,config-index = <0>;
++			apple,input-size = <1920 1920>;
++			apple,output-size = <960 1280>;
++			apple,crop = <240 0 1440 1920>;
++		};
++		/* 640x480 */
++		preset8 {
++			apple,config-index = <0>;
++			apple,input-size = <1920 1920>;
++			apple,output-size = <640 480>;
++			apple,crop = <0 240 1920 1440>;
++		};
++		/* 480x640 */
++		preset9 {
++			apple,config-index = <0>;
++			apple,input-size = <1920 1920>;
++			apple,output-size = <480 640>;
++			apple,crop = <240 0 1440 1920>;
++		};
++	};
++};
+diff --git a/arch/arm64/boot/dts/apple/isp-imx558.dtsi b/arch/arm64/boot/dts/apple/isp-imx558.dtsi
+new file mode 100644
+index 000000000000..a23785b7d5e6
+--- /dev/null
++++ b/arch/arm64/boot/dts/apple/isp-imx558.dtsi
+@@ -0,0 +1,50 @@
++// SPDX-License-Identifier: GPL-2.0+ OR MIT
++/*
++ * ISP configuration for platforms with IMX558 sensor.
++ *
++ * Copyright The Asahi Linux Contributors
++ */
++
++#include "isp-common.dtsi"
++
++&isp {
++	apple,temporal-filter = <0>;
++
++	sensor-presets {
++		/* 1920x1080 */
++		preset0 {
++			apple,config-index = <1>;
++			apple,input-size = <1920 1080>;
++			apple,output-size = <1920 1080>;
++			apple,crop = <0 0 1920 1080>;
++		};
++		/* 1080x1920 */
++		preset1 {
++			apple,config-index = <2>;
++			apple,input-size = <1080 1920>;
++			apple,output-size = <1080 1920>;
++			apple,crop = <0 0 1080 1920>;
++		};
++		/* 1760x1328 */
++		preset2 {
++			apple,config-index = <3>;
++			apple,input-size = <1760 1328>;
++			apple,output-size = <1760 1328>;
++			apple,crop = <0 0 1760 1328>;
++		};
++		/* 1328x1760 */
++		preset3 {
++			apple,config-index = <4>;
++			apple,input-size = <1328 1760>;
++			apple,output-size = < 1328 1760>;
++			apple,crop = <0 0 1328 1760>;
++		};
++		/* 1152x1152 */
++		preset4 {
++			apple,config-index = <5>;
++			apple,input-size = <1152 1152>;
++			apple,output-size = <1152 1152>;
++			apple,crop = <0 0 1152 1152>;
++		};
++	};
++};
+diff --git a/arch/arm64/boot/dts/apple/t600x-j314-j316.dtsi b/arch/arm64/boot/dts/apple/t600x-j314-j316.dtsi
+index b552abb6084f..5b9143756217 100644
+--- a/arch/arm64/boot/dts/apple/t600x-j314-j316.dtsi
++++ b/arch/arm64/boot/dts/apple/t600x-j314-j316.dtsi
+@@ -534,3 +534,8 @@ codec {
+ #include "spi1-nvram.dtsi"
+ #include "hwmon-laptop.dtsi"
+ #include "hwmon-fan-dual.dtsi"
++#include "isp-imx558.dtsi"
++
++&isp {
++	apple,platform-id = <3>;
++};
+diff --git a/arch/arm64/boot/dts/apple/t602x-j414-j416.dtsi b/arch/arm64/boot/dts/apple/t602x-j414-j416.dtsi
+index 67c2f117a060..89d842d69938 100644
+--- a/arch/arm64/boot/dts/apple/t602x-j414-j416.dtsi
++++ b/arch/arm64/boot/dts/apple/t602x-j414-j416.dtsi
+@@ -143,3 +143,10 @@ actuator {
+ 	tp_accel {
+ 	};
+ };
++
++&isp {
++	apple,platform-id = <7>;
++	/delete-node/ sensor-presets; /* Override j31[46] below */
++};
++
++#include "isp-imx558-cfg0.dtsi"
+diff --git a/arch/arm64/boot/dts/apple/t8103-j293.dts b/arch/arm64/boot/dts/apple/t8103-j293.dts
+index 282fed395610..eea8505c6729 100644
+--- a/arch/arm64/boot/dts/apple/t8103-j293.dts
++++ b/arch/arm64/boot/dts/apple/t8103-j293.dts
+@@ -265,3 +265,8 @@ codec {
+ 
+ #include "hwmon-laptop.dtsi"
+ #include "hwmon-fan.dtsi"
++#include "isp-imx248.dtsi"
++
++&isp {
++	apple,platform-id = <1>;
++};
+diff --git a/arch/arm64/boot/dts/apple/t8103-j313.dts b/arch/arm64/boot/dts/apple/t8103-j313.dts
+index 14950fa924df..95e631c92798 100644
+--- a/arch/arm64/boot/dts/apple/t8103-j313.dts
++++ b/arch/arm64/boot/dts/apple/t8103-j313.dts
+@@ -159,3 +159,8 @@ codec {
+ };
+ 
+ #include "hwmon-laptop.dtsi"
++#include "isp-imx248.dtsi"
++
++&isp {
++	apple,platform-id = <1>;
++};
+diff --git a/arch/arm64/boot/dts/apple/t8103-j456.dts b/arch/arm64/boot/dts/apple/t8103-j456.dts
+index c384d4dfd19a..a3638871f366 100644
+--- a/arch/arm64/boot/dts/apple/t8103-j456.dts
++++ b/arch/arm64/boot/dts/apple/t8103-j456.dts
+@@ -137,3 +137,9 @@ codec {
+ &gpu {
+ 	apple,perf-base-pstate = <3>;
+ };
++
++#include "isp-imx364.dtsi"
++
++&isp {
++	apple,platform-id = <2>;
++};
+diff --git a/arch/arm64/boot/dts/apple/t8103-j457.dts b/arch/arm64/boot/dts/apple/t8103-j457.dts
+index 28e3eedfc35b..4c1adb310ba9 100644
+--- a/arch/arm64/boot/dts/apple/t8103-j457.dts
++++ b/arch/arm64/boot/dts/apple/t8103-j457.dts
+@@ -118,3 +118,9 @@ codec {
+ &gpu {
+ 	apple,perf-base-pstate = <3>;
+ };
++
++#include "isp-imx364.dtsi"
++
++&isp {
++	apple,platform-id = <2>;
++};
+diff --git a/arch/arm64/boot/dts/apple/t8112-j413.dts b/arch/arm64/boot/dts/apple/t8112-j413.dts
+index 4371b2d37459..030235a5ffab 100644
+--- a/arch/arm64/boot/dts/apple/t8112-j413.dts
++++ b/arch/arm64/boot/dts/apple/t8112-j413.dts
+@@ -234,3 +234,9 @@ tp_accel {
+ };
+ 
+ #include "hwmon-laptop.dtsi"
++#include "isp-imx558-cfg0.dtsi"
++
++&isp {
++	apple,platform-id = <14>;
++	apple,temporal-filter = <1>;
++};
+diff --git a/arch/arm64/boot/dts/apple/t8112-j415.dts b/arch/arm64/boot/dts/apple/t8112-j415.dts
+index 4cdf687dc0c9..2a70d6b719aa 100644
+--- a/arch/arm64/boot/dts/apple/t8112-j415.dts
++++ b/arch/arm64/boot/dts/apple/t8112-j415.dts
+@@ -260,3 +260,9 @@ tp_accel {
+ };
+ 
+ #include "hwmon-laptop.dtsi"
++#include "isp-imx558-cfg0.dtsi"
++
++&isp {
++	apple,platform-id = <15>;
++	apple,temporal-filter = <1>;
++};
+diff --git a/arch/arm64/boot/dts/apple/t8112-j493.dts b/arch/arm64/boot/dts/apple/t8112-j493.dts
+index d20668265d6b..b0ce038866ac 100644
+--- a/arch/arm64/boot/dts/apple/t8112-j493.dts
++++ b/arch/arm64/boot/dts/apple/t8112-j493.dts
+@@ -289,3 +289,8 @@ tp_accel {
+ 
+ #include "hwmon-laptop.dtsi"
+ #include "hwmon-fan.dtsi"
++#include "isp-imx248.dtsi"
++
++&isp {
++	apple,platform-id = <6>;
++};
+-- 
+2.47.3
+

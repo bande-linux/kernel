@@ -1,0 +1,163 @@
+From 691d616f332ac0eb13e8506dfe50515746f1e669 Mon Sep 17 00:00:00 2001
+From: =?UTF-8?q?Martin=20Povi=C5=A1er?= <povik+lin@cutebit.org>
+Date: Mon, 28 Nov 2022 17:10:01 +0100
+Subject: [PATCH] arm64: apple: t8103: Add SIO, DPA nodes; hook up to DCP
+MIME-Version: 1.0
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 8bit
+
+Signed-off-by: Martin Povišer <povik+lin@cutebit.org>
+(cherry picked from commit 8f3f424086387abfa53a6d31586facb3c0e0b4fc)
+---
+ arch/arm64/boot/dts/apple/t8103-j274.dts |  5 ++
+ arch/arm64/boot/dts/apple/t8103.dtsi     | 90 ++++++++++++++++++++++++
+ 2 files changed, 95 insertions(+)
+
+diff --git a/arch/arm64/boot/dts/apple/t8103-j274.dts b/arch/arm64/boot/dts/apple/t8103-j274.dts
+index 29e326ae4000..a5039e9325a7 100644
+--- a/arch/arm64/boot/dts/apple/t8103-j274.dts
++++ b/arch/arm64/boot/dts/apple/t8103-j274.dts
+@@ -19,6 +19,7 @@ / {
+ 
+ 	aliases {
+ 		ethernet0 = &ethernet0;
++		sio = &sio;
+ 	};
+ };
+ 
+@@ -26,6 +27,10 @@ &dcp {
+ 	apple,connector-type = "HDMI-A";
+ };
+ 
++&dpaudio0 {
++	status = "okay";
++};
++
+ &bluetooth0 {
+ 	brcm,board-type = "apple,atlantisb";
+ };
+diff --git a/arch/arm64/boot/dts/apple/t8103.dtsi b/arch/arm64/boot/dts/apple/t8103.dtsi
+index 3b08b9cd2dc6..b547a62e6102 100644
+--- a/arch/arm64/boot/dts/apple/t8103.dtsi
++++ b/arch/arm64/boot/dts/apple/t8103.dtsi
+@@ -669,6 +669,17 @@ disp0_piodma: piodma {
+ 				iommus = <&disp0_dart 4 0x0 0x0 0x0 0xfc000000>;
+ 				phandle = <&disp0_piodma>;
+ 			};
++
++			ports {
++				#address-cells = <1>;
++				#size-cells = <0>;
++				port@0 {
++					reg = <0>;
++					dcp_audio: endpoint {
++						remote-endpoint = <&dpaudio0_dcp>;
++					};
++				};
++			};
+ 		};
+ 
+ 		display: display-subsystem {
+@@ -889,6 +900,32 @@ serial2: serial@235208000 {
+ 			status = "disabled";
+ 		};
+ 
++		sio_mbox: mbox@236408000 {
++			compatible = "apple,t8103-asc-mailbox", "apple,asc-mailbox-v4";
++			reg = <0x2 0x36408000 0x0 0x4000>;
++			interrupt-parent = <&aic>;
++			interrupts = <AIC_IRQ 640 IRQ_TYPE_LEVEL_HIGH>,
++				<AIC_IRQ 641 IRQ_TYPE_LEVEL_HIGH>,
++				<AIC_IRQ 642 IRQ_TYPE_LEVEL_HIGH>,
++				<AIC_IRQ 643 IRQ_TYPE_LEVEL_HIGH>;
++			interrupt-names = "send-empty", "send-not-empty",
++				"recv-empty", "recv-not-empty";
++			#mbox-cells = <0>;
++			power-domains = <&ps_sio>;
++		};
++
++		sio: sio@236400000 {
++			compatible = "apple,t8103-sio", "apple,sio";
++			reg = <0x2 0x36400000 0x0 0x8000>;
++			dma-channels = <128>;
++			#dma-cells = <1>;
++			mboxes = <&sio_mbox>;
++			iommus = <&sio_dart 0>;
++			power-domains = <&ps_sio_cpu>;
++			resets = <&ps_sio>; /* TODO: verify reset does something */
++			status = "disabled";
++		};
++
+ 		admac: dma-controller@238200000 {
+ 			compatible = "apple,t8103-admac", "apple,admac";
+ 			reg = <0x2 0x38200000 0x0 0x34000>;
+@@ -903,6 +940,48 @@ admac: dma-controller@238200000 {
+ 			resets = <&ps_audio_p>;
+ 		};
+ 
++		dpaudio0: audio-controller@238330000 {
++			compatible = "apple,t8103-dpaudio", "apple,dpaudio";
++			reg = <0x2 0x38330000 0x0 0x4000>;
++			dmas = <&sio 0x64>;
++			dma-names = "tx";
++			power-domains = <&ps_dpa0>;
++			reset-domains = <&ps_dpa0>;
++			status = "disabled";
++
++			ports {
++				#address-cells = <1>;
++				#size-cells = <0>;
++				port@0 {
++					reg = <0>;
++					dpaudio0_dcp: endpoint {
++						remote-endpoint = <&dcp_audio>;
++					};
++				};
++			};
++		};
++
++		dpaudio1: audio-controller@238334000 {
++			compatible = "apple,t8103-dpaudio", "apple,dpaudio";
++			reg = <0x2 0x38334000 0x0 0x4000>;
++			dmas = <&sio 0x66>;
++			dma-names = "tx";
++			power-domains = <&ps_dpa1>;
++			reset-domains = <&ps_dpa1>;
++			status = "disabled";
++
++			ports {
++				#address-cells = <1>;
++				#size-cells = <0>;
++				port@0 {
++					reg = <0>;
++					dpaudio1_dcp: endpoint {
++						remote-endpoint = <&dcpext_audio>;
++					};
++				};
++			};
++		};
++
+ 		mca: i2s@238400000 {
+ 			compatible = "apple,t8103-mca", "apple,mca";
+ 			reg = <0x2 0x38400000 0x0 0x18000>,
+@@ -1297,6 +1376,17 @@ dcpext: dcp@271c00000 {
+ 			piodma {
+ 				iommus = <&dispext0_dart 4 0x0 0x0 0xf 0xffff0000>;
+ 			};
++
++			ports {
++				#address-cells = <1>;
++				#size-cells = <0>;
++				port@0 {
++					reg = <0>;
++					dcpext_audio: endpoint {
++						remote-endpoint = <&dpaudio1_dcp>;
++					};
++				};
++			};
+ 		};
+ 
+ 		ans_mbox: mbox@277408000 {
+-- 
+2.47.3
+

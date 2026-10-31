@@ -1,0 +1,30 @@
+From 2a6e533dbc1fe94d198e4c4786e6b3e7cdd70d07 Mon Sep 17 00:00:00 2001
+From: Yureka Lilian <yureka@cyberchaos.dev>
+Date: Sun, 5 Jul 2026 15:17:23 +0200
+Subject: [PATCH] dt-bindings: arm: apple: apple,pmgr: Add t8132 compatible
+
+The PMGR blocks on Apple silicon M4 SoCs (t8132) are compatible with the
+M1/M2/M3 predecessors. Add "apple,t8132-pmgr" as M4 specific compatible.
+
+Signed-off-by: Yureka Lilian <yureka@cyberchaos.dev>
+Acked-by: Krzysztof Kozlowski <krzysztof.kozlowski@oss.qualcomm.com>
+(cherry picked from commit a49fd336df0689a18fe6809e088e397a80e8e940)
+---
+ Documentation/devicetree/bindings/arm/apple/apple,pmgr.yaml | 1 +
+ 1 file changed, 1 insertion(+)
+
+diff --git a/Documentation/devicetree/bindings/arm/apple/apple,pmgr.yaml b/Documentation/devicetree/bindings/arm/apple/apple,pmgr.yaml
+index 1d2001836eb4..da660fa13f77 100644
+--- a/Documentation/devicetree/bindings/arm/apple/apple,pmgr.yaml
++++ b/Documentation/devicetree/bindings/arm/apple/apple,pmgr.yaml
+@@ -41,6 +41,7 @@ properties:
+               - apple,t6030-pmgr
+               - apple,t6031-pmgr
+               - apple,t8122-pmgr
++              - apple,t8132-pmgr
+           - const: apple,t8103-pmgr
+           - const: syscon
+           - const: simple-mfd
+-- 
+2.47.3
+

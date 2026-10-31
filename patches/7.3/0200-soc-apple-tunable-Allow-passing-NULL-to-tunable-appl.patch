@@ -1,0 +1,30 @@
+From 0e265ddb16fdbf3a930e7aad98e3ffdc75cf1a32 Mon Sep 17 00:00:00 2001
+From: Sasha Finkelstein <k@chaosmail.tech>
+Date: Sat, 25 Jul 2026 00:19:10 +0200
+Subject: [PATCH] soc: apple: tunable: Allow passing NULL to tunable_apply
+
+Make it easier to have optional tunables by tolerating NULL entries and
+doing nothing when one is passed
+
+Signed-off-by: Sasha Finkelstein <k@chaosmail.tech>
+(cherry picked from commit 9cca396c015f7d201c2af7f388be9357bc91d3aa)
+---
+ drivers/soc/apple/tunable.c | 2 ++
+ 1 file changed, 2 insertions(+)
+
+diff --git a/drivers/soc/apple/tunable.c b/drivers/soc/apple/tunable.c
+index 659323839171..e89e8f9bb455 100644
+--- a/drivers/soc/apple/tunable.c
++++ b/drivers/soc/apple/tunable.c
+@@ -63,6 +63,8 @@ void apple_tunable_apply(void __iomem *regs, struct apple_tunable *tunable)
+ {
+ 	size_t i;
+ 
++	if (!tunable)
++		return;
+ 	for (i = 0; i < tunable->sz; ++i) {
+ 		u32 val, old_val;
+ 
+-- 
+2.47.3
+

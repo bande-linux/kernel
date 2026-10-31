@@ -1,0 +1,54 @@
+From 5e4d87315fa0688af75dc73e1483e8272bb9f729 Mon Sep 17 00:00:00 2001
+From: Hector Martin <marcan@marcan.st>
+Date: Wed, 26 Apr 2023 02:17:26 +0900
+Subject: [PATCH] arm64: dts: apple: Make ps_msg always-on
+
+Apple has it that way, and it might be important. Let's not risk it.
+
+Signed-off-by: Hector Martin <marcan@marcan.st>
+(cherry picked from commit ea912b275906f875ee4f14c5172c74ee4d9a6f3f)
+---
+ arch/arm64/boot/dts/apple/t600x-pmgr.dtsi | 1 +
+ arch/arm64/boot/dts/apple/t8103-pmgr.dtsi | 1 +
+ arch/arm64/boot/dts/apple/t8112-pmgr.dtsi | 1 +
+ 3 files changed, 3 insertions(+)
+
+diff --git a/arch/arm64/boot/dts/apple/t600x-pmgr.dtsi b/arch/arm64/boot/dts/apple/t600x-pmgr.dtsi
+index 3315b392b21d..84d5e126e232 100644
+--- a/arch/arm64/boot/dts/apple/t600x-pmgr.dtsi
++++ b/arch/arm64/boot/dts/apple/t600x-pmgr.dtsi
+@@ -1877,6 +1877,7 @@ DIE_NODE(ps_msg): power-controller@78 {
+ 		#power-domain-cells = <0>;
+ 		#reset-cells = <0>;
+ 		label = DIE_LABEL(msg);
++		apple,always-on; /* Core AON device? */
+ 	};
+ 
+ 	DIE_NODE(ps_nub_gpio): power-controller@80 {
+diff --git a/arch/arm64/boot/dts/apple/t8103-pmgr.dtsi b/arch/arm64/boot/dts/apple/t8103-pmgr.dtsi
+index f0ae11bf6ce6..a97d64b66573 100644
+--- a/arch/arm64/boot/dts/apple/t8103-pmgr.dtsi
++++ b/arch/arm64/boot/dts/apple/t8103-pmgr.dtsi
+@@ -1101,6 +1101,7 @@ ps_msg: power-controller@78 {
+ 		#power-domain-cells = <0>;
+ 		#reset-cells = <0>;
+ 		label = "msg";
++		apple,always-on; /* Core AON device? */
+ 	};
+ 
+ 	ps_atc0_usb_aon: power-controller@88 {
+diff --git a/arch/arm64/boot/dts/apple/t8112-pmgr.dtsi b/arch/arm64/boot/dts/apple/t8112-pmgr.dtsi
+index 276f1ab35f06..7ff5052d1cdc 100644
+--- a/arch/arm64/boot/dts/apple/t8112-pmgr.dtsi
++++ b/arch/arm64/boot/dts/apple/t8112-pmgr.dtsi
+@@ -1067,6 +1067,7 @@ ps_msg: power-controller@78 {
+ 		#power-domain-cells = <0>;
+ 		#reset-cells = <0>;
+ 		label = "msg";
++		apple,always-on; /* Core AON device? */
+ 	};
+ 
+ 	ps_nub_gpio: power-controller@80 {
+-- 
+2.47.3
+

@@ -1,0 +1,73 @@
+From 14c33e62037f7e0e063e9d159616a5127136a3a4 Mon Sep 17 00:00:00 2001
+From: James Calligeros <jcalligeros99@gmail.com>
+Date: Sun, 21 Jun 2026 21:07:32 +1000
+Subject: [PATCH] arm64: dts: apple: t8103: Use new codec bus keeper config
+
+Signed-off-by: James Calligeros <jcalligeros99@gmail.com>
+(cherry picked from commit adae1710bb871f32c7d23634fc950e603396a9f4)
+---
+ arch/arm64/boot/dts/apple/t8103-j293.dts | 4 ++--
+ arch/arm64/boot/dts/apple/t8103-j313.dts | 4 ++--
+ 2 files changed, 4 insertions(+), 4 deletions(-)
+
+diff --git a/arch/arm64/boot/dts/apple/t8103-j293.dts b/arch/arm64/boot/dts/apple/t8103-j293.dts
+index 1211fb8e4d8a..2c63d056522c 100644
+--- a/arch/arm64/boot/dts/apple/t8103-j293.dts
++++ b/arch/arm64/boot/dts/apple/t8103-j293.dts
+@@ -118,7 +118,6 @@ speaker_left_front: codec@32 {
+ 		ti,imon-slot-no = <0>;
+ 		ti,vmon-slot-no = <2>;
+ 		ti,pdm-slot-no = <4>;
+-		ti,sdout-pull-down;
+ 	};
+ };
+ 
+@@ -160,7 +159,6 @@ speaker_right_front: codec@35 {
+ 		ti,imon-slot-no = <4>;
+ 		ti,vmon-slot-no = <6>;
+ 		ti,pdm-slot-no = <8>;
+-		ti,sdout-pull-down;
+ 	};
+ };
+ 
+@@ -266,6 +264,8 @@ sound {
+ 
+ 		dai-link@0 {
+ 			link-name = "Speakers";
++			dai-tdm-idle-mode-0 = "pulldown";
++			dai-tdm-idle-mode-2 = "pulldown";
+ 
+ 			cpu {
+ 				sound-dai = <&mca 0>, <&mca 1>;
+diff --git a/arch/arm64/boot/dts/apple/t8103-j313.dts b/arch/arm64/boot/dts/apple/t8103-j313.dts
+index 1ec8bc9e40a9..5e658fd35c19 100644
+--- a/arch/arm64/boot/dts/apple/t8103-j313.dts
++++ b/arch/arm64/boot/dts/apple/t8103-j313.dts
+@@ -104,7 +104,6 @@ speaker_left: codec@31 {
+ 		interrupts-extended = <&pinctrl_ap 182 IRQ_TYPE_LEVEL_LOW>;
+ 		ti,imon-slot-no = <0>;
+ 		ti,vmon-slot-no = <2>;
+-		ti,sdout-zero-fill;
+ 	};
+ };
+ 
+@@ -118,7 +117,6 @@ speaker_right: codec@34 {
+ 		interrupts-extended = <&pinctrl_ap 182 IRQ_TYPE_LEVEL_LOW>;
+ 		ti,imon-slot-no = <4>;
+ 		ti,vmon-slot-no = <6>;
+-		ti,sdout-zero-fill;
+ 	};
+ 
+ 	jack_codec: codec@48 {
+@@ -165,6 +163,8 @@ sound {
+ 
+ 		dai-link@0 {
+ 			link-name = "Speakers";
++			dai-tdm-idle-mode-0 = "zero";
++			dai-tdm-idle-mode-1 = "zero";
+ 
+ 			cpu {
+ 				sound-dai = <&mca 0>, <&mca 1>;
+-- 
+2.47.3
+

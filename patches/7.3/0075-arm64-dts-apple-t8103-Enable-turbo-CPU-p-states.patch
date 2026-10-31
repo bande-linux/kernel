@@ -1,0 +1,36 @@
+From 385b0e00b53d9b333d592e0167156ad32a254dfb Mon Sep 17 00:00:00 2001
+From: Hector Martin <marcan@marcan.st>
+Date: Thu, 27 Apr 2023 13:54:17 +0900
+Subject: [PATCH] arm64: dts: apple: t8103: Enable turbo CPU p-states
+
+These should work now that we have cpuidle.
+
+Signed-off-by: Hector Martin <marcan@marcan.st>
+(cherry picked from commit a32e79b67cdfa6d6a17ad4bedfef6836f0a278a4)
+---
+ arch/arm64/boot/dts/apple/t8103.dtsi | 2 --
+ 1 file changed, 2 deletions(-)
+
+diff --git a/arch/arm64/boot/dts/apple/t8103.dtsi b/arch/arm64/boot/dts/apple/t8103.dtsi
+index dc6e666b2dce..3b2411a560f6 100644
+--- a/arch/arm64/boot/dts/apple/t8103.dtsi
++++ b/arch/arm64/boot/dts/apple/t8103.dtsi
+@@ -280,7 +280,6 @@ opp12 {
+ 			opp-level = <12>;
+ 			clock-latency-ns = <55000>;
+ 		};
+-#if 0
+ 		/* Not available until CPU deep sleep is implemented */
+ 		opp13 {
+ 			opp-hz = /bits/ 64 <3096000000>;
+@@ -300,7 +299,6 @@ opp15 {
+ 			clock-latency-ns = <56000>;
+ 			turbo-mode;
+ 		};
+-#endif
+ 	};
+ 
+ 	gpu_opp: opp-table-gpu {
+-- 
+2.47.3
+

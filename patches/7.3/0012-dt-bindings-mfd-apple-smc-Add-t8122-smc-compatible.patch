@@ -1,0 +1,29 @@
+From 98579f6f657289101974d43865da89ae1b220dcc Mon Sep 17 00:00:00 2001
+From: Janne Grunau <j@jannau.net>
+Date: Fri, 3 Apr 2026 14:19:50 +0200
+Subject: [PATCH] dt-bindings: mfd: apple,smc: Add t8122-smc compatible
+
+Signed-off-by: Janne Grunau <j@jannau.net>
+(cherry picked from commit 6484e76268a06af264ee140829b38df54430166c)
+---
+ Documentation/devicetree/bindings/mfd/apple,smc.yaml | 4 +++-
+ 1 file changed, 3 insertions(+), 1 deletion(-)
+
+diff --git a/Documentation/devicetree/bindings/mfd/apple,smc.yaml b/Documentation/devicetree/bindings/mfd/apple,smc.yaml
+index 34ce048619f5..d5d30c053845 100644
+--- a/Documentation/devicetree/bindings/mfd/apple,smc.yaml
++++ b/Documentation/devicetree/bindings/mfd/apple,smc.yaml
+@@ -17,7 +17,9 @@ properties:
+   compatible:
+     oneOf:
+       - items:
+-          - const: apple,t6020-smc
++          - enum:
++              - apple,t6020-smc
++              - apple,t8122-smc
+           - const: apple,t8103-smc
+       - items:
+           - enum:
+-- 
+2.47.3
+

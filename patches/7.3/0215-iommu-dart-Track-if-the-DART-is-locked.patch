@@ -1,0 +1,73 @@
+From fa5b80dc0881727571a6ea0fc348c0148d39e099 Mon Sep 17 00:00:00 2001
+From: Alyssa Rosenzweig <alyssa@rosenzweig.io>
+Date: Mon, 10 Feb 2025 14:39:53 -0500
+Subject: [PATCH] iommu/dart: Track if the DART is locked
+
+Some DARTs are locked at boot-time. That means they are already
+configured and we cannot change their configuration, which requires
+special handling. Locked DARTs are identified in the configuration
+register. Check this bit when probing and save the result so we can
+handle accordingly.
+
+Signed-off-by: Alyssa Rosenzweig <alyssa@rosenzweig.io>
+Signed-off-by: Janne Grunau <j@jannau.net>
+(cherry picked from commit b2332d22801f83f048b5286be19d85eefbd344d4)
+---
+ drivers/iommu/apple-dart.c | 12 ++++++++++--
+ 1 file changed, 10 insertions(+), 2 deletions(-)
+
+diff --git a/drivers/iommu/apple-dart.c b/drivers/iommu/apple-dart.c
+index 54b285334bb7..28a63374f944 100644
+--- a/drivers/iommu/apple-dart.c
++++ b/drivers/iommu/apple-dart.c
+@@ -203,6 +203,7 @@ struct apple_dart_hw {
+  * @lock: lock for hardware operations involving this dart
+  * @pgsize: pagesize supported by this DART
+  * @supports_bypass: indicates if this DART supports bypass mode
++ * @locked: indicates if this DART is locked
+  * @sid2group: maps stream ids to iommu_groups
+  * @iommu: iommu core device
+  */
+@@ -224,6 +225,7 @@ struct apple_dart {
+ 	u32 num_streams;
+ 	u32 supports_bypass : 1;
+ 	u32 four_level : 1;
++	u32 locked : 1;
+ 
+ 	dma_addr_t dma_min;
+ 	dma_addr_t dma_max;
+@@ -1212,6 +1214,11 @@ static irqreturn_t apple_dart_irq(int irq, void *dev)
+ 	return ret;
+ }
+ 
++static bool apple_dart_is_locked(struct apple_dart *dart)
++{
++	return !!(readl(dart->regs + dart->hw->lock) & dart->hw->lock_bit);
++}
++
+ static int apple_dart_probe(struct platform_device *pdev)
+ {
+ 	int ret;
+@@ -1310,6 +1317,7 @@ static int apple_dart_probe(struct platform_device *pdev)
+ 		goto err_clk_disable;
+ 	}
+ 
++	dart->locked = apple_dart_is_locked(dart);
+ 	ret = apple_dart_hw_reset(dart);
+ 	if (ret)
+ 		goto err_clk_disable;
+@@ -1337,9 +1345,9 @@ static int apple_dart_probe(struct platform_device *pdev)
+ 
+ 	dev_info(
+ 		&pdev->dev,
+-		"DART [pagesize %x, %d streams, bypass support: %d, bypass forced: %d, AS %d -> %d] initialized\n",
++		"DART [pagesize %x, %d streams, bypass support: %d, bypass forced: %d, locked: %d, AS %d -> %d] initialized\n",
+ 		dart->pgsize, dart->num_streams, dart->supports_bypass,
+-		dart->pgsize > PAGE_SIZE, dart->ias, dart->oas);
++		dart->pgsize > PAGE_SIZE, dart->locked, dart->ias, dart->oas);
+ 	return 0;
+ 
+ err_sysfs_remove:
+-- 
+2.47.3
+

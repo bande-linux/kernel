@@ -1,0 +1,61 @@
+From a6ff8b3bcc37324b49cedd11f116202767f8a57c Mon Sep 17 00:00:00 2001
+From: sofus <sofus.c@icloud.com>
+Date: Tue, 30 Jun 2026 13:27:42 +0200
+Subject: [PATCH] arm64: dts: apple: t8112: add avd nodes
+
+Signed-off-by: sofus <sofus.c@icloud.com>
+(cherry picked from commit ccab1ff8a5f32ca44ce71599ee01fed537c22084)
+---
+ arch/arm64/boot/dts/apple/t8112.dtsi | 29 +++++++++++++++++++++++++++-
+ 1 file changed, 28 insertions(+), 1 deletion(-)
+
+diff --git a/arch/arm64/boot/dts/apple/t8112.dtsi b/arch/arm64/boot/dts/apple/t8112.dtsi
+index 918560329186..334005bf1daa 100644
+--- a/arch/arm64/boot/dts/apple/t8112.dtsi
++++ b/arch/arm64/boot/dts/apple/t8112.dtsi
+@@ -1153,7 +1153,6 @@ pmp_report_avd_sys: report@a {
+ 				label = "pmp-avd-sys";
+ 				#power-domain-cells = <0>;
+ 				power-domains = <&ps_avd_sys>;
+-				status = "disabled";
+ 			};
+ 
+ 			pmp_report_msr: report@b {
+@@ -1663,6 +1662,34 @@ sep_mbox: mbox@25e408000 {
+ 			#mbox-cells = <0>;
+ 		};
+ 
++		avd: avd@269080000 {
++			compatible = "apple,t8112-avd";
++			interrupt-parent = <&aic>;
++			interrupts = <AIC_IRQ 667 IRQ_TYPE_LEVEL_HIGH>,
++				<AIC_IRQ 668 IRQ_TYPE_LEVEL_HIGH>;
++			#ifdef APPLE_USE_PMP
++			power-domains = <&pmp_report_avd_sys>;
++			#else
++			power-domains = <&ps_avd_sys>;
++			#endif
++			resets = <&ps_avd_sys>;
++			reg = <0x2 0x69080000 0x0 0x10000>,
++				<0x2 0x69090000 0x0 0x10000>,
++				<0x2 0x690a0000 0x0 0x4000>,
++				<0x2 0x69100000 0x0 0x10000>;
++			reg-names = "code", "sram", "mbox", "ctrl";
++			iommus = <&avd_dart 0>;
++		};
++
++		avd_dart: iommu@269010000 {
++			compatible = "apple,t8110-dart";
++			reg = <0x2 0x69010000 0x0 0x4000>;
++			#iommu-cells = <1>;
++			interrupt-parent = <&aic>;
++			interrupts = <AIC_IRQ 674 IRQ_TYPE_LEVEL_HIGH>;
++			power-domains = <&ps_avd_sys>;
++		};
++
+ 		dispext0_dart: iommu@271304000 {
+ 			compatible = "apple,t8112-dart", "apple,t8110-dart";
+ 			reg = <0x2 0x71304000 0x0 0x4000>;
+-- 
+2.47.3
+

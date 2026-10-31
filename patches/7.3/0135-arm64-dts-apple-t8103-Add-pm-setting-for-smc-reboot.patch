@@ -1,0 +1,32 @@
+From 7e925251762f3af83c9cd7108ba51ec92d4c2705 Mon Sep 17 00:00:00 2001
+From: Janne Grunau <j@jannau.net>
+Date: Sat, 6 Sep 2025 11:23:03 +0200
+Subject: [PATCH] arm64: dts: apple: t8103: Add "pm_setting" for smc_reboot
+
+For backawrds compatibility with the downstream driver.
+
+Signed-off-by: Janne Grunau <j@jannau.net>
+(cherry picked from commit edff4ba5dfd902f786b23b92c26efd48ee722395)
+---
+ arch/arm64/boot/dts/apple/t8103.dtsi | 4 ++--
+ 1 file changed, 2 insertions(+), 2 deletions(-)
+
+diff --git a/arch/arm64/boot/dts/apple/t8103.dtsi b/arch/arm64/boot/dts/apple/t8103.dtsi
+index 6c07868755bd..4e5bf4e8997c 100644
+--- a/arch/arm64/boot/dts/apple/t8103.dtsi
++++ b/arch/arm64/boot/dts/apple/t8103.dtsi
+@@ -1241,9 +1241,9 @@ smc_gpio: gpio {
+ 			smc_reboot: reboot {
+ 				compatible = "apple,smc-reboot";
+ 				nvmem-cells = <&shutdown_flag>, <&boot_stage>,
+-					<&boot_error_count>, <&panic_count>;
++					<&boot_error_count>, <&panic_count>, <&pm_setting>;
+ 				nvmem-cell-names = "shutdown_flag", "boot_stage",
+-					"boot_error_count", "panic_count";
++					"boot_error_count", "panic_count", "pm_setting";
+ 			};
+ 
+ 			smc_hwmon: hwmon {
+-- 
+2.47.3
+

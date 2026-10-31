@@ -1,0 +1,127 @@
+From cbb8c06e436b1ef87bb6d62c9fe1751201f9cbc0 Mon Sep 17 00:00:00 2001
+From: Sasha Finkelstein <k@chaosmail.tech>
+Date: Fri, 17 Jul 2026 12:40:39 +0200
+Subject: [PATCH] arm64: dts: apple: t6030: Add isp nodes
+
+Signed-off-by: Sasha Finkelstein <k@chaosmail.tech>
+(cherry picked from commit 6a299b80ef704ec16ca5c15f47e61036bfc9bef3)
+---
+ arch/arm64/boot/dts/apple/t6030-j514s.dts     |  4 ++
+ arch/arm64/boot/dts/apple/t6030-j516s.dts     |  4 ++
+ arch/arm64/boot/dts/apple/t6030.dtsi          | 50 ++++++++++++++++++-
+ .../arm64/boot/dts/apple/t603x-j514-j516.dtsi |  2 -
+ 4 files changed, 56 insertions(+), 4 deletions(-)
+
+diff --git a/arch/arm64/boot/dts/apple/t6030-j514s.dts b/arch/arm64/boot/dts/apple/t6030-j514s.dts
+index 754638f93f23..aa5db1e84483 100644
+--- a/arch/arm64/boot/dts/apple/t6030-j514s.dts
++++ b/arch/arm64/boot/dts/apple/t6030-j514s.dts
+@@ -77,3 +77,7 @@ &sound {
+ 	compatible = "apple,j514-macaudio", "apple,j314-macaudio", "apple,macaudio";
+ 	model = "MacBook Pro J514";
+ };
++
++&isp {
++	apple,platform-id = <16>;
++};
+diff --git a/arch/arm64/boot/dts/apple/t6030-j516s.dts b/arch/arm64/boot/dts/apple/t6030-j516s.dts
+index bd955406ac68..5532faac8ed8 100644
+--- a/arch/arm64/boot/dts/apple/t6030-j516s.dts
++++ b/arch/arm64/boot/dts/apple/t6030-j516s.dts
+@@ -77,3 +77,7 @@ &sound {
+ 	compatible = "apple,j516-macaudio", "apple,j316-macaudio", "apple,macaudio";
+ 	model = "MacBook Pro J516";
+ };
++
++&isp {
++	apple,platform-id = <16>;
++};
+diff --git a/arch/arm64/boot/dts/apple/t6030.dtsi b/arch/arm64/boot/dts/apple/t6030.dtsi
+index 563ae349ae4b..7fc525d5f90a 100644
+--- a/arch/arm64/boot/dts/apple/t6030.dtsi
++++ b/arch/arm64/boot/dts/apple/t6030.dtsi
+@@ -13,8 +13,6 @@
+ #include <dt-bindings/pinctrl/apple.h>
+ #include <dt-bindings/spmi/spmi.h>
+ 
+-#define NO_ISP_YET 1
+-
+ / {
+ 	#address-cells = <2>;
+ 	#size-cells = <2>;
+@@ -643,6 +641,54 @@ pmgr_gfx: power-management@290e80000 {
+ 			/* child nodes are added in t6030-pmgr.dtsi */
+ 		};
+ 
++		isp: isp@2c8000000 {
++			compatible = "apple,t6030-isp";
++			iommus = <&isp_dart0 0>, <&isp_dart1 0>, <&isp_dart2 0>;
++			reg-names = "coproc", "mbox", "gpio", "mbox2";
++			reg = <0x2 0xc8000000 0x0 0x2000000>,
++				<0x2 0xca4c4000 0x0 0x100>,
++				<0x2 0xca4c41d0 0x0 0x100>,
++				<0x2 0xca4c4458 0x0 0x100>;
++			interrupt-parent = <&aic>;
++			interrupts = <AIC_IRQ 359 IRQ_TYPE_LEVEL_HIGH>;
++			power-domains = <&ps_isp_sys>, <&ps_ispsens0>,
++				<&ps_isp_cpu>, <&ps_isp_fe>, <&ps_dprx>,
++				<&ps_isp_secure>, <&ps_isp_be>, <&ps_isp_clr>;
++			apple,dart-vm-size = <0x0 0xa0000000>;
++
++			status = "disabled";
++		};
++
++		isp_dart0: iommu@2ca4a8000 {
++			compatible = "apple,t6030-dart", "apple,t8110-dart";
++			reg = <0x2 0xca4a8000 0x0 0x4000>;
++			#iommu-cells = <1>;
++			interrupt-parent = <&aic>;
++			interrupts = <AIC_IRQ 364 IRQ_TYPE_LEVEL_HIGH>;
++			power-domains = <&ps_isp_sys>;
++			status = "disabled";
++		};
++
++		isp_dart1: iommu@2ca4b4000 {
++			compatible = "apple,t6030-dart", "apple,t8110-dart";
++			reg = <0x2 0xca4b4000 0x0 0x4000>;
++			#iommu-cells = <1>;
++			interrupt-parent = <&aic>;
++			interrupts = <AIC_IRQ 364 IRQ_TYPE_LEVEL_HIGH>;
++			power-domains = <&ps_isp_sys>;
++			status = "disabled";
++		};
++
++		isp_dart2: iommu@2ca4bc000 {
++			compatible = "apple,t6030-dart", "apple,t8110-dart";
++			reg = <0x2 0xca4bc000 0x0 0x4000>;
++			#iommu-cells = <1>;
++			interrupt-parent = <&aic>;
++			interrupts = <AIC_IRQ 364 IRQ_TYPE_LEVEL_HIGH>;
++			power-domains = <&ps_isp_sys>;
++			status = "disabled";
++		};
++
+ 		avd: avd@30a000000 {
+ 			compatible = "apple,t6030-avd", "apple,t8122-avd";
+ 			interrupt-parent = <&aic>;
+diff --git a/arch/arm64/boot/dts/apple/t603x-j514-j516.dtsi b/arch/arm64/boot/dts/apple/t603x-j514-j516.dtsi
+index ddb130730fbd..f79ad9407de8 100644
+--- a/arch/arm64/boot/dts/apple/t603x-j514-j516.dtsi
++++ b/arch/arm64/boot/dts/apple/t603x-j514-j516.dtsi
+@@ -294,13 +294,11 @@ codec {
+ 	};
+ };
+ 
+-#ifndef NO_ISP_YET
+ &isp {
+ 	apple,platform-id = <9>;
+ };
+ 
+ #include "isp-imx558-cfg0.dtsi"
+-#endif
+ 
+ #include "spi1-nvram.dtsi"
+ #include "hwmon-common.dtsi"
+-- 
+2.47.3
+

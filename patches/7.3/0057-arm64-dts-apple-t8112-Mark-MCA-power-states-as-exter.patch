@@ -1,0 +1,67 @@
+From db74b61fbf88ca8a3d71a065fa609d1171b1dbdd Mon Sep 17 00:00:00 2001
+From: Hector Martin <marcan@marcan.st>
+Date: Thu, 12 Oct 2023 23:20:56 +0900
+Subject: [PATCH] arm64: dts: apple: t8112: Mark MCA power states as
+ externally-clocked
+
+Signed-off-by: Hector Martin <marcan@marcan.st>
+(cherry picked from commit 46b5a74ae724a6bacadc2fdd1649ee301f4991cb)
+---
+ arch/arm64/boot/dts/apple/t8112-pmgr.dtsi | 6 ++++++
+ 1 file changed, 6 insertions(+)
+
+diff --git a/arch/arm64/boot/dts/apple/t8112-pmgr.dtsi b/arch/arm64/boot/dts/apple/t8112-pmgr.dtsi
+index 118694dd9b5f..8b3297d75992 100644
+--- a/arch/arm64/boot/dts/apple/t8112-pmgr.dtsi
++++ b/arch/arm64/boot/dts/apple/t8112-pmgr.dtsi
+@@ -465,6 +465,7 @@ ps_mca0: power-controller@2c0 {
+ 		#reset-cells = <0>;
+ 		label = "mca0";
+ 		power-domains = <&ps_sio_adma>, <&ps_audio_p>;
++		apple,externally-clocked;
+ 	};
+ 
+ 	ps_mca1: power-controller@2c8 {
+@@ -474,6 +475,7 @@ ps_mca1: power-controller@2c8 {
+ 		#reset-cells = <0>;
+ 		label = "mca1";
+ 		power-domains = <&ps_sio_adma>, <&ps_audio_p>;
++		apple,externally-clocked;
+ 	};
+ 
+ 	ps_mca2: power-controller@2d0 {
+@@ -483,6 +485,7 @@ ps_mca2: power-controller@2d0 {
+ 		#reset-cells = <0>;
+ 		label = "mca2";
+ 		power-domains = <&ps_sio_adma>, <&ps_audio_p>;
++		apple,externally-clocked;
+ 	};
+ 
+ 	ps_mca3: power-controller@2d8 {
+@@ -492,6 +495,7 @@ ps_mca3: power-controller@2d8 {
+ 		#reset-cells = <0>;
+ 		label = "mca3";
+ 		power-domains = <&ps_sio_adma>, <&ps_audio_p>;
++		apple,externally-clocked;
+ 	};
+ 
+ 	ps_mca4: power-controller@2e0 {
+@@ -501,6 +505,7 @@ ps_mca4: power-controller@2e0 {
+ 		#reset-cells = <0>;
+ 		label = "mca4";
+ 		power-domains = <&ps_sio_adma>, <&ps_audio_p>;
++		apple,externally-clocked;
+ 	};
+ 
+ 	ps_mca5: power-controller@2e8 {
+@@ -510,6 +515,7 @@ ps_mca5: power-controller@2e8 {
+ 		#reset-cells = <0>;
+ 		label = "mca5";
+ 		power-domains = <&ps_sio_adma>, <&ps_audio_p>;
++		apple,externally-clocked;
+ 	};
+ 
+ 	ps_mcc: power-controller@2f0 {
+-- 
+2.47.3
+

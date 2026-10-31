@@ -1,0 +1,1117 @@
+From a59e769839dba87bd733d9232a74ad34748d7be7 Mon Sep 17 00:00:00 2001
+From: Sasha Finkelstein <fnkl.kernel@gmail.com>
+Date: Thu, 26 Feb 2026 18:15:38 +0100
+Subject: [PATCH] arm64: dts: apple: Add PMP nodes and hook up power reporting
+
+Add the PMP device and set it as the power-domain for devices that
+need to report their power states to it.
+
+Signed-off-by: Sasha Finkelstein <fnkl.kernel@gmail.com>
+(cherry picked from commit b96c059798f27410f31d98c0307405840db9078c)
+---
+ arch/arm64/boot/dts/apple/t6000.dtsi          |  17 ++
+ arch/arm64/boot/dts/apple/t6001.dtsi          |  12 +
+ arch/arm64/boot/dts/apple/t6002.dtsi          |  57 +++++
+ arch/arm64/boot/dts/apple/t600x-common.dtsi   |   3 +
+ arch/arm64/boot/dts/apple/t600x-die0.dtsi     | 201 ++++++++++++++++
+ arch/arm64/boot/dts/apple/t600x-dieX.dtsi     |   8 +
+ .../arm64/boot/dts/apple/t600x-j314-j316.dtsi |   4 +
+ arch/arm64/boot/dts/apple/t600x-pmgr.dtsi     |   2 +
+ arch/arm64/boot/dts/apple/t6020.dtsi          |   7 +
+ arch/arm64/boot/dts/apple/t6022-jxxxd.dtsi    |   1 +
+ arch/arm64/boot/dts/apple/t6022.dtsi          |  20 ++
+ arch/arm64/boot/dts/apple/t602x-common.dtsi   |   3 +
+ arch/arm64/boot/dts/apple/t602x-die0.dtsi     | 219 ++++++++++++++++++
+ arch/arm64/boot/dts/apple/t602x-dieX.dtsi     |   8 +
+ arch/arm64/boot/dts/apple/t602x-pmgr.dtsi     |   2 +
+ arch/arm64/boot/dts/apple/t8112-j413.dts      |   4 +
+ arch/arm64/boot/dts/apple/t8112-j415.dts      |   4 +
+ arch/arm64/boot/dts/apple/t8112-j493.dts      |   4 +
+ arch/arm64/boot/dts/apple/t8112.dtsi          | 173 ++++++++++++++
+ 19 files changed, 749 insertions(+)
+
+diff --git a/arch/arm64/boot/dts/apple/t6000.dtsi b/arch/arm64/boot/dts/apple/t6000.dtsi
+index c9e4e52d9aac..db7ea6eac5a6 100644
+--- a/arch/arm64/boot/dts/apple/t6000.dtsi
++++ b/arch/arm64/boot/dts/apple/t6000.dtsi
+@@ -18,6 +18,23 @@ / {
+ };
+ 
+ /delete-node/ &pmgr_south;
++/delete-node/ &pmp_report_dispext2;
++/delete-node/ &pmp_report_dispext3;
++/delete-node/ &pmp_report_venc1;
++/delete-node/ &pmp_report_msr1;
++/delete-node/ &pmp_report_prores;
++/delete-node/ &pmp_report_afnc4_ioa;
++/delete-node/ &pmp_report_afnc5_ioa;
++
++&pmp {
++	apple,pio-ranges = <0x2 0x82000000 0x0 0x1000000>,
++		<0x3 0x4000000 0x0 0x1000000>,
++		<0x3 0x83000000 0x0 0x1000000>,
++		<0x4 0x2000000 0x0 0x1000000>,
++		<0x2 0x10e70000 0x0 0x90000>,
++		<0x2 0x11e70000 0x0 0x90000>,
++		<0x2 0x12e70000 0x0 0x90000>;
++};
+ 
+ &gpu {
+ 	compatible = "apple,agx-t6000", "apple,agx-g13x";
+diff --git a/arch/arm64/boot/dts/apple/t6001.dtsi b/arch/arm64/boot/dts/apple/t6001.dtsi
+index 364a956663b9..46ce496825dd 100644
+--- a/arch/arm64/boot/dts/apple/t6001.dtsi
++++ b/arch/arm64/boot/dts/apple/t6001.dtsi
+@@ -69,6 +69,18 @@ p-core-pmu-affinity {
+ 	};
+ };
+ 
++&pmp {
++	apple,pio-ranges = <0x2 0x82000000 0x0 0x1000000>,
++		<0x3 0x4000000 0x0 0x1000000>,
++		<0x3 0x83000000 0x0 0x1000000>,
++		<0x4 0x2000000 0x0 0x1000000>,
++		<0x2 0x10e70000 0x0 0x90000>,
++		<0x2 0x11e70000 0x0 0x90000>,
++		<0x2 0x12e70000 0x0 0x90000>,
++		<0x4 0x82000000 0x0 0x1000000>,
++		<0x5 0x2000000 0x0 0x1000000>;
++};
++
+ &gpu {
+ 	compatible = "apple,agx-t6001", "apple,agx-g13c", "apple,agx-g13s";
+ };
+diff --git a/arch/arm64/boot/dts/apple/t6002.dtsi b/arch/arm64/boot/dts/apple/t6002.dtsi
+index e16717f6bdcb..d34a03b374df 100644
+--- a/arch/arm64/boot/dts/apple/t6002.dtsi
++++ b/arch/arm64/boot/dts/apple/t6002.dtsi
+@@ -318,6 +318,63 @@ &ps_gfx {
+ 	power-domains = <&ps_afr>, <&ps_afr_die1>;
+ };
+ 
++&pmp {
++	apple,pio-ranges = <0x2 0x82000000 0x0 0x1000000>,
++		<0x3 0x4000000 0x0 0x1000000>,
++		<0x3 0x83000000 0x0 0x1000000>,
++		<0x4 0x2000000 0x0 0x1000000>,
++		<0x2 0x10e70000 0x0 0x90000>,
++		<0x2 0x11e70000 0x0 0x90000>,
++		<0x2 0x12e70000 0x0 0x90000>,
++		<0x4 0x82000000 0x0 0x1000000>,
++		<0x5 0x2000000 0x0 0x1000000>,
++		<0x22 0x82000000 0x0 0x1000000>,
++		<0x23 0x4000000 0x0 0x1000000>,
++		<0x23 0x83000000 0x0 0x1000000>,
++		<0x24 0x2000000 0x0 0x1000000>,
++		<0x24 0x82000000 0x0 0x1000000>,
++		<0x25 0x2000000 0x0 0x1000000>,
++		<0x22 0x10e70000 0x0 0x90000>,
++		<0x22 0x11e70000 0x0 0x90000>,
++		<0x22 0x12e70000 0x0 0x90000>;
++};
++
++&pmp_report {
++	pmp_report_dispext0_die1: report@33 {
++		compatible = "apple,t6000-pmp-v2-report-entry";
++		reg = <0x33>;
++		label = "pmp-dispext0_die1";
++		#power-domain-cells = <0>;
++		power-domains = <&ps_dispext0_cpu0_die1>;
++	};
++
++	pmp_report_dispext1_die1: report@34 {
++		compatible = "apple,t6000-pmp-v2-report-entry";
++		reg = <0x34>;
++		label = "pmp-dispext1_die1";
++		#power-domain-cells = <0>;
++		power-domains = <&ps_dispext1_cpu0_die1>;
++	};
++
++	pmp_report_dispext2_die1: report@35 {
++		compatible = "apple,t6000-pmp-v2-report-entry";
++		reg = <0x35>;
++		label = "pmp-dispext2_die1";
++		#power-domain-cells = <0>;
++		power-domains = <&ps_dispext1_cpu0_die1>;
++		status = "disabled";
++	};
++
++	pmp_report_dispext3_die1: report@36 {
++		compatible = "apple,t6000-pmp-v2-report-entry";
++		reg = <0x36>;
++		label = "pmp-dispext3_die1";
++		#power-domain-cells = <0>;
++		power-domains = <&ps_dispext1_cpu0_die1>;
++		status = "disabled";
++	};
++};
++
+ &gpu {
+ 	compatible = "apple,agx-t6002", "apple,agx-g13d", "apple,agx-g13s";
+ };
+diff --git a/arch/arm64/boot/dts/apple/t600x-common.dtsi b/arch/arm64/boot/dts/apple/t600x-common.dtsi
+index 070904ee7e87..f41cc72b38d1 100644
+--- a/arch/arm64/boot/dts/apple/t600x-common.dtsi
++++ b/arch/arm64/boot/dts/apple/t600x-common.dtsi
+@@ -13,6 +13,9 @@ / {
+ 
+ 	aliases {
+ 		gpu = &gpu;
++		#ifdef APPLE_USE_PMP
++		pmp = &pmp;
++		#endif
+ 	};
+ 
+ 	cpus {
+diff --git a/arch/arm64/boot/dts/apple/t600x-die0.dtsi b/arch/arm64/boot/dts/apple/t600x-die0.dtsi
+index 4b197c95c2c3..e4f001158c67 100644
+--- a/arch/arm64/boot/dts/apple/t600x-die0.dtsi
++++ b/arch/arm64/boot/dts/apple/t600x-die0.dtsi
+@@ -31,12 +31,205 @@ pmgr_misc: power-management@28e20c000 {
+ 		reg-names = "fabric-ps", "dcs-ps";
+ 	};
+ 
++	pmp_dart: iommu@28e300000 {
++		compatible = "apple,t6000-dart";
++		reg = <0x2 0x8e300000 0x0 0x4000>;
++		#iommu-cells = <1>;
++		interrupt-parent = <&aic>;
++		interrupts = <AIC_IRQ 0 1010 IRQ_TYPE_LEVEL_HIGH>;
++		power-domains = <&ps_pmp>;
++	};
++
++	pmp_report: pmp_report@28e3c0000 {
++		compatible = "apple,t6000-pmp-v2-report";
++		reg = <0x2 0x8e3c0000 0x0 0x20000>;
++		power-domains = <&ps_pms_sram>;
++		#address-cells = <1>;
++		#size-cells = <0>;
++
++		pmp_report_ane_sys: report@a {
++			compatible = "apple,t6000-pmp-v2-report-entry";
++			reg = <0xa>;
++			label = "pmp-ane-sys";
++			#power-domain-cells = <0>;
++			power-domains = <&ps_ane_sys>;
++			status = "disabled";
++		};
++
++		pmp_report_isp_sys: report@b {
++			compatible = "apple,t6000-pmp-v2-report-entry";
++			reg = <0xb>;
++			label = "pmp-isp-sys";
++			#power-domain-cells = <0>;
++			power-domains = <&ps_isp_sys>;
++			status = "disabled";
++		};
++
++		pmp_report_disp0: report@c {
++			compatible = "apple,t6000-pmp-v2-report-entry";
++			reg = <0xc>;
++			label = "pmp-disp0";
++			#power-domain-cells = <0>;
++			power-domains = <&ps_disp0_cpu0>;
++			apple,always-on;
++		};
++
++		pmp_report_dispext0: report@d {
++			compatible = "apple,t6000-pmp-v2-report-entry";
++			reg = <0xd>;
++			label = "pmp-dispext0";
++			#power-domain-cells = <0>;
++			power-domains = <&ps_dispext0_cpu0>;
++			apple,always-on;
++		};
++
++		pmp_report_dispext1: report@e {
++			compatible = "apple,t6000-pmp-v2-report-entry";
++			reg = <0xe>;
++			label = "pmp-dispext1";
++			#power-domain-cells = <0>;
++			power-domains = <&ps_dispext1_cpu0>;
++		};
++
++		pmp_report_venc_sys: report@10 {
++			compatible = "apple,t6000-pmp-v2-report-entry";
++			reg = <0x10>;
++			label = "pmp-venc-sys";
++			#power-domain-cells = <0>;
++			power-domains = <&ps_venc_sys>;
++			status = "disabled";
++		};
++
++		pmp_report_avd_sys: report@11 {
++			compatible = "apple,t6000-pmp-v2-report-entry";
++			reg = <0x11>;
++			label = "pmp-avd-sys";
++			#power-domain-cells = <0>;
++			power-domains = <&ps_avd_sys>;
++			status = "disabled";
++		};
++
++		pmp_report_msr0: report@12 {
++			compatible = "apple,t6000-pmp-v2-report-entry";
++			reg = <0x12>;
++			label = "pmp-msr0";
++			#power-domain-cells = <0>;
++			power-domains = <&ps_msr0>;
++			status = "disabled";
++		};
++
++		pmp_report_jpg: report@13 {
++			compatible = "apple,t6000-pmp-v2-report-entry";
++			reg = <0x13>;
++			label = "pmp-jpg";
++			#power-domain-cells = <0>;
++			power-domains = <&ps_jpg>;
++			status = "disabled";
++		};
++
++		pmp_report_scodec: report@14 {
++			compatible = "apple,t6000-pmp-v2-report-entry";
++			reg = <0x14>;
++			label = "pmp-scodec";
++			#power-domain-cells = <0>;
++			power-domains = <&ps_scodec>;
++			status = "disabled";
++		};
++
++		pmp_report_afnc4_ioa: report@1d {
++			compatible = "apple,t6000-pmp-v2-report-entry";
++			reg = <0x1d>;
++			label = "pmp-afnc4-ioa";
++			#power-domain-cells = <0>;
++			apple,always-on;
++		};
++
++		pmp_report_afnc5_ioa: report@1e {
++			compatible = "apple,t6000-pmp-v2-report-entry";
++			reg = <0x1e>;
++			label = "pmp-afnc5-ioa";
++			#power-domain-cells = <0>;
++			apple,always-on;
++		};
++
++		pmp_report_dispext2: report@20 {
++			compatible = "apple,t6000-pmp-v2-report-entry";
++			reg = <0x20>;
++			label = "pmp-dispext2";
++			#power-domain-cells = <0>;
++			power-domains = <&ps_dispext2_cpu0>;
++			status = "disabled";
++		};
++
++		pmp_report_dispext3: report@21 {
++			compatible = "apple,t6000-pmp-v2-report-entry";
++			reg = <0x21>;
++			label = "pmp-dispext3";
++			#power-domain-cells = <0>;
++			power-domains = <&ps_dispext3_cpu0>;
++			status = "disabled";
++		};
++
++		pmp_report_venc1: report@22 {
++			compatible = "apple,t6000-pmp-v2-report-entry";
++			reg = <0x22>;
++			label = "pmp-venc1";
++			#power-domain-cells = <0>;
++			power-domains = <&ps_venc1_sys>;
++			status = "disabled";
++		};
++
++		pmp_report_msr1: report@23 {
++			compatible = "apple,t6000-pmp-v2-report-entry";
++			reg = <0x23>;
++			label = "pmp-msr1";
++			#power-domain-cells = <0>;
++			power-domains = <&ps_msr1>;
++			status = "disabled";
++		};
++
++		pmp_report_prores: report@24 {
++			compatible = "apple,t6000-pmp-v2-report-entry";
++			reg = <0x24>;
++			label = "pmp-prores";
++			#power-domain-cells = <0>;
++			power-domains = <&ps_prores>;
++			status = "disabled";
++		};
++	};
++
+ 	pmgr_dcp: power-management@28e3d0000 {
+ 		reg = <0x2 0x8e3d0000 0x0 0x4000>;
+ 		reg-names = "dcp-fw-pmgr";
+ 		#apple,bw-scratch-cells = <3>;
+ 	};
+ 
++	pmp: pmp@28e700000 {
++		compatible = "apple,t6000-pmp-v2";
++		reg = <0x2 0x8e700000 0x0 0x100000>,
++			<0x2 0x8ec00000 0x0 0x4000>;
++		reg-names = "pmp", "asc";
++		mboxes = <&pmp_mbox>;
++		mbox-names = "mbox";
++		iommus = <&pmp_dart 0>;
++		power-domains = <&ps_pmp>;
++		status = "disabled";
++	};
++
++	pmp_mbox: mbox@28ec08000 {
++		compatible = "apple,t6000-asc-mailbox", "apple,asc-mailbox-v4";
++		reg = <0x2 0x8ec08000 0x0 0x4000>;
++		interrupt-parent = <&aic>;
++		interrupts = <AIC_IRQ 0 1006 IRQ_TYPE_LEVEL_HIGH>,
++			<AIC_IRQ 0 1007 IRQ_TYPE_LEVEL_HIGH>,
++			<AIC_IRQ 0 1008 IRQ_TYPE_LEVEL_HIGH>,
++			<AIC_IRQ 0 1009 IRQ_TYPE_LEVEL_HIGH>;
++		interrupt-names = "send-empty", "send-not-empty",
++			"recv-empty", "recv-not-empty";
++		#mbox-cells = <0>;
++		power-domains = <&ps_pmp>, <&ps_pms_sram>;
++	};
++
+ 	smc: smc@290400000 {
+ 		compatible = "apple,t6000-smc", "apple,smc";
+ 		reg = <0x2 0x90400000 0x0 0x4000>,
+@@ -328,7 +521,11 @@ dcp: dcp@38bc00000 {
+ 			<0x3 0x8b344000 0x0 0x4000>,
+ 			<0x3 0x8b800000 0x0 0x800000>;
+ 		apple,bw-scratch = <&pmgr_dcp 0 4 0x988>;
++		#ifdef APPLE_USE_PMP
++		power-domains = <&pmp_report_disp0>;
++		#else
+ 		power-domains = <&ps_disp0_cpu0>;
++		#endif
+ 		resets = <&ps_disp0_cpu0>;
+ 		clocks = <&clk_disp0>;
+ 		phandle = <&dcp>;
+@@ -639,7 +836,11 @@ isp: isp@384000000 {
+ 			<0x3 0x861043f0 0x0 0x100>;
+ 		interrupt-parent = <&aic>;
+ 		interrupts = <AIC_IRQ 0 538 IRQ_TYPE_LEVEL_HIGH>;
++		#ifdef APPLE_USE_PMP
++		power-domains = <&pmp_report_isp_sys>, <&ps_isp_set0>,
++		#else
+ 		power-domains = <&ps_isp_sys>, <&ps_isp_set0>,
++		#endif
+ 			<&ps_isp_set1>, <&ps_isp_fe>, <&ps_isp_set3>,
+ 			<&ps_isp_set4>, <&ps_isp_set5>, <&ps_isp_set6>,
+ 			<&ps_isp_set7>, <&ps_isp_set8>;
+diff --git a/arch/arm64/boot/dts/apple/t600x-dieX.dtsi b/arch/arm64/boot/dts/apple/t600x-dieX.dtsi
+index 2fa1fa5a1820..e5330e43b520 100644
+--- a/arch/arm64/boot/dts/apple/t600x-dieX.dtsi
++++ b/arch/arm64/boot/dts/apple/t600x-dieX.dtsi
+@@ -74,7 +74,11 @@ DIE_NODE(dcpext0):  dcp@289c00000 {
+ 			<0x2 0x89344000 0x0 0x4000>,
+ 			<0x2 0x89800000 0x0 0x800000>;
+ 		apple,bw-scratch = <&pmgr_dcp 0 4 0x990>;
++		#ifdef APPLE_USE_PMP
++		power-domains = <&DIE_NODE(pmp_report_dispext0)>;
++		#else
+ 		power-domains = <&DIE_NODE(ps_dispext0_cpu0)>;
++		#endif
+ 		resets = <&DIE_NODE(ps_dispext0_cpu0)>;
+ 		clocks = <&DIE_NODE(clk_dispext0)>;
+ 		phandle = <&DIE_NODE(dcpext0)>;
+@@ -149,7 +153,11 @@ DIE_NODE(dcpext1):  dcp@28cc00000 {
+ 			<0x2 0x8c344000 0x0 0x4000>,
+ 			<0x2 0x8c800000 0x0 0x800000>;
+ 		apple,bw-scratch = <&pmgr_dcp 0 4 0x998>;
++		#ifdef APPLE_USE_PMP
++		power-domains = <&DIE_NODE(pmp_report_dispext1)>;
++		#else
+ 		power-domains = <&DIE_NODE(ps_dispext1_cpu0)>;
++		#endif
+ 		resets = <&DIE_NODE(ps_dispext1_cpu0)>;
+ 		clocks = <&DIE_NODE(clk_dispext1)>;
+ 		phandle = <&DIE_NODE(dcpext1)>;
+diff --git a/arch/arm64/boot/dts/apple/t600x-j314-j316.dtsi b/arch/arm64/boot/dts/apple/t600x-j314-j316.dtsi
+index a4a194263f7a..391bcdaedd66 100644
+--- a/arch/arm64/boot/dts/apple/t600x-j314-j316.dtsi
++++ b/arch/arm64/boot/dts/apple/t600x-j314-j316.dtsi
+@@ -633,3 +633,7 @@ codec {
+ &isp {
+ 	apple,platform-id = <3>;
+ };
++
++&pmp_report_isp_sys {
++	status = "okay";
++};
+diff --git a/arch/arm64/boot/dts/apple/t600x-pmgr.dtsi b/arch/arm64/boot/dts/apple/t600x-pmgr.dtsi
+index 1429554ed545..833a59ecf379 100644
+--- a/arch/arm64/boot/dts/apple/t600x-pmgr.dtsi
++++ b/arch/arm64/boot/dts/apple/t600x-pmgr.dtsi
+@@ -426,6 +426,7 @@ DIE_NODE(ps_pmp): power-controller@2d8 {
+ 		#power-domain-cells = <0>;
+ 		#reset-cells = <0>;
+ 		label = DIE_LABEL(pmp);
++		apple,always-on;
+ 	};
+ #endif
+ 
+@@ -435,6 +436,7 @@ DIE_NODE(ps_pms_sram): power-controller@2e0 {
+ 		#power-domain-cells = <0>;
+ 		#reset-cells = <0>;
+ 		label = DIE_LABEL(pms_sram);
++		apple,always-on;
+ 	};
+ 
+ 	DIE_NODE(ps_apcie_st_sys): power-controller@2e8 {
+diff --git a/arch/arm64/boot/dts/apple/t6020.dtsi b/arch/arm64/boot/dts/apple/t6020.dtsi
+index 482a1e5f53d0..500726e697a8 100644
+--- a/arch/arm64/boot/dts/apple/t6020.dtsi
++++ b/arch/arm64/boot/dts/apple/t6020.dtsi
+@@ -18,6 +18,13 @@ / {
+ };
+ 
+ /delete-node/ &pmgr_south;
++/delete-node/ &pmp_report_dispext2;
++/delete-node/ &pmp_report_dispext3;
++/delete-node/ &pmp_report_venc1;
++/delete-node/ &pmp_report_msr1;
++/delete-node/ &pmp_report_prores;
++/delete-node/ &pmp_report_afnc4_ioa;
++/delete-node/ &pmp_report_afnc5_ioa;
+ 
+ &gpu {
+ 	compatible = "apple,agx-t6020", "apple,agx-g14x", "apple,agx-g14s";
+diff --git a/arch/arm64/boot/dts/apple/t6022-jxxxd.dtsi b/arch/arm64/boot/dts/apple/t6022-jxxxd.dtsi
+index 31231251f7de..4264fdf766e8 100644
+--- a/arch/arm64/boot/dts/apple/t6022-jxxxd.dtsi
++++ b/arch/arm64/boot/dts/apple/t6022-jxxxd.dtsi
+@@ -68,6 +68,7 @@ &dpaudio1_die1 {
+ /* delete power-domains for missing disp0 / disp0_die1 */
+ /delete-node/ &ps_disp0_cpu0;
+ /delete-node/ &ps_disp0_fe;
++/delete-node/ &pmp_report_disp0;
+ 
+ /delete-node/ &ps_disp0_cpu0_die1;
+ /delete-node/ &ps_disp0_fe_die1;
+diff --git a/arch/arm64/boot/dts/apple/t6022.dtsi b/arch/arm64/boot/dts/apple/t6022.dtsi
+index a14cdc6c45db..1c6a67ddf0ac 100644
+--- a/arch/arm64/boot/dts/apple/t6022.dtsi
++++ b/arch/arm64/boot/dts/apple/t6022.dtsi
+@@ -357,6 +357,26 @@ &ps_gfx {
+ 	power-domains = <&ps_afr>, <&ps_afr_die1>;
+ };
+ 
++&pmp_report {
++	pmp_report_dispext0_die1: report@1f {
++		compatible = "apple,t6020-pmp-v2-report-entry",
++			"apple,t6000-pmp-v2-report-entry";
++		reg = <0x1f>;
++		label = "pmp-dispext0_die1";
++		#power-domain-cells = <0>;
++		power-domains = <&ps_dispext0_cpu0_die1>;
++	};
++
++	pmp_report_dispext1_die1: report@20 {
++		compatible = "apple,t6020-pmp-v2-report-entry",
++			"apple,t6000-pmp-v2-report-entry";
++		reg = <0x20>;
++		label = "pmp-dispext1_die1";
++		#power-domain-cells = <0>;
++		power-domains = <&ps_dispext1_cpu0_die1>;
++	};
++};
++
+ &gpu {
+ 	compatible = "apple,agx-t6022", "apple,agx-g14x", "apple,agx-g14d", "apple,agx-g14s";
+ 
+diff --git a/arch/arm64/boot/dts/apple/t602x-common.dtsi b/arch/arm64/boot/dts/apple/t602x-common.dtsi
+index a7cad364e895..e370a2e12473 100644
+--- a/arch/arm64/boot/dts/apple/t602x-common.dtsi
++++ b/arch/arm64/boot/dts/apple/t602x-common.dtsi
+@@ -13,6 +13,9 @@ / {
+ 
+ 	aliases {
+ 		gpu = &gpu;
++		#ifdef APPLE_USE_PMP
++		pmp = &pmp;
++		#endif
+ 	};
+ 
+ 	cpus {
+diff --git a/arch/arm64/boot/dts/apple/t602x-die0.dtsi b/arch/arm64/boot/dts/apple/t602x-die0.dtsi
+index ad9c86a5ac1d..350f91d1209f 100644
+--- a/arch/arm64/boot/dts/apple/t602x-die0.dtsi
++++ b/arch/arm64/boot/dts/apple/t602x-die0.dtsi
+@@ -31,12 +31,223 @@ pmgr_misc: power-management@28e20c000 {
+ 		reg-names = "fabric-ps", "dcs-ps";
+ 	};
+ 
++	pmp_dart: iommu@28e300000 {
++		compatible = "apple,t6020-dart", "apple,t8110-dart";
++		reg = <0x2 0x8e300000 0x0 0x4000>;
++		#iommu-cells = <1>;
++		interrupt-parent = <&aic>;
++		interrupts = <AIC_IRQ 0 1087 IRQ_TYPE_LEVEL_HIGH>;
++		power-domains = <&ps_pmp>;
++	};
++
++	pmp_report: pmp_report@28e3c0000 {
++		compatible = "apple,t6020-pmp-v2-report";
++		reg = <0x2 0x8e3c0000 0x0 0x20000>;
++		power-domains = <&ps_pms_sram>;
++		#address-cells = <1>;
++		#size-cells = <0>;
++
++		pmp_report_ane_sys: report@b {
++			compatible = "apple,t6020-pmp-v2-report-entry",
++				"apple,t6000-pmp-v2-report-entry";
++			reg = <0xb>;
++			label = "pmp-ane-sys";
++			#power-domain-cells = <0>;
++			power-domains = <&ps_ane_sys>;
++			status = "disabled";
++		};
++
++		pmp_report_isp_sys: report@c {
++			compatible = "apple,t6020-pmp-v2-report-entry",
++				"apple,t6000-pmp-v2-report-entry";
++			reg = <0xc>;
++			label = "pmp-isp-sys";
++			#power-domain-cells = <0>;
++			power-domains = <&ps_isp_sys>;
++			status = "disabled";
++		};
++
++		pmp_report_disp0: report@d {
++			compatible = "apple,t6020-pmp-v2-report-entry",
++				"apple,t6000-pmp-v2-report-entry";
++			reg = <0xd>;
++			label = "pmp-disp0";
++			#power-domain-cells = <0>;
++			power-domains = <&ps_disp0_cpu0>;
++			apple,always-on;
++		};
++
++		pmp_report_dispext0: report@e {
++			compatible = "apple,t6020-pmp-v2-report-entry",
++				"apple,t6000-pmp-v2-report-entry";
++			reg = <0xe>;
++			label = "pmp-dispext0";
++			#power-domain-cells = <0>;
++			power-domains = <&ps_dispext0_cpu0>;
++			apple,always-on;
++		};
++
++		pmp_report_dispext1: report@f {
++			compatible = "apple,t6020-pmp-v2-report-entry",
++				"apple,t6000-pmp-v2-report-entry";
++			reg = <0xf>;
++			label = "pmp-dispext1";
++			#power-domain-cells = <0>;
++			power-domains = <&ps_dispext1_cpu0>;
++			apple,always-on;
++		};
++
++		pmp_report_venc_sys: report@10 {
++			compatible = "apple,t6020-pmp-v2-report-entry",
++				"apple,t6000-pmp-v2-report-entry";
++			reg = <0x10>;
++			label = "pmp-venc-sys";
++			#power-domain-cells = <0>;
++			power-domains = <&ps_venc_sys>;
++			status = "disabled";
++		};
++
++		pmp_report_avd_sys: report@11 {
++			compatible = "apple,t6020-pmp-v2-report-entry",
++				"apple,t6000-pmp-v2-report-entry";
++			reg = <0x11>;
++			label = "pmp-avd-sys";
++			#power-domain-cells = <0>;
++			power-domains = <&ps_avd_sys>;
++			status = "disabled";
++		};
++
++		pmp_report_msr0: report@12 {
++			compatible = "apple,t6020-pmp-v2-report-entry",
++				"apple,t6000-pmp-v2-report-entry";
++			reg = <0x12>;
++			label = "pmp-msr0";
++			#power-domain-cells = <0>;
++			power-domains = <&ps_msr0>;
++			status = "disabled";
++		};
++
++		pmp_report_jpg: report@13 {
++			compatible = "apple,t6020-pmp-v2-report-entry",
++				"apple,t6000-pmp-v2-report-entry";
++			reg = <0x13>;
++			label = "pmp-jpg";
++			#power-domain-cells = <0>;
++			power-domains = <&ps_jpg>;
++			status = "disabled";
++		};
++
++		pmp_report_scodec: report@14 {
++			compatible = "apple,t6020-pmp-v2-report-entry",
++				"apple,t6000-pmp-v2-report-entry";
++			reg = <0x14>;
++			label = "pmp-scodec";
++			#power-domain-cells = <0>;
++			power-domains = <&ps_scodec>;
++			status = "disabled";
++		};
++
++		pmp_report_afnc4_ioa: report@1d {
++			compatible = "apple,t6020-pmp-v2-report-entry",
++				"apple,t6000-pmp-v2-report-entry";
++			reg = <0x1d>;
++			label = "pmp-afnc4-ioa";
++			#power-domain-cells = <0>;
++			apple,always-on;
++		};
++
++		pmp_report_afnc5_ioa: report@1e {
++			compatible = "apple,t6020-pmp-v2-report-entry",
++				"apple,t6000-pmp-v2-report-entry";
++			reg = <0x1e>;
++			label = "pmp-afnc5-ioa";
++			#power-domain-cells = <0>;
++			apple,always-on;
++		};
++
++		pmp_report_dispext2: report@1f {
++			compatible = "apple,t6020-pmp-v2-report-entry",
++				"apple,t6000-pmp-v2-report-entry";
++			reg = <0x1f>;
++			label = "pmp-dispext2";
++			#power-domain-cells = <0>;
++			power-domains = <&ps_dispext2_cpu0>;
++			status = "disabled";
++		};
++
++		pmp_report_dispext3: report@20 {
++			compatible = "apple,t6020-pmp-v2-report-entry",
++				"apple,t6000-pmp-v2-report-entry";
++			reg = <0x20>;
++			label = "pmp-dispext3";
++			#power-domain-cells = <0>;
++			power-domains = <&ps_dispext3_cpu0>;
++			status = "disabled";
++		};
++
++		pmp_report_venc1: report@21 {
++			compatible = "apple,t6020-pmp-v2-report-entry",
++				"apple,t6000-pmp-v2-report-entry";
++			reg = <0x21>;
++			label = "pmp-venc1";
++			#power-domain-cells = <0>;
++			power-domains = <&ps_venc1_sys>;
++			status = "disabled";
++		};
++
++		pmp_report_msr1: report@22 {
++			compatible = "apple,t6020-pmp-v2-report-entry",
++				"apple,t6000-pmp-v2-report-entry";
++			reg = <0x22>;
++			label = "pmp-msr1";
++			#power-domain-cells = <0>;
++			power-domains = <&ps_msr1>;
++			status = "disabled";
++		};
++
++		pmp_report_prores: report@23 {
++			compatible = "apple,t6020-pmp-v2-report-entry",
++				"apple,t6000-pmp-v2-report-entry";
++			reg = <0x23>;
++			label = "pmp-prores";
++			#power-domain-cells = <0>;
++			power-domains = <&ps_prores>;
++			status = "disabled";
++		};
++	};
++
+ 	pmgr_dcp: power-management@28e3d0000 {
+ 		reg = <0x2 0x8e3d0000 0x0 0x4000>;
+ 		reg-names = "dcp-fw-pmgr";
+ 		#apple,bw-scratch-cells = <3>;
+ 	};
+ 
++	pmp: pmp@28e700000 {
++		compatible = "apple,t6020-pmp-v2", "apple,t6000-pmp-v2";
++		reg = <0x2 0x8e700000 0x0 0x100000>,
++			<0x2 0x8ec00000 0x0 0x4000>;
++		reg-names = "pmp", "asc";
++		mboxes = <&pmp_mbox>;
++		mbox-names = "mbox";
++		iommus = <&pmp_dart 0>;
++		power-domains = <&ps_pmp>;
++		status = "disabled";
++	};
++
++	pmp_mbox: mbox@28ec08000 {
++		compatible = "apple,t6020-asc-mailbox", "apple,asc-mailbox-v4";
++		reg = <0x2 0x8ec08000 0x0 0x4000>;
++		interrupt-parent = <&aic>;
++		interrupts = <AIC_IRQ 0 1083 IRQ_TYPE_LEVEL_HIGH>,
++			<AIC_IRQ 0 1084 IRQ_TYPE_LEVEL_HIGH>,
++			<AIC_IRQ 0 1085 IRQ_TYPE_LEVEL_HIGH>,
++			<AIC_IRQ 0 1086 IRQ_TYPE_LEVEL_HIGH>;
++		interrupt-names = "send-empty", "send-not-empty",
++			"recv-empty", "recv-not-empty";
++		#mbox-cells = <0>;
++		power-domains = <&ps_pmp>, <&ps_pms_sram>;
++	};
++
+ 	nub_spmi0: spmi@29e114000 {
+ 		compatible = "apple,t6020-spmi", "apple,t8103-spmi", "apple,spmi";
+ 		reg = <0x2 0x9e114000 0x0 0x100>;
+@@ -310,7 +521,11 @@ isp_dart0: iommu@3860e8000 {
+ 		#iommu-cells = <5>;
+ 		interrupt-parent = <&aic>;
+ 		interrupts = <AIC_IRQ 0 574 IRQ_TYPE_LEVEL_HIGH>;
++		#ifdef APPLE_USE_PMP
++		power-domains = <&pmp_report_isp_sys>;
++		#else
+ 		power-domains = <&ps_isp_sys>;
++		#endif
+ 
+ 		status = "disabled";
+ 	};
+@@ -403,7 +618,11 @@ dcp: dcp@389c00000 {
+ 			<0x3 0x89344000 0x0 0x4000>,
+ 			<0x3 0x89800000 0x0 0x800000>;
+ 		apple,bw-scratch = <&pmgr_dcp 0 4 0x1208>;
++		#ifdef APPLE_USE_PMP
++		power-domains = <&pmp_report_disp0>;
++		#else
+ 		power-domains = <&ps_disp0_cpu0>;
++		#endif
+ 		resets = <&ps_disp0_cpu0>;
+ 		clocks = <&clk_disp0>;
+ 		phandle = <&dcp>;
+diff --git a/arch/arm64/boot/dts/apple/t602x-dieX.dtsi b/arch/arm64/boot/dts/apple/t602x-dieX.dtsi
+index e01bb328390f..ab0b3cec00c4 100644
+--- a/arch/arm64/boot/dts/apple/t602x-dieX.dtsi
++++ b/arch/arm64/boot/dts/apple/t602x-dieX.dtsi
+@@ -73,7 +73,11 @@ DIE_NODE(dcpext0):  dcp@289c00000 {
+ 			<0x2 0x89344000 0x0 0x4000>,
+ 			<0x2 0x89800000 0x0 0x800000>;
+ 		apple,bw-scratch = <&pmgr_dcp 0 4 0x1210>;
++		#ifdef APPLE_USE_PMP
++		power-domains = <&DIE_NODE(pmp_report_dispext0)>;
++		#else
+ 		power-domains = <&DIE_NODE(ps_dispext0_cpu0)>;
++		#endif
+ 		resets = <&DIE_NODE(ps_dispext0_cpu0)>;
+ 		clocks = <&DIE_NODE(clk_dispext0)>;
+ 		phandle = <&DIE_NODE(dcpext0)>;
+@@ -219,7 +223,11 @@ DIE_NODE(dcpext1):  dcp@315c00000 {
+ 			<0x3 0x15344000 0x0 0x4000>,
+ 			<0x3 0x15800000 0x0 0x800000>;
+ 		apple,bw-scratch = <&pmgr_dcp 0 4 0x1218>;
++		#ifdef APPLE_USE_PMP
++		power-domains = <&DIE_NODE(pmp_report_dispext1)>;
++		#else
+ 		power-domains = <&DIE_NODE(ps_dispext1_cpu0)>;
++		#endif
+ 		resets = <&DIE_NODE(ps_dispext1_cpu0)>;
+ 		clocks = <&DIE_NODE(clk_dispext1)>;
+ 		phandle = <&DIE_NODE(dcpext1)>;
+diff --git a/arch/arm64/boot/dts/apple/t602x-pmgr.dtsi b/arch/arm64/boot/dts/apple/t602x-pmgr.dtsi
+index b9233f252e6c..4ead781fea68 100644
+--- a/arch/arm64/boot/dts/apple/t602x-pmgr.dtsi
++++ b/arch/arm64/boot/dts/apple/t602x-pmgr.dtsi
+@@ -454,6 +454,7 @@ DIE_NODE(ps_pmp): power-controller@2c8 {
+ 		#power-domain-cells = <0>;
+ 		#reset-cells = <0>;
+ 		label = DIE_LABEL(pmp);
++		apple,always-on;
+ 	};
+ 
+ 	DIE_NODE(ps_pms_sram): power-controller@2d0 {
+@@ -462,6 +463,7 @@ DIE_NODE(ps_pms_sram): power-controller@2d0 {
+ 		#power-domain-cells = <0>;
+ 		#reset-cells = <0>;
+ 		label = DIE_LABEL(pms_sram);
++		apple,always-on;
+ 	};
+ 
+ 	DIE_NODE(ps_dispext0_cpu0): power-controller@2d8 {
+diff --git a/arch/arm64/boot/dts/apple/t8112-j413.dts b/arch/arm64/boot/dts/apple/t8112-j413.dts
+index 2abef089e611..6221935058c7 100644
+--- a/arch/arm64/boot/dts/apple/t8112-j413.dts
++++ b/arch/arm64/boot/dts/apple/t8112-j413.dts
+@@ -261,3 +261,7 @@ &isp {
+ 	apple,platform-id = <14>;
+ 	apple,temporal-filter = <1>;
+ };
++
++&pmp_report_isp_sys {
++	status = "okay";
++};
+diff --git a/arch/arm64/boot/dts/apple/t8112-j415.dts b/arch/arm64/boot/dts/apple/t8112-j415.dts
+index 0824758d380c..6c5175af6f3e 100644
+--- a/arch/arm64/boot/dts/apple/t8112-j415.dts
++++ b/arch/arm64/boot/dts/apple/t8112-j415.dts
+@@ -287,3 +287,7 @@ &isp {
+ 	apple,platform-id = <15>;
+ 	apple,temporal-filter = <1>;
+ };
++
++&pmp_report_isp_sys {
++	status = "okay";
++};
+diff --git a/arch/arm64/boot/dts/apple/t8112-j493.dts b/arch/arm64/boot/dts/apple/t8112-j493.dts
+index 7481f82c027e..3a7b7cc5fcb8 100644
+--- a/arch/arm64/boot/dts/apple/t8112-j493.dts
++++ b/arch/arm64/boot/dts/apple/t8112-j493.dts
+@@ -315,3 +315,7 @@ tp_accel {
+ &isp {
+ 	apple,platform-id = <6>;
+ };
++
++&pmp_report_isp_sys {
++	status = "okay";
++};
+diff --git a/arch/arm64/boot/dts/apple/t8112.dtsi b/arch/arm64/boot/dts/apple/t8112.dtsi
+index f7a7693c850c..918560329186 100644
+--- a/arch/arm64/boot/dts/apple/t8112.dtsi
++++ b/arch/arm64/boot/dts/apple/t8112.dtsi
+@@ -22,6 +22,9 @@ / {
+ 
+ 	aliases {
+ 		gpu = &gpu;
++		#ifdef APPLE_USE_PMP
++		pmp = &pmp;
++		#endif
+ 	};
+ 
+ 	cpus {
+@@ -508,7 +511,11 @@ gpu: gpu@206400000 {
+ 				<0x2 0x4000000 0 0x1000000>;
+ 			reg-names = "asc", "sgx";
+ 			mboxes = <&agx_mbox>;
++			#ifdef APPLE_USE_PMP
++			power-domains = <&pmp_report_gfx>;
++			#else
+ 			power-domains = <&ps_gfx>;
++			#endif
+ 			memory-region = <&uat_ttbs>, <&uat_pagetables>, <&uat_handoff>,
+ 					<&gpu_hw_cal_a>, <&gpu_hw_cal_b>, <&gpu_globals>;
+ 			memory-region-names = "ttbs", "pagetables", "handoff",
+@@ -578,7 +585,11 @@ display_dfr: display-pipe@228200000 {
+ 			reg = <0x2 0x28200000 0x0 0xc000>,
+ 			      <0x2 0x28400000 0x0 0x4000>;
+ 			reg-names = "be", "fe";
++			#ifdef APPLE_USE_PMP
++			power-domains = <&pmp_report_dispdfr>, <&ps_dispdfr_be>;
++			#else
+ 			power-domains = <&ps_dispdfr_fe>, <&ps_dispdfr_be>;
++			#endif
+ 			interrupt-parent = <&aic>;
+ 			interrupts = <AIC_IRQ 614 IRQ_TYPE_LEVEL_HIGH>,
+ 				     <AIC_IRQ 618 IRQ_TYPE_LEVEL_HIGH>;
+@@ -672,7 +683,11 @@ isp: isp@22a000000 {
+ 				<0x2 0x2c4c4430 0x0 0x100>;
+ 			interrupt-parent = <&aic>;
+ 			interrupts = <AIC_IRQ 269 IRQ_TYPE_LEVEL_HIGH>;
++			#ifdef APPLE_USE_PMP
++			power-domains = <&pmp_report_isp_sys>, <&ps_isp_set0>,
++			#else
+ 			power-domains = <&ps_isp_sys>, <&ps_isp_set0>,
++			#endif
+ 				<&ps_isp_set1>, <&ps_isp_set2>, <&ps_isp_fe>,
+ 				<&ps_isp_set4>, <&ps_isp_set5>, <&ps_isp_set6>,
+ 				<&ps_isp_set7>, <&ps_isp_set8>, <&ps_isp_set9>,
+@@ -731,7 +746,11 @@ dcp: dcp@231c00000 {
+ 				<0x2 0x31344000 0x0 0x4000>,
+ 				<0x2 0x31800000 0x0 0x800000>;
+ 			apple,bw-scratch = <&pmgr_dcp 0 4 0x5d8>;
++			#ifdef APPLE_USE_PMP
++			power-domains = <&pmp_report_disp0>;
++			#else
+ 			power-domains = <&ps_disp0_cpu0>;
++			#endif
+ 			resets = <&ps_disp0_cpu0>;
+ 			clocks = <&clk_disp0>;
+ 			phandle = <&dcp>;
+@@ -1053,12 +1072,148 @@ p-core-pmu-affinity {
+ 			};
+ 		};
+ 
++		pmp_dart: iommu@23b300000 {
++			compatible = "apple,t8110-dart";
++			reg = <0x2 0x3b300000 0x0 0x4000>;
++			#iommu-cells = <1>;
++			interrupt-parent = <&aic>;
++			interrupts = <AIC_IRQ 632 IRQ_TYPE_LEVEL_HIGH>;
++			power-domains = <&ps_pmp>;
++		};
++
++		pmp_report: pmp_report@23b3c0000 {
++			compatible = "apple,t8112-pmp-v2-report";
++			reg = <0x2 0x3b3c0000 0x0 0x20000>;
++			power-domains = <&ps_pms_sram>;
++			#address-cells = <1>;
++			#size-cells = <0>;
++
++			pmp_report_gfx: report@4 {
++				compatible = "apple,t8112-pmp-v2-report-entry",
++					"apple,t6000-pmp-v2-report-entry";
++				reg = <0x4>;
++				label = "pmp-gfx";
++				#power-domain-cells = <0>;
++				power-domains = <&ps_gfx>;
++			};
++
++			pmp_report_ane_sys: report@5 {
++				compatible = "apple,t8112-pmp-v2-report-entry",
++					"apple,t6000-pmp-v2-report-entry";
++				reg = <0x5>;
++				label = "pmp-ane-sys";
++				#power-domain-cells = <0>;
++				power-domains = <&ps_ane_sys>;
++				status = "disabled";
++			};
++
++			pmp_report_isp_sys: report@6 {
++				compatible = "apple,t8112-pmp-v2-report-entry",
++					"apple,t6000-pmp-v2-report-entry";
++				reg = <0x6>;
++				label = "pmp-isp-sys";
++				#power-domain-cells = <0>;
++				power-domains = <&ps_isp_sys>;
++				status = "disabled";
++			};
++
++			pmp_report_disp0: report@7 {
++				compatible = "apple,t8112-pmp-v2-report-entry",
++					"apple,t6000-pmp-v2-report-entry";
++				reg = <0x7>;
++				label = "pmp-disp0";
++				#power-domain-cells = <0>;
++				power-domains = <&ps_disp0_cpu0>;
++				apple,always-on;
++			};
++
++			pmp_report_dispext: report@8 {
++				compatible = "apple,t8112-pmp-v2-report-entry",
++					"apple,t6000-pmp-v2-report-entry";
++				reg = <0x8>;
++				label = "pmp-dispext";
++				#power-domain-cells = <0>;
++				power-domains = <&ps_dispext_cpu0>;
++			};
++
++			pmp_report_venc_sys: report@9 {
++				compatible = "apple,t8112-pmp-v2-report-entry",
++					"apple,t6000-pmp-v2-report-entry";
++				reg = <0x9>;
++				label = "pmp-venc-sys";
++				#power-domain-cells = <0>;
++				power-domains = <&ps_venc_sys>;
++				status = "disabled";
++			};
++
++			pmp_report_avd_sys: report@a {
++				compatible = "apple,t8112-pmp-v2-report-entry",
++					"apple,t6000-pmp-v2-report-entry";
++				reg = <0xa>;
++				label = "pmp-avd-sys";
++				#power-domain-cells = <0>;
++				power-domains = <&ps_avd_sys>;
++				status = "disabled";
++			};
++
++			pmp_report_msr: report@b {
++				compatible = "apple,t8112-pmp-v2-report-entry",
++					"apple,t6000-pmp-v2-report-entry";
++				reg = <0xb>;
++				label = "pmp-msr";
++				#power-domain-cells = <0>;
++				power-domains = <&ps_msr>;
++				status = "disabled";
++			};
++
++			pmp_report_jpg: report@c {
++				compatible = "apple,t8112-pmp-v2-report-entry",
++					"apple,t6000-pmp-v2-report-entry";
++				reg = <0xc>;
++				label = "pmp-jpg";
++				#power-domain-cells = <0>;
++				power-domains = <&ps_jpg>;
++				status = "disabled";
++			};
++
++			pmp_report_scodec: report@d {
++				compatible = "apple,t8112-pmp-v2-report-entry",
++					"apple,t6000-pmp-v2-report-entry";
++				reg = <0xd>;
++				label = "pmp-scodec";
++				#power-domain-cells = <0>;
++				power-domains = <&ps_scodec>;
++				status = "disabled";
++			};
++
++			pmp_report_dispdfr: report@11 {
++				compatible = "apple,t8112-pmp-v2-report-entry",
++					"apple,t6000-pmp-v2-report-entry";
++				reg = <0x11>;
++				label = "pmp-dispdfr";
++				#power-domain-cells = <0>;
++				power-domains = <&ps_dispdfr_fe>;
++			};
++		};
++
+ 		pmgr_dcp: power-management@23b3d0000 {
+ 			reg = <0x2 0x3b3d0000 0x0 0x4000>;
+ 			reg-names = "dcp-bw-scratch";
+ 			#apple,bw-scratch-cells = <3>;
+ 		};
+ 
++		pmp: pmp@23b500000 {
++			compatible = "apple,t8112-pmp-v2", "apple,t6000-pmp-v2";
++			reg = <0x2 0x3b500000 0x0 0x80000>,
++				<0x2 0x3bc00000 0x0 0x4000>;
++			reg-names = "pmp", "asc";
++			mboxes = <&pmp_mbox>;
++			mbox-names = "mbox";
++			iommus = <&pmp_dart 0>;
++			power-domains = <&ps_pmp>;
++			status = "disabled";
++		};
++
+ 		pmgr: power-management@23b700000 {
+ 			compatible = "apple,t8112-pmgr", "apple,pmgr", "syscon", "simple-mfd";
+ 			#address-cells = <1>;
+@@ -1067,6 +1222,20 @@ pmgr: power-management@23b700000 {
+ 			/* child nodes are added in t8103-pmgr.dtsi */
+ 		};
+ 
++		pmp_mbox: mbox@23bc08000 {
++			compatible = "apple,t8112-asc-mailbox", "apple,asc-mailbox-v4";
++			reg = <0x2 0x3bc08000 0x0 0x4000>;
++			interrupt-parent = <&aic>;
++			interrupts = <AIC_IRQ 628 IRQ_TYPE_LEVEL_HIGH>,
++				<AIC_IRQ 629 IRQ_TYPE_LEVEL_HIGH>,
++				<AIC_IRQ 630 IRQ_TYPE_LEVEL_HIGH>,
++				<AIC_IRQ 631 IRQ_TYPE_LEVEL_HIGH>;
++			interrupt-names = "send-empty", "send-not-empty",
++				"recv-empty", "recv-not-empty";
++			#mbox-cells = <0>;
++			power-domains = <&ps_pmp>, <&ps_pms_sram>;
++		};
++
+ 		pinctrl_ap: pinctrl@23c100000 {
+ 			compatible = "apple,t8112-pinctrl", "apple,pinctrl";
+ 			reg = <0x2 0x3c100000 0x0 0x100000>;
+@@ -1545,7 +1714,11 @@ dcpext: dcp@271c00000 {
+ 			      <0x2 0x71344000 0x0 0x4000>,
+ 			      <0x2 0x71800000 0x0 0x800000>;
+ 			apple,bw-scratch = <&pmgr_dcp 0 4 0x5e0>;
++			#ifdef APPLE_USE_PMP
++			power-domains = <&pmp_report_dispext>;
++			#else
+ 			power-domains = <&ps_dispext_cpu0>;
++			#endif
+ 			resets = <&ps_dispext_cpu0>;
+ 			clocks = <&clk_dispext0>;
+ 			apple,dcp-index = <1>;
+-- 
+2.47.3
+

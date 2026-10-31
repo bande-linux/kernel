@@ -1,0 +1,49 @@
+From 73bc0eb50dbfad8ef6916ef4d32275054d59cdb1 Mon Sep 17 00:00:00 2001
+From: sofus <sofus.c@icloud.com>
+Date: Fri, 19 Jun 2026 20:36:51 +0200
+Subject: [PATCH] arm64: dts: apple: t8122: add avd nodes
+
+Signed-off-by: sofus <sofus.c@icloud.com>
+(cherry picked from commit 55825f9acec33c73af4054be106ce1f8cd15679b)
+---
+ arch/arm64/boot/dts/apple/t8122.dtsi | 24 ++++++++++++++++++++++++
+ 1 file changed, 24 insertions(+)
+
+diff --git a/arch/arm64/boot/dts/apple/t8122.dtsi b/arch/arm64/boot/dts/apple/t8122.dtsi
+index 8db99fc574f0..2386339077d8 100644
+--- a/arch/arm64/boot/dts/apple/t8122.dtsi
++++ b/arch/arm64/boot/dts/apple/t8122.dtsi
+@@ -465,6 +465,30 @@ sio_dart: iommu@2a1004000 {
+ 			power-domains = <&ps_sio_cpu>;
+ 		};
+ 
++		avd: avd@289080000 {
++			compatible = "apple,t8122-avd";
++			interrupt-parent = <&aic>;
++			interrupts = <AIC_IRQ 679 IRQ_TYPE_LEVEL_HIGH>,
++				<AIC_IRQ 680 IRQ_TYPE_LEVEL_HIGH>;
++			power-domains = <&ps_avd_sys>;
++			resets = <&ps_avd_sys>;
++			reg = <0x2 0x89080000 0x0 0x12000>,
++				<0x2 0x89092000 0x0 0x12000>,
++				<0x2 0x890a4000 0x0 0x4000>,
++				<0x2 0x89100000 0x0 0x10000>;
++			reg-names = "code", "sram", "mbox", "ctrl";
++			iommus = <&avd_dart 0>;
++		};
++
++		avd_dart: iommu@289010000 {
++			compatible = "apple,t8122-dart", "apple,t8110-dart";
++			reg = <0x2 0x89010000 0x0 0x4000>;
++			#iommu-cells = <1>;
++			interrupt-parent = <&aic>;
++			interrupts = <AIC_IRQ 686 IRQ_TYPE_LEVEL_HIGH>;
++			power-domains = <&ps_avd_sys>;
++		};
++
+ 		fpwm1: pwm@2a1044000 {
+ 			compatible = "apple,t8122-fpwm", "apple,s5l-fpwm";
+ 			reg = <0x2 0xa1044000 0x0 0x4000>;
+-- 
+2.47.3
+

@@ -1,0 +1,32 @@
+From 543ed390190483c7cdfed858c2d224ec1bf0aff9 Mon Sep 17 00:00:00 2001
+From: Sven Peter <sven@kernel.org>
+Date: Sun, 30 Aug 2026 16:22:08 +0200
+Subject: [PATCH] arm64: dts: apple: t6030: Fix cpus node indentation
+
+Drop the extra space indentation of the closing brace of the cpus node.
+
+Fixes: e81af013dbdd ("arm64: dts: apple: Initial T6030 (M3 Pro) device trees")
+Reviewed-by: Janne Grunau <j@jannau.net>
+Link: https://patch.msgid.link/20260830-b4-apple-dts-fixes-v1-2-cc20f8445754@kernel.org
+Signed-off-by: Sven Peter <sven@kernel.org>
+(cherry picked from commit b9c7663a454b37b6e076d48442d76965a3b020f4)
+---
+ arch/arm64/boot/dts/apple/t6030.dtsi | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/arch/arm64/boot/dts/apple/t6030.dtsi b/arch/arm64/boot/dts/apple/t6030.dtsi
+index dda9568af11f..5ff12edfc553 100644
+--- a/arch/arm64/boot/dts/apple/t6030.dtsi
++++ b/arch/arm64/boot/dts/apple/t6030.dtsi
+@@ -208,7 +208,7 @@ l2_cache_1: l2-cache-1 {
+ 			cache-unified;
+ 			cache-size = <0x1000000>;
+ 		};
+-	 };
++	};
+ 
+ 	timer {
+ 		compatible = "arm,armv8-timer";
+-- 
+2.47.3
+

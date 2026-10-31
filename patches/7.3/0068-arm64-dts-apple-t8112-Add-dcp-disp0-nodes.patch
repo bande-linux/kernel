@@ -1,0 +1,276 @@
+From eb3e5409ab5e3d5340da3109bb5c7567679bd05c Mon Sep 17 00:00:00 2001
+From: Janne Grunau <j@jannau.net>
+Date: Sun, 20 Nov 2022 20:22:57 +0100
+Subject: [PATCH] arm64: dts: apple: t8112: Add dcp/disp0 nodes
+
+arm64: dts: apple: t8112: Add "ps_disp0_cpu0" as resets for dcp
+
+arm64: dts: apple: t8112-j473: Add dptx-phy power-domain
+
+The HDMI output used by framebuffer0 requires the display controller and
+external DP phy power-domains to remain active.
+
+Signed-off-by: Janne Grunau <j@jannau.net>
+(cherry picked from commit 3ee0a11c5ca44cb13edf0366045f340b44bf9f67)
+---
+ arch/arm64/boot/dts/apple/t8112-j413.dts  | 15 ++++
+ arch/arm64/boot/dts/apple/t8112-j415.dts  | 15 ++++
+ arch/arm64/boot/dts/apple/t8112-j473.dts  |  9 +++
+ arch/arm64/boot/dts/apple/t8112-j493.dts  | 14 ++++
+ arch/arm64/boot/dts/apple/t8112-jxxx.dtsi |  5 ++
+ arch/arm64/boot/dts/apple/t8112-pmgr.dtsi |  2 -
+ arch/arm64/boot/dts/apple/t8112.dtsi      | 84 +++++++++++++++++++++++
+ 7 files changed, 142 insertions(+), 2 deletions(-)
+
+diff --git a/arch/arm64/boot/dts/apple/t8112-j413.dts b/arch/arm64/boot/dts/apple/t8112-j413.dts
+index 72a16161c13f..4371b2d37459 100644
+--- a/arch/arm64/boot/dts/apple/t8112-j413.dts
++++ b/arch/arm64/boot/dts/apple/t8112-j413.dts
+@@ -37,6 +37,21 @@ led-0 {
+ 	};
+ };
+ 
++&dcp {
++	panel: panel {
++		compatible = "apple,panel-j413", "apple,panel";
++		width-mm = <290>;
++		height-mm = <189>;
++		adj-height-mm = <181>;
++		apple,max-brightness = <525>;
++	};
++};
++
++&framebuffer0 {
++	panel = <&panel>;
++	post-init-providers = <&panel>;
++};
++
+ /*
+  * Force the bus number assignments so that we can declare some of the
+  * on-board devices and properties that are populated by the bootloader
+diff --git a/arch/arm64/boot/dts/apple/t8112-j415.dts b/arch/arm64/boot/dts/apple/t8112-j415.dts
+index 383f6587fe3e..4cdf687dc0c9 100644
+--- a/arch/arm64/boot/dts/apple/t8112-j415.dts
++++ b/arch/arm64/boot/dts/apple/t8112-j415.dts
+@@ -37,6 +37,21 @@ led-0 {
+ 	};
+ };
+ 
++&dcp {
++	panel: panel {
++		compatible = "apple,panel-j415", "apple,panel";
++		width-mm = <327>;
++		height-mm = <211>;
++		adj-height-mm = <204>;
++		apple,max-brightness = <500>;
++	};
++};
++
++&framebuffer0 {
++	panel = <&panel>;
++	post-init-providers = <&panel>;
++};
++
+ /*
+  * Force the bus number assignments so that we can declare some of the
+  * on-board devices and properties that are populated by the bootloader
+diff --git a/arch/arm64/boot/dts/apple/t8112-j473.dts b/arch/arm64/boot/dts/apple/t8112-j473.dts
+index 76df7091dbeb..1c32f1554fe3 100644
+--- a/arch/arm64/boot/dts/apple/t8112-j473.dts
++++ b/arch/arm64/boot/dts/apple/t8112-j473.dts
+@@ -24,6 +24,15 @@ aliases {
+ 	};
+ };
+ 
++&framebuffer0 {
++	power-domains = <&ps_disp0_cpu0>, <&ps_dptx_ext_phy>;
++};
++
++/* disable dcp until it is supported */
++&dcp {
++	status = "disabled";
++};
++
+ /*
+  * Keep the power-domains used for the HDMI port on.
+  */
+diff --git a/arch/arm64/boot/dts/apple/t8112-j493.dts b/arch/arm64/boot/dts/apple/t8112-j493.dts
+index 8bd3650188cc..d20668265d6b 100644
+--- a/arch/arm64/boot/dts/apple/t8112-j493.dts
++++ b/arch/arm64/boot/dts/apple/t8112-j493.dts
+@@ -52,6 +52,20 @@ &ps_dispdfr_be {
+ 	apple,always-on;
+ };
+ 
++&dcp {
++	panel: panel {
++		compatible = "apple,panel-j493", "apple,panel";
++		width-mm = <286>;
++		height-mm = <179>;
++		apple,max-brightness = <525>;
++	};
++};
++
++&framebuffer0 {
++	panel = <&panel>;
++	post-init-providers = <&panel>;
++};
++
+ &display_dfr {
+ 	status = "okay";
+ };
+diff --git a/arch/arm64/boot/dts/apple/t8112-jxxx.dtsi b/arch/arm64/boot/dts/apple/t8112-jxxx.dtsi
+index 562e7a25a1e8..d471201fd774 100644
+--- a/arch/arm64/boot/dts/apple/t8112-jxxx.dtsi
++++ b/arch/arm64/boot/dts/apple/t8112-jxxx.dtsi
+@@ -13,6 +13,10 @@ / {
+ 	aliases {
+ 		atcphy0 = &atcphy0;
+ 		atcphy1 = &atcphy1;
++		dcp = &dcp;
++		disp0 = &display;
++		disp0_piodma = &disp0_piodma;
++		disp0-piodma = &disp0_piodma;
+ 		serial0 = &serial0;
+ 		serial2 = &serial2;
+ 	};
+@@ -27,6 +31,7 @@ chosen {
+ 		framebuffer0: framebuffer@0 {
+ 			compatible = "apple,simple-framebuffer", "simple-framebuffer";
+ 			reg = <0 0 0 0>; /* To be filled by loader */
++			power-domains = <&ps_disp0_cpu0>;
+ 			/* Format properties will be added by loader */
+ 			status = "disabled";
+ 		};
+diff --git a/arch/arm64/boot/dts/apple/t8112-pmgr.dtsi b/arch/arm64/boot/dts/apple/t8112-pmgr.dtsi
+index 8b3297d75992..276f1ab35f06 100644
+--- a/arch/arm64/boot/dts/apple/t8112-pmgr.dtsi
++++ b/arch/arm64/boot/dts/apple/t8112-pmgr.dtsi
+@@ -669,7 +669,6 @@ ps_disp0_sys: power-controller@370 {
+ 		#reset-cells = <0>;
+ 		label = "disp0_sys";
+ 		power-domains = <&ps_rmx1>;
+-		apple,always-on; /* TODO: figure out if we can enable PM here */
+ 	};
+ 
+ 	ps_disp0_fe: power-controller@378 {
+@@ -679,7 +678,6 @@ ps_disp0_fe: power-controller@378 {
+ 		#reset-cells = <0>;
+ 		label = "disp0_fe";
+ 		power-domains = <&ps_disp0_sys>, <&ps_pmp>;
+-		apple,always-on; /* TODO: figure out if we can enable PM here */
+ 	};
+ 
+ 	ps_dispext_sys: power-controller@380 {
+diff --git a/arch/arm64/boot/dts/apple/t8112.dtsi b/arch/arm64/boot/dts/apple/t8112.dtsi
+index 2d1e0f677f1b..9b719807222d 100644
+--- a/arch/arm64/boot/dts/apple/t8112.dtsi
++++ b/arch/arm64/boot/dts/apple/t8112.dtsi
+@@ -371,6 +371,14 @@ nco_clkref: clock-ref-nco {
+ 		clock-output-names = "nco_ref";
+ 	};
+ 
++	/* Pixel clock? frequency in Hz (compare: 4K@60 VGA clock 533.250 MHz) */
++	clk_disp0: clock-disp0 {
++		compatible = "fixed-clock";
++		#clock-cells = <0>;
++		clock-frequency = <533333328>;
++		clock-output-names = "clk_disp0";
++	};
++
+ 	reserved-memory {
+ 		#address-cells = <2>;
+ 		#size-cells = <2>;
+@@ -508,6 +516,76 @@ dfr_mipi_out: port@1 {
+ 			};
+ 		};
+ 
++		disp0_dart: iommu@231304000 {
++			compatible = "apple,t8112-dart", "apple,t8110-dart";
++			reg = <0x2 0x31304000 0x0 0x4000>;
++			#iommu-cells = <5>;
++			interrupt-parent = <&aic>;
++			interrupts = <AIC_IRQ 553 IRQ_TYPE_LEVEL_HIGH>;
++			power-domains = <&ps_disp0_cpu0>;
++			status = "disabled";
++		};
++
++		dcp_dart: iommu@23130c000 {
++			compatible = "apple,t8112-dart", "apple,t8110-dart";
++			reg = <0x2 0x3130c000 0x0 0x4000>;
++			#iommu-cells = <5>;
++			interrupt-parent = <&aic>;
++			interrupts = <AIC_IRQ 553 IRQ_TYPE_LEVEL_HIGH>;
++			power-domains = <&ps_disp0_cpu0>;
++		};
++
++		dcp_mbox: mbox@231c08000 {
++			compatible = "apple,t8112-asc-mailbox", "apple,asc-mailbox-v4";
++			reg = <0x2 0x31c08000 0x0 0x4000>;
++			interrupt-parent = <&aic>;
++			interrupts = <AIC_IRQ 535 IRQ_TYPE_LEVEL_HIGH>,
++				<AIC_IRQ 536 IRQ_TYPE_LEVEL_HIGH>,
++				<AIC_IRQ 537 IRQ_TYPE_LEVEL_HIGH>,
++				<AIC_IRQ 538 IRQ_TYPE_LEVEL_HIGH>;
++			interrupt-names = "send-empty", "send-not-empty",
++				"recv-empty", "recv-not-empty";
++			#mbox-cells = <0>;
++			power-domains = <&ps_disp0_cpu0>;
++			resets = <&ps_disp0_cpu0>;
++		};
++
++		dcp: dcp@231c00000 {
++			compatible = "apple,t8112-dcp", "apple,dcp";
++			mboxes = <&dcp_mbox>;
++			mbox-names = "mbox";
++			iommus = <&dcp_dart 5 0x8 0x00000000 0x7 0xffff0000>;
++
++			/* the ADT has 2 additional regs which seems to be unused */
++			reg-names = "coproc", "disp-0", "disp-1", "disp-2", "disp-3";
++			reg = <0x2 0x31c00000 0x0 0x4000>,
++				<0x2 0x30000000 0x0 0x61c000>,
++				<0x2 0x31320000 0x0 0x4000>,
++				<0x2 0x31344000 0x0 0x4000>,
++				<0x2 0x31800000 0x0 0x800000>;
++			apple,bw-scratch = <&pmgr_dcp 0 4 0x5d8>;
++			power-domains = <&ps_disp0_cpu0>;
++			resets = <&ps_disp0_cpu0>;
++			clocks = <&clk_disp0>;
++			phandle = <&dcp>;
++			// required bus properties for 'piodma' subdevice
++			#address-cells = <2>;
++			#size-cells = <2>;
++
++			disp0_piodma: piodma {
++				iommus = <&disp0_dart 4 0x0 0x0 0xf 0xffff0000>;
++				phandle = <&disp0_piodma>;
++			};
++		};
++
++		display: display-subsystem {
++			compatible = "apple,display-subsystem";
++			/* disp_dart0 must be 1st since it is locked */
++			iommus = <&disp0_dart 0 0x0 0x0 0xf 0xffff0000>;
++			/* generate phandle explicitly for use in loader */
++			phandle = <&display>;
++		};
++
+ 		sio_dart: iommu@235004000 {
+ 			compatible = "apple,t8110-dart";
+ 			reg = <0x2 0x35004000 0x0 0x4000>;
+@@ -729,6 +807,12 @@ p-core-pmu-affinity {
+ 			};
+ 		};
+ 
++		pmgr_dcp: power-management@23b3d0000 {
++			reg = <0x2 0x3b3d0000 0x0 0x4000>;
++			reg-names = "dcp-bw-scratch";
++			#apple,bw-scratch-cells = <3>;
++		};
++
+ 		pmgr: power-management@23b700000 {
+ 			compatible = "apple,t8112-pmgr", "apple,pmgr", "syscon", "simple-mfd";
+ 			#address-cells = <1>;
+-- 
+2.47.3
+

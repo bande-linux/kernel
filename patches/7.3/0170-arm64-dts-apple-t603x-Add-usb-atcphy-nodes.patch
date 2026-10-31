@@ -1,0 +1,606 @@
+From 49b663e03cea2ee3c45f5ceb424da18613768c2e Mon Sep 17 00:00:00 2001
+From: Sasha Finkelstein <k@chaosmail.tech>
+Date: Sat, 25 Jul 2026 00:39:32 +0200
+Subject: [PATCH] arm64: dts: apple: t603x: Add usb/atcphy nodes
+
+Signed-off-by: Sasha Finkelstein <k@chaosmail.tech>
+(cherry picked from commit 4d3fd2b610d52e1731f186865b3dd4d3106c62bd)
+---
+ arch/arm64/boot/dts/apple/t6030.dtsi          | 161 ++++++++++++++
+ arch/arm64/boot/dts/apple/t6031-dieX.dtsi     | 159 ++++++++++++++
+ arch/arm64/boot/dts/apple/t6031.dtsi          |   1 +
+ .../arm64/boot/dts/apple/t603x-j514-j516.dtsi | 198 ++++++++++++++++++
+ 4 files changed, 519 insertions(+)
+
+diff --git a/arch/arm64/boot/dts/apple/t6030.dtsi b/arch/arm64/boot/dts/apple/t6030.dtsi
+index 2ceb60aafebd..a1fc24574811 100644
+--- a/arch/arm64/boot/dts/apple/t6030.dtsi
++++ b/arch/arm64/boot/dts/apple/t6030.dtsi
+@@ -11,6 +11,7 @@
+ #include <dt-bindings/interrupt-controller/apple-aic.h>
+ #include <dt-bindings/interrupt-controller/irq.h>
+ #include <dt-bindings/pinctrl/apple.h>
++#include <dt-bindings/phy/phy.h>
+ #include <dt-bindings/spmi/spmi.h>
+ 
+ / {
+@@ -1367,6 +1368,166 @@ pcie0_dart_3: iommu@597000000 {
+ 			power-domains = <&ps_apcie_sys_gp>;
+ 			status = "disabled";
+ 		};
++
++		dwc3_0: usb@702280000 {
++			compatible = "apple,t6030-dwc3", "apple,t8103-dwc3";
++			reg = <0x7 0x02280000 0x0 0xcd00>, <0x7 0x0228cd00 0x0 0x3200>;
++			reg-names = "dwc3-core", "dwc3-apple";
++			interrupt-parent = <&aic>;
++			interrupts = <AIC_IRQ 1087 IRQ_TYPE_LEVEL_HIGH>;
++			dr_mode = "otg";
++			usb-role-switch;
++			role-switch-default-mode = "host";
++			iommus = <&dwc3_0_dart_0 0>,
++				<&dwc3_0_dart_1 1>;
++			power-domains = <&ps_atc0_usb>;
++			resets = <&atcphy0>;
++			phys = <&atcphy0 PHY_TYPE_USB2>, <&atcphy0 PHY_TYPE_USB3>;
++			phy-names = "usb2-phy", "usb3-phy";
++		};
++
++		dwc3_0_dart_0: iommu@702f00000 {
++			compatible = "apple,t6030-dart", "apple,t8110-dart";
++			reg = <0x7 0x02f00000 0x0 0x4000>;
++			interrupt-parent = <&aic>;
++			interrupts = <AIC_IRQ 1091 IRQ_TYPE_LEVEL_HIGH>;
++			power-domains = <&ps_atc0_usb>;
++			#iommu-cells = <1>;
++		};
++
++		dwc3_0_dart_1: iommu@702f80000 {
++			compatible = "apple,t6030-dart", "apple,t8110-dart";
++			reg = <0x7 0x02f80000 0x0 0x4000>;
++			interrupt-parent = <&aic>;
++			interrupts = <AIC_IRQ 1091 IRQ_TYPE_LEVEL_HIGH>;
++			power-domains = <&ps_atc0_usb>;
++			#iommu-cells = <1>;
++		};
++
++		atcphy0: phy@703000000 {
++			compatible = "apple,t6030-atcphy", "apple,t8122-atcphy";
++			reg = <0x7 0x03000000 0x0 0x4c000>,
++				<0x7 0x03050000 0x0 0x8000>,
++				<0x7 0x00000000 0x0 0x8000>,
++				<0x7 0x02a90000 0x0 0x4000>,
++				<0x7 0x02a84000 0x0 0x4000>;
++			reg-names = "core", "lpdptx", "axi2af", "usb2phy",
++				"pipehandler";
++
++			#phy-cells = <1>;
++			#reset-cells = <0>;
++
++			orientation-switch;
++			mode-switch;
++			power-domains = <&ps_atc0_usb>;
++		};
++
++		dwc3_1: usb@b02280000 {
++			compatible = "apple,t6030-dwc3", "apple,t8103-dwc3";
++			reg = <0xb 0x02280000 0x0 0xcd00>, <0xb 0x0228cd00 0x0 0x3200>;
++			reg-names = "dwc3-core", "dwc3-apple";
++			interrupt-parent = <&aic>;
++			interrupts = <AIC_IRQ 1145 IRQ_TYPE_LEVEL_HIGH>;
++			dr_mode = "otg";
++			usb-role-switch;
++			role-switch-default-mode = "host";
++			iommus = <&dwc3_1_dart_0 0>,
++				<&dwc3_1_dart_1 1>;
++			power-domains = <&ps_atc1_usb>;
++			resets = <&atcphy1>;
++			phys = <&atcphy1 PHY_TYPE_USB2>, <&atcphy1 PHY_TYPE_USB3>;
++			phy-names = "usb2-phy", "usb3-phy";
++		};
++
++		dwc3_1_dart_0: iommu@b02f00000 {
++			compatible = "apple,t6030-dart", "apple,t8110-dart";
++			reg = <0xb 0x02f00000 0x0 0x4000>;
++			interrupt-parent = <&aic>;
++			interrupts = <AIC_IRQ 1149 IRQ_TYPE_LEVEL_HIGH>;
++			power-domains = <&ps_atc1_usb>;
++			#iommu-cells = <1>;
++		};
++
++		dwc3_1_dart_1: iommu@b02f80000 {
++			compatible = "apple,t6030-dart", "apple,t8110-dart";
++			reg = <0xb 0x02f80000 0x0 0x4000>;
++			interrupt-parent = <&aic>;
++			interrupts = <AIC_IRQ 1149 IRQ_TYPE_LEVEL_HIGH>;
++			power-domains = <&ps_atc1_usb>;
++			#iommu-cells = <1>;
++		};
++
++		atcphy1: phy@b03000000 {
++			compatible = "apple,t6030-atcphy", "apple,t8122-atcphy";
++			reg = <0xb 0x03000000 0x0 0x4c000>,
++				<0xb 0x03050000 0x0 0x8000>,
++				<0xb 0x00000000 0x0 0x8000>,
++				<0xb 0x02a90000 0x0 0x4000>,
++				<0xb 0x02a84000 0x0 0x4000>;
++			reg-names = "core", "lpdptx", "axi2af", "usb2phy",
++				"pipehandler";
++
++			#phy-cells = <1>;
++			#reset-cells = <0>;
++
++			orientation-switch;
++			mode-switch;
++			power-domains = <&ps_atc1_usb>;
++		};
++
++		dwc3_2: usb@f02280000 {
++			compatible = "apple,t6030-dwc3", "apple,t8103-dwc3";
++			reg = <0xf 0x02280000 0x0 0xcd00>, <0xf 0x0228cd00 0x0 0x3200>;
++			reg-names = "dwc3-core", "dwc3-apple";
++			interrupt-parent = <&aic>;
++			interrupts = <AIC_IRQ 1203 IRQ_TYPE_LEVEL_HIGH>;
++			dr_mode = "otg";
++			usb-role-switch;
++			role-switch-default-mode = "host";
++			iommus = <&dwc3_2_dart_0 0>,
++				<&dwc3_2_dart_1 1>;
++			power-domains = <&ps_atc2_usb>;
++			resets = <&atcphy2>;
++			phys = <&atcphy2 PHY_TYPE_USB2>, <&atcphy2 PHY_TYPE_USB3>;
++			phy-names = "usb2-phy", "usb3-phy";
++		};
++
++		dwc3_2_dart_0: iommu@f02f00000 {
++			compatible = "apple,t6030-dart", "apple,t8110-dart";
++			reg = <0xf 0x02f00000 0x0 0x4000>;
++			interrupt-parent = <&aic>;
++			interrupts = <AIC_IRQ 1207 IRQ_TYPE_LEVEL_HIGH>;
++			power-domains = <&ps_atc2_usb>;
++			#iommu-cells = <1>;
++		};
++
++		dwc3_2_dart_1: iommu@f02f80000 {
++			compatible = "apple,t6030-dart", "apple,t8110-dart";
++			reg = <0xf 0x02f80000 0x0 0x4000>;
++			interrupt-parent = <&aic>;
++			interrupts = <AIC_IRQ 1207 IRQ_TYPE_LEVEL_HIGH>;
++			power-domains = <&ps_atc2_usb>;
++			#iommu-cells = <1>;
++		};
++
++		atcphy2: phy@f03000000 {
++			compatible = "apple,t6030-atcphy", "apple,t8122-atcphy";
++			reg = <0xf 0x03000000 0x0 0x4c000>,
++				<0xf 0x03050000 0x0 0x8000>,
++				<0xf 0x00000000 0x0 0x8000>,
++				<0xf 0x02a90000 0x0 0x4000>,
++				<0xf 0x02a84000 0x0 0x4000>;
++			reg-names = "core", "lpdptx", "axi2af", "usb2phy",
++				"pipehandler";
++
++			#phy-cells = <1>;
++			#reset-cells = <0>;
++
++			orientation-switch;
++			mode-switch;
++			power-domains = <&ps_atc2_usb>;
++		};
++
+ 	};
+ };
+ 
+diff --git a/arch/arm64/boot/dts/apple/t6031-dieX.dtsi b/arch/arm64/boot/dts/apple/t6031-dieX.dtsi
+index cf8076eab1fd..e4344da6ec93 100644
+--- a/arch/arm64/boot/dts/apple/t6031-dieX.dtsi
++++ b/arch/arm64/boot/dts/apple/t6031-dieX.dtsi
+@@ -157,4 +157,163 @@ DIE_NODE(pmgr_gfx): power-management@408e80000 {
+ 
+ 		reg = <0x4 0x8e80000 0 0x4000>;
+ 	};
++
++	DIE_NODE(dwc3_0): usb@702280000 {
++		compatible = "apple,t6031-dwc3", "apple,t8103-dwc3";
++		reg = <0x7 0x02280000 0x0 0xcd00>, <0x7 0x0228cd00 0x0 0x3200>;
++		reg-names = "dwc3-core", "dwc3-apple";
++		interrupt-parent = <&aic>;
++		interrupts = <AIC_IRQ DIE_NO 1362 IRQ_TYPE_LEVEL_HIGH>;
++		dr_mode = "otg";
++		usb-role-switch;
++		role-switch-default-mode = "host";
++		iommus = <&DIE_NODE(dwc3_0_dart_0) 0>,
++			<&DIE_NODE(dwc3_0_dart_1) 1>;
++		power-domains = <&DIE_NODE(ps_atc0_usb)>;
++		resets = <&DIE_NODE(atcphy0)>;
++		phys = <&DIE_NODE(atcphy0) PHY_TYPE_USB2>, <&DIE_NODE(atcphy0) PHY_TYPE_USB3>;
++		phy-names = "usb2-phy", "usb3-phy";
++	};
++
++	DIE_NODE(dwc3_0_dart_0): iommu@702f00000 {
++		compatible = "apple,t6031-dart", "apple,t8110-dart";
++		reg = <0x7 0x02f00000 0x0 0x4000>;
++		interrupt-parent = <&aic>;
++		interrupts = <AIC_IRQ DIE_NO 1366 IRQ_TYPE_LEVEL_HIGH>;
++		power-domains = <&DIE_NODE(ps_atc0_usb)>;
++		#iommu-cells = <1>;
++	};
++
++	DIE_NODE(dwc3_0_dart_1): iommu@702f80000 {
++		compatible = "apple,t6031-dart", "apple,t8110-dart";
++		reg = <0x7 0x02f80000 0x0 0x4000>;
++		interrupt-parent = <&aic>;
++		interrupts = <AIC_IRQ DIE_NO 1366 IRQ_TYPE_LEVEL_HIGH>;
++		power-domains = <&DIE_NODE(ps_atc0_usb)>;
++		#iommu-cells = <1>;
++	};
++
++	DIE_NODE(atcphy0): phy@703000000 {
++		compatible = "apple,t6031-atcphy", "apple,t8122-atcphy";
++		reg = <0x7 0x03000000 0x0 0x4c000>,
++			<0x7 0x03050000 0x0 0x8000>,
++			<0x7 0x00000000 0x0 0x8000>,
++			<0x7 0x02a90000 0x0 0x4000>,
++			<0x7 0x02a84000 0x0 0x4000>;
++		reg-names = "core", "lpdptx", "axi2af", "usb2phy",
++			"pipehandler";
++
++		#phy-cells = <1>;
++		#reset-cells = <0>;
++
++		orientation-switch;
++		mode-switch;
++		power-domains = <&DIE_NODE(ps_atc0_usb)>;
++	};
++
++	DIE_NODE(dwc3_1): usb@b02280000 {
++		compatible = "apple,t6031-dwc3", "apple,t8103-dwc3";
++		reg = <0xb 0x02280000 0x0 0xcd00>, <0xb 0x0228cd00 0x0 0x3200>;
++		reg-names = "dwc3-core", "dwc3-apple";
++		interrupt-parent = <&aic>;
++		interrupts = <AIC_IRQ DIE_NO 1390 IRQ_TYPE_LEVEL_HIGH>;
++		dr_mode = "otg";
++		usb-role-switch;
++		role-switch-default-mode = "host";
++		iommus = <&DIE_NODE(dwc3_1_dart_0) 0>,
++			<&DIE_NODE(dwc3_1_dart_1) 1>;
++		power-domains = <&DIE_NODE(ps_atc1_usb)>;
++		resets = <&DIE_NODE(atcphy1)>;
++		phys = <&DIE_NODE(atcphy1) PHY_TYPE_USB2>, <&DIE_NODE(atcphy1) PHY_TYPE_USB3>;
++		phy-names = "usb2-phy", "usb3-phy";
++	};
++
++	DIE_NODE(dwc3_1_dart_0): iommu@b02f00000 {
++		compatible = "apple,t6031-dart", "apple,t8110-dart";
++		reg = <0xb 0x02f00000 0x0 0x4000>;
++		interrupt-parent = <&aic>;
++		interrupts = <AIC_IRQ DIE_NO 1394 IRQ_TYPE_LEVEL_HIGH>;
++		power-domains = <&DIE_NODE(ps_atc1_usb)>;
++		#iommu-cells = <1>;
++	};
++
++	DIE_NODE(dwc3_1_dart_1): iommu@b02f80000 {
++		compatible = "apple,t6031-dart", "apple,t8110-dart";
++		reg = <0xb 0x02f80000 0x0 0x4000>;
++		interrupt-parent = <&aic>;
++		interrupts = <AIC_IRQ DIE_NO 1394 IRQ_TYPE_LEVEL_HIGH>;
++		power-domains = <&DIE_NODE(ps_atc1_usb)>;
++		#iommu-cells = <1>;
++	};
++
++	DIE_NODE(atcphy1): phy@b03000000 {
++		compatible = "apple,t6031-atcphy", "apple,t8122-atcphy";
++		reg = <0xb 0x03000000 0x0 0x4c000>,
++			<0xb 0x03050000 0x0 0x8000>,
++			<0xb 0x00000000 0x0 0x8000>,
++			<0xb 0x02a90000 0x0 0x4000>,
++			<0xb 0x02a84000 0x0 0x4000>;
++		reg-names = "core", "lpdptx", "axi2af", "usb2phy",
++			"pipehandler";
++
++		#phy-cells = <1>;
++		#reset-cells = <0>;
++
++		orientation-switch;
++		mode-switch;
++		power-domains = <&DIE_NODE(ps_atc1_usb)>;
++	};
++
++	DIE_NODE(dwc3_2): usb@f02280000 {
++		compatible = "apple,t6031-dwc3", "apple,t8103-dwc3";
++		reg = <0xf 0x02280000 0x0 0xcd00>, <0xf 0x0228cd00 0x0 0x3200>;
++		reg-names = "dwc3-core", "dwc3-apple";
++		interrupt-parent = <&aic>;
++		interrupts = <AIC_IRQ DIE_NO 1418 IRQ_TYPE_LEVEL_HIGH>;
++		dr_mode = "otg";
++		usb-role-switch;
++		role-switch-default-mode = "host";
++		iommus = <&DIE_NODE(dwc3_2_dart_0) 0>,
++			<&DIE_NODE(dwc3_2_dart_1) 1>;
++		power-domains = <&DIE_NODE(ps_atc2_usb)>;
++		resets = <&DIE_NODE(atcphy2)>;
++		phys = <&DIE_NODE(atcphy2) PHY_TYPE_USB2>, <&DIE_NODE(atcphy2) PHY_TYPE_USB3>;
++		phy-names = "usb2-phy", "usb3-phy";
++	};
++
++	DIE_NODE(dwc3_2_dart_0): iommu@f02f00000 {
++		compatible = "apple,t6031-dart", "apple,t8110-dart";
++		reg = <0xf 0x02f00000 0x0 0x4000>;
++		interrupt-parent = <&aic>;
++		interrupts = <AIC_IRQ DIE_NO 1422 IRQ_TYPE_LEVEL_HIGH>;
++		power-domains = <&DIE_NODE(ps_atc2_usb)>;
++		#iommu-cells = <1>;
++	};
++
++	DIE_NODE(dwc3_2_dart_1): iommu@f02f80000 {
++		compatible = "apple,t6031-dart", "apple,t8110-dart";
++		reg = <0xf 0x02f80000 0x0 0x4000>;
++		interrupt-parent = <&aic>;
++		interrupts = <AIC_IRQ DIE_NO 1422 IRQ_TYPE_LEVEL_HIGH>;
++		power-domains = <&DIE_NODE(ps_atc2_usb)>;
++		#iommu-cells = <1>;
++	};
++
++	DIE_NODE(atcphy2): phy@f03000000 {
++		compatible = "apple,t6031-atcphy", "apple,t8122-atcphy";
++		reg = <0xf 0x03000000 0x0 0x4c000>,
++			<0xf 0x03050000 0x0 0x8000>,
++			<0xf 0x00000000 0x0 0x8000>,
++			<0xf 0x02a90000 0x0 0x4000>,
++			<0xf 0x02a84000 0x0 0x4000>;
++		reg-names = "core", "lpdptx", "axi2af", "usb2phy",
++			"pipehandler";
++
++		#phy-cells = <1>;
++		#reset-cells = <0>;
++
++		orientation-switch;
++		mode-switch;
++		power-domains = <&DIE_NODE(ps_atc2_usb)>;
++	};
+ };
+diff --git a/arch/arm64/boot/dts/apple/t6031.dtsi b/arch/arm64/boot/dts/apple/t6031.dtsi
+index 34725483c630..88e815b33881 100644
+--- a/arch/arm64/boot/dts/apple/t6031.dtsi
++++ b/arch/arm64/boot/dts/apple/t6031.dtsi
+@@ -9,6 +9,7 @@
+ #include <dt-bindings/interrupt-controller/apple-aic.h>
+ #include <dt-bindings/interrupt-controller/irq.h>
+ #include <dt-bindings/pinctrl/apple.h>
++#include <dt-bindings/phy/phy.h>
+ #include <dt-bindings/spmi/spmi.h>
+ 
+ #include "multi-die-cpp.h"
+diff --git a/arch/arm64/boot/dts/apple/t603x-j514-j516.dtsi b/arch/arm64/boot/dts/apple/t603x-j514-j516.dtsi
+index 47504ae1d608..a1cfcdbfe89a 100644
+--- a/arch/arm64/boot/dts/apple/t603x-j514-j516.dtsi
++++ b/arch/arm64/boot/dts/apple/t603x-j514-j516.dtsi
+@@ -21,6 +21,9 @@ / {
+ 	chassis-type = "laptop";
+ 
+ 	aliases {
++		atcphy0 = &atcphy0;
++		atcphy1 = &atcphy1;
++		atcphy2 = &atcphy2;
+ 		bluetooth0 = &bluetooth0;
+ 		serial0 = &serial0;
+ 		wifi0 = &wifi0;
+@@ -303,6 +306,30 @@ hpm0: usb-pd@c {
+ 			<17 IRQ_TYPE_EDGE_RISING>,
+ 			<19 IRQ_TYPE_EDGE_RISING>;
+ 		interrupt-names = "irq", "select", "sleep", "wake";
++
++		typec0: connector {
++			compatible = "usb-c-connector";
++			label = "USB-C Left Back";
++			power-role = "dual";
++			data-role = "dual";
++
++			ports {
++				#address-cells = <1>;
++				#size-cells = <0>;
++				port@0 {
++					reg = <0>;
++					typec0_connector_hs: endpoint {
++						remote-endpoint = <&dwc3_0_hs>;
++					};
++				};
++				port@1 {
++					reg = <1>;
++					typec0_connector_ss: endpoint {
++						remote-endpoint = <&atcphy0_typec_lanes>;
++					};
++				};
++			};
++		};
+ 	};
+ 
+ 	hpm1: usb-pd@a {
+@@ -313,6 +340,30 @@ hpm1: usb-pd@a {
+ 			<43 IRQ_TYPE_EDGE_RISING>,
+ 			<45 IRQ_TYPE_EDGE_RISING>;
+ 		interrupt-names = "irq", "select", "sleep", "wake";
++
++		typec1: connector {
++			compatible = "usb-c-connector";
++			label = "USB-C Left Front";
++			power-role = "dual";
++			data-role = "dual";
++
++			ports {
++				#address-cells = <1>;
++				#size-cells = <0>;
++				port@0 {
++					reg = <0>;
++					typec1_connector_hs: endpoint {
++						remote-endpoint = <&dwc3_1_hs>;
++					};
++				};
++				port@1 {
++					reg = <1>;
++					typec1_connector_ss: endpoint {
++						remote-endpoint = <&atcphy1_typec_lanes>;
++					};
++				};
++			};
++		};
+ 	};
+ 
+ 	hpm5: usb-pd@6 {
+@@ -335,6 +386,153 @@ hpm2: usb-pd@8 {
+ 			<69 IRQ_TYPE_EDGE_RISING>,
+ 			<71 IRQ_TYPE_EDGE_RISING>;
+ 		interrupt-names = "irq", "select", "sleep", "wake";
++
++		typec2: connector {
++			compatible = "usb-c-connector";
++			label = "USB-C Right";
++			power-role = "dual";
++			data-role = "dual";
++
++			ports {
++				#address-cells = <1>;
++				#size-cells = <0>;
++				port@0 {
++					reg = <0>;
++					typec2_connector_hs: endpoint {
++						remote-endpoint = <&dwc3_2_hs>;
++					};
++				};
++				port@1 {
++					reg = <1>;
++					typec2_connector_ss: endpoint {
++						remote-endpoint = <&atcphy2_typec_lanes>;
++					};
++				};
++			};
++		};
++	};
++};
++
++&dwc3_0 {
++	ports {
++		#address-cells = <1>;
++		#size-cells = <0>;
++
++		port@0 {
++			reg = <0>;
++			dwc3_0_hs: endpoint {
++				remote-endpoint = <&typec0_connector_hs>;
++			};
++		};
++		port@1 {
++			reg = <1>;
++			dwc3_0_ss: endpoint {
++				remote-endpoint = <&atcphy0_usb3>;
++			};
++		};
++	};
++};
++
++&dwc3_1 {
++	ports {
++		#address-cells = <1>;
++		#size-cells = <0>;
++
++		port@0 {
++			reg = <0>;
++			dwc3_1_hs: endpoint {
++				remote-endpoint = <&typec1_connector_hs>;
++			};
++		};
++		port@1 {
++			reg = <1>;
++			dwc3_1_ss: endpoint {
++				remote-endpoint = <&atcphy1_usb3>;
++			};
++		};
++	};
++};
++
++&dwc3_2 {
++	ports {
++		#address-cells = <1>;
++		#size-cells = <0>;
++
++		port@0 {
++			reg = <0>;
++			dwc3_2_hs: endpoint {
++				remote-endpoint = <&typec2_connector_hs>;
++			};
++		};
++		port@1 {
++			reg = <1>;
++			dwc3_2_ss: endpoint {
++				remote-endpoint = <&atcphy2_usb3>;
++			};
++		};
++	};
++};
++
++&atcphy0 {
++	ports {
++		#address-cells = <1>;
++		#size-cells = <0>;
++
++		port@0 {
++			reg = <0>;
++			atcphy0_typec_lanes: endpoint {
++				remote-endpoint = <&typec0_connector_ss>;
++			};
++		};
++
++		port@1 {
++			reg = <1>;
++			atcphy0_usb3: endpoint {
++				remote-endpoint = <&dwc3_0_ss>;
++			};
++		};
++	};
++};
++
++&atcphy1 {
++	ports {
++		#address-cells = <1>;
++		#size-cells = <0>;
++
++		port@0 {
++			reg = <0>;
++			atcphy1_typec_lanes: endpoint {
++				remote-endpoint = <&typec1_connector_ss>;
++			};
++		};
++
++		port@1 {
++			reg = <1>;
++			atcphy1_usb3: endpoint {
++				remote-endpoint = <&dwc3_1_ss>;
++			};
++		};
++	};
++};
++
++&atcphy2 {
++	ports {
++		#address-cells = <1>;
++		#size-cells = <0>;
++
++		port@0 {
++			reg = <0>;
++			atcphy2_typec_lanes: endpoint {
++				remote-endpoint = <&typec2_connector_ss>;
++			};
++		};
++
++		port@1 {
++			reg = <1>;
++			atcphy2_usb3: endpoint {
++				remote-endpoint = <&dwc3_2_ss>;
++			};
++		};
+ 	};
+ };
+ 
+-- 
+2.47.3
+

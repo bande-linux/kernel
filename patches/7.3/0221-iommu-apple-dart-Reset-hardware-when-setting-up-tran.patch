@@ -1,0 +1,36 @@
+From b61a761e4a389e68a882d86584bec026f9c9eaf2 Mon Sep 17 00:00:00 2001
+From: sofus <sofus.c@icloud.com>
+Date: Tue, 30 Jun 2026 17:22:17 +0200
+Subject: [PATCH] iommu: apple-dart: Reset hardware when setting up
+ translations
+
+Allows restoring state after a reset
+
+Signed-off-by: sofus <sofus.c@icloud.com>
+(cherry picked from commit 3e3bd38fb1163061976866b13688f163c6f38277)
+---
+ drivers/iommu/apple-dart.c | 5 +++++
+ 1 file changed, 5 insertions(+)
+
+diff --git a/drivers/iommu/apple-dart.c b/drivers/iommu/apple-dart.c
+index cd87184d95f4..1ab66842d381 100644
+--- a/drivers/iommu/apple-dart.c
++++ b/drivers/iommu/apple-dart.c
+@@ -666,9 +666,14 @@ apple_dart_setup_translation(struct apple_dart_domain *domain,
+ 			     struct apple_dart_stream_map *stream_map)
+ {
+ 	int i;
++	struct apple_dart *dart = stream_map->dart;
+ 	struct io_pgtable_cfg *pgtbl_cfg =
+ 		&io_pgtable_ops_to_pgtable(domain->pgtbl_ops)->cfg;
+ 
++	/* enable all streams globally since TCR is used to control isolation */
++	for (i = 0; i < BITS_TO_U32(dart->num_streams); i++)
++		writel(U32_MAX, dart->regs + dart->hw->enable_streams + 4 * i);
++
+ 	for (i = 0; i < pgtbl_cfg->apple_dart_cfg.n_ttbrs; ++i) {
+ 		u64 ttbr = virt_to_phys(pgtbl_cfg->apple_dart_cfg.ttbr[i]);
+ 		apple_dart_hw_set_ttbr(stream_map, i, ttbr);
+-- 
+2.47.3
+

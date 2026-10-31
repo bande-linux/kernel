@@ -1,0 +1,30 @@
+From f66ebd3e665936e0ff8e41e5be0d3a817213b8cf Mon Sep 17 00:00:00 2001
+From: Janne Grunau <j@jannau.net>
+Date: Fri, 3 Apr 2026 14:26:05 +0200
+Subject: [PATCH] dt-bindings: pci: apple,pcie: Add apple,t8122-pcie compatible
+
+apple,t8122-pcie is compatible to apple,t6020-pcie.
+
+Signed-off-by: Janne Grunau <j@jannau.net>
+(cherry picked from commit 1dad571f702b8a24c7aceb95c740207030107da9)
+---
+ Documentation/devicetree/bindings/pci/apple,pcie.yaml | 3 +++
+ 1 file changed, 3 insertions(+)
+
+diff --git a/Documentation/devicetree/bindings/pci/apple,pcie.yaml b/Documentation/devicetree/bindings/pci/apple,pcie.yaml
+index c0852be04f6d..17d623a19d1d 100644
+--- a/Documentation/devicetree/bindings/pci/apple,pcie.yaml
++++ b/Documentation/devicetree/bindings/pci/apple,pcie.yaml
+@@ -41,6 +41,9 @@ properties:
+               - apple,t8112-pcie
+               - apple,t6000-pcie
+           - const: apple,pcie
++      - items:
++          - const: apple,t8122-pcie
++          - const: apple,t6020-pcie
+       - const: apple,t6020-pcie
+ 
+   reg:
+-- 
+2.47.3
+

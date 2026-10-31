@@ -1,0 +1,40 @@
+From dd73275a7319ebea5b83f09b73f44b547285560b Mon Sep 17 00:00:00 2001
+From: Janne Grunau <j@jannau.net>
+Date: Tue, 25 Jan 2022 21:50:59 +0100
+Subject: [PATCH] arm64: apple: Add missing power state deps for display
+
+The dcp co-processor crashes on HDMI unplug while it apparently tries
+to notify pmp. Handle "notify_pmp" as a parent dependency for
+"ps_disp0_fe" and "ps_dispext_fe".
+
+Signed-off-by: Janne Grunau <j@jannau.net>
+(cherry picked from commit f126fe7f637c4cd5c11c3023bf36b38eb7f2572a)
+---
+ arch/arm64/boot/dts/apple/t8103-pmgr.dtsi | 4 ++--
+ 1 file changed, 2 insertions(+), 2 deletions(-)
+
+diff --git a/arch/arm64/boot/dts/apple/t8103-pmgr.dtsi b/arch/arm64/boot/dts/apple/t8103-pmgr.dtsi
+index 9bddd5bf8660..196912349077 100644
+--- a/arch/arm64/boot/dts/apple/t8103-pmgr.dtsi
++++ b/arch/arm64/boot/dts/apple/t8103-pmgr.dtsi
+@@ -651,7 +651,7 @@ ps_disp0_fe: power-controller@360 {
+ 		#power-domain-cells = <0>;
+ 		#reset-cells = <0>;
+ 		label = "disp0_fe";
+-		power-domains = <&ps_rmx>;
++		power-domains = <&ps_rmx>, <&ps_pmp>;
+ 		apple,always-on; /* TODO: figure out if we can enable PM here */
+ 	};
+ 
+@@ -661,7 +661,7 @@ ps_dispext_fe: power-controller@368 {
+ 		#power-domain-cells = <0>;
+ 		#reset-cells = <0>;
+ 		label = "dispext_fe";
+-		power-domains = <&ps_rmx>;
++		power-domains = <&ps_rmx>, <&ps_pmp>;
+ 	};
+ 
+ 	ps_dispext_cpu0: power-controller@378 {
+-- 
+2.47.3
+

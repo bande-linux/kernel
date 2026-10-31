@@ -1,0 +1,33 @@
+From 90a5cfb197e6c833411410e3e250d3d42b37cf77 Mon Sep 17 00:00:00 2001
+From: Hector Martin <marcan@marcan.st>
+Date: Tue, 11 Apr 2023 02:34:01 +0900
+Subject: [PATCH] arm64: dts: apple: t602x: Add identity dma-ranges mapping
+
+Without this, the OF core ends up limiting all DMA masks to the default
+32-bit, since that runs before drivers set up the proper DMA mask.
+
+Skipping the highest page because it is impossible to express a full
+64-bit range in the DT.
+
+Signed-off-by: Hector Martin <marcan@marcan.st>
+(cherry picked from commit 3a9728bb94d63f92c2fe2add15bd9585eed4d6a2)
+---
+ arch/arm64/boot/dts/apple/t6021.dtsi | 2 ++
+ 1 file changed, 2 insertions(+)
+
+diff --git a/arch/arm64/boot/dts/apple/t6021.dtsi b/arch/arm64/boot/dts/apple/t6021.dtsi
+index 3cddc1697e14..b9dd962bd6d8 100644
+--- a/arch/arm64/boot/dts/apple/t6021.dtsi
++++ b/arch/arm64/boot/dts/apple/t6021.dtsi
+@@ -28,6 +28,8 @@ soc {
+ 
+ 		ranges;
+ 		nonposted-mmio;
++		/* Required to get >32-bit DMA via DARTs */
++		dma-ranges = <0 0 0 0 0xffffffff 0xffffc000>;
+ 
+ 		// filled via templated includes at the end of the file
+ 	};
+-- 
+2.47.3
+

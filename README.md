@@ -9,9 +9,8 @@ system, and the Bande archive publishes it to the `apple` component.
 
 | Path | What it is |
 |---|---|
-| `patches/` | our patches and their `series`, applied after Debian's own `debian/patches/series` |
-| `config/apple.config` | the only options added to Debian's `arm64-16k` config |
-| `config/apple-pending.config` | options that need our patches; they move into `apple.config` with them |
+| `patches/<series>/` | our patches for one upstream series (`7.3`) with their `series`, applied after Debian's own, and `apple.config`, the options that need them |
+| `config/apple.config` | the options added to Debian's `arm64-16k` config on every series |
 | `debian/bande-os-apple/` | the `bande-os-apple` metapackage: `bande-os`, the Apple kernel, and an apt pin that keeps Debian's own kernels off the Mac |
 | `scripts/` | the build, run the same way by CI and on the mini |
 
@@ -36,14 +35,27 @@ have no UEFI Secure Boot). Headers are built but not published yet.
    of it, and `scripts/published.sh` the version the archive serves. Equal: nothing to do.
 2. `scripts/build.sh fetch` gets Debian's source through apt, which checks it against testing's
    signed Release.
-3. `scripts/prepare.sh` adds the flavour, the `bande` release and our patches. A patch that no
-   longer applies stops it with exit 3; the workflow then runs Claude Code to refresh our
+3. `scripts/prepare.sh` adds the flavour, the `bande` release and our patches for Debian's
+   series (`scripts/series.sh`). A series older than our newest builds without patches (Debian
+   testing lagging behind); a newer one, or a patch that no longer applies, stops it with exit 3; the workflow then runs Claude Code to refresh our
    patches against the new source, prepares again and commits the refreshed patches to `main`.
 4. `scripts/build.sh compile` builds the flavour and `bande-os-apple`.
-5. Checks: `scripts/config-diff.sh` proves the config is Debian's plus `apple.config` and nothing
-   else, and `scripts/qemu-boot.sh` boots the kernel to userspace in QEMU (16k pages, UEFI).
+5. Checks: `scripts/config-diff.sh` generates Debian's own `arm64-16k` config from the same source
+   and proves ours is that plus the listed options and nothing else, and `scripts/qemu-boot.sh` boots the kernel to userspace in QEMU (16k pages, UEFI).
 6. It uploads `bande-debs-arm64` and `bande-version-<version>`, which the archive's scheduled
    publish picks up.
+
+## Updating the patches
+
+The patches come from the kernel branch we develop on (`bande-hw/integration` in
+`bande-linux/linux`), one per step of its first-parent history:
+
+```
+scripts/export-patches.sh ../linux v7.3 origin/bande-hw/integration 7.3
+```
+
+A dispatch with `debian_version` (for example `7.3~rc7-1~exp1` from experimental) test-builds any
+Debian version without publishing it.
 
 ## Building on the mini
 

@@ -1,0 +1,36 @@
+From f75ababe6fd920136fe7fffb3644baf1956d963c Mon Sep 17 00:00:00 2001
+From: Janne Grunau <j@jannau.net>
+Date: Sun, 21 Apr 2024 18:01:37 +0200
+Subject: [PATCH] arm64: apple: t602x: pmgr: SIO: Add audio, spi and uart
+ power-domains
+
+The power-domains AUDIO_P, SPI_P and UART_P are necessary for SIO's ASC
+firmware to run. This is not explicitly expressed in the ADT (probably
+since the power-domains are implicitly turned on when macOS uses SIO).
+Since we plan to use SIO only for DP/HDMI audio add the power-domains
+explicitly as dependency of ps_sio_cpu.
+They might be better placed directly into the SIO node butr the SIO
+driver doesn't support multiple power-domains.
+
+Signed-off-by: Janne Grunau <j@jannau.net>
+(cherry picked from commit 140337a254414a90665759ba819e799a60151096)
+---
+ arch/arm64/boot/dts/apple/t602x-pmgr.dtsi | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/arch/arm64/boot/dts/apple/t602x-pmgr.dtsi b/arch/arm64/boot/dts/apple/t602x-pmgr.dtsi
+index 7d70e8bb0818..b9233f252e6c 100644
+--- a/arch/arm64/boot/dts/apple/t602x-pmgr.dtsi
++++ b/arch/arm64/boot/dts/apple/t602x-pmgr.dtsi
+@@ -1260,7 +1260,7 @@ DIE_NODE(ps_sio_cpu): power-controller@1e0 {
+ 		#power-domain-cells = <0>;
+ 		#reset-cells = <0>;
+ 		label = DIE_LABEL(sio_cpu);
+-		power-domains = <&DIE_NODE(ps_sio)>;
++		power-domains = <&DIE_NODE(ps_sio) &DIE_NODE(ps_uart_p) &DIE_NODE(ps_spi_p) &DIE_NODE(ps_audio_p)>;
+ 	};
+ 
+ 	DIE_NODE(ps_fpwm0): power-controller@1e8 {
+-- 
+2.47.3
+

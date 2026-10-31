@@ -1,0 +1,30 @@
+From 69a2ae55fea8b6210911a69536821f4d883569b1 Mon Sep 17 00:00:00 2001
+From: Janne Grunau <j@jannau.net>
+Date: Fri, 3 Apr 2026 14:24:47 +0200
+Subject: [PATCH] dt-bindings: nvme: apple: Add apple,t8122-nvme-ans2
+ compatible
+
+Signed-off-by: Janne Grunau <j@jannau.net>
+(cherry picked from commit efc4af3d1ff70be01567890205f6907e08d1dd68)
+---
+ Documentation/devicetree/bindings/nvme/apple,nvme-ans.yaml | 4 +++-
+ 1 file changed, 3 insertions(+), 1 deletion(-)
+
+diff --git a/Documentation/devicetree/bindings/nvme/apple,nvme-ans.yaml b/Documentation/devicetree/bindings/nvme/apple,nvme-ans.yaml
+index 4c0b1f90aff8..352251c801f5 100644
+--- a/Documentation/devicetree/bindings/nvme/apple,nvme-ans.yaml
++++ b/Documentation/devicetree/bindings/nvme/apple,nvme-ans.yaml
+@@ -14,7 +14,9 @@ properties:
+     oneOf:
+       - const: apple,t8015-nvme-ans2
+       - items:
+-          - const: apple,t6020-nvme-ans2
++          - enum:
++              - apple,t6020-nvme-ans2
++              - apple,t8122-nvme-ans2
+           - const: apple,t8103-nvme-ans2
+       - items:
+           - enum:
+-- 
+2.47.3
+

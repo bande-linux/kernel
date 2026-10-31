@@ -1,0 +1,262 @@
+From 8abcb38e2d6cb88c870c8c4acbf7b452c6814691 Mon Sep 17 00:00:00 2001
+From: Janne Grunau <j@jannau.net>
+Date: Thu, 2 Feb 2023 11:15:35 +0100
+Subject: [PATCH] arm64: dts: apple: t8112: Add mtp device nodes for j413/j493
+
+Those provide trackpad and keyboard for j413/j493.
+Add keyboard alias & layout props for t8112 laptops
+
+Signed-off-by: Hector Martin <marcan@marcan.st>
+Signed-off-by: Janne Grunau <j@jannau.net>
+(cherry picked from commit 51eee32de9c38540af3ecefdf3e1a3afae7510d9)
+---
+ arch/arm64/boot/dts/apple/t8112-j413.dts | 36 ++++++++++++
+ arch/arm64/boot/dts/apple/t8112-j415.dts | 36 ++++++++++++
+ arch/arm64/boot/dts/apple/t8112-j493.dts | 36 ++++++++++++
+ arch/arm64/boot/dts/apple/t8112.dtsi     | 73 ++++++++++++++++++++++++
+ 4 files changed, 181 insertions(+)
+
+diff --git a/arch/arm64/boot/dts/apple/t8112-j413.dts b/arch/arm64/boot/dts/apple/t8112-j413.dts
+index c6da0ff92097..e9ef413a535a 100644
+--- a/arch/arm64/boot/dts/apple/t8112-j413.dts
++++ b/arch/arm64/boot/dts/apple/t8112-j413.dts
+@@ -20,6 +20,7 @@ / {
+ 
+ 	aliases {
+ 		bluetooth0 = &bluetooth0;
++		keyboard = &keyboard;
+ 		wifi0 = &wifi0;
+ 	};
+ 
+@@ -93,4 +94,39 @@ &fpwm1 {
+ 	status = "okay";
+ };
+ 
++&mtp {
++	status = "okay";
++};
++&mtp_mbox {
++	status = "okay";
++};
++&mtp_dart {
++	status = "okay";
++};
++&mtp_dockchannel {
++	status = "okay";
++};
++&mtp_hid {
++	apple,afe-reset-gpios = <&smc_gpio 8 GPIO_ACTIVE_LOW>;
++	apple,stm-reset-gpios = <&smc_gpio 24 GPIO_ACTIVE_LOW>;
++
++	multi-touch {
++		firmware-name = "apple/tpmtfw-j413.bin";
++	};
++
++	keyboard: keyboard {
++		hid-country-code = <0>;
++		apple,keyboard-layout-id = <0>;
++	};
++
++	stm {
++	};
++
++	actuator {
++	};
++
++	tp_accel {
++	};
++};
++
+ #include "hwmon-laptop.dtsi"
+diff --git a/arch/arm64/boot/dts/apple/t8112-j415.dts b/arch/arm64/boot/dts/apple/t8112-j415.dts
+index 676eca181905..8c09e67ba1b7 100644
+--- a/arch/arm64/boot/dts/apple/t8112-j415.dts
++++ b/arch/arm64/boot/dts/apple/t8112-j415.dts
+@@ -20,6 +20,7 @@ / {
+ 
+ 	aliases {
+ 		bluetooth0 = &bluetooth0;
++		keyboard = &keyboard;
+ 		wifi0 = &wifi0;
+ 	};
+ 
+@@ -93,4 +94,39 @@ &fpwm1 {
+ 	status = "okay";
+ };
+ 
++&mtp {
++	status = "okay";
++};
++&mtp_mbox {
++	status = "okay";
++};
++&mtp_dart {
++	status = "okay";
++};
++&mtp_dockchannel {
++	status = "okay";
++};
++&mtp_hid {
++	apple,afe-reset-gpios = <&smc_gpio 8 GPIO_ACTIVE_LOW>;
++	apple,stm-reset-gpios = <&smc_gpio 24 GPIO_ACTIVE_LOW>;
++
++	multi-touch {
++		firmware-name = "apple/tpmtfw-j415.bin";
++	};
++
++	keyboard: keyboard {
++		hid-country-code = <0>;
++		apple,keyboard-layout-id = <0>;
++	};
++
++	stm {
++	};
++
++	actuator {
++	};
++
++	tp_accel {
++	};
++};
++
+ #include "hwmon-laptop.dtsi"
+diff --git a/arch/arm64/boot/dts/apple/t8112-j493.dts b/arch/arm64/boot/dts/apple/t8112-j493.dts
+index 51af35e02a14..e8659fe3f28a 100644
+--- a/arch/arm64/boot/dts/apple/t8112-j493.dts
++++ b/arch/arm64/boot/dts/apple/t8112-j493.dts
+@@ -24,6 +24,7 @@ / {
+ 	 */
+ 	aliases {
+ 		bluetooth0 = &bluetooth0;
++		keyboard = &keyboard;
+ 		touchbar0 = &touchbar0;
+ 		wifi0 = &wifi0;
+ 	};
+@@ -148,5 +149,40 @@ touchbar0: touchbar@0 {
+ 	};
+ };
+ 
++&mtp {
++	status = "okay";
++};
++&mtp_mbox {
++	status = "okay";
++};
++&mtp_dart {
++	status = "okay";
++};
++&mtp_dockchannel {
++	status = "okay";
++};
++&mtp_hid {
++	apple,afe-reset-gpios = <&smc_gpio 8 GPIO_ACTIVE_LOW>;
++	apple,stm-reset-gpios = <&smc_gpio 24 GPIO_ACTIVE_LOW>;
++
++	multi-touch {
++		firmware-name = "apple/tpmtfw-j493.bin";
++	};
++
++	keyboard: keyboard {
++		hid-country-code = <0>;
++		apple,keyboard-layout-id = <0>;
++	};
++
++	stm {
++	};
++
++	actuator {
++	};
++
++	tp_accel {
++	};
++};
++
+ #include "hwmon-laptop.dtsi"
+ #include "hwmon-fan.dtsi"
+diff --git a/arch/arm64/boot/dts/apple/t8112.dtsi b/arch/arm64/boot/dts/apple/t8112.dtsi
+index ec248ca052cb..a928d4d07365 100644
+--- a/arch/arm64/boot/dts/apple/t8112.dtsi
++++ b/arch/arm64/boot/dts/apple/t8112.dtsi
+@@ -987,6 +987,79 @@ pinctrl_aop: pinctrl@24a820000 {
+ 				     <AIC_IRQ 307 IRQ_TYPE_LEVEL_HIGH>;
+ 		};
+ 
++		mtp: mtp@24e400000 {
++			compatible = "apple,t8112-mtp", "apple,t8112-rtk-helper-asc4", "apple,mtp", "apple,rtk-helper-asc4";
++			reg = <0x2 0x4e400000 0x0 0x4000>,
++				<0x2 0x4ec00000 0x0 0x100000>;
++			reg-names = "asc", "sram";
++			mboxes = <&mtp_mbox>;
++			iommus = <&mtp_dart 1>;
++			#helper-cells = <0>;
++
++			status = "disabled";
++		};
++
++		mtp_mbox: mbox@24e408000 {
++			compatible = "apple,t8112-asc-mailbox", "apple,asc-mailbox-v4";
++			reg = <0x2 0x4e408000 0x0 0x4000>;
++			interrupt-parent = <&aic>;
++			interrupts = <AIC_IRQ 864 IRQ_TYPE_LEVEL_HIGH>,
++				<AIC_IRQ 865 IRQ_TYPE_LEVEL_HIGH>,
++				<AIC_IRQ 866 IRQ_TYPE_LEVEL_HIGH>,
++				<AIC_IRQ 867 IRQ_TYPE_LEVEL_HIGH>;
++			interrupt-names = "send-empty", "send-not-empty",
++				"recv-empty", "recv-not-empty";
++			#mbox-cells = <0>;
++
++			status = "disabled";
++		};
++
++		mtp_dart: iommu@24e808000 {
++			compatible = "apple,t8112-dart", "apple,t8110-dart";
++			reg = <0x2 0x4e808000 0x0 0x4000>;
++			interrupt-parent = <&aic>;
++			interrupts = <AIC_IRQ 848 IRQ_TYPE_LEVEL_HIGH>;
++			#iommu-cells = <1>;
++
++			status = "disabled";
++		};
++
++		mtp_dockchannel: fifo@24eb14000 {
++			compatible = "apple,t8112-dockchannel", "apple,dockchannel";
++			reg = <0x2 0x4eb14000 0x0 0x4000>;
++			reg-names = "irq";
++			interrupt-parent = <&aic>;
++			interrupts = <AIC_IRQ 850 IRQ_TYPE_LEVEL_HIGH>;
++
++			ranges = <0 0x2 0x4eb28000 0x20000>;
++			#address-cells = <1>;
++			#size-cells = <1>;
++
++			interrupt-controller;
++			#interrupt-cells = <2>;
++
++			status = "disabled";
++
++			mtp_hid: input@8000 {
++				compatible = "apple,dockchannel-hid";
++				reg = <0x8000 0x4000>,
++					<0xc000 0x4000>,
++					<0x0000 0x4000>,
++					<0x4000 0x4000>;
++				reg-names = "config", "data",
++					"rmt-config", "rmt-data";
++				iommus = <&mtp_dart 1>;
++				interrupt-parent = <&mtp_dockchannel>;
++				interrupts = <2 IRQ_TYPE_LEVEL_HIGH>,
++					<3 IRQ_TYPE_LEVEL_HIGH>;
++				interrupt-names = "tx", "rx";
++
++				apple,fifo-size = <0x800>;
++				apple,helper-cpu = <&mtp>;
++			};
++
++		};
++
+ 		ans_mbox: mbox@277408000 {
+ 			compatible = "apple,t8112-asc-mailbox", "apple,asc-mailbox-v4";
+ 			reg = <0x2 0x77408000 0x0 0x4000>;
+-- 
+2.47.3
+

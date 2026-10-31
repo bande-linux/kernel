@@ -1,0 +1,32 @@
+From 9c3da0b622bc4252a579e95e73632b913530576e Mon Sep 17 00:00:00 2001
+From: Michael Reeves <michael.reeves077@gmail.com>
+Date: Sat, 31 Jan 2026 13:03:06 +1100
+Subject: [PATCH] dt-bindings: iommu: apple: Add Apple M3 compatibles to DART
+
+The DART is compatible with "apple,t8110-dart" introduced with Apple M1
+Pro/Max and M2 devices.
+
+Signed-off-by: Michael Reeves <michael.reeves077@gmail.com>
+(cherry picked from commit 33e9dec80ee4881e6cf95081da0efd64a2a27c31)
+---
+ Documentation/devicetree/bindings/iommu/apple,dart.yaml | 4 +++-
+ 1 file changed, 3 insertions(+), 1 deletion(-)
+
+diff --git a/Documentation/devicetree/bindings/iommu/apple,dart.yaml b/Documentation/devicetree/bindings/iommu/apple,dart.yaml
+index 47ec7fa52c3a..e179199dbd3b 100644
+--- a/Documentation/devicetree/bindings/iommu/apple,dart.yaml
++++ b/Documentation/devicetree/bindings/iommu/apple,dart.yaml
+@@ -29,7 +29,9 @@ properties:
+           - apple,t8110-dart
+           - apple,t6000-dart
+       - items:
+-          - const: apple,t6020-dart
++          - enum:
++              - apple,t6020-dart
++              - apple,t8122-dart
+           - const: apple,t8110-dart
+ 
+   reg:
+-- 
+2.47.3
+

@@ -1,0 +1,124 @@
+From d01337fd2af713862efbe63cfa5e65b8781d2924 Mon Sep 17 00:00:00 2001
+From: Janne Grunau <j@jannau.net>
+Date: Tue, 1 Sep 2026 14:56:44 +0200
+Subject: [PATCH] arm64: dts: apple: Fix style issues for t6031 multi die .dtsi
+
+The M3 Max/Ultra .dtsi files containing most MMIO nodes are a collection
+of nodes without parent. The proper embedding inside a "simple-bus"
+parent only happens in t6031.dtsi and t6032.dtsi.
+Fix these dt style issue by using a define for their parent soc node and
+bracket those MMIO nodes inside it.
+
+Suggested-by: Krzysztof Kozlowski <krzk@kernel.org>
+Signed-off-by: Janne Grunau <j@jannau.net>
+(cherry picked from commit e06fbb60477d1c6e6d6ffd029979a45d3af73176)
+---
+ arch/arm64/boot/dts/apple/t6031-die0.dtsi |  2 ++
+ arch/arm64/boot/dts/apple/t6031-dieX.dtsi |  2 ++
+ arch/arm64/boot/dts/apple/t6031.dtsi      |  9 ++++-----
+ arch/arm64/boot/dts/apple/t6032.dtsi      | 16 +++++++---------
+ 4 files changed, 15 insertions(+), 14 deletions(-)
+
+diff --git a/arch/arm64/boot/dts/apple/t6031-die0.dtsi b/arch/arm64/boot/dts/apple/t6031-die0.dtsi
+index 47d08672a047..cffab6b51d12 100644
+--- a/arch/arm64/boot/dts/apple/t6031-die0.dtsi
++++ b/arch/arm64/boot/dts/apple/t6031-die0.dtsi
+@@ -6,6 +6,7 @@
+  * Copyright The Asahi Linux Contributors
+  */
+ 
++&SOC_NODE {
+ 	aic: interrupt-controller@292400000 {
+ 		compatible = "apple,t6031-aic3", "apple,t8122-aic3";
+ 		#interrupt-cells = <4>;
+@@ -195,3 +196,4 @@ serial0: serial@391200000 {
+ 		power-domains = <&ps_uart0>;
+ 		status = "disabled";
+ 	};
++};
+diff --git a/arch/arm64/boot/dts/apple/t6031-dieX.dtsi b/arch/arm64/boot/dts/apple/t6031-dieX.dtsi
+index 2e9d3d2e6dea..524a72f5483e 100644
+--- a/arch/arm64/boot/dts/apple/t6031-dieX.dtsi
++++ b/arch/arm64/boot/dts/apple/t6031-dieX.dtsi
+@@ -6,6 +6,7 @@
+  * Copyright The Asahi Linux Contributors
+  */
+ 
++&SOC_NODE {
+ 	DIE_NODE(pmgr): power-management@292280000 {
+ 		compatible = "apple,t6031-pmgr", "apple,t8103-pmgr", "syscon", "simple-mfd";
+ 		#address-cells = <1>;
+@@ -105,3 +106,4 @@ DIE_NODE(pmgr_gfx): power-management@408e80000 {
+ 
+ 		reg = <0x4 0x8e80000 0 0x4000>;
+ 	};
++};
+diff --git a/arch/arm64/boot/dts/apple/t6031.dtsi b/arch/arm64/boot/dts/apple/t6031.dtsi
+index 0059afe9a844..2ba0768c33bc 100644
+--- a/arch/arm64/boot/dts/apple/t6031.dtsi
++++ b/arch/arm64/boot/dts/apple/t6031.dtsi
+@@ -35,14 +35,13 @@ soc: soc {
+ 
+ #define DIE
+ #define DIE_NO 0
++#define SOC_NODE soc
+ 
+-&soc {
+-	#include "t6031-die0.dtsi"
+-	#include "t6031-dieX.dtsi"
+-};
+-
++#include "t6031-die0.dtsi"
++#include "t6031-dieX.dtsi"
+ #include "t6031-gpio-pins.dtsi"
+ #include "t6031-pmgr.dtsi"
+ 
+ #undef DIE
+ #undef DIE_NO
++#undef SOC_NODE
+diff --git a/arch/arm64/boot/dts/apple/t6032.dtsi b/arch/arm64/boot/dts/apple/t6032.dtsi
+index 61d044f3a734..0a966370cc82 100644
+--- a/arch/arm64/boot/dts/apple/t6032.dtsi
++++ b/arch/arm64/boot/dts/apple/t6032.dtsi
+@@ -317,31 +317,29 @@ die1: soc@2200000000 {
+ 
+ #define DIE
+ #define DIE_NO 0
++#define SOC_NODE die0
+ 
+-&die0 {
+-	#include "t6031-die0.dtsi"
+-	#include "t6031-dieX.dtsi"
+-};
+-
++#include "t6031-die0.dtsi"
++#include "t6031-dieX.dtsi"
+ #include "t6031-pmgr.dtsi"
+ #include "t6031-gpio-pins.dtsi"
+ 
+ #undef DIE
+ #undef DIE_NO
++#undef SOC_NODE
+ 
+ #define DIE _die1
+ #define DIE_NO 1
++#define SOC_NODE die1
+ 
+-&die1 {
+-	#include "t6031-dieX.dtsi"
+-};
+-
++#include "t6031-dieX.dtsi"
+ #include "t6031-pmgr.dtsi"
+ 
+ /delete-node/ &ps_pmp_die1;
+ 
+ #undef DIE
+ #undef DIE_NO
++#undef SOC_NODE
+ 
+ /* delete non-present DISP power-states */
+ /delete-node/ &ps_disp_cpu;
+-- 
+2.47.3
+

@@ -1,0 +1,36 @@
+From 5ae58d53b3a35f1ea7a525b0b86a0b8b0887428f Mon Sep 17 00:00:00 2001
+From: Hector Martin <marcan@marcan.st>
+Date: Tue, 25 Apr 2023 01:46:23 +0900
+Subject: [PATCH] tty: serial: samsung_tty: Mark as wakeup_path on
+ no_console_suspend
+
+Devices not in the wakeup path always have their power domains shut down
+on suspend, which breaks no_console_suspend. Use the wakeup path feature
+to stop this from happening.
+
+This is somewhat an abuse of the concept as named, but the end result is
+exactly what we desire.
+
+Signed-off-by: Hector Martin <marcan@marcan.st>
+(cherry picked from commit 1b8df9bbe1e2ac3cb10c021656f238b772f703b4)
+---
+ drivers/tty/serial/samsung_tty.c | 3 +++
+ 1 file changed, 3 insertions(+)
+
+diff --git a/drivers/tty/serial/samsung_tty.c b/drivers/tty/serial/samsung_tty.c
+index a9e3ffb732be..d33a5d848659 100644
+--- a/drivers/tty/serial/samsung_tty.c
++++ b/drivers/tty/serial/samsung_tty.c
+@@ -2092,6 +2092,9 @@ static int __maybe_unused s3c24xx_serial_suspend(struct device *dev)
+ {
+ 	struct uart_port *port = s3c24xx_dev_to_port(dev);
+ 
++	if (!console_suspend_enabled && uart_console(port))
++		device_set_wakeup_path(dev);
++
+ 	if (port)
+ 		uart_suspend_port(&s3c24xx_uart_drv, port);
+ 
+-- 
+2.47.3
+

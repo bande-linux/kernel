@@ -1,0 +1,32 @@
+From 4b8d76b294ed1ca91b008035731d98728ac2e70a Mon Sep 17 00:00:00 2001
+From: Sven Peter <sven@kernel.org>
+Date: Sun, 30 Aug 2026 16:22:07 +0200
+Subject: [PATCH] arm64: dts: apple: t602x: Fix cpus node indentation
+
+Drop the extra space indentation of the closing brace of the cpus node.
+
+Fixes: e1514f9b3755 ("arm64: dts: apple: Add initial t602x device trees")
+Reviewed-by: Janne Grunau <j@jannau.net>
+Link: https://patch.msgid.link/20260830-b4-apple-dts-fixes-v1-1-cc20f8445754@kernel.org
+Signed-off-by: Sven Peter <sven@kernel.org>
+(cherry picked from commit 6024d7a684d9b22097c1b7e2347f3a211dc6735f)
+---
+ arch/arm64/boot/dts/apple/t602x-common.dtsi | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/arch/arm64/boot/dts/apple/t602x-common.dtsi b/arch/arm64/boot/dts/apple/t602x-common.dtsi
+index 9c800a391e7e..66b6f8347d19 100644
+--- a/arch/arm64/boot/dts/apple/t602x-common.dtsi
++++ b/arch/arm64/boot/dts/apple/t602x-common.dtsi
+@@ -254,7 +254,7 @@ l2_cache_2: l2-cache-2 {
+ 			cache-unified;
+ 			cache-size = <0x1000000>;
+ 		};
+-	 };
++	};
+ 
+ 	blizzard_opp: opp-table-0 {
+ 		compatible = "operating-points-v2";
+-- 
+2.47.3
+

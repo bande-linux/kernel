@@ -1,0 +1,293 @@
+From dcdaf72eba38c970c88c7a32d3be30396a23a93f Mon Sep 17 00:00:00 2001
+From: James Calligeros <jcalligeros99@gmail.com>
+Date: Mon, 6 Nov 2023 20:33:51 +1000
+Subject: [PATCH] arm64: dts: apple: add opp-microwatt to t8103/t600x
+
+This patch adds measured opp-microwatt values for the
+Firestorm and Icestorm application cores found in Apple's
+T8103 (M1), T6000 (M1 Pro), T6001 (M1 Max) and T6002 (M1 Ultra) SoCs.
+
+Values were measured from the System Management Controller's
+core cluster power meter. A version of freqbench modified
+to read this power meter was used to orchestrate testing,
+running 1,000,000 iterations of coremark on a single core
+from each cluster at each operating point. The bulk of the
+testing was done on a T6000.
+
+Note that Apple calibrates voltage regulator settings for
+each SoC as they come off the assembly line, introducing some
+natural variance between machines. Testing across multiple
+machines with identical SoCs reveals no measurable impact
+on the accuracy of the EM subsystem's cost calculations.
+
+Signed-off-by: James Calligeros <jcalligeros99@gmail.com>
+(cherry picked from commit d822402049af29554788971855b02eb5fe6d928b)
+---
+ arch/arm64/boot/dts/apple/t600x-common.dtsi | 20 ++++++++++++++++++++
+ arch/arm64/boot/dts/apple/t8103.dtsi        | 20 ++++++++++++++++++++
+ 2 files changed, 40 insertions(+)
+
+diff --git a/arch/arm64/boot/dts/apple/t600x-common.dtsi b/arch/arm64/boot/dts/apple/t600x-common.dtsi
+index 1be32bc5aaff..d07ab3ef80d9 100644
+--- a/arch/arm64/boot/dts/apple/t600x-common.dtsi
++++ b/arch/arm64/boot/dts/apple/t600x-common.dtsi
+@@ -229,26 +229,31 @@ opp01 {
+ 			opp-hz = /bits/ 64 <600000000>;
+ 			opp-level = <1>;
+ 			clock-latency-ns = <7500>;
++			opp-microwatt = <47296>;
+ 		};
+ 		opp02 {
+ 			opp-hz = /bits/ 64 <972000000>;
+ 			opp-level = <2>;
+ 			clock-latency-ns = <23000>;
++			opp-microwatt = <99715>;
+ 		};
+ 		opp03 {
+ 			opp-hz = /bits/ 64 <1332000000>;
+ 			opp-level = <3>;
+ 			clock-latency-ns = <29000>;
++			opp-microwatt = <188860>;
+ 		};
+ 		opp04 {
+ 			opp-hz = /bits/ 64 <1704000000>;
+ 			opp-level = <4>;
+ 			clock-latency-ns = <40000>;
++			opp-microwatt = <288891>;
+ 		};
+ 		opp05 {
+ 			opp-hz = /bits/ 64 <2064000000>;
+ 			opp-level = <5>;
+ 			clock-latency-ns = <50000>;
++			opp-microwatt = <412979>;
+ 		};
+ 	};
+ 
+@@ -259,78 +264,93 @@ opp01 {
+ 			opp-hz = /bits/ 64 <600000000>;
+ 			opp-level = <1>;
+ 			clock-latency-ns = <8000>;
++			opp-microwatt = <290230>;
+ 		};
+ 		opp02 {
+ 			opp-hz = /bits/ 64 <828000000>;
+ 			opp-level = <2>;
+ 			clock-latency-ns = <18000>;
++			opp-microwatt = <449013>;
+ 		};
+ 		opp03 {
+ 			opp-hz = /bits/ 64 <1056000000>;
+ 			opp-level = <3>;
+ 			clock-latency-ns = <19000>;
++			opp-microwatt = <647097>;
+ 		};
+ 		opp04 {
+ 			opp-hz = /bits/ 64 <1296000000>;
+ 			opp-level = <4>;
+ 			clock-latency-ns = <23000>;
++			opp-microwatt = <865620>;
+ 		};
+ 		opp05 {
+ 			opp-hz = /bits/ 64 <1524000000>;
+ 			opp-level = <5>;
+ 			clock-latency-ns = <24000>;
++			opp-microwatt = <1112838>;
+ 		};
+ 		opp06 {
+ 			opp-hz = /bits/ 64 <1752000000>;
+ 			opp-level = <6>;
+ 			clock-latency-ns = <28000>;
++			opp-microwatt = <1453271>;
+ 		};
+ 		opp07 {
+ 			opp-hz = /bits/ 64 <1980000000>;
+ 			opp-level = <7>;
+ 			clock-latency-ns = <31000>;
++			opp-microwatt = <1776667>;
+ 		};
+ 		opp08 {
+ 			opp-hz = /bits/ 64 <2208000000>;
+ 			opp-level = <8>;
+ 			clock-latency-ns = <45000>;
++			opp-microwatt = <2366690>;
+ 		};
+ 		opp09 {
+ 			opp-hz = /bits/ 64 <2448000000>;
+ 			opp-level = <9>;
+ 			clock-latency-ns = <49000>;
++			opp-microwatt = <2892193>;
+ 		};
+ 		opp10 {
+ 			opp-hz = /bits/ 64 <2676000000>;
+ 			opp-level = <10>;
+ 			clock-latency-ns = <53000>;
++			opp-microwatt = <3475417>;
+ 		};
+ 		opp11 {
+ 			opp-hz = /bits/ 64 <2904000000>;
+ 			opp-level = <11>;
+ 			clock-latency-ns = <56000>;
++			opp-microwatt = <3959410>;
+ 		};
+ 		opp12 {
+ 			opp-hz = /bits/ 64 <3036000000>;
+ 			opp-level = <12>;
+ 			clock-latency-ns = <56000>;
++			opp-microwatt = <4540620>;
+ 		};
+ 		opp13 {
+ 			opp-hz = /bits/ 64 <3132000000>;
+ 			opp-level = <13>;
+ 			clock-latency-ns = <56000>;
++			opp-microwatt = <4745031>;
+ 			turbo-mode;
+ 		};
+ 		opp14 {
+ 			opp-hz = /bits/ 64 <3168000000>;
+ 			opp-level = <14>;
+ 			clock-latency-ns = <56000>;
++			opp-microwatt = <4822390>;
+ 			turbo-mode;
+ 		};
+ 		opp15 {
+ 			opp-hz = /bits/ 64 <3228000000>;
+ 			opp-level = <15>;
+ 			clock-latency-ns = <56000>;
++			opp-microwatt = <4951324>;
+ 			turbo-mode;
+ 		};
+ 	};
+diff --git a/arch/arm64/boot/dts/apple/t8103.dtsi b/arch/arm64/boot/dts/apple/t8103.dtsi
+index b506ca2e0039..135d8ad2e93b 100644
+--- a/arch/arm64/boot/dts/apple/t8103.dtsi
++++ b/arch/arm64/boot/dts/apple/t8103.dtsi
+@@ -194,26 +194,31 @@ opp01 {
+ 			opp-hz = /bits/ 64 <600000000>;
+ 			opp-level = <1>;
+ 			clock-latency-ns = <7500>;
++			opp-microwatt = <47296>;
+ 		};
+ 		opp02 {
+ 			opp-hz = /bits/ 64 <972000000>;
+ 			opp-level = <2>;
+ 			clock-latency-ns = <22000>;
++			opp-microwatt = <99715>;
+ 		};
+ 		opp03 {
+ 			opp-hz = /bits/ 64 <1332000000>;
+ 			opp-level = <3>;
+ 			clock-latency-ns = <27000>;
++			opp-microwatt = <188860>;
+ 		};
+ 		opp04 {
+ 			opp-hz = /bits/ 64 <1704000000>;
+ 			opp-level = <4>;
+ 			clock-latency-ns = <33000>;
++			opp-microwatt = <288891>;
+ 		};
+ 		opp05 {
+ 			opp-hz = /bits/ 64 <2064000000>;
+ 			opp-level = <5>;
+ 			clock-latency-ns = <50000>;
++			opp-microwatt = <412979>;
+ 		};
+ 	};
+ 
+@@ -224,79 +229,94 @@ opp01 {
+ 			opp-hz = /bits/ 64 <600000000>;
+ 			opp-level = <1>;
+ 			clock-latency-ns = <8000>;
++			opp-microwatt = <290230>;
+ 		};
+ 		opp02 {
+ 			opp-hz = /bits/ 64 <828000000>;
+ 			opp-level = <2>;
+ 			clock-latency-ns = <19000>;
++			opp-microwatt = <449013>;
+ 		};
+ 		opp03 {
+ 			opp-hz = /bits/ 64 <1056000000>;
+ 			opp-level = <3>;
+ 			clock-latency-ns = <21000>;
++			opp-microwatt = <647097>;
+ 		};
+ 		opp04 {
+ 			opp-hz = /bits/ 64 <1284000000>;
+ 			opp-level = <4>;
+ 			clock-latency-ns = <23000>;
++			opp-microwatt = <865620>;
+ 		};
+ 		opp05 {
+ 			opp-hz = /bits/ 64 <1500000000>;
+ 			opp-level = <5>;
+ 			clock-latency-ns = <24000>;
++			opp-microwatt = <1112838>;
+ 		};
+ 		opp06 {
+ 			opp-hz = /bits/ 64 <1728000000>;
+ 			opp-level = <6>;
+ 			clock-latency-ns = <29000>;
++			opp-microwatt = <1453271>;
+ 		};
+ 		opp07 {
+ 			opp-hz = /bits/ 64 <1956000000>;
+ 			opp-level = <7>;
+ 			clock-latency-ns = <31000>;
++			opp-microwatt = <1776667>;
+ 		};
+ 		opp08 {
+ 			opp-hz = /bits/ 64 <2184000000>;
+ 			opp-level = <8>;
+ 			clock-latency-ns = <34000>;
++			opp-microwatt = <2366690>;
+ 		};
+ 		opp09 {
+ 			opp-hz = /bits/ 64 <2388000000>;
+ 			opp-level = <9>;
+ 			clock-latency-ns = <36000>;
++			opp-microwatt = <2892193>;
+ 		};
+ 		opp10 {
+ 			opp-hz = /bits/ 64 <2592000000>;
+ 			opp-level = <10>;
+ 			clock-latency-ns = <51000>;
++			opp-microwatt = <3475417>;
+ 		};
+ 		opp11 {
+ 			opp-hz = /bits/ 64 <2772000000>;
+ 			opp-level = <11>;
+ 			clock-latency-ns = <54000>;
++			opp-microwatt = <3959410>;
+ 		};
+ 		opp12 {
+ 			opp-hz = /bits/ 64 <2988000000>;
+ 			opp-level = <12>;
+ 			clock-latency-ns = <55000>;
++			opp-microwatt = <4540620>;
+ 		};
+ 		/* Not available until CPU deep sleep is implemented */
+ 		opp13 {
+ 			opp-hz = /bits/ 64 <3096000000>;
+ 			opp-level = <13>;
+ 			clock-latency-ns = <55000>;
++			opp-microwatt = <4745031>;
+ 			turbo-mode;
+ 		};
+ 		opp14 {
+ 			opp-hz = /bits/ 64 <3144000000>;
+ 			opp-level = <14>;
+ 			clock-latency-ns = <56000>;
++			opp-microwatt = <4822390>;
+ 			turbo-mode;
+ 		};
+ 		opp15 {
+ 			opp-hz = /bits/ 64 <3204000000>;
+ 			opp-level = <15>;
+ 			clock-latency-ns = <56000>;
++			opp-microwatt = <4951324>;
+ 			turbo-mode;
+ 		};
+ 	};
+-- 
+2.47.3
+

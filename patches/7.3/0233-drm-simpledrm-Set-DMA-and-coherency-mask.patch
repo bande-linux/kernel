@@ -1,0 +1,63 @@
+From 737efc41de115f3ebde614be2591875c45f3a7a5 Mon Sep 17 00:00:00 2001
+From: Janne Grunau <j@jannau.net>
+Date: Sun, 15 Oct 2023 17:41:32 +0200
+Subject: [PATCH] drm/simpledrm: Set DMA and coherency mask
+
+Simpledrm is "DMA" access is not limited. All CPU addressible memory
+can be used via direct DMA mappings.
+
+Fixes following warning on Apple silicon systems. Physical memory on
+those systems starts at (1 << 35) or (1 << 40) so 32-bit direct DMA
+mappings are not possible.
+------------[ cut here ]------------
+simple-framebuffer 9e5064000.framebuffer: swiotlb addr 0x00000009de654000+16384 overflow (mask ffffffff, bus limit 0).
+WARNING: CPU: 3 PID: 961 at kernel/dma/swiotlb.c:928 swiotlb_map+0x1f4/0x2a0
+Modules linked in: ...
+CPU: 3 PID: 961 Comm: kwin_wayland Not tainted 6.5.0-asahi+ #1
+Hardware name: Apple Mac mini (M2, 2023) (DT)
+...
+Call trace:
+ swiotlb_map+0x1f4/0x2a0
+ dma_direct_map_sg+0x8c/0x2a8
+ dma_map_sgtable+0x5c/0xd0
+ drm_gem_map_dma_buf+0x64/0xb8
+ dma_buf_map_attachment+0xac/0x158
+ dma_buf_map_attachment_unlocked+0x48/0x80
+ drm_gem_prime_import_dev+0xa0/0x1a0
+ drm_gem_prime_fd_to_handle+0xc8/0x218
+ drm_prime_fd_to_handle_ioctl+0x34/0x50
+ drm_ioctl_kernel+0xe4/0x160
+ drm_ioctl+0x23c/0x3e0
+...
+---[ end trace 0000000000000000 ]---
+
+Avoids using swiotbl bounce buffers on other platforms when the mapped
+memory is above 4GB.
+
+Fixes: 11e8f5fd223b ("drm: Add simpledrm driver")
+Signed-off-by: Janne Grunau <j@jannau.net>
+(cherry picked from commit bdb09749960f8b37362e334bfc8e8db950f1d69f)
+---
+ drivers/gpu/drm/sysfb/simpledrm.c | 6 ++++++
+ 1 file changed, 6 insertions(+)
+
+diff --git a/drivers/gpu/drm/sysfb/simpledrm.c b/drivers/gpu/drm/sysfb/simpledrm.c
+index 21ddf4502ecc..404758261a49 100644
+--- a/drivers/gpu/drm/sysfb/simpledrm.c
++++ b/drivers/gpu/drm/sysfb/simpledrm.c
+@@ -927,6 +927,12 @@ static int simpledrm_probe(struct platform_device *pdev)
+ 	struct drm_device *dev;
+ 	int ret;
+ 
++	ret = dma_set_mask_and_coherent(&pdev->dev, DMA_BIT_MASK(64));
++	if (ret)
++		ret = dma_set_mask_and_coherent(&pdev->dev, DMA_BIT_MASK(32));
++	if (ret)
++		return dev_err_probe(&pdev->dev, ret, "Failed to set dma mask\n");
++
+ 	sdev = simpledrm_device_create(&simpledrm_driver, pdev);
+ 	if (IS_ERR(sdev))
+ 		return PTR_ERR(sdev);
+-- 
+2.47.3
+

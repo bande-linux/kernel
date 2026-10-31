@@ -1,0 +1,74 @@
+From 83cb1f7da0ecf9e580e94afcd69a2d205b08bb7b Mon Sep 17 00:00:00 2001
+From: Hector Martin <marcan@marcan.st>
+Date: Mon, 24 Apr 2023 23:05:40 +0900
+Subject: [PATCH] driver core: fw_devlink: Add
+ fw_devlink_count_absent_consumers()
+
+Some platforms have power domains that are active on boot and must
+remain powered up until all of their consumers probe. The genpd core
+needs a way to count how many consumers haven't probed yet to avoid
+powering off such domains.
+
+Add a fw_devlink_count_absent_consumers() function, which returns the
+total count of consumer devices which either have not been created at
+all yet (only fwlinks exist) or have been created but have no driver
+bound and fully probed yet.
+
+Signed-off-by: Hector Martin <marcan@marcan.st>
+(cherry picked from commit 560ed3a036c4afd948ab7d82b0bee9c0aa10f083)
+---
+ drivers/base/core.c    | 26 ++++++++++++++++++++++++++
+ include/linux/fwnode.h |  1 +
+ 2 files changed, 27 insertions(+)
+
+diff --git a/drivers/base/core.c b/drivers/base/core.c
+index 4c0c373998a1..39d23da8aa5b 100644
+--- a/drivers/base/core.c
++++ b/drivers/base/core.c
+@@ -2398,6 +2398,32 @@ static void fw_devlink_link_device(struct device *dev)
+ 	__fw_devlink_link_to_suppliers(dev, fwnode);
+ }
+ 
++/**
++ * fw_devlink_count_absent_consumers - Return how many consumers have
++ * either not been created yet, or do not yet have a driver attached.
++ * @fwnode: fwnode of the supplier
++ */
++int fw_devlink_count_absent_consumers(struct fwnode_handle *fwnode)
++{
++	struct fwnode_link *link, *tmp;
++	struct device_link *dlink, *dtmp;
++	struct device *sup_dev = get_dev_from_fwnode(fwnode);
++	int count = 0;
++
++	list_for_each_entry_safe(link, tmp, &fwnode->consumers, s_hook)
++		count++;
++
++	if (!sup_dev)
++		return count;
++
++	list_for_each_entry_safe(dlink, dtmp, &sup_dev->links.consumers, s_node)
++		if (dlink->consumer->links.status != DL_DEV_DRIVER_BOUND)
++			count++;
++
++	return count;
++}
++EXPORT_SYMBOL_GPL(fw_devlink_count_absent_consumers);
++
+ /* Device links support end. */
+ 
+ static struct kobject *dev_kobj;
+diff --git a/include/linux/fwnode.h b/include/linux/fwnode.h
+index a9dcaf7e7076..21cb1cc31e44 100644
+--- a/include/linux/fwnode.h
++++ b/include/linux/fwnode.h
+@@ -259,5 +259,6 @@ void fwnode_links_purge(struct fwnode_handle *fwnode);
+ void fw_devlink_purge_absent_suppliers(struct fwnode_handle *fwnode);
+ void fw_devlink_refresh_fwnode(struct fwnode_handle *fwnode);
+ bool fw_devlink_is_strict(void);
++int fw_devlink_count_absent_consumers(struct fwnode_handle *fwnode);
+ 
+ #endif
+-- 
+2.47.3
+

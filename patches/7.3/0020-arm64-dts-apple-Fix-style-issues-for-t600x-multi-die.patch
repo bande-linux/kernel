@@ -1,0 +1,148 @@
+From 4fdfa151a967cf9b85a1c20b131e08d313ffbed0 Mon Sep 17 00:00:00 2001
+From: Janne Grunau <j@jannau.net>
+Date: Tue, 1 Sep 2026 14:56:44 +0200
+Subject: [PATCH] arm64: dts: apple: Fix style issues for t600x multi die .dtsi
+
+The M1 Pro/Max/Ultra .dtsi files containing most MMIO nodes are a
+collection of nodes without parent. The proper embedding inside a
+"simple-bus" parent only happens in t6001.dtsi and t6002.dtsi.
+Fix these dt style issue by using a define for their parent soc node and
+bracket those MMIO nodes inside it.
+
+Suggested-by: Krzysztof Kozlowski <krzk@kernel.org>
+Signed-off-by: Janne Grunau <j@jannau.net>
+(cherry picked from commit df76be3a0cc922693926ae6e7daf6b4fc757515c)
+---
+ arch/arm64/boot/dts/apple/t6001.dtsi      | 11 +++++------
+ arch/arm64/boot/dts/apple/t6002.dtsi      | 18 ++++++++----------
+ arch/arm64/boot/dts/apple/t600x-die0.dtsi |  3 ++-
+ arch/arm64/boot/dts/apple/t600x-dieX.dtsi |  2 ++
+ arch/arm64/boot/dts/apple/t600x-nvme.dtsi |  2 ++
+ 5 files changed, 19 insertions(+), 17 deletions(-)
+
+diff --git a/arch/arm64/boot/dts/apple/t6001.dtsi b/arch/arm64/boot/dts/apple/t6001.dtsi
+index 4fb934d7e71f..e0acf2ba078b 100644
+--- a/arch/arm64/boot/dts/apple/t6001.dtsi
++++ b/arch/arm64/boot/dts/apple/t6001.dtsi
+@@ -35,18 +35,17 @@ soc {
+ 
+ #define DIE
+ #define DIE_NO 0
++#define SOC_NODE {/soc}
+ 
+-&{/soc} {
+-	#include "t600x-die0.dtsi"
+-	#include "t600x-dieX.dtsi"
+-	#include "t600x-nvme.dtsi"
+-};
+-
++#include "t600x-die0.dtsi"
++#include "t600x-dieX.dtsi"
++#include "t600x-nvme.dtsi"
+ #include "t600x-gpio-pins.dtsi"
+ #include "t600x-pmgr.dtsi"
+ 
+ #undef DIE
+ #undef DIE_NO
++#undef SOC_NODE
+ 
+ 
+ &aic {
+diff --git a/arch/arm64/boot/dts/apple/t6002.dtsi b/arch/arm64/boot/dts/apple/t6002.dtsi
+index 0f81fc612a2a..91ce9a665cab 100644
+--- a/arch/arm64/boot/dts/apple/t6002.dtsi
++++ b/arch/arm64/boot/dts/apple/t6002.dtsi
+@@ -254,30 +254,28 @@ die1: soc@2200000000 {
+ 
+ #define DIE
+ #define DIE_NO 0
++#define SOC_NODE die0
+ 
+-&die0 {
+-	#include "t600x-die0.dtsi"
+-	#include "t600x-dieX.dtsi"
+-};
+-
++#include "t600x-die0.dtsi"
++#include "t600x-dieX.dtsi"
+ #include "t600x-pmgr.dtsi"
+ #include "t600x-gpio-pins.dtsi"
+ 
+ #undef DIE
+ #undef DIE_NO
++#undef SOC_NODE
+ 
+ #define DIE _die1
+ #define DIE_NO 1
++#define SOC_NODE die1
+ 
+-&die1 {
+-	#include "t600x-dieX.dtsi"
+-	#include "t600x-nvme.dtsi"
+-};
+-
++#include "t600x-dieX.dtsi"
++#include "t600x-nvme.dtsi"
+ #include "t600x-pmgr.dtsi"
+ 
+ #undef DIE
+ #undef DIE_NO
++#undef SOC_NODE
+ 
+ &aic {
+ 	affinities {
+diff --git a/arch/arm64/boot/dts/apple/t600x-die0.dtsi b/arch/arm64/boot/dts/apple/t600x-die0.dtsi
+index 49b23f3da980..122a566e75d1 100644
+--- a/arch/arm64/boot/dts/apple/t600x-die0.dtsi
++++ b/arch/arm64/boot/dts/apple/t600x-die0.dtsi
+@@ -6,7 +6,7 @@
+  * Copyright The Asahi Linux Contributors
+  */
+ 
+-
++&SOC_NODE {
+ 	nco: clock-controller@28e03c000 {
+ 		compatible = "apple,t6000-nco", "apple,nco";
+ 		reg = <0x2 0x8e03c000 0x0 0x14000>;
+@@ -537,3 +537,4 @@ port03: pci@3,0 {
+ 			status = "disabled";
+ 		};
+ 	};
++};
+diff --git a/arch/arm64/boot/dts/apple/t600x-dieX.dtsi b/arch/arm64/boot/dts/apple/t600x-dieX.dtsi
+index 9676d5127039..7ab60873faf1 100644
+--- a/arch/arm64/boot/dts/apple/t600x-dieX.dtsi
++++ b/arch/arm64/boot/dts/apple/t600x-dieX.dtsi
+@@ -6,6 +6,7 @@
+  * Copyright The Asahi Linux Contributors
+  */
+ 
++&SOC_NODE {
+ 	DIE_NODE(cpufreq_e): cpufreq@210e20000 {
+ 		compatible = "apple,t6000-cluster-cpufreq", "apple,t8103-cluster-cpufreq", "apple,cluster-cpufreq";
+ 		reg = <0x2 0x10e20000 0 0x1000>;
+@@ -331,3 +332,4 @@ DIE_NODE(atcphy3): phy@1303000000 {
+ 		mode-switch;
+ 		power-domains = <&DIE_NODE(ps_atc3_usb)>;
+ 	};
++};
+diff --git a/arch/arm64/boot/dts/apple/t600x-nvme.dtsi b/arch/arm64/boot/dts/apple/t600x-nvme.dtsi
+index 7dff738d317e..3a8e2299eac4 100644
+--- a/arch/arm64/boot/dts/apple/t600x-nvme.dtsi
++++ b/arch/arm64/boot/dts/apple/t600x-nvme.dtsi
+@@ -5,6 +5,7 @@
+  * Copyright The Asahi Linux Contributors
+  */
+ 
++&SOC_NODE {
+ 	DIE_NODE(ans_mbox): mbox@38f408000 {
+ 		compatible = "apple,t6000-asc-mailbox", "apple,asc-mailbox-v4";
+ 		reg = <0x3 0x8f408000 0x0 0x4000>;
+@@ -40,3 +41,4 @@ DIE_NODE(nvme): nvme@393cc0000 {
+ 		power-domain-names = "ans", "apcie0", "apcie1";
+ 		resets = <&DIE_NODE(ps_ans2)>;
+ 	};
++};
+-- 
+2.47.3
+

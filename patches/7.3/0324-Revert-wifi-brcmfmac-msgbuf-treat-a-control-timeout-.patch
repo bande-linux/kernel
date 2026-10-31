@@ -1,0 +1,43 @@
+From dcb7bab85bcb0a863406a429bd75dc20d1f8dc75 Mon Sep 17 00:00:00 2001
+From: Mikael Hug <mikaelhug@gmail.com>
+Date: Sat, 31 Oct 2026 00:51:31 +0000
+Subject: [PATCH] Revert "wifi: brcmfmac: msgbuf: treat a control timeout as
+ stopped firmware"
+
+This reverts commit eda10f588bebd7678aa573216a9b57cf0a249748.
+
+It introduces a lock-order inversion. A command thread holding RTNL and
+the wiphy lock times out and takes bus_reset_lock in brcmf_fw_crashed(),
+while remove holds bus_reset_lock and waits for a reset worker that needs
+RTNL and the wiphy lock.
+
+Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>
+Claude-Session: https://claude.ai/code/session_01UqitcmCNS6G33aQUShi39x
+---
+ .../net/wireless/broadcom/brcm80211/brcmfmac/msgbuf.c  | 10 ----------
+ 1 file changed, 10 deletions(-)
+
+diff --git a/drivers/net/wireless/broadcom/brcm80211/brcmfmac/msgbuf.c b/drivers/net/wireless/broadcom/brcm80211/brcmfmac/msgbuf.c
+index c76378a2e12c..5c114f120ceb 100644
+--- a/drivers/net/wireless/broadcom/brcm80211/brcmfmac/msgbuf.c
++++ b/drivers/net/wireless/broadcom/brcm80211/brcmfmac/msgbuf.c
+@@ -547,16 +547,6 @@ static int brcmf_msgbuf_query_dcmd(struct brcmf_pub *drvr, int ifidx,
+ 	timeout = brcmf_msgbuf_ioctl_resp_wait(msgbuf);
+ 	if (!timeout) {
+ 		bphy_err(drvr, "Timeout on response for query command\n");
+-		/*
+-		 * The firmware answers every control message, so it has
+-		 * stopped. Fail the commands that follow at once instead of
+-		 * waiting for each of them, and reload the firmware. While
+-		 * the device is removed, its interrupts are already off, so
+-		 * no answer can arrive and nothing needs reloading.
+-		 */
+-		brcmf_bus_change_state(drvr->bus_if, BRCMF_BUS_DOWN);
+-		if (!READ_ONCE(drvr->bus_if->removing))
+-			brcmf_fw_crashed(drvr->bus_if->dev);
+ 		return -EIO;
+ 	}
+ 
+-- 
+2.47.3
+

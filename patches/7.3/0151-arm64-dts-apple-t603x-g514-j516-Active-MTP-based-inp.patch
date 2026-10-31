@@ -1,0 +1,162 @@
+From d0e8857a4fa82fe07d2322ebb243f87920ebcb3f Mon Sep 17 00:00:00 2001
+From: Janne Grunau <j@jannau.net>
+Date: Thu, 21 May 2026 23:33:18 +0200
+Subject: [PATCH] arm64: dts: apple: t603x-g514-j516: Active MTP based input
+
+List trackpad firmware files and activate MTP devices nodes on all
+t6030, t6031 and t6034 based MacBooks.
+
+Signed-off-by: Janne Grunau <j@jannau.net>
+(cherry picked from commit 500b9a8e80548f900a911dd262142e7b613a3702)
+---
+ arch/arm64/boot/dts/apple/t6030-j514s.dts     |  4 ++
+ arch/arm64/boot/dts/apple/t6030-j516s.dts     |  4 ++
+ arch/arm64/boot/dts/apple/t6031-j514c.dts     |  4 ++
+ arch/arm64/boot/dts/apple/t6031-j516c.dts     |  4 ++
+ arch/arm64/boot/dts/apple/t6034-j514m.dts     |  4 ++
+ arch/arm64/boot/dts/apple/t6034-j516m.dts     |  4 ++
+ .../arm64/boot/dts/apple/t603x-j514-j516.dtsi | 38 +++++++++++++++++++
+ 7 files changed, 62 insertions(+)
+
+diff --git a/arch/arm64/boot/dts/apple/t6030-j514s.dts b/arch/arm64/boot/dts/apple/t6030-j514s.dts
+index f7c1307e76bd..a53624afae2e 100644
+--- a/arch/arm64/boot/dts/apple/t6030-j514s.dts
++++ b/arch/arm64/boot/dts/apple/t6030-j514s.dts
+@@ -21,6 +21,10 @@ &framebuffer0 {
+ 	power-domains = <&ps_disp_cpu>;
+ };
+ 
++&mtp_mt {
++	firmware-name = "apple/tpmtfw-j514s.bin";
++};
++
+ &wifi0 {
+ 	brcm,board-type = "apple,texa";
+ };
+diff --git a/arch/arm64/boot/dts/apple/t6030-j516s.dts b/arch/arm64/boot/dts/apple/t6030-j516s.dts
+index 9f9609575ed0..8837d7175277 100644
+--- a/arch/arm64/boot/dts/apple/t6030-j516s.dts
++++ b/arch/arm64/boot/dts/apple/t6030-j516s.dts
+@@ -21,6 +21,10 @@ &framebuffer0 {
+ 	power-domains = <&ps_disp_cpu>;
+ };
+ 
++&mtp_mt {
++	firmware-name = "apple/tpmtfw-j516s.bin";
++};
++
+ &wifi0 {
+ 	brcm,board-type = "apple,jura";
+ };
+diff --git a/arch/arm64/boot/dts/apple/t6031-j514c.dts b/arch/arm64/boot/dts/apple/t6031-j514c.dts
+index 8cc2224ee0fd..ad9250eac9ad 100644
+--- a/arch/arm64/boot/dts/apple/t6031-j514c.dts
++++ b/arch/arm64/boot/dts/apple/t6031-j514c.dts
+@@ -17,6 +17,10 @@ / {
+ 	model = "Apple MacBook Pro (14-inch, M3 Max, 16 CPU cores, Nov 2023)";
+ };
+ 
++&mtp_mt {
++	firmware-name = "apple/tpmtfw-j514c.bin";
++};
++
+ &wifi0 {
+ 	brcm,board-type = "apple,texa";
+ };
+diff --git a/arch/arm64/boot/dts/apple/t6031-j516c.dts b/arch/arm64/boot/dts/apple/t6031-j516c.dts
+index 5dfe886d47a9..23d928a61f34 100644
+--- a/arch/arm64/boot/dts/apple/t6031-j516c.dts
++++ b/arch/arm64/boot/dts/apple/t6031-j516c.dts
+@@ -17,6 +17,10 @@ / {
+ 	model = "Apple MacBook Pro (16-inch, M3 Max, 16 CPU cores, Nov 2023)";
+ };
+ 
++&mtp_mt {
++	firmware-name = "apple/tpmtfw-j516c.bin";
++};
++
+ &wifi0 {
+ 	brcm,board-type = "apple,jura";
+ };
+diff --git a/arch/arm64/boot/dts/apple/t6034-j514m.dts b/arch/arm64/boot/dts/apple/t6034-j514m.dts
+index dfae771ec626..679f82a0e7da 100644
+--- a/arch/arm64/boot/dts/apple/t6034-j514m.dts
++++ b/arch/arm64/boot/dts/apple/t6034-j514m.dts
+@@ -17,6 +17,10 @@ / {
+ 	model = "Apple MacBook Pro (14-inch, M3 Max, 14 CPU cores, Nov 2023)";
+ };
+ 
++&mtp_mt {
++	firmware-name = "apple/tpmtfw-j514m.bin";
++};
++
+ &wifi0 {
+ 	brcm,board-type = "apple,texa";
+ };
+diff --git a/arch/arm64/boot/dts/apple/t6034-j516m.dts b/arch/arm64/boot/dts/apple/t6034-j516m.dts
+index dc5c202a787b..bc337313b2f0 100644
+--- a/arch/arm64/boot/dts/apple/t6034-j516m.dts
++++ b/arch/arm64/boot/dts/apple/t6034-j516m.dts
+@@ -17,6 +17,10 @@ / {
+ 	model = "Apple MacBook Pro (16-inch, M3 Max, 14 CPU cores, Nov 2023)";
+ };
+ 
++&mtp_mt {
++	firmware-name = "apple/tpmtfw-j516m.bin";
++};
++
+ &wifi0 {
+ 	brcm,board-type = "apple,jura";
+ };
+diff --git a/arch/arm64/boot/dts/apple/t603x-j514-j516.dtsi b/arch/arm64/boot/dts/apple/t603x-j514-j516.dtsi
+index 96b0ac3cd3ee..a580287e70bb 100644
+--- a/arch/arm64/boot/dts/apple/t603x-j514-j516.dtsi
++++ b/arch/arm64/boot/dts/apple/t603x-j514-j516.dtsi
+@@ -71,6 +71,44 @@ &nco_clkref {
+ 	clock-frequency = <900000000>;
+ };
+ 
++&mtp {
++	status = "okay";
++};
++
++&mtp_mbox {
++	status = "okay";
++};
++
++&mtp_dart {
++	status = "okay";
++};
++
++&mtp_dockchannel {
++	status = "okay";
++};
++
++&mtp_hid {
++	apple,afe-reset-gpios = <&smc_gpio_low 25 GPIO_ACTIVE_LOW>;
++	apple,stm-reset-gpios = <&smc_gpio_low 26 GPIO_ACTIVE_LOW>;
++
++	mtp_mt: multi-touch {
++	};
++
++	keyboard: keyboard {
++		hid-country-code = <0>;
++		apple,keyboard-layout-id = <0>;
++	};
++
++	stm {
++	};
++
++	actuator {
++	};
++
++	tp_accel {
++	};
++};
++
+ /* PCIe devices */
+ 
+ /*
+-- 
+2.47.3
+

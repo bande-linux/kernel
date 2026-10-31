@@ -1,0 +1,31 @@
+From 2dbd24c794d1dbad23d311347fc60c099b879867 Mon Sep 17 00:00:00 2001
+From: Yureka Lilian <yureka@cyberchaos.dev>
+Date: Sun, 5 Jul 2026 15:17:21 +0200
+Subject: [PATCH] dt-bindings: interrupt-controller: apple,aic2: Add
+ apple,t8132 compatible
+
+The Apple t8132 (M4) SoC uses an AIC3 as interrupt controller, same as
+the M3 predecessor.
+
+Signed-off-by: Yureka Lilian <yureka@cyberchaos.dev>
+Reviewed-by: Krzysztof Kozlowski <krzysztof.kozlowski@oss.qualcomm.com>
+(cherry picked from commit ccbe86a1f99d9f6e2095d8e1867e7ef80ce8bb03)
+---
+ .../devicetree/bindings/interrupt-controller/apple,aic2.yaml     | 1 +
+ 1 file changed, 1 insertion(+)
+
+diff --git a/Documentation/devicetree/bindings/interrupt-controller/apple,aic2.yaml b/Documentation/devicetree/bindings/interrupt-controller/apple,aic2.yaml
+index 726a6720e05f..1cb886785173 100644
+--- a/Documentation/devicetree/bindings/interrupt-controller/apple,aic2.yaml
++++ b/Documentation/devicetree/bindings/interrupt-controller/apple,aic2.yaml
+@@ -45,6 +45,7 @@ properties:
+           - enum:
+               - apple,t6030-aic3
+               - apple,t6031-aic3
++              - apple,t8132-aic3
+           - const: apple,t8122-aic3
+       - const: apple,t8122-aic3
+ 
+-- 
+2.47.3
+

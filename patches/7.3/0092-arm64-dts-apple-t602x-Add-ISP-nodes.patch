@@ -1,0 +1,78 @@
+From 079a610e020f0ca21d68a4c060b9269305b3c75e Mon Sep 17 00:00:00 2001
+From: Asahi Lina <lina@asahilina.net>
+Date: Sun, 24 Sep 2023 01:01:10 +0900
+Subject: [PATCH] arm64: dts: apple: t602x: Add ISP nodes
+
+Signed-off-by: Asahi Lina <lina@asahilina.net>
+(cherry picked from commit 05dd7981bb9c3f7f4988bbbbccb9f31a9049db08)
+---
+ arch/arm64/boot/dts/apple/t602x-die0.dtsi | 53 +++++++++++++++++++++++
+ 1 file changed, 53 insertions(+)
+
+diff --git a/arch/arm64/boot/dts/apple/t602x-die0.dtsi b/arch/arm64/boot/dts/apple/t602x-die0.dtsi
+index 04658354f9e5..de527eebfc60 100644
+--- a/arch/arm64/boot/dts/apple/t602x-die0.dtsi
++++ b/arch/arm64/boot/dts/apple/t602x-die0.dtsi
+@@ -242,6 +242,59 @@ mtp_hid: input@8000 {
+ 
+ 	};
+ 
++	isp_dart0: iommu@3860e8000 {
++		compatible = "apple,t6020-dart", "apple,t8110-dart";
++		reg = <0x3 0x860e8000 0x0 0x4000>;
++		#iommu-cells = <5>;
++		interrupt-parent = <&aic>;
++		interrupts = <AIC_IRQ 0 574 IRQ_TYPE_LEVEL_HIGH>;
++		power-domains = <&ps_isp_sys>;
++
++		status = "disabled";
++	};
++
++	isp_dart1: iommu@3860f4000 {
++		compatible = "apple,t6020-dart", "apple,t8110-dart";
++		reg = <0x3 0x860f4000 0x0 0x4000>;
++		#iommu-cells = <5>;
++		interrupt-parent = <&aic>;
++		interrupts = <AIC_IRQ 0 574 IRQ_TYPE_LEVEL_HIGH>;
++		power-domains = <&ps_isp_sys>;
++
++		status = "disabled";
++	};
++
++	isp_dart2: iommu@3860fc000 {
++		compatible = "apple,t6020-dart", "apple,t8110-dart";
++		reg = <0x3 0x860fc000 0x0 0x4000>;
++		#iommu-cells = <5>;
++		interrupt-parent = <&aic>;
++		interrupts = <AIC_IRQ 0 574 IRQ_TYPE_LEVEL_HIGH>;
++		power-domains = <&ps_isp_sys>;
++
++		status = "disabled";
++	};
++
++	isp: isp@384000000 {
++		compatible = "apple,t6020-isp", "apple,isp";
++		iommus = <&isp_dart0 0 0x100 0x0 0x1 0x0>,
++			<&isp_dart1 0 0x100 0x0 0x1 0x0>,
++			<&isp_dart2 0 0x100 0x0 0x1 0x0>;
++		reg-names = "coproc", "mbox", "gpio", "mbox2";
++		reg = <0x3 0x84000000 0x0 0x2000000>,
++			<0x3 0x86104000 0x0 0x100>,
++			<0x3 0x86104170 0x0 0x100>,
++			<0x3 0x861043f0 0x0 0x100>;
++		interrupt-parent = <&aic>;
++		interrupts = <AIC_IRQ 0 569 IRQ_TYPE_LEVEL_HIGH>;
++		power-domains = <&ps_isp_cpu>, <&ps_isp_fe>,
++			<&ps_dprx>, <&ps_isp_vis>, <&ps_isp_be>,
++			<&ps_isp_clr>, <&ps_isp_raw>;
++		apple,dart-vm-size = <0x0 0xa0000000>;
++
++		status = "disabled";
++	};
++
+ 	disp0_dart: iommu@389304000 {
+ 		compatible = "apple,t6020-dart", "apple,t8110-dart";
+ 		reg = <0x3 0x89304000 0x0 0x4000>;
+-- 
+2.47.3
+

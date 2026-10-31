@@ -1,0 +1,105 @@
+From fe675411fdabdfc905ec5b44708476868037d022 Mon Sep 17 00:00:00 2001
+From: Janne Grunau <j@jannau.net>
+Date: Fri, 3 Apr 2026 14:18:24 +0200
+Subject: [PATCH] arm64: dts: apple: Add spmi stowe pmic
+
+The SPMI pmic provides nvmem cells for macsmc-reboot and macsmc-rtc.
+
+Signed-off-by: Janne Grunau <j@jannau.net>
+(cherry picked from commit 68d17275590bf36b279a0acc76c7e96a4ba80768)
+---
+ arch/arm64/boot/dts/apple/t8122.dtsi | 71 ++++++++++++++++++++++++++++
+ 1 file changed, 71 insertions(+)
+
+diff --git a/arch/arm64/boot/dts/apple/t8122.dtsi b/arch/arm64/boot/dts/apple/t8122.dtsi
+index ed95da1d5ed7..747939cb6a34 100644
+--- a/arch/arm64/boot/dts/apple/t8122.dtsi
++++ b/arch/arm64/boot/dts/apple/t8122.dtsi
+@@ -404,6 +404,63 @@ wdt: watchdog@2e42b0000 {
+ 			interrupts = <AIC_IRQ 432 IRQ_TYPE_LEVEL_HIGH>;
+ 		};
+ 
++		nub_spmi: spmi@2e4714000 {
++			compatible = "apple,t8122-spmi", "apple,t8103-spmi";
++			reg = <0x2 0xe4714000 0x0 0x100>;
++			#address-cells = <2>;
++			#size-cells = <0>;
++
++			pmic1: pmic@e {
++				compatible = "apple,stowe-pmic", "apple,spmi-nvmem";
++				reg = <0xe SPMI_USID>;
++
++				nvmem-layout {
++					compatible = "fixed-layout";
++					#address-cells = <1>;
++					#size-cells = <1>;
++
++					fault_shadow: fault-shadow@867b {
++						reg = <0x867b 0x10>;
++					};
++
++					socd: socd@8b00 {
++						reg = <0x8b00 0x400>;
++					};
++
++					boot_stage: boot-stage@f701 {
++						reg = <0xf701 0x1>;
++					};
++
++					boot_error_count: boot-error-count@f702,0 {
++						reg = <0xf702 0x1>;
++						bits = <0 4>;
++					};
++
++					panic_count: panic-count@f702,4 {
++						reg = <0xf702 0x1>;
++						bits = <4 4>;
++					};
++
++					boot_error_stage: boot-error-stage@f703 {
++						reg = <0xf703 0x1>;
++					};
++
++					shutdown_flag: shutdown-flag@f70f,3 {
++						reg = <0xf70f 0x1>;
++						bits = <3 1>;
++					};
++
++					pm_setting: pm-setting@f801 {
++						reg = <0xf801 0x1>;
++					};
++
++					rtc_offset: rtc-offset@f900 {
++						reg = <0xf900 0x6>;
++					};
++				};
++			};
++		};
++
+ 		smc_mbox: mbox@2ec408000 {
+ 			compatible = "apple,t8122-asc-mailbox", "apple,asc-mailbox-v4";
+ 			reg = <0x2 0xec408000 0x0 0x4000>;
+@@ -429,6 +486,20 @@ smc_gpio: gpio {
+ 				gpio-controller;
+ 				#gpio-cells = <2>;
+ 			};
++
++			smc_reboot: reboot {
++				compatible = "apple,smc-reboot";
++				nvmem-cells = <&shutdown_flag>, <&boot_stage>,
++					<&boot_error_count>, <&panic_count>;
++				nvmem-cell-names = "shutdown_flag", "boot_stage",
++					"boot_error_count", "panic_count";
++			};
++
++			rtc {
++				compatible = "apple,smc-rtc";
++				nvmem-cells = <&rtc_offset>;
++				nvmem-cell-names = "rtc_offset";
++			};
+ 		};
+ 
+ 		pinctrl_smc: pinctrl@2ec820000 {
+-- 
+2.47.3
+

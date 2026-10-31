@@ -1,0 +1,974 @@
+From 552fc36a9bced210d65900ef958ccb34ea5a97c0 Mon Sep 17 00:00:00 2001
+From: Hector Martin <marcan@marcan.st>
+Date: Sun, 9 Apr 2023 23:48:38 +0900
+Subject: [PATCH] arm64: dts: apple: t602x: Add missing devices
+
+Still contains the downstream commits:
+
+arm64: dts: apple: t6022: Disable dcp thouroughly
+
+Also disables "display" until it can be supported via dispext*.
+
+arm64: dts: apple: t602x: Add initial Mac Studio (2023) device trees
+
+They use the same GPIO pins and interrupts as the Mac Mini (M2 Pro, 2023)
+so use a common .dtsi for those definitions.
+
+Squashed commits to ease rebasing onto upstream t602x device trees which
+contains changes from above commits but reordered them in hindsight of
+knowing the full rooster of t602x devices.
+
+Signed-off-by: Hector Martin <marcan@marcan.st>
+Co-developed-by: Asahi Lina <lina@asahilina.net>
+Signed-off-by: Asahi Lina <lina@asahilina.net>
+Co-developed-by: Janne Grunau <j@jannau.net>
+Signed-off-by: Janne Grunau <j@jannau.net>
+(cherry picked from commit 07ccdfa64abca6e6876964e9eb5c9adf707994c5)
+---
+ .../arm64/boot/dts/apple/t600x-j314-j316.dtsi |   7 +
+ arch/arm64/boot/dts/apple/t600x-j375.dtsi     |   2 +
+ arch/arm64/boot/dts/apple/t6020-j414s.dts     |  12 ++
+ arch/arm64/boot/dts/apple/t6020-j416s.dts     |  12 ++
+ arch/arm64/boot/dts/apple/t6020-j474s.dts     |  22 +++
+ arch/arm64/boot/dts/apple/t6020.dtsi          |  11 +-
+ arch/arm64/boot/dts/apple/t6021-j414c.dts     |  12 ++
+ arch/arm64/boot/dts/apple/t6021-j416c.dts     |  32 ++++
+ arch/arm64/boot/dts/apple/t6021-j475c.dts     |  30 ++++
+ arch/arm64/boot/dts/apple/t6021.dtsi          |  16 +-
+ arch/arm64/boot/dts/apple/t6022-j180d.dts     |  12 +-
+ arch/arm64/boot/dts/apple/t6022-j475d.dts     |   8 +
+ arch/arm64/boot/dts/apple/t6022-jxxxd.dtsi    |  13 ++
+ arch/arm64/boot/dts/apple/t6022.dtsi          |  22 ++-
+ arch/arm64/boot/dts/apple/t602x-common.dtsi   | 147 +++++++++++++++++-
+ arch/arm64/boot/dts/apple/t602x-die0.dtsi     | 136 +++++++++++++++-
+ .../arm64/boot/dts/apple/t602x-j414-j416.dtsi |  46 ++++++
+ .../arm64/boot/dts/apple/t602x-j474-j475.dtsi |  25 +++
+ arch/arm64/boot/dts/apple/t602x-pmgr.dtsi     |   3 +
+ 19 files changed, 556 insertions(+), 12 deletions(-)
+
+diff --git a/arch/arm64/boot/dts/apple/t600x-j314-j316.dtsi b/arch/arm64/boot/dts/apple/t600x-j314-j316.dtsi
+index 8756ad40bc64..b552abb6084f 100644
+--- a/arch/arm64/boot/dts/apple/t600x-j314-j316.dtsi
++++ b/arch/arm64/boot/dts/apple/t600x-j314-j316.dtsi
+@@ -275,6 +275,7 @@ &nco_clkref {
+ 	clock-frequency = <1068000000>;
+ };
+ 
++#ifndef NO_SPI_TRACKPAD
+ &spi3 {
+ 	status = "okay";
+ 
+@@ -295,6 +296,7 @@ hid-transport@0 {
+ 		interrupts-extended = <&pinctrl_nub 6 IRQ_TYPE_LEVEL_LOW>;
+ 	};
+ };
++#endif
+ 
+ /* PCIe devices */
+ &port00 {
+@@ -321,6 +323,7 @@ &port01 {
+ 	/* SD card reader */
+ 	bus-range = <2 2>;
+ 	pwren-gpios = <&smc_gpio 26 GPIO_ACTIVE_HIGH>;
++	status = "okay";
+ 	sdhci0: mmc@0,0 {
+ 		compatible = "pci17a0,9755";
+ 		reg = <0x20000 0x0 0x0 0x0 0x0>;
+@@ -333,6 +336,10 @@ &fpwm0 {
+ 	status = "okay";
+ };
+ 
++&pcie0_dart_1 {
++	status = "okay";
++};
++
+ /* USB controllers */
+ &dwc3_0 {
+ 	ports {
+diff --git a/arch/arm64/boot/dts/apple/t600x-j375.dtsi b/arch/arm64/boot/dts/apple/t600x-j375.dtsi
+index 3fe684d0bbb0..39cb7229d9f2 100644
+--- a/arch/arm64/boot/dts/apple/t600x-j375.dtsi
++++ b/arch/arm64/boot/dts/apple/t600x-j375.dtsi
+@@ -18,10 +18,12 @@ aliases {
+ 		atcphy2 = &atcphy2;
+ 		atcphy3 = &atcphy3;
+ 		bluetooth0 = &bluetooth0;
++		#ifndef NO_DCP
+ 		dcp = &dcp;
+ 		disp0 = &display;
+ 		disp0_piodma = &disp0_piodma;
+ 		disp0-piodma = &disp0_piodma;
++		#endif
+ 		ethernet0 = &ethernet0;
+ 		serial0 = &serial0;
+ 		wifi0 = &wifi0;
+diff --git a/arch/arm64/boot/dts/apple/t6020-j414s.dts b/arch/arm64/boot/dts/apple/t6020-j414s.dts
+index 631c54c5f03d..18cc67a3076d 100644
+--- a/arch/arm64/boot/dts/apple/t6020-j414s.dts
++++ b/arch/arm64/boot/dts/apple/t6020-j414s.dts
+@@ -24,3 +24,15 @@ &wifi0 {
+ &bluetooth0 {
+ 	brcm,board-type = "apple,tokara";
+ };
++
++&panel {
++	compatible = "apple,panel-j414", "apple,panel-mini-led", "apple,panel";
++	width-mm = <302>;
++	height-mm = <196>;
++	adj-height-mm = <189>;
++};
++
++&sound {
++	compatible = "apple,j414-macaudio", "apple,j314-macaudio", "apple,macaudio";
++	model = "MacBook Pro J414";
++};
+diff --git a/arch/arm64/boot/dts/apple/t6020-j416s.dts b/arch/arm64/boot/dts/apple/t6020-j416s.dts
+index c277ed5889a2..b9e0973ba37c 100644
+--- a/arch/arm64/boot/dts/apple/t6020-j416s.dts
++++ b/arch/arm64/boot/dts/apple/t6020-j416s.dts
+@@ -24,3 +24,15 @@ &wifi0 {
+ &bluetooth0 {
+ 	brcm,board-type = "apple,amami";
+ };
++
++&panel {
++	compatible = "apple,panel-j416", "apple,panel-mini-led", "apple,panel";
++	width-mm = <346>;
++	height-mm = <223>;
++	adj-height-mm = <216>;
++};
++
++&sound {
++	compatible = "apple,j416-macaudio", "apple,j316-macaudio", "apple,macaudio";
++	model = "MacBook Pro J416";
++};
+diff --git a/arch/arm64/boot/dts/apple/t6020-j474s.dts b/arch/arm64/boot/dts/apple/t6020-j474s.dts
+index e3c2635d84fa..4696b039629b 100644
+--- a/arch/arm64/boot/dts/apple/t6020-j474s.dts
++++ b/arch/arm64/boot/dts/apple/t6020-j474s.dts
+@@ -46,4 +46,26 @@ &pcie0 {
+ 			<0x300 &pcie0_dart_3 1 1>;
+ };
+ 
++&port02 {
++	bus-range = <2 2>;
++};
++
++&ethernet0 {
++	reg = <0x20000 0x0 0x0 0x0 0x0>;
++};
++
++&port03 {
++	bus-range = <3 3>;
++};
++
++&sound {
++	compatible = "apple,j474-macaudio", "apple,j473-macaudio", "apple,macaudio";
++	model = "Mac mini J474";
++};
++
++&gpu {
++	/* Apple does not do this, but they probably should */
++	apple,perf-base-pstate = <3>;
++};
++
+ #include "hwmon-mini.dtsi"
+diff --git a/arch/arm64/boot/dts/apple/t6020.dtsi b/arch/arm64/boot/dts/apple/t6020.dtsi
+index bffa66a3ffff..482a1e5f53d0 100644
+--- a/arch/arm64/boot/dts/apple/t6020.dtsi
++++ b/arch/arm64/boot/dts/apple/t6020.dtsi
+@@ -9,6 +9,8 @@
+ 
+ /* This chip is just a cut down version of t6021, so include it and disable the missing parts */
+ 
++#define GPU_REPEAT(x) <x x>
++
+ #include "t6021.dtsi"
+ 
+ / {
+@@ -18,5 +20,12 @@ / {
+ /delete-node/ &pmgr_south;
+ 
+ &gpu {
+-	compatible = "apple,agx-g14s";
++	compatible = "apple,agx-t6020", "apple,agx-g14x", "apple,agx-g14s";
++
++	apple,avg-power-filter-tc-ms = <302>;
++	apple,avg-power-ki-only = <2.6375>;
++	apple,avg-power-kp = <0.18>;
++	apple,fast-die0-integral-gain = <1350.0>;
++	apple,ppm-filter-time-constant-ms = <32>;
++	apple,ppm-ki = <28.0>;
+ };
+diff --git a/arch/arm64/boot/dts/apple/t6021-j414c.dts b/arch/arm64/boot/dts/apple/t6021-j414c.dts
+index cdcf0740714d..b173caf0df0f 100644
+--- a/arch/arm64/boot/dts/apple/t6021-j414c.dts
++++ b/arch/arm64/boot/dts/apple/t6021-j414c.dts
+@@ -24,3 +24,15 @@ &wifi0 {
+ &bluetooth0 {
+ 	brcm,board-type = "apple,tokara";
+ };
++
++&panel {
++	compatible = "apple,panel-j414", "apple,panel-mini-led", "apple,panel";
++	width-mm = <302>;
++	height-mm = <196>;
++	adj-height-mm = <189>;
++};
++
++&sound {
++	compatible = "apple,j414-macaudio", "apple,j314-macaudio", "apple,macaudio";
++	model = "MacBook Pro J414";
++};
+diff --git a/arch/arm64/boot/dts/apple/t6021-j416c.dts b/arch/arm64/boot/dts/apple/t6021-j416c.dts
+index 6d8146b94170..2fbb00b364c7 100644
+--- a/arch/arm64/boot/dts/apple/t6021-j416c.dts
++++ b/arch/arm64/boot/dts/apple/t6021-j416c.dts
+@@ -17,6 +17,26 @@ / {
+ 	model = "Apple MacBook Pro (16-inch, M2 Max, 2023)";
+ };
+ 
++/* This machine model (only) has two extra boost CPU P-states *
++ * Disabled: Only the highest CPU bin (38 GPU cores) has this.
++ * Keep this disabled until m1n1 learns how to remove these OPPs
++ * for unsupported machines, otherwise it breaks cpufreq.
++&avalanche_opp {
++	opp18 {
++		opp-hz = /bits/ 64 <3528000000>;
++		opp-level = <18>;
++		clock-latency-ns = <67000>;
++		turbo-mode;
++	};
++	opp19 {
++		opp-hz = /bits/ 64 <3696000000>;
++		opp-level = <19>;
++		clock-latency-ns = <67000>;
++		turbo-mode;
++	};
++};
++*/
++
+ &wifi0 {
+ 	brcm,board-type = "apple,amami";
+ };
+@@ -24,3 +44,15 @@ &wifi0 {
+ &bluetooth0 {
+ 	brcm,board-type = "apple,amami";
+ };
++
++&panel {
++	compatible = "apple,panel-j416", "apple,panel-mini-led", "apple,panel";
++	width-mm = <346>;
++	height-mm = <223>;
++	adj-height-mm = <216>;
++};
++
++&sound {
++	compatible = "apple,j416-macaudio", "apple,j316-macaudio", "apple,macaudio";
++	model = "MacBook Pro J416";
++};
+diff --git a/arch/arm64/boot/dts/apple/t6021-j475c.dts b/arch/arm64/boot/dts/apple/t6021-j475c.dts
+index 9fe17f1f7f59..655a28cf57db 100644
+--- a/arch/arm64/boot/dts/apple/t6021-j475c.dts
++++ b/arch/arm64/boot/dts/apple/t6021-j475c.dts
+@@ -29,6 +29,7 @@ &bluetooth0 {
+ 
+ /* enable PCIe port01 with SDHCI */
+ &port01 {
++	pwren-gpios = <&smc_gpio 22 GPIO_ACTIVE_HIGH>;
+ 	status = "okay";
+ };
+ 
+@@ -36,4 +37,33 @@ &pcie0_dart_1 {
+ 	status = "okay";
+ };
+ 
++&pinctrl_ap {
++	usb_hub_oe-hog {
++		gpio-hog;
++		gpios = <231 0>;
++		input;
++		line-name = "usb-hub-oe";
++	};
++
++	usb_hub_rst-hog {
++		gpio-hog;
++		gpios = <232 GPIO_ACTIVE_LOW>;
++		output-low;
++		line-name = "usb-hub-rst";
++	};
++};
++
++&sound {
++	compatible = "apple,j475-macaudio", "apple,j375-macaudio", "apple,macaudio";
++	model = "Mac Studio J475";
++};
++
++&gpu {
++	apple,idleoff-standby-timer = <3000>;
++	apple,perf-base-pstate = <5>;
++	apple,perf-boost-ce-step = <100>;
++	apple,perf-boost-min-util = <75>;
++	apple,perf-tgt-utilization = <70>;
++};
++
+ #include "hwmon-fan-dual.dtsi"
+diff --git a/arch/arm64/boot/dts/apple/t6021.dtsi b/arch/arm64/boot/dts/apple/t6021.dtsi
+index b9dd962bd6d8..daffb7170c6d 100644
+--- a/arch/arm64/boot/dts/apple/t6021.dtsi
++++ b/arch/arm64/boot/dts/apple/t6021.dtsi
+@@ -16,6 +16,13 @@
+ 
+ #include "multi-die-cpp.h"
+ 
++#ifndef GPU_REPEAT
++# define GPU_REPEAT(x) <x x x x>
++#endif
++#ifndef GPU_DIE_REPEAT
++# define GPU_DIE_REPEAT(x) <x>
++#endif
++
+ #include "t602x-common.dtsi"
+ 
+ / {
+@@ -65,7 +72,14 @@ p-core-pmu-affinity {
+ };
+ 
+ &gpu {
+-	compatible = "apple,agx-g14c", "apple,agx-g14s";
++	compatible = "apple,agx-t6021", "apple,agx-g14x", "apple,agx-g14c", "apple,agx-g14s";
++
++	apple,avg-power-filter-tc-ms = <300>;
++	apple,avg-power-ki-only = <1.5125>;
++	apple,avg-power-kp = <0.38>;
++	apple,fast-die0-integral-gain = <700.0>;
++	apple,ppm-filter-time-constant-ms = <34>;
++	apple,ppm-ki = <18.0>;
+ };
+ 
+ #include "hwmon-common.dtsi"
+diff --git a/arch/arm64/boot/dts/apple/t6022-j180d.dts b/arch/arm64/boot/dts/apple/t6022-j180d.dts
+index 7d92505e3fd2..59e5825a0368 100644
+--- a/arch/arm64/boot/dts/apple/t6022-j180d.dts
++++ b/arch/arm64/boot/dts/apple/t6022-j180d.dts
+@@ -26,8 +26,11 @@ aliases {
+ 		atcphy5 = &atcphy1_die1;
+ 		atcphy6 = &atcphy2_die1;
+ 		atcphy7 = &atcphy3_die1;
+-		nvram = &nvram;
++		//bluetooth0 = &bluetooth0;
++		//ethernet0 = &ethernet0;
++		//ethernet1 = &ethernet1;
+ 		serial0 = &serial0;
++		//wifi0 = &wifi0;
+ 	};
+ 
+ 	chosen {
+@@ -46,6 +49,13 @@ framebuffer0: framebuffer@0 {
+ 		};
+ 	};
+ 
++	reserved-memory {
++		#address-cells = <2>;
++		#size-cells = <2>;
++		ranges;
++		/* To be filled by loader */
++	};
++
+ 	memory@10000000000 {
+ 		device_type = "memory";
+ 		reg = <0x100 0 0x2 0>; /* To be filled by loader */
+diff --git a/arch/arm64/boot/dts/apple/t6022-j475d.dts b/arch/arm64/boot/dts/apple/t6022-j475d.dts
+index 32938a3bf96a..ad3e5ccc7b44 100644
+--- a/arch/arm64/boot/dts/apple/t6022-j475d.dts
++++ b/arch/arm64/boot/dts/apple/t6022-j475d.dts
+@@ -9,6 +9,8 @@
+ 
+ /dts-v1/;
+ 
++#define NO_DCP
++
+ #include "t6022.dtsi"
+ #include "t602x-j474-j475.dtsi"
+ #include "t6022-jxxxd.dtsi"
+@@ -29,6 +31,7 @@ &framebuffer0 {
+ 
+ /* enable PCIe port01 with SDHCI */
+ &port01 {
++	pwren-gpios = <&smc_gpio 22 GPIO_ACTIVE_HIGH>;
+ 	status = "okay";
+ };
+ 
+@@ -73,3 +76,8 @@ &bluetooth0 {
+ 	compatible = "pci14e4,5f72";
+ 	brcm,board-type = "apple,canary";
+ };
++
++&sound {
++	compatible = "apple,j475-macaudio", "apple,j375-macaudio", "apple,macaudio";
++	model = "Mac Studio J475";
++};
+diff --git a/arch/arm64/boot/dts/apple/t6022-jxxxd.dtsi b/arch/arm64/boot/dts/apple/t6022-jxxxd.dtsi
+index dc877bd604f8..5b7b41ce07c3 100644
+--- a/arch/arm64/boot/dts/apple/t6022-jxxxd.dtsi
++++ b/arch/arm64/boot/dts/apple/t6022-jxxxd.dtsi
+@@ -9,6 +9,19 @@
+  * Copyright The Asahi Linux Contributors
+  */
+ 
++/* disable unused display node */
++
++&display {
++	status = "disabled";
++	iommus = <>; /* <&dispext0_dart_die1 0>; */
++};
++
++/* delete missing dcp0/disp0 */
++/delete-node/ &disp0_dart;
++/delete-node/ &dcp_dart;
++/delete-node/ &dcp_mbox;
++/delete-node/ &dcp;
++
+ /* delete power-domains for missing disp0 / disp0_die1 */
+ /delete-node/ &ps_disp0_cpu0;
+ /delete-node/ &ps_disp0_fe;
+diff --git a/arch/arm64/boot/dts/apple/t6022.dtsi b/arch/arm64/boot/dts/apple/t6022.dtsi
+index 0feda70568ee..d803edbc4440 100644
+--- a/arch/arm64/boot/dts/apple/t6022.dtsi
++++ b/arch/arm64/boot/dts/apple/t6022.dtsi
+@@ -16,6 +16,13 @@
+ 
+ #include "multi-die-cpp.h"
+ 
++#ifndef GPU_REPEAT
++# define GPU_REPEAT(x) <x x x x x x x x>
++#endif
++#ifndef GPU_DIE_REPEAT
++# define GPU_DIE_REPEAT(x) <x x>
++#endif
++
+ #include "t602x-common.dtsi"
+ 
+ / {
+@@ -343,7 +350,20 @@ &ps_gfx {
+ };
+ 
+ &gpu {
+-	compatible = "apple,agx-g14d", "apple,agx-g14s";
++	compatible = "apple,agx-t6022", "apple,agx-g14x", "apple,agx-g14d", "apple,agx-g14s";
++
++	apple,avg-power-filter-tc-ms = <302>;
++	apple,avg-power-ki-only = <1.0125>;
++	apple,avg-power-kp = <0.15>;
++	apple,fast-die0-integral-gain = <9.6>;
++	apple,fast-die0-proportional-gain = <24.0>;
++	apple,idleoff-standby-timer = <3000>;
++	apple,perf-base-pstate = <5>;
++	apple,perf-boost-ce-step = <100>;
++	apple,perf-boost-min-util = <75>;
++	apple,perf-tgt-utilization = <70>;
++	apple,ppm-ki = <11.0>;
++	apple,ppm-kp = <0.15>;
+ };
+ 
+ #include "hwmon-common.dtsi"
+diff --git a/arch/arm64/boot/dts/apple/t602x-common.dtsi b/arch/arm64/boot/dts/apple/t602x-common.dtsi
+index 66b6f8347d19..617ff2415345 100644
+--- a/arch/arm64/boot/dts/apple/t602x-common.dtsi
++++ b/arch/arm64/boot/dts/apple/t602x-common.dtsi
+@@ -387,6 +387,134 @@ opp17 {
+ 		};
+ 	};
+ 
++	gpu_opp: opp-table-gpu {
++		compatible = "operating-points-v2";
++
++		/*
++		 * NOTE: The voltage and power values are device-specific and
++		 * must be filled in by the bootloader.
++		 */
++		opp00 {
++			opp-hz = /bits/ 64 <0>;
++			opp-microvolt = GPU_REPEAT(400000);
++			opp-microwatt = <0>;
++		};
++		opp01 {
++			opp-hz = /bits/ 64 <444000000>;
++			opp-microvolt = GPU_REPEAT(637000);
++			opp-microwatt = <4295000>;
++		};
++		opp02 {
++			opp-hz = /bits/ 64 <612000000>;
++			opp-microvolt = GPU_REPEAT(656000);
++			opp-microwatt = <6251000>;
++		};
++		opp03 {
++			opp-hz = /bits/ 64 <808000000>;
++			opp-microvolt = GPU_REPEAT(687000);
++			opp-microwatt = <8625000>;
++		};
++		opp04 {
++			opp-hz = /bits/ 64 <968000000>;
++			opp-microvolt = GPU_REPEAT(725000);
++			opp-microwatt = <11948000>;
++		};
++		opp05 {
++			opp-hz = /bits/ 64 <1110000000>;
++			opp-microvolt = GPU_REPEAT(790000);
++			opp-microwatt = <15071000>;
++		};
++		opp06 {
++			opp-hz = /bits/ 64 <1236000000>;
++			opp-microvolt = GPU_REPEAT(843000);
++			opp-microwatt = <18891000>;
++		};
++		opp07 {
++			opp-hz = /bits/ 64 <1338000000>;
++			opp-microvolt = GPU_REPEAT(887000);
++			opp-microwatt = <21960000>;
++		};
++		opp08 {
++			opp-hz = /bits/ 64 <1398000000>;
++			opp-microvolt = GPU_REPEAT(918000);
++			opp-microwatt = <22800000>;
++		};
++	};
++
++	gpu_cs_opp: opp-table-gpu-cs {
++		compatible = "operating-points-v2";
++
++		/*
++		 * NOTE: The voltage and power values are device-specific and
++		 * must be filled in by the bootloader.
++		 */
++		opp00 {
++			opp-hz = /bits/ 64 <24>;
++			opp-microvolt = GPU_DIE_REPEAT(668000);
++		};
++		opp01 {
++			opp-hz = /bits/ 64 <444000000>;
++			opp-microvolt = GPU_DIE_REPEAT(668000);
++		};
++		opp02 {
++			opp-hz = /bits/ 64 <612000000>;
++			opp-microvolt = GPU_DIE_REPEAT(678000);
++		};
++		opp03 {
++			opp-hz = /bits/ 64 <808000000>;
++			opp-microvolt = GPU_DIE_REPEAT(737000);
++		};
++		opp04 {
++			opp-hz = /bits/ 64 <1024000000>;
++			opp-microvolt = GPU_DIE_REPEAT(815000);
++		};
++		opp05 {
++			opp-hz = /bits/ 64 <1140000000>;
++			opp-microvolt = GPU_DIE_REPEAT(862000);
++		};
++		opp06 {
++			opp-hz = /bits/ 64 <1236000000>;
++			opp-microvolt = GPU_DIE_REPEAT(893000);
++		};
++	};
++
++	gpu_afr_opp: opp-table-gpu-afr {
++		compatible = "operating-points-v2";
++
++		/*
++		 * NOTE: The voltage and power values are device-specific and
++		 * must be filled in by the bootloader.
++		 */
++		opp00 {
++			opp-hz = /bits/ 64 <24>;
++			opp-microvolt = GPU_DIE_REPEAT(668000);
++		};
++		opp01 {
++			opp-hz = /bits/ 64 <400000000>;
++			opp-microvolt = GPU_DIE_REPEAT(668000);
++		};
++		opp02 {
++			opp-hz = /bits/ 64 <552000000>;
++			opp-microvolt = GPU_DIE_REPEAT(678000);
++		};
++		opp03 {
++			opp-hz = /bits/ 64 <760000000>;
++			opp-microvolt = GPU_DIE_REPEAT(737000);
++		};
++		opp04 {
++			opp-hz = /bits/ 64 <980000000>;
++			opp-microvolt = GPU_DIE_REPEAT(815000);
++		};
++		opp05 {
++			opp-hz = /bits/ 64 <1098000000>;
++			opp-microvolt = GPU_DIE_REPEAT(862000);
++		};
++		opp06 {
++			opp-hz = /bits/ 64 <1200000000>;
++			opp-microvolt = GPU_DIE_REPEAT(893000);
++		};
++	};
++
+ 	pmu-e {
+ 		compatible = "apple,blizzard-pmu";
+ 		interrupt-parent = <&aic>;
+@@ -423,6 +551,13 @@ clk_200m: clock-200m {
+ 		clock-output-names = "clk_200m";
+ 	};
+ 
++	clk_disp0: clock-disp0 {
++		compatible = "fixed-clock";
++		#clock-cells = <0>;
++		clock-frequency = <257142848>; /* TODO: check */
++		clock-output-names = "clk_disp0";
++	};
++
+ 	/*
+ 	 * This is a fabulated representation of the input clock
+ 	 * to NCO since we don't know the true clock tree.
+@@ -450,16 +585,16 @@ gpu_hw_cal_b: hw-cal-b {
+ 			status = "disabled";
+ 		};
+ 
+-		uat_handoff: uat-handoff {
+-			status = "disabled";
++		uat_handoff: uat-handoff@10 {
++			reg = <0 0x10 0 0>;
+ 		};
+ 
+-		uat_pagetables: uat-pagetables {
+-			status = "disabled";
++		uat_pagetables: uat-pagetables@20 {
++			reg = <0 0x20 0 0>;
+ 		};
+ 
+-		uat_ttbs: uat-ttbs {
+-			status = "disabled";
++		uat_ttbs: uat-ttbs@30 {
++			reg = <0 0x30 0 0>;
+ 		};
+ 	};
+ };
+diff --git a/arch/arm64/boot/dts/apple/t602x-die0.dtsi b/arch/arm64/boot/dts/apple/t602x-die0.dtsi
+index 05819755a18f..63767e465aaf 100644
+--- a/arch/arm64/boot/dts/apple/t602x-die0.dtsi
++++ b/arch/arm64/boot/dts/apple/t602x-die0.dtsi
+@@ -31,6 +31,12 @@ pmgr_misc: power-management@28e20c000 {
+ 		reg-names = "fabric-ps", "dcs-ps";
+ 	};
+ 
++	pmgr_dcp: power-management@28e3d0000 {
++		reg = <0x2 0x8e3d0000 0x0 0x4000>;
++		reg-names = "dcp-fw-pmgr";
++		#apple,bw-scratch-cells = <3>;
++	};
++
+ 	nub_spmi0: spmi@29e114000 {
+ 		compatible = "apple,t6020-spmi", "apple,t8103-spmi";
+ 		reg = <0x2 0x9e114000 0x0 0x100>;
+@@ -125,9 +131,9 @@ smc_gpio: gpio {
+ 		smc_reboot: reboot {
+ 			compatible = "apple,smc-reboot";
+ 			nvmem-cells = <&shutdown_flag>, <&boot_stage>,
+-				<&boot_error_count>, <&panic_count>;
++				<&boot_error_count>, <&panic_count>, <&pm_setting>;
+ 			nvmem-cell-names = "shutdown_flag", "boot_stage",
+-				"boot_error_count", "panic_count";
++				"boot_error_count", "panic_count", "pm_setting";
+ 		};
+ 
+ 		smc_hwmon: hwmon {
+@@ -162,6 +168,73 @@ pinctrl_smc: pinctrl@2a2820000 {
+ 				<AIC_IRQ 0 857 IRQ_TYPE_LEVEL_HIGH>;
+ 	};
+ 
++	disp0_dart: iommu@389304000 {
++		compatible = "apple,t6020-dart", "apple,t8110-dart";
++		reg = <0x3 0x89304000 0x0 0x4000>;
++		#iommu-cells = <5>;
++		interrupt-parent = <&aic>;
++		interrupts = <AIC_IRQ 0 911 IRQ_TYPE_LEVEL_HIGH>;
++		status = "disabled";
++		power-domains = <&ps_disp0_cpu0>;
++	};
++
++	dcp_dart: iommu@38930c000 {
++		compatible = "apple,t6020-dart", "apple,t8110-dart";
++		reg = <0x3 0x8930c000 0x0 0x4000>;
++		#iommu-cells = <5>;
++		interrupt-parent = <&aic>;
++		interrupts = <AIC_IRQ 0 911 IRQ_TYPE_LEVEL_HIGH>;
++		power-domains = <&ps_disp0_cpu0>;
++	};
++
++	dcp_mbox: mbox@389c08000 {
++		compatible = "apple,t6020-asc-mailbox", "apple,asc-mailbox-v4";
++		reg = <0x3 0x89c08000 0x0 0x4000>;
++		interrupt-parent = <&aic>;
++		interrupts = <AIC_IRQ 0 932 IRQ_TYPE_LEVEL_HIGH>,
++			<AIC_IRQ 0 933 IRQ_TYPE_LEVEL_HIGH>,
++			<AIC_IRQ 0 934 IRQ_TYPE_LEVEL_HIGH>,
++			<AIC_IRQ 0 935 IRQ_TYPE_LEVEL_HIGH>;
++		interrupt-names = "send-empty", "send-not-empty",
++			"recv-empty", "recv-not-empty";
++		#mbox-cells = <0>;
++		power-domains = <&ps_disp0_cpu0>;
++	};
++
++	dcp: dcp@389c00000 {
++		compatible = "apple,t6020-dcp", "apple,dcp";
++		mboxes = <&dcp_mbox>;
++		mbox-names = "mbox";
++		iommus = <&dcp_dart 5 0x100 0x0 0x10 0x0>;
++
++		reg-names = "coproc", "disp-0", "disp-1", "disp-2", "disp-3";
++		reg = <0x3 0x89c00000 0x0 0x4000>, // check?
++			<0x3 0x88000000 0x0 0x61c000>,
++			<0x3 0x89320000 0x0 0x4000>,
++			<0x3 0x89344000 0x0 0x4000>,
++			<0x3 0x89800000 0x0 0x800000>;
++		apple,bw-scratch = <&pmgr_dcp 0 4 0x1208>;
++		power-domains = <&ps_disp0_cpu0>;
++		resets = <&ps_disp0_cpu0>;
++		clocks = <&clk_disp0>;
++		phandle = <&dcp>;
++		// required bus properties for 'piodma' subdevice
++		#address-cells = <2>;
++		#size-cells = <2>;
++
++		disp0_piodma: piodma {
++			iommus = <&disp0_dart 4 0x100 0x0 0x10 0x0>;
++			phandle = <&disp0_piodma>;
++		};
++	};
++
++	display: display-subsystem {
++		compatible = "apple,display-subsystem";
++		iommus = <&disp0_dart 0 0x100 0x0 0x10 0x0>;
++		/* generate phandle explicitly for use in loader */
++		phandle = <&display>;
++	};
++
+ 	sio_dart: iommu@39b008000 {
+ 		compatible = "apple,t6020-dart", "apple,t8110-dart";
+ 		reg = <0x3 0x9b008000 0x0 0x8000>;
+@@ -406,6 +479,14 @@ gpu: gpu@406400000 {
+ 		reg = <0x4 0x6400000 0 0x40000>,
+ 			<0x4 0x4000000 0 0x1000000>;
+ 		reg-names = "asc", "sgx";
++		interrupt-parent = <&aic>;
++		interrupts = <AIC_IRQ 0 1127 IRQ_TYPE_LEVEL_HIGH>,
++			<AIC_IRQ 0 1128 IRQ_TYPE_LEVEL_HIGH>,
++			<AIC_IRQ 0 1129 IRQ_TYPE_LEVEL_HIGH>,
++			<AIC_IRQ 0 1130 IRQ_TYPE_LEVEL_HIGH>,
++			<AIC_IRQ 0 1147 IRQ_TYPE_LEVEL_HIGH>,
++			<AIC_IRQ 0 1149 IRQ_TYPE_LEVEL_HIGH>,
++			<AIC_IRQ 0 1142 IRQ_TYPE_LEVEL_HIGH>;
+ 		mboxes = <&agx_mbox>;
+ 		power-domains = <&ps_gfx>;
+ 		memory-region = <&uat_ttbs>, <&uat_pagetables>, <&uat_handoff>,
+@@ -414,6 +495,55 @@ gpu: gpu@406400000 {
+ 				      "hw-cal-a", "hw-cal-b", "globals";
+ 
+ 		apple,firmware-abi = <0 0 0>;
++		apple,firmware-version = <0 0 0>;
++		apple,firmware-compat = <0 0 0>;
++
++		operating-points-v2 = <&gpu_opp>;
++		apple,cs-opp = <&gpu_cs_opp>;
++		apple,afr-opp = <&gpu_afr_opp>;
++
++		apple,min-sram-microvolt = <790000>;
++		apple,csafr-min-sram-microvolt = <812000>;
++		apple,perf-base-pstate = <1>;
++
++		apple,avg-power-min-duty-cycle = <40>;
++		apple,avg-power-target-filter-tc = <1>;
++		apple,fast-die0-proportional-gain = <34.0>;
++		apple,perf-boost-ce-step = <50>;
++		apple,perf-boost-min-util = <90>;
++		apple,perf-filter-drop-threshold = <0>;
++		apple,perf-filter-time-constant = <5>;
++		apple,perf-filter-time-constant2 = <200>;
++		apple,perf-integral-gain = <1.62>;
++		apple,perf-integral-gain2 = <1.62>;
++		apple,perf-integral-min-clamp = <0>;
++		apple,perf-proportional-gain2 = <5.4>;
++		apple,perf-proportional-gain = <5.4>;
++		apple,perf-tgt-utilization = <85>;
++		apple,power-sample-period = <8>;
++		apple,ppm-filter-time-constant-ms = <34>;
++		apple,ppm-ki = <18.0>;
++		apple,ppm-kp = <0.1>;
++		apple,pwr-filter-time-constant = <313>;
++		apple,pwr-integral-gain = <0.0202129>;
++		apple,pwr-integral-min-clamp = <0>;
++		apple,pwr-min-duty-cycle = <40>;
++		apple,pwr-proportional-gain = <5.2831855>;
++		apple,pwr-sample-period-aic-clks = <200000>;
++		apple,se-engagement-criteria = <700>;
++		apple,se-filter-time-constant = <9>;
++		apple,se-filter-time-constant-1 = <3>;
++		apple,se-inactive-threshold = <2500>;
++		apple,se-ki = <-50.0>;
++		apple,se-ki-1 = <-100.0>;
++		apple,se-kp = <-5.0>;
++		apple,se-kp-1 = <-10.0>;
++		apple,se-reset-criteria = <50>;
++
++		apple,core-leak-coef = GPU_REPEAT(1200.0);
++		apple,sram-leak-coef = GPU_REPEAT(20.0);
++		apple,cs-leak-coef = GPU_DIE_REPEAT(400.0);
++		apple,afr-leak-coef = GPU_DIE_REPEAT(200.0);
+ 	};
+ 
+ 	agx_mbox: mbox@406408000 {
+@@ -473,6 +603,8 @@ pcie0: pcie@580000000 {
+ 		pinctrl-0 = <&pcie_pins>;
+ 		pinctrl-names = "default";
+ 
++		dma-coherent;
++
+ 		port00: pci@0,0 {
+ 			device_type = "pci";
+ 			reg = <0x0 0x0 0x0 0x0 0x0>;
+diff --git a/arch/arm64/boot/dts/apple/t602x-j414-j416.dtsi b/arch/arm64/boot/dts/apple/t602x-j414-j416.dtsi
+index 0e806d8ddf81..b0fa34282681 100644
+--- a/arch/arm64/boot/dts/apple/t602x-j414-j416.dtsi
++++ b/arch/arm64/boot/dts/apple/t602x-j414-j416.dtsi
+@@ -14,8 +14,15 @@
+  * the GPIO indices.
+  */
+ 
++#define NO_SPI_TRACKPAD
+ #include "t600x-j314-j316.dtsi"
+ 
++/ {
++	aliases {
++		keyboard = &keyboard;
++	};
++};
++
+ &framebuffer0 {
+ 	power-domains = <&ps_disp0_cpu0>, <&ps_dptx_phy_ps>;
+ };
+@@ -36,6 +43,41 @@ &hpm5 {
+ 	interrupts = <44 IRQ_TYPE_LEVEL_LOW>;
+ };
+ 
++&speaker_left_tweet {
++	shutdown-gpios = <&pinctrl_ap 57 GPIO_ACTIVE_HIGH>;
++	interrupts-extended = <&pinctrl_ap 58 IRQ_TYPE_LEVEL_LOW>;
++};
++
++&speaker_left_woof1 {
++	shutdown-gpios = <&pinctrl_ap 57 GPIO_ACTIVE_HIGH>;
++	interrupts-extended = <&pinctrl_ap 58 IRQ_TYPE_LEVEL_LOW>;
++};
++
++&speaker_left_woof2 {
++	shutdown-gpios = <&pinctrl_ap 57 GPIO_ACTIVE_HIGH>;
++	interrupts-extended = <&pinctrl_ap 58 IRQ_TYPE_LEVEL_LOW>;
++};
++
++&speaker_right_tweet {
++	shutdown-gpios = <&pinctrl_ap 57 GPIO_ACTIVE_HIGH>;
++	interrupts-extended = <&pinctrl_ap 58 IRQ_TYPE_LEVEL_LOW>;
++};
++
++&speaker_right_woof1 {
++	shutdown-gpios = <&pinctrl_ap 57 GPIO_ACTIVE_HIGH>;
++	interrupts-extended = <&pinctrl_ap 58 IRQ_TYPE_LEVEL_LOW>;
++};
++
++&speaker_right_woof2 {
++	shutdown-gpios = <&pinctrl_ap 57 GPIO_ACTIVE_HIGH>;
++	interrupts-extended = <&pinctrl_ap 58 IRQ_TYPE_LEVEL_LOW>;
++};
++
++&jack_codec {
++	reset-gpios = <&pinctrl_nub 8 GPIO_ACTIVE_HIGH>;
++	interrupts-extended = <&pinctrl_ap 59 IRQ_TYPE_LEVEL_LOW>;
++};
++
+ &wifi0 {
+ 	compatible = "pci14e4,4434";
+ };
+@@ -43,3 +85,7 @@ &wifi0 {
+ &bluetooth0 {
+ 	compatible = "pci14e4,5f72";
+ };
++
++&port01 {
++	pwren-gpios = <&smc_gpio 22 GPIO_ACTIVE_HIGH>;
++};
+diff --git a/arch/arm64/boot/dts/apple/t602x-j474-j475.dtsi b/arch/arm64/boot/dts/apple/t602x-j474-j475.dtsi
+index 926bb4ab77af..703d929aefdd 100644
+--- a/arch/arm64/boot/dts/apple/t602x-j474-j475.dtsi
++++ b/arch/arm64/boot/dts/apple/t602x-j474-j475.dtsi
+@@ -21,6 +21,11 @@ &framebuffer0 {
+ 	power-domains = <&ps_dispext0_cpu0>, <&ps_dptx_phy_ps>;
+ };
+ 
++/* disable dcp until it is supported */
++&dcp {
++	status = "disabled";
++};
++
+ &hpm0 {
+ 	interrupts = <44 IRQ_TYPE_LEVEL_LOW>;
+ };
+@@ -36,3 +41,23 @@ &hpm2 {
+ &hpm3 {
+ 	interrupts = <44 IRQ_TYPE_LEVEL_LOW>;
+ };
++
++/* PCIe devices */
++&port00 {
++	pwren-gpios = <&smc_gpio 13 GPIO_ACTIVE_HIGH>;
++};
++
++&port03 {
++	/* USB xHCI */
++	pwren-gpios = <&smc_gpio 19 GPIO_ACTIVE_HIGH>;
++};
++
++&speaker {
++	shutdown-gpios = <&pinctrl_ap 57 GPIO_ACTIVE_HIGH>;
++	interrupts-extended = <&pinctrl_ap 58 IRQ_TYPE_LEVEL_LOW>;
++};
++
++&jack_codec {
++	reset-gpios = <&pinctrl_nub 8 GPIO_ACTIVE_HIGH>;
++	interrupts-extended = <&pinctrl_ap 59 IRQ_TYPE_LEVEL_LOW>;
++};
+diff --git a/arch/arm64/boot/dts/apple/t602x-pmgr.dtsi b/arch/arm64/boot/dts/apple/t602x-pmgr.dtsi
+index f5382a2faf0b..5fa2a93ad9ec 100644
+--- a/arch/arm64/boot/dts/apple/t602x-pmgr.dtsi
++++ b/arch/arm64/boot/dts/apple/t602x-pmgr.dtsi
+@@ -447,6 +447,7 @@ DIE_NODE(ps_dispext0_fe): power-controller@2c0 {
+ 		power-domains = <&DIE_NODE(ps_dispext0_sys)>;
+ 	};
+ 
++	/* PMP is only present on die 0 of the M2 Ultra */
+ 	DIE_NODE(ps_pmp): power-controller@2c8 {
+ 		compatible = "apple,t6020-pmgr-pwrstate", "apple,t8103-pmgr-pwrstate";
+ 		reg = <0x2c8 4>;
+@@ -1449,6 +1450,7 @@ DIE_NODE(ps_dptx_phy_ps): power-controller@288 {
+ 		#power-domain-cells = <0>;
+ 		#reset-cells = <0>;
+ 		label = DIE_LABEL(dptx_phy_ps);
++		apple,always-on;
+ 		power-domains = <&DIE_NODE(ps_sio)>;
+ 	};
+ 
+@@ -1853,6 +1855,7 @@ DIE_NODE(ps_isp_cpu): power-controller@4000 {
+ 		#reset-cells = <0>;
+ 		label = DIE_LABEL(isp_cpu);
+ 		/* power-domains = <&DIE_NODE(ps_isp_sys)>; */
++		apple,force-disable;
+ 	};
+ 
+ 	DIE_NODE(ps_isp_fe): power-controller@4008 {
+-- 
+2.47.3
+

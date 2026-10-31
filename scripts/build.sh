@@ -14,6 +14,8 @@ case ${1:-} in
 fetch)
     debver=$2 work=$(realpath -m "$3")
     sed -i 's/^Types: deb$/Types: deb deb-src/' /etc/apt/sources.list.d/debian.sources
+    printf 'Types: deb-src\nURIs: http://deb.debian.org/debian\nSuites: unstable experimental\nComponents: main\nSigned-By: /usr/share/keyrings/debian-archive-keyring.pgp\n' \
+        > /etc/apt/sources.list.d/debian-newer-src.sources
     apt-get update -qq
     apt-get install -y -qq --no-install-recommends devscripts quilt python3 python3-dacite \
         python3-jinja2 debhelper dpkg-dev fakeroot ca-certificates > /dev/null

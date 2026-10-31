@@ -1,0 +1,53 @@
+From 0db397c25ce2b955e1af47672e25092d3145b921 Mon Sep 17 00:00:00 2001
+From: Janne Grunau <j@jannau.net>
+Date: Mon, 6 Nov 2023 00:46:53 +0100
+Subject: [PATCH] arm64: dts: apple: t600x: Add "apple,min-state" to
+ ps_dispextN_cpu0
+
+DCP ASC co-processors do not come back up from lower power states.
+
+Signed-off-by: Janne Grunau <j@jannau.net>
+(cherry picked from commit 23949fc443b0e077b484d860f7f6456df73d0460)
+---
+ arch/arm64/boot/dts/apple/t600x-pmgr.dtsi | 4 ++++
+ 1 file changed, 4 insertions(+)
+
+diff --git a/arch/arm64/boot/dts/apple/t600x-pmgr.dtsi b/arch/arm64/boot/dts/apple/t600x-pmgr.dtsi
+index cf274aaf632c..a8f85e41baa4 100644
+--- a/arch/arm64/boot/dts/apple/t600x-pmgr.dtsi
++++ b/arch/arm64/boot/dts/apple/t600x-pmgr.dtsi
+@@ -396,6 +396,7 @@ DIE_NODE(ps_dispext0_cpu0): power-controller@280 {
+ 		#reset-cells = <0>;
+ 		label = DIE_LABEL(dispext0_cpu0);
+ 		power-domains = <&DIE_NODE(ps_dispext0_fe)>;
++		apple,min-state = <4>;
+ 	};
+ 
+ 	DIE_NODE(ps_dispext1_cpu0): power-controller@2a8 {
+@@ -405,6 +406,7 @@ DIE_NODE(ps_dispext1_cpu0): power-controller@2a8 {
+ 		#reset-cells = <0>;
+ 		label = DIE_LABEL(dispext1_cpu0);
+ 		power-domains = <&DIE_NODE(ps_dispext1_fe)>;
++		apple,min-state = <4>;
+ 	};
+ 
+ 	DIE_NODE(ps_ane_sys_cpu): power-controller@2c8 {
+@@ -1792,6 +1794,7 @@ DIE_NODE(ps_dispext2_cpu0): power-controller@1e8 {
+ 		#reset-cells = <0>;
+ 		label = DIE_LABEL(dispext2_cpu0);
+ 		power-domains = <&DIE_NODE(ps_dispext2_fe)>;
++		apple,min-state = <4>;
+ 	};
+ 
+ 	DIE_NODE(ps_dispext3_fe): power-controller@210 {
+@@ -1810,6 +1813,7 @@ DIE_NODE(ps_dispext3_cpu0): power-controller@228 {
+ 		#reset-cells = <0>;
+ 		label = DIE_LABEL(dispext3_cpu0);
+ 		power-domains = <&DIE_NODE(ps_dispext3_fe)>;
++		apple,min-state = <4>;
+ 	};
+ 
+ 	DIE_NODE(ps_msr1): power-controller@250 {
+-- 
+2.47.3
+

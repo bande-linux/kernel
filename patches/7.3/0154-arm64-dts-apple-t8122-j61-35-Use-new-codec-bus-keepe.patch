@@ -1,0 +1,78 @@
+From 0c6ba3171230fa3cd9c1355d92f20d8fb9a5a9aa Mon Sep 17 00:00:00 2001
+From: Janne Grunau <j@jannau.net>
+Date: Sun, 28 Jun 2026 19:56:55 +0200
+Subject: [PATCH] arm64: dts: apple: t8122-j61[35]: Use new codec bus keeper
+ configuration
+
+Signed-off-by: Janne Grunau <j@jannau.net>
+(cherry picked from commit 1027626c7f6b5668aa997cef20ea986b2370e39a)
+---
+ arch/arm64/boot/dts/apple/t8122-j613.dts | 6 ++++--
+ arch/arm64/boot/dts/apple/t8122-j615.dts | 6 ++++--
+ 2 files changed, 8 insertions(+), 4 deletions(-)
+
+diff --git a/arch/arm64/boot/dts/apple/t8122-j613.dts b/arch/arm64/boot/dts/apple/t8122-j613.dts
+index 40596f31a3b1..eabffb366c34 100644
+--- a/arch/arm64/boot/dts/apple/t8122-j613.dts
++++ b/arch/arm64/boot/dts/apple/t8122-j613.dts
+@@ -48,7 +48,6 @@ speaker_left_woof: codec@38 {
+ 		interrupts-extended = <&pinctrl_ap 12 IRQ_TYPE_LEVEL_LOW>;
+ 		ti,imon-slot-no = <0>;
+ 		ti,vmon-slot-no = <2>;
+-		ti,sdout-force-zero-mask = <0x0f0f>;
+ 	};
+ 
+ 	speaker_left_tweet: codec@39 {
+@@ -73,7 +72,6 @@ speaker_right_woof: codec@3b {
+ 		interrupts-extended = <&pinctrl_ap 12 IRQ_TYPE_LEVEL_LOW>;
+ 		ti,imon-slot-no = <4>;
+ 		ti,vmon-slot-no = <6>;
+-		ti,sdout-force-zero-mask = <0xf0f0>;
+ 	};
+ 
+ 	speaker_right_tweet: codec@3c {
+@@ -104,6 +102,10 @@ sound {
+ 
+ 		dai-link@0 {
+ 			link-name = "Speakers";
++			dai-tdm-idle-mode-0 = "zero";
++			dai-tdm-idle-mode-2 = "zero";
++			dai-tdm-slot-tx-idle-mask-0 = <0x0f0f>;
++			dai-tdm-slot-tx-idle-mask-2 = <0xf0f0>;
+ 
+ 			cpu {
+ 				sound-dai = <&mca 0>, <&mca 1>;
+diff --git a/arch/arm64/boot/dts/apple/t8122-j615.dts b/arch/arm64/boot/dts/apple/t8122-j615.dts
+index df3e10c197e0..ffa5c6e5d4d3 100644
+--- a/arch/arm64/boot/dts/apple/t8122-j615.dts
++++ b/arch/arm64/boot/dts/apple/t8122-j615.dts
+@@ -48,7 +48,6 @@ speaker_left_woof: codec@38 {
+ 		interrupts-extended = <&pinctrl_ap 12 IRQ_TYPE_LEVEL_LOW>;
+ 		ti,imon-slot-no = <0>;
+ 		ti,vmon-slot-no = <2>;
+-		ti,sdout-force-zero-mask = <0x0f0f>;
+ 	};
+ 
+ 	speaker_left_tweet: codec@39 {
+@@ -73,7 +72,6 @@ speaker_right_woof: codec@3b {
+ 		interrupts-extended = <&pinctrl_ap 12 IRQ_TYPE_LEVEL_LOW>;
+ 		ti,imon-slot-no = <4>;
+ 		ti,vmon-slot-no = <6>;
+-		ti,sdout-force-zero-mask = <0xf0f0>;
+ 	};
+ 
+ 	speaker_right_tweet: codec@3c {
+@@ -104,6 +102,10 @@ sound {
+ 
+ 		dai-link@0 {
+ 			link-name = "Speakers";
++			dai-tdm-idle-mode-0 = "zero";
++			dai-tdm-idle-mode-2 = "zero";
++			dai-tdm-slot-tx-idle-mask-0 = <0x0f0f>;
++			dai-tdm-slot-tx-idle-mask-2 = <0xf0f0>;
+ 
+ 			cpu {
+ 				sound-dai = <&mca 0>, <&mca 1>;
+-- 
+2.47.3
+

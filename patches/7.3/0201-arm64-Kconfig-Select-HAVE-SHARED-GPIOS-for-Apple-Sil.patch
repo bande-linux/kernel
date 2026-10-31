@@ -1,0 +1,33 @@
+From 006394c8fecf9cae4e75db0a0517182a6fdbb2d4 Mon Sep 17 00:00:00 2001
+From: James Calligeros <jcalligeros99@gmail.com>
+Date: Thu, 13 Aug 2026 21:09:10 +1000
+Subject: [PATCH] arm64: Kconfig: Select HAVE_SHARED_GPIOS for Apple Silicon
+
+Apple Silicon devices use shared GPIO lines for speaker codec reset.
+We have been abusing the regulator API for this downstream.
+
+Select HAVE_SHARED_GPIOS for ARCH_APPLE so that we can use the new
+shared GPIO proxy infrastructure for the speaker codec reset lines
+going forward.
+
+Signed-off-by: James Calligeros <jcalligeros99@gmail.com>
+(cherry picked from commit 4c147bae8912ecd504e50d2e87ef50fa7934ee1f)
+---
+ arch/arm64/Kconfig.platforms | 1 +
+ 1 file changed, 1 insertion(+)
+
+diff --git a/arch/arm64/Kconfig.platforms b/arch/arm64/Kconfig.platforms
+index d2acfac73003..76a6a0e6ae4f 100644
+--- a/arch/arm64/Kconfig.platforms
++++ b/arch/arm64/Kconfig.platforms
+@@ -37,6 +37,7 @@ config ARCH_APPLE
+ 	bool "Apple Silicon SoC family"
+ 	select APPLE_AIC
+ 	select APPLE_PMGR_PWRSTATE if PM
++	select HAVE_SHARED_GPIOS
+ 	help
+ 	  This enables support for Apple's in-house ARM SoC family, such
+ 	  as the Apple M1.
+-- 
+2.47.3
+

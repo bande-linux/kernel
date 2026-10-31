@@ -1,0 +1,27 @@
+From 35e57e4d2dc08dbc1c91dcdf332abd6f3a7af5da Mon Sep 17 00:00:00 2001
+From: Hector Martin <marcan@marcan.st>
+Date: Tue, 25 Oct 2022 01:12:17 +0900
+Subject: [PATCH] firmware_loader: Add /lib/firmware/vendor path
+
+Signed-off-by: Hector Martin <marcan@marcan.st>
+(cherry picked from commit 319cc7698fb1ed555a9b4ee7ddb32fcfe6828154)
+---
+ drivers/base/firmware_loader/main.c | 2 ++
+ 1 file changed, 2 insertions(+)
+
+diff --git a/drivers/base/firmware_loader/main.c b/drivers/base/firmware_loader/main.c
+index 24213a0ea831..1acc5842fb24 100644
+--- a/drivers/base/firmware_loader/main.c
++++ b/drivers/base/firmware_loader/main.c
+@@ -471,6 +471,8 @@ static int fw_decompress_xz(struct device *dev, struct fw_priv *fw_priv,
+ static char fw_path_para[256];
+ static const char * const fw_path[] = {
+ 	fw_path_para,
++	"/lib/firmware/vendor/" UTS_RELEASE,
++	"/lib/firmware/vendor",
+ 	"/lib/firmware/updates/" UTS_RELEASE,
+ 	"/lib/firmware/updates",
+ 	"/lib/firmware/" UTS_RELEASE,
+-- 
+2.47.3
+

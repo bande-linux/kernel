@@ -1,0 +1,32 @@
+From 0105491e57c56fc7d29b71fedcf3bd43fcd21252 Mon Sep 17 00:00:00 2001
+From: Janne Grunau <j@jannau.net>
+Date: Sat, 23 May 2026 11:14:54 +0200
+Subject: [PATCH] arm64: dts: apple: t8122: Keep ps_apcie_phy_sw always-on
+
+The APCIE_PHY_SW power state is described in Apple's device tree as
+child of the virtual storage and general purpose PCIe power tree.
+Instead of supplementing them with their derived power states keep it
+always on like macOS. This mirrors t602x-pgmr.dtsi ps_apcie_phy_sw.
+
+Signed-off-by: Janne Grunau <j@jannau.net>
+(cherry picked from commit 3a198cc1d071a4ce2b2916b9539f5aa5226d823e)
+---
+ arch/arm64/boot/dts/apple/t8122-pmgr.dtsi | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/arch/arm64/boot/dts/apple/t8122-pmgr.dtsi b/arch/arm64/boot/dts/apple/t8122-pmgr.dtsi
+index 64093792e0ad..d3b3f9e71860 100644
+--- a/arch/arm64/boot/dts/apple/t8122-pmgr.dtsi
++++ b/arch/arm64/boot/dts/apple/t8122-pmgr.dtsi
+@@ -899,7 +899,7 @@ ps_apcie_phy_sw: power-controller@4a0 {
+ 		#power-domain-cells = <0>;
+ 		#reset-cells = <0>;
+ 		label = "apcie_phy_sw";
+-		power-domains = <&ps_apcie_st>, <&ps_apcie_gp>;
++		apple,always-on; /* macOS does not turn this off */
+ 	};
+ 
+ 	ps_atc0_cio_pcie: power-controller@4a8 {
+-- 
+2.47.3
+

@@ -1,0 +1,131 @@
+From 10b520bfcf169d3f81f4a029ede73491d03a8e53 Mon Sep 17 00:00:00 2001
+From: Janne Grunau <j@jannau.net>
+Date: Thu, 4 Jun 2026 12:29:29 +0200
+Subject: [PATCH] arm64: dts: apple: t6030: Add "capacity-dmips-mhz" properties
+
+Values determined by running coremark [1] via following script:
+```
+#!/bin/sh
+set -e
+CPUS="$@"
+
+for CPU in ${CPUS}; do
+    echo performance > /sys/devices/system/cpu/cpu${CPU}/cpufreq/scaling_governor
+    CUR_FREQ=$(cat /sys/devices/system/cpu/cpu${CPU}/cpufreq/scaling_cur_freq)
+    echo -n "coremark on CPU core ${CPU} at ${CUR_FREQ%000} MHz: "
+    taskset -c ${CPU} make run1.log > /dev/null
+    grep 'Iterations/Sec' run1.log
+    echo schedutil > /sys/devices/system/cpu/cpu${CPU}/cpufreq/scaling_governor
+done
+```
+
+Link: https://github.com/eembc/coremark [1]
+Signed-off-by: Janne Grunau <j@jannau.net>
+(cherry picked from commit a981898724c8a26fe6c1e615e9a0b0734b9d46b8)
+---
+ arch/arm64/boot/dts/apple/t6030.dtsi | 12 ++++++++++++
+ 1 file changed, 12 insertions(+)
+
+diff --git a/arch/arm64/boot/dts/apple/t6030.dtsi b/arch/arm64/boot/dts/apple/t6030.dtsi
+index a97b0bd91edb..f66eac1da3ea 100644
+--- a/arch/arm64/boot/dts/apple/t6030.dtsi
++++ b/arch/arm64/boot/dts/apple/t6030.dtsi
+@@ -75,6 +75,7 @@ cpu_e00: cpu@0 {
+ 			i-cache-size = <0x20000>;
+ 			d-cache-size = <0x10000>;
+ 			operating-points-v2 = <&sawtooth_opp>;
++			capacity-dmips-mhz = <851>;
+ 			performance-domains = <&cpufreq_e>;
+ 		};
+ 
+@@ -88,6 +89,7 @@ cpu_e01: cpu@1 {
+ 			i-cache-size = <0x20000>;
+ 			d-cache-size = <0x10000>;
+ 			operating-points-v2 = <&sawtooth_opp>;
++			capacity-dmips-mhz = <851>;
+ 			performance-domains = <&cpufreq_e>;
+ 		};
+ 
+@@ -101,6 +103,7 @@ cpu_e02: cpu@2 {
+ 			i-cache-size = <0x20000>;
+ 			d-cache-size = <0x10000>;
+ 			operating-points-v2 = <&sawtooth_opp>;
++			capacity-dmips-mhz = <851>;
+ 			performance-domains = <&cpufreq_e>;
+ 		};
+ 
+@@ -114,6 +117,7 @@ cpu_e03: cpu@3 {
+ 			i-cache-size = <0x20000>;
+ 			d-cache-size = <0x10000>;
+ 			operating-points-v2 = <&sawtooth_opp>;
++			capacity-dmips-mhz = <851>;
+ 			performance-domains = <&cpufreq_e>;
+ 		};
+ 
+@@ -127,6 +131,7 @@ cpu_e04: cpu@4 {
+ 			i-cache-size = <0x20000>;
+ 			d-cache-size = <0x10000>;
+ 			operating-points-v2 = <&sawtooth_opp>;
++			capacity-dmips-mhz = <851>;
+ 			performance-domains = <&cpufreq_e>;
+ 		};
+ 
+@@ -140,6 +145,7 @@ cpu_e05: cpu@5 {
+ 			i-cache-size = <0x20000>;
+ 			d-cache-size = <0x10000>;
+ 			operating-points-v2 = <&sawtooth_opp>;
++			capacity-dmips-mhz = <851>;
+ 			performance-domains = <&cpufreq_e>;
+ 		};
+ 
+@@ -153,6 +159,7 @@ cpu_p00: cpu@10100 {
+ 			i-cache-size = <0x30000>;
+ 			d-cache-size = <0x20000>;
+ 			operating-points-v2 = <&everest_opp>;
++			capacity-dmips-mhz = <1024>;
+ 			performance-domains = <&cpufreq_p>;
+ 		};
+ 
+@@ -166,6 +173,7 @@ cpu_p01: cpu@10101 {
+ 			i-cache-size = <0x30000>;
+ 			d-cache-size = <0x20000>;
+ 			operating-points-v2 = <&everest_opp>;
++			capacity-dmips-mhz = <1024>;
+ 			performance-domains = <&cpufreq_p>;
+ 		};
+ 
+@@ -179,6 +187,7 @@ cpu_p02: cpu@10102 {
+ 			i-cache-size = <0x30000>;
+ 			d-cache-size = <0x20000>;
+ 			operating-points-v2 = <&everest_opp>;
++			capacity-dmips-mhz = <1024>;
+ 			performance-domains = <&cpufreq_p>;
+ 		};
+ 
+@@ -192,6 +201,7 @@ cpu_p03: cpu@10103 {
+ 			i-cache-size = <0x30000>;
+ 			d-cache-size = <0x20000>;
+ 			operating-points-v2 = <&everest_opp>;
++			capacity-dmips-mhz = <1024>;
+ 			performance-domains = <&cpufreq_p>;
+ 		};
+ 
+@@ -205,6 +215,7 @@ cpu_p04: cpu@10104 {
+ 			i-cache-size = <0x30000>;
+ 			d-cache-size = <0x20000>;
+ 			operating-points-v2 = <&everest_opp>;
++			capacity-dmips-mhz = <1024>;
+ 			performance-domains = <&cpufreq_p>;
+ 		};
+ 
+@@ -218,6 +229,7 @@ cpu_p05: cpu@10105 {
+ 			i-cache-size = <0x30000>;
+ 			d-cache-size = <0x20000>;
+ 			operating-points-v2 = <&everest_opp>;
++			capacity-dmips-mhz = <1024>;
+ 			performance-domains = <&cpufreq_p>;
+ 		};
+ 
+-- 
+2.47.3
+

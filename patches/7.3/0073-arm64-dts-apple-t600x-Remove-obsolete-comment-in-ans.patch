@@ -1,0 +1,32 @@
+From d091e61583f0d296812276697b6bca3c1858ab2a Mon Sep 17 00:00:00 2001
+From: Hector Martin <marcan@marcan.st>
+Date: Mon, 24 Apr 2023 23:27:52 +0900
+Subject: [PATCH] arm64: dts: apple: t600x: Remove obsolete comment in ans2
+ power domain
+
+Signed-off-by: Hector Martin <marcan@marcan.st>
+(cherry picked from commit 8aabab8caa40841f6be30215d0fe1a4d8895e050)
+---
+ arch/arm64/boot/dts/apple/t600x-pmgr.dtsi | 6 ------
+ 1 file changed, 6 deletions(-)
+
+diff --git a/arch/arm64/boot/dts/apple/t600x-pmgr.dtsi b/arch/arm64/boot/dts/apple/t600x-pmgr.dtsi
+index 3f507cbc65f0..3315b392b21d 100644
+--- a/arch/arm64/boot/dts/apple/t600x-pmgr.dtsi
++++ b/arch/arm64/boot/dts/apple/t600x-pmgr.dtsi
+@@ -1387,12 +1387,6 @@ DIE_NODE(ps_ans2): power-controller@3b8 {
+ 		#power-domain-cells = <0>;
+ 		#reset-cells = <0>;
+ 		label = DIE_LABEL(ans2);
+-		/*
+-		 * The ADT makes ps_apcie_st[1]_sys depend on ps_ans2 instead,
+-		 * but we'd rather have a single power domain for the downstream
+-		 * device to depend on, so use this node as the child.
+-		 * This makes more sense anyway (since ANS2 uses APCIE_ST).
+-		 */
+ 		power-domains = <&DIE_NODE(ps_afnc2_lw0)>;
+ 	};
+ 
+-- 
+2.47.3
+

@@ -1,0 +1,105 @@
+From 17407298ebb9c4e887e30d567db9b976bf8ca4c7 Mon Sep 17 00:00:00 2001
+From: Sasha Finkelstein <k@chaosmail.tech>
+Date: Tue, 21 Jul 2026 00:35:54 +0200
+Subject: [PATCH] arm64: dts: apple: t603x: Add usb-related spmi controllers
+
+Signed-off-by: Sasha Finkelstein <k@chaosmail.tech>
+(cherry picked from commit 62bd04b3cd9add8ee22361fbd8f1b066271dfce2)
+---
+ arch/arm64/boot/dts/apple/t6030.dtsi      | 26 +++++++++++++++++++++
+ arch/arm64/boot/dts/apple/t6031-die0.dtsi | 28 +++++++++++++++++++++++
+ 2 files changed, 54 insertions(+)
+
+diff --git a/arch/arm64/boot/dts/apple/t6030.dtsi b/arch/arm64/boot/dts/apple/t6030.dtsi
+index 7fc525d5f90a..2ceb60aafebd 100644
+--- a/arch/arm64/boot/dts/apple/t6030.dtsi
++++ b/arch/arm64/boot/dts/apple/t6030.dtsi
+@@ -853,6 +853,8 @@ nub_spmi: spmi@364714000 {
+ 			reg = <0x3 0x64714000 0x0 0x100>;
+ 			#address-cells = <2>;
+ 			#size-cells = <0>;
++			interrupt-parent = <&aic>;
++			interrupts = <AIC_IRQ 485 IRQ_TYPE_LEVEL_HIGH>;
+ 
+ 			pmic1: pmic@b {
+ 				compatible = "apple,chapel-pmic", "apple,spmi-nvmem";
+@@ -905,6 +907,30 @@ shutdown_flag: shutdown-flag@f80f,3 {
+ 			};
+ 		};
+ 
++		nub_spmi_a0: spmi@364908000 {
++			compatible = "apple,t6030-spmi", "apple,t8103-spmi";
++			reg = <0x3 0x64908000 0x0 0x100>;
++			#address-cells = <2>;
++			#size-cells = <0>;
++			#interrupt-cells = <2>;
++			interrupt-controller;
++			interrupt-parent = <&aic>;
++			interrupts = <AIC_IRQ 509 IRQ_TYPE_LEVEL_HIGH>;
++			power-domains = <&ps_nub_spmi_a0>;
++		};
++
++		nub_spmi_a1: spmi@364a08000 {
++			compatible = "apple,t6030-spmi", "apple,t8103-spmi";
++			reg = <0x3 0x64a08000 0x0 0x100>;
++			#address-cells = <2>;
++			#size-cells = <0>;
++			#interrupt-cells = <2>;
++			interrupt-controller;
++			interrupt-parent = <&aic>;
++			interrupts = <AIC_IRQ 511 IRQ_TYPE_LEVEL_HIGH>;
++			power-domains = <&ps_nub_spmi_a1>;
++		};
++
+ 		smc_mbox: mbox@36c408000 {
+ 			compatible = "apple,t6030-asc-mailbox", "apple,asc-mailbox-v4";
+ 			reg = <0x3 0x6c408000 0x0 0x4000>;
+diff --git a/arch/arm64/boot/dts/apple/t6031-die0.dtsi b/arch/arm64/boot/dts/apple/t6031-die0.dtsi
+index 2afb028b0990..7ca801e7c2f6 100644
+--- a/arch/arm64/boot/dts/apple/t6031-die0.dtsi
++++ b/arch/arm64/boot/dts/apple/t6031-die0.dtsi
+@@ -38,6 +38,8 @@ nub_spmi: spmi@2a1014000 {
+ 		reg = <0x2 0xa1014000 0x0 0x100>;
+ 		#address-cells = <2>;
+ 		#size-cells = <0>;
++		interrupt-parent = <&aic>;
++		interrupts = <AIC_IRQ 0 723 IRQ_TYPE_LEVEL_HIGH>;
+ 
+ 		pmic1: pmic@b {
+ 			compatible = "apple,chapel-pmic", "apple,spmi-nvmem";
+@@ -90,6 +92,32 @@ shutdown_flag: shutdown-flag@f80f,3 {
+ 		};
+ 	};
+ 
++	nub_spmi_a0: spmi@2a1188000 {
++		compatible = "apple,t6031-spmi", "apple,t8103-spmi";
++		#address-cells = <2>;
++		#size-cells = <0>;
++		#interrupt-cells = <2>;
++		interrupt-controller;
++
++		reg = <0x2 0xa1188000 0x0 0x100>;
++		interrupt-parent = <&aic>;
++		interrupts = <AIC_IRQ 0 763 IRQ_TYPE_LEVEL_HIGH>;
++		power-domains = <&ps_nub_spmi_a0>;
++	};
++
++	nub_spmi_a1: spmi@2a1198000 {
++		compatible = "apple,t6031-spmi", "apple,t8103-spmi";
++		#address-cells = <2>;
++		#size-cells = <0>;
++		#interrupt-cells = <2>;
++		interrupt-controller;
++
++		reg = <0x2 0xa1198000 0x0 0x100>;
++		interrupt-parent = <&aic>;
++		interrupts = <AIC_IRQ 0 765 IRQ_TYPE_LEVEL_HIGH>;
++		power-domains = <&ps_nub_spmi_a1>;
++	};
++
+ 	smc_mbox: mbox@2a4408000 {
+ 		compatible = "apple,t6031-asc-mailbox", "apple,asc-mailbox-v4";
+ 		reg = <0x2 0xa4408000 0x0 0x4000>;
+-- 
+2.47.3
+

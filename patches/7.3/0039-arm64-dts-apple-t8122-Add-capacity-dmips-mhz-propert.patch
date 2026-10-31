@@ -1,0 +1,99 @@
+From 912e4d51da3e4d6a26e032ada5ba7cb549ee06ed Mon Sep 17 00:00:00 2001
+From: Janne Grunau <j@jannau.net>
+Date: Thu, 4 Jun 2026 13:01:23 +0200
+Subject: [PATCH] arm64: dts: apple: t8122: Add "capacity-dmips-mhz" properties
+
+Values determined by running coremark [1] via following script:
+```
+#!/bin/sh
+set -e
+CPUS="$@"
+
+for CPU in ${CPUS}; do
+    echo performance > /sys/devices/system/cpu/cpu${CPU}/cpufreq/scaling_governor
+    CUR_FREQ=$(cat /sys/devices/system/cpu/cpu${CPU}/cpufreq/scaling_cur_freq)
+    echo -n "coremark on CPU core ${CPU} at ${CUR_FREQ%000} MHz: "
+    taskset -c ${CPU} make run1.log > /dev/null
+    grep 'Iterations/Sec' run1.log
+    echo schedutil > /sys/devices/system/cpu/cpu${CPU}/cpufreq/scaling_governor
+done
+```
+
+Link: https://github.com/eembc/coremark [1]
+Signed-off-by: Janne Grunau <j@jannau.net>
+(cherry picked from commit b3fd72737326d42fda5eca2b122246d5344e716b)
+---
+ arch/arm64/boot/dts/apple/t8122.dtsi | 8 ++++++++
+ 1 file changed, 8 insertions(+)
+
+diff --git a/arch/arm64/boot/dts/apple/t8122.dtsi b/arch/arm64/boot/dts/apple/t8122.dtsi
+index 2c2e1594071c..1452711f64ad 100644
+--- a/arch/arm64/boot/dts/apple/t8122.dtsi
++++ b/arch/arm64/boot/dts/apple/t8122.dtsi
+@@ -66,6 +66,7 @@ cpu_e0: cpu@0 {
+ 			i-cache-size = <0x20000>;
+ 			d-cache-size = <0x10000>;
+ 			operating-points-v2 = <&sawtooth_opp>;
++			capacity-dmips-mhz = <804>;
+ 			performance-domains = <&cpufreq_e>;
+ 		};
+ 
+@@ -79,6 +80,7 @@ cpu_e1: cpu@1 {
+ 			i-cache-size = <0x20000>;
+ 			d-cache-size = <0x10000>;
+ 			operating-points-v2 = <&sawtooth_opp>;
++			capacity-dmips-mhz = <804>;
+ 			performance-domains = <&cpufreq_e>;
+ 		};
+ 
+@@ -92,6 +94,7 @@ cpu_e2: cpu@2 {
+ 			i-cache-size = <0x20000>;
+ 			d-cache-size = <0x10000>;
+ 			operating-points-v2 = <&sawtooth_opp>;
++			capacity-dmips-mhz = <804>;
+ 			performance-domains = <&cpufreq_e>;
+ 		};
+ 
+@@ -105,6 +108,7 @@ cpu_e3: cpu@3 {
+ 			i-cache-size = <0x20000>;
+ 			d-cache-size = <0x10000>;
+ 			operating-points-v2 = <&sawtooth_opp>;
++			capacity-dmips-mhz = <804>;
+ 			performance-domains = <&cpufreq_e>;
+ 		};
+ 
+@@ -118,6 +122,7 @@ cpu_p0: cpu@10100 {
+ 			i-cache-size = <0x30000>;
+ 			d-cache-size = <0x20000>;
+ 			operating-points-v2 = <&everest_opp>;
++			capacity-dmips-mhz = <1024>;
+ 			performance-domains = <&cpufreq_p>;
+ 		};
+ 
+@@ -131,6 +136,7 @@ cpu_p1: cpu@10101 {
+ 			i-cache-size = <0x30000>;
+ 			d-cache-size = <0x20000>;
+ 			operating-points-v2 = <&everest_opp>;
++			capacity-dmips-mhz = <1024>;
+ 			performance-domains = <&cpufreq_p>;
+ 		};
+ 
+@@ -144,6 +150,7 @@ cpu_p2: cpu@10102 {
+ 			i-cache-size = <0x30000>;
+ 			d-cache-size = <0x20000>;
+ 			operating-points-v2 = <&everest_opp>;
++			capacity-dmips-mhz = <1024>;
+ 			performance-domains = <&cpufreq_p>;
+ 		};
+ 
+@@ -157,6 +164,7 @@ cpu_p3: cpu@10103 {
+ 			i-cache-size = <0x30000>;
+ 			d-cache-size = <0x20000>;
+ 			operating-points-v2 = <&everest_opp>;
++			capacity-dmips-mhz = <1024>;
+ 			performance-domains = <&cpufreq_p>;
+ 		};
+ 
+-- 
+2.47.3
+

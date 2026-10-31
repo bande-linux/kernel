@@ -1,0 +1,568 @@
+From 4315175c63374c323d02474dbc8b6d3c795c7e0f Mon Sep 17 00:00:00 2001
+From: Hector Martin <marcan@marcan.st>
+Date: Mon, 7 Aug 2023 19:53:50 +0900
+Subject: [PATCH] arm64: dts: apple: t6022: Add APCIE-GE nodes
+
+arm64: dts: apple: t6022-j180d: Add node for built-in PCIe devices
+
+Currently only the two ethernet controllers and the SATA-AHCI are
+detected. The USB controller (internal USB-A port and USB-A ports on the
+I/O board) are missing code to toggle the reset gpio pin. The Broadcom
+Wlan/BT device needs in addition the SMC power enable GPIO.
+The "bluetooth0" and "wifi0" aliases can not be added since the ADT
+misses calibration data for Wlan and BT.
+
+arm64: dts: apple: Move PCIe-GE nodes intro their own file
+
+These are only used on the Mac Pro (M2 Ultra, 2023) so do not bloat all
+other DTBs.
+
+Signed-off-by: Hector Martin <marcan@marcan.st>
+Co-developed-by: Janne Grunau <j@jannau.net>
+Signed-off-by: Janne Grunau <j@jannau.net>
+(cherry picked from commit 64de6a4b8f36eb6dead464106d6186bfef13cc66)
+---
+ arch/arm64/boot/dts/apple/t6022-j180d.dts     | 352 +++++++++++++++++-
+ arch/arm64/boot/dts/apple/t6022-pcie-ge.dtsi  |  27 ++
+ arch/arm64/boot/dts/apple/t6022.dtsi          |   6 +
+ .../arm64/boot/dts/apple/t602x-gpio-pins.dtsi |   4 +
+ arch/arm64/boot/dts/apple/t602x-pcie-ge.dtsi  |  89 +++++
+ 5 files changed, 474 insertions(+), 4 deletions(-)
+
+diff --git a/arch/arm64/boot/dts/apple/t6022-j180d.dts b/arch/arm64/boot/dts/apple/t6022-j180d.dts
+index c0674aad5c49..570cf88e5b20 100644
+--- a/arch/arm64/boot/dts/apple/t6022-j180d.dts
++++ b/arch/arm64/boot/dts/apple/t6022-j180d.dts
+@@ -11,6 +11,7 @@
+ 
+ #include "t6022.dtsi"
+ #include "t6022-jxxxd.dtsi"
++#include "t6022-pcie-ge.dtsi"
+ 
+ / {
+ 	compatible = "apple,j180d", "apple,t6022", "apple,arm-platform";
+@@ -26,11 +27,11 @@ aliases {
+ 		atcphy5 = &atcphy1_die1;
+ 		atcphy6 = &atcphy2_die1;
+ 		atcphy7 = &atcphy3_die1;
+-		//bluetooth0 = &bluetooth0;
+-		//ethernet0 = &ethernet0;
+-		//ethernet1 = &ethernet1;
++		bluetooth0 = &bluetooth0;
++		ethernet0 = &ethernet0;
++		ethernet1 = &ethernet1;
+ 		serial0 = &serial0;
+-		//wifi0 = &wifi0;
++		wifi0 = &wifi0;
+ 	};
+ 
+ 	chosen {
+@@ -611,6 +612,349 @@ codec {
+ 	};
+ };
+ 
++/* PCIe devices */
++&port_ge00 {
++	bus-range = <0x01 0x09>;
++
++	pci@0,0 {
++		// compatible = "pci11f8,4000", "pciclass,060400", "pciclass,0604";
++		device_type = "pci";
++		reg = <0x10000 0x00 0x00 0x00 0x00>;
++		bus-range = <0x02 0x07>;
++
++		#address-cells = <0x03>;
++		#size-cells = <0x02>;
++		ranges = <0x82010000 0x00 0x80000000 0x82010000 0x00 0x80000000 0x00 0x500000>,
++			 <0xc3010000 0x18 0x00000000 0xc3010000 0x18 0x00000000 0x00 0x500000>;
++
++		#interrupt-cells = <0x01>;
++		interrupt-map-mask = <0xffff00 0x00 0x00 0x07>;
++		interrupt-map = <0x20000 0x00 0x00 0x01 &port_ge00 0x00 0x00 0x00 0x00>,
++				<0x20000 0x00 0x00 0x02 &port_ge00 0x00 0x00 0x00 0x01>,
++				<0x20000 0x00 0x00 0x03 &port_ge00 0x00 0x00 0x00 0x02>,
++				<0x20000 0x00 0x00 0x04 &port_ge00 0x00 0x00 0x00 0x03>,
++				<0x20800 0x00 0x00 0x01 &port_ge00 0x00 0x00 0x00 0x01>,
++				<0x20800 0x00 0x00 0x02 &port_ge00 0x00 0x00 0x00 0x02>,
++				<0x20800 0x00 0x00 0x03 &port_ge00 0x00 0x00 0x00 0x03>,
++				<0x20800 0x00 0x00 0x04 &port_ge00 0x00 0x00 0x00 0x00>,
++				<0x21000 0x00 0x00 0x01 &port_ge00 0x00 0x00 0x00 0x02>,
++				<0x21000 0x00 0x00 0x02 &port_ge00 0x00 0x00 0x00 0x03>,
++				<0x21000 0x00 0x00 0x03 &port_ge00 0x00 0x00 0x00 0x00>,
++				<0x21000 0x00 0x00 0x04 &port_ge00 0x00 0x00 0x00 0x01>,
++				<0x21800 0x00 0x00 0x01 &port_ge00 0x00 0x00 0x00 0x03>,
++				<0x21800 0x00 0x00 0x02 &port_ge00 0x00 0x00 0x00 0x00>,
++				<0x21800 0x00 0x00 0x03 &port_ge00 0x00 0x00 0x00 0x01>,
++				<0x21800 0x00 0x00 0x04 &port_ge00 0x00 0x00 0x00 0x02>,
++				<0x22000 0x00 0x00 0x01 &port_ge00 0x00 0x00 0x00 0x00>,
++				<0x22000 0x00 0x00 0x02 &port_ge00 0x00 0x00 0x00 0x01>,
++				<0x22000 0x00 0x00 0x03 &port_ge00 0x00 0x00 0x00 0x02>,
++				<0x22000 0x00 0x00 0x04 &port_ge00 0x00 0x00 0x00 0x03>;
++
++		/* pci-slot1-dsp, PCIe slot-1 */
++		pci@0,0 {
++			compatible = "pci11f8,4000", "pciclass,060400", "pciclass,0604";
++			device_type = "pci";
++			reg = <0x20000 0x00 0x00 0x00 0x00>;
++			bus-range = <0x03 0x03>;
++
++			#address-cells = <0x03>;
++			#size-cells = <0x02>;
++			ranges;
++		};
++
++		/* pci-slot2-dsp, PCIe slot-2 */
++		pci@1,0 {
++			compatible = "pci11f8,4000", "pciclass,060400", "pciclass,0604";
++			device_type = "pci";
++			reg = <0x20800 0x00 0x00 0x00 0x00>;
++			bus-range = <0x04 0x04>;
++
++			#address-cells = <0x03>;
++			#size-cells = <0x02>;
++			ranges;
++		};
++
++		/* pci-slot3-dsp, PCIe slot-3 */
++		pci@2,0 {
++			compatible = "pci11f8,4000", "pciclass,060400", "pciclass,0604";
++			device_type = "pci";
++			reg = <0x21000 0x00 0x00 0x00 0x00>;
++			bus-range = <0x05 0x05>;
++
++			#address-cells = <0x03>;
++			#size-cells = <0x02>;
++			ranges;
++		};
++
++		/* pci-slot4-dsp, PCIe slot-4 */
++		pci@3,0 {
++			compatible = "pci11f8,4000", "pciclass,060400", "pciclass,0604";
++			device_type = "pci";
++			reg = <0x21800 0x00 0x00 0x00 0x00>;
++			bus-range = <0x06 0x06>;
++
++			#address-cells = <0x03>;
++			#size-cells = <0x02>;
++			ranges;
++		};
++
++		/* pci-slot5-dsp, PCIe slot-5 */
++		pci@4,0 {
++			compatible = "pci11f8,4000", "pciclass,060400", "pciclass,0604";
++			device_type = "pci";
++			reg = <0x22000 0x00 0x00 0x00 0x00>;
++			bus-range = <0x07 0x07>;
++
++			#address-cells = <0x03>;
++			#size-cells = <0x02>;
++			ranges;
++		};
++
++	};
++};
++
++&port_ge00_die1 {
++	bus-range = <0x01 0x09>;
++
++	/*
++	 * Add mulptiple "reset-gpios" since there is no mechanismen to access
++	 * PERST# for devices behind the PCIe switch.
++	 * The "pwren" GPIO is from the wifi/bt chip which faces the same
++	 * problem without pci-pwrctrl integration.
++	 */
++	reset-gpios = <&pinctrl_ap 4 GPIO_ACTIVE_LOW>,
++		<&pinctrl_ap 6 GPIO_ACTIVE_LOW>,
++		<&pinctrl_ap 7 GPIO_ACTIVE_LOW>,
++		<&pinctrl_ap_die1 9 GPIO_ACTIVE_LOW>;
++	pwren-gpios = <&smc_gpio 13 GPIO_ACTIVE_HIGH>;
++
++	pci@0,0 {
++		device_type = "pci";
++		reg = <0x10000 0x00 0x00 0x00 0x00>;
++		bus-range = <0x02 0x09>;
++
++		#address-cells = <3>;
++		#size-cells = <2>;
++		ranges;
++
++		interrupt-controller;
++		#interrupt-cells = <1>;
++		interrupt-map-mask = <0xffff00 0x00 0x00 0x07>;
++		interrupt-map = <0x20000 0x00 0x00 0x01 &port_ge00_die1 0x00 0x00 0x00 0x00>,
++				<0x20000 0x00 0x00 0x02 &port_ge00_die1 0x00 0x00 0x00 0x01>,
++				<0x20000 0x00 0x00 0x03 &port_ge00_die1 0x00 0x00 0x00 0x02>,
++				<0x20000 0x00 0x00 0x04 &port_ge00_die1 0x00 0x00 0x00 0x03>,
++				<0x20800 0x00 0x00 0x01 &port_ge00_die1 0x00 0x00 0x00 0x01>,
++				<0x20800 0x00 0x00 0x02 &port_ge00_die1 0x00 0x00 0x00 0x02>,
++				<0x20800 0x00 0x00 0x03 &port_ge00_die1 0x00 0x00 0x00 0x03>,
++				<0x20800 0x00 0x00 0x04 &port_ge00_die1 0x00 0x00 0x00 0x00>,
++				<0x21000 0x00 0x00 0x01 &port_ge00_die1 0x00 0x00 0x00 0x02>,
++				<0x21000 0x00 0x00 0x02 &port_ge00_die1 0x00 0x00 0x00 0x03>,
++				<0x21000 0x00 0x00 0x03 &port_ge00_die1 0x00 0x00 0x00 0x00>,
++				<0x21000 0x00 0x00 0x04 &port_ge00_die1 0x00 0x00 0x00 0x01>,
++				<0x21800 0x00 0x00 0x01 &port_ge00_die1 0x00 0x00 0x00 0x03>,
++				<0x21800 0x00 0x00 0x02 &port_ge00_die1 0x00 0x00 0x00 0x00>,
++				<0x21800 0x00 0x00 0x03 &port_ge00_die1 0x00 0x00 0x00 0x01>,
++				<0x21800 0x00 0x00 0x04 &port_ge00_die1 0x00 0x00 0x00 0x02>,
++				<0x22000 0x00 0x00 0x01 &port_ge00_die1 0x00 0x00 0x00 0x00>,
++				<0x22000 0x00 0x00 0x02 &port_ge00_die1 0x00 0x00 0x00 0x01>,
++				<0x22000 0x00 0x00 0x03 &port_ge00_die1 0x00 0x00 0x00 0x02>,
++				<0x22000 0x00 0x00 0x04 &port_ge00_die1 0x00 0x00 0x00 0x03>,
++				<0x22800 0x00 0x00 0x01 &port_ge00_die1 0x00 0x00 0x00 0x01>,
++				<0x22800 0x00 0x00 0x02 &port_ge00_die1 0x00 0x00 0x00 0x02>,
++				<0x22800 0x00 0x00 0x03 &port_ge00_die1 0x00 0x00 0x00 0x03>,
++				<0x22800 0x00 0x00 0x04 &port_ge00_die1 0x00 0x00 0x00 0x00>,
++				<0x23000 0x00 0x00 0x01 &port_ge00_die1 0x00 0x00 0x00 0x02>,
++				<0x23000 0x00 0x00 0x02 &port_ge00_die1 0x00 0x00 0x00 0x03>,
++				<0x23000 0x00 0x00 0x03 &port_ge00_die1 0x00 0x00 0x00 0x00>,
++				<0x23000 0x00 0x00 0x04 &port_ge00_die1 0x00 0x00 0x00 0x01>;
++
++		/* pci-usba-dsp, internal USB-A port */
++		pci@0,0 {
++			compatible = "pci11f8,4000", "pciclass,060400", "pciclass,0604";
++			device_type = "pci";
++			reg = <0x20000 0x00 0x00 0x00 0x00>;
++			bus-range = <0x03 0x03>;
++
++			#address-cells = <3>;
++			#size-cells = <2>;
++			ranges;
++
++			interrupt-controller;
++			#interrupt-cells = <1>;
++			interrupt-map-mask = <0 0 0 7>;
++			interrupt-map = <0x30000 0x00 0x00 0x02 &port_ge00_die1 0x00 0x00 0x00 0x00>,
++					<0x30000 0x00 0x00 0x03 &port_ge00_die1 0x00 0x00 0x00 0x01>,
++					<0x30000 0x00 0x00 0x04 &port_ge00_die1 0x00 0x00 0x00 0x02>;
++
++			/* temporarily handled in the root port */
++			// reset-gpios = <&pinctrl_ap 6 GPIO_ACTIVE_LOW>;
++		};
++
++		/* pci-sata-dsp, internal AHCI controller */
++		pci@1,0 {
++			compatible = "pci11f8,4000", "pciclass,060400", "pciclass,0604";
++			device_type = "pci";
++			reg = <0x20800 0x00 0x00 0x00 0x00>;
++			bus-range = <0x04 0x04>;
++
++			#address-cells = <3>;
++			#size-cells = <2>;
++			ranges;
++
++			interrupt-controller;
++			#interrupt-cells = <1>;
++			interrupt-map-mask = <0 0 0 7>;
++			interrupt-map = <0x40000 0x00 0x00 0x01 &port_ge00_die1 0x00 0x00 0x00 0x00>,
++					<0x40000 0x00 0x00 0x02 &port_ge00_die1 0x00 0x00 0x00 0x01>,
++					<0x40000 0x00 0x00 0x03 &port_ge00_die1 0x00 0x00 0x00 0x02>;
++		};
++
++		/* pci-bio-dsp, I/O board USB-A ports */
++		pci@2,0 {
++			compatible = "pci11f8,4000", "pciclass,060400", "pciclass,0604";
++			device_type = "pci";
++			reg = <0x21000 0x00 0x00 0x00 0x00>;
++			bus-range = <0x05 0x05>;
++
++			#address-cells = <3>;
++			#size-cells = <2>;
++			ranges;
++
++			interrupt-controller;
++			#interrupt-cells = <1>;
++			interrupt-map-mask = <0 0 0 7>;
++			interrupt-map = <0x50000 0x00 0x00 0x01 &port_ge00_die1 0x00 0x00 0x00 0x01>,
++					<0x50000 0x00 0x00 0x02 &port_ge00_die1 0x00 0x00 0x00 0x02>,
++					<0x50000 0x00 0x00 0x04 &port_ge00_die1 0x00 0x00 0x00 0x00>;
++
++			/* temporarily handled in the root port */
++			// reset-gpios = <&pinctrl_ap 7 GPIO_ACTIVE_LOW>;
++		};
++
++		/* pci-lan-dsp, Qtion AQC113 10G etherner controller (0) */
++		pci@3,0 {
++			compatible = "pci11f8,4000", "pciclass,060400", "pciclass,0604";
++			device_type = "pci";
++			reg = <0x21800 0x00 0x00 0x00 0x00>;
++			bus-range = <0x06 0x06>;
++
++			#address-cells = <3>;
++			#size-cells = <2>;
++			ranges;
++
++			interrupt-controller;
++			#interrupt-cells = <1>;
++			interrupt-map-mask = <0 0 0 7>;
++			interrupt-map = <0x60000 0x00 0x00 0x01 &port_ge00_die1 0x00 0x00 0x00 0x02>,
++					<0x60000 0x00 0x00 0x03 &port_ge00_die1 0x00 0x00 0x00 0x00>,
++					<0x60000 0x00 0x00 0x04 &port_ge00_die1 0x00 0x00 0x00 0x01>;
++
++			ethernet0: ethernet@0,0 {
++				reg = <0x60000 0x0 0x0 0x0 0x0>;
++				/* To be filled by the loader */
++				local-mac-address = [00 10 18 00 00 00];
++			};
++		};
++
++		/* pci-lan-b-dsp, Qtion AQC113 10G etherner controller (1) */
++		pci@4,0 {
++			compatible = "pci11f8,4000", "pciclass,060400", "pciclass,0604";
++			device_type = "pci";
++			reg = <0x22000 0x00 0x00 0x00 0x00>;
++			bus-range = <0x07 0x07>;
++
++			#address-cells = <3>;
++			#size-cells = <2>;
++			ranges;
++
++			interrupt-controller;
++			#interrupt-cells = <1>;
++			interrupt-map-mask = <0 0 0 7>;
++			interrupt-map = <0x70000 0x00 0x00 0x02 &port_ge00_die1 0x00 0x00 0x00 0x00>,
++					<0x70000 0x00 0x00 0x03 &port_ge00_die1 0x00 0x00 0x00 0x01>,
++					<0x70000 0x00 0x00 0x04 &port_ge00_die1 0x00 0x00 0x00 0x02>;
++
++			ethernet1: ethernet@0,0 {
++				reg = <0x70000 0x0 0x0 0x0 0x0>;
++				/* To be filled by the loader */
++				local-mac-address = [00 10 18 00 00 00];
++			};
++		};
++
++		/* pci-wifibt-dsp, Broadcom BCM4388 Wlan/BT */
++		pci@5,0 {
++			compatible = "pci11f8,4000", "pciclass,060400", "pciclass,0604";
++			device_type = "pci";
++			reg = <0x22800 0x00 0x00 0x00 0x00>;
++			bus-range = <0x08 0x08>;
++
++			#address-cells = <3>;
++			#size-cells = <2>;
++			ranges;
++
++			interrupt-controller;
++			#interrupt-cells = <1>;
++			interrupt-map-mask = <0 0 0 7>;
++			interrupt-map = <0x80000 0x00 0x00 0x01 &port_ge00_die1 0x00 0x00 0x00 0x00>,
++					<0x80000 0x00 0x00 0x02 &port_ge00_die1 0x00 0x00 0x00 0x01>,
++					<0x80000 0x00 0x00 0x03 &port_ge00_die1 0x00 0x00 0x00 0x02>,
++					<0x80100 0x00 0x00 0x01 &port_ge00_die1 0x00 0x00 0x00 0x00>,
++					<0x80100 0x00 0x00 0x02 &port_ge00_die1 0x00 0x00 0x00 0x01>,
++					<0x80100 0x00 0x00 0x03 &port_ge00_die1 0x00 0x00 0x00 0x02>;
++
++			/* temporarily handled in the root port */
++			// reset-gpios = <&pinctrl_ap 4 GPIO_ACTIVE_LOW>;
++			// pwren-gpios = <&smc_gpio 13 GPIO_ACTIVE_HIGH>;
++
++			wifi0: wifi@0,0 {
++				reg = <0x80000 0x0 0x0 0x0 0x0>;
++				compatible = "pci14e4,4433";
++				brcm,board-type = "apple,sumatra";
++				apple,antenna-sku = "XX";
++				/* To be filled by the loader */
++				local-mac-address = [00 10 18 00 00 10];
++			};
++
++			bluetooth0: network@0,1 {
++				compatible = "pci14e4,5f71";
++				brcm,board-type = "apple,sumatra";
++				reg = <0x80100 0x0 0x0 0x0 0x0>;
++				/* To be filled by the loader */
++				local-bd-address = [00 00 00 00 00 00];
++			};
++		};
++
++		/* pci-slot6-dsp, PCIe slot-6 */
++		pci@6,0 {
++			compatible = "pci11f8,4000", "pciclass,060400", "pciclass,0604";
++			device_type = "pci";
++			reg = <0x23000 0x00 0x00 0x00 0x00>;
++			bus-range = <0x09 0x09>;
++
++			#address-cells = <3>;
++			#size-cells = <2>;
++			ranges;
++		};
++	};
++};
++
++&pcie_ge {
++	status = "ok";
++};
++
++&pcie_ge_dart {
++	status = "ok";
++};
++
++&pcie_ge_die1 {
++	status = "ok";
++};
++
++&pcie_ge_dart_die1 {
++	status = "ok";
++};
++
+ /*
+  * Delete unused PCIe nodes, the Mac Pro uses slightly different PCIe
+  * controllers with a single port connected to a PM40100 PCIe switch
+diff --git a/arch/arm64/boot/dts/apple/t6022-pcie-ge.dtsi b/arch/arm64/boot/dts/apple/t6022-pcie-ge.dtsi
+new file mode 100644
+index 000000000000..e49d27355c32
+--- /dev/null
++++ b/arch/arm64/boot/dts/apple/t6022-pcie-ge.dtsi
+@@ -0,0 +1,27 @@
++// SPDX-License-Identifier: GPL-2.0+ OR MIT
++/*
++ * Include PCIe-GE nodes presen on both dies of T6022 (M2 Ultra) in the
++ * Mac Pro (2023).
++ *
++ * Copyright The Asahi Linux Contributors
++ */
++
++#define DIE
++#define DIE_NO 0
++#define SOC_NODE die0
++
++#include "t602x-pcie-ge.dtsi"
++
++#undef DIE
++#undef DIE_NO
++#undef SOC_NODE
++
++#define DIE _die1
++#define DIE_NO 1
++#define SOC_NODE die1
++
++#include "t602x-pcie-ge.dtsi"
++
++#undef DIE
++#undef DIE_NO
++#undef SOC_NODE
+diff --git a/arch/arm64/boot/dts/apple/t6022.dtsi b/arch/arm64/boot/dts/apple/t6022.dtsi
+index d803edbc4440..26850a1441c4 100644
+--- a/arch/arm64/boot/dts/apple/t6022.dtsi
++++ b/arch/arm64/boot/dts/apple/t6022.dtsi
+@@ -366,4 +366,10 @@ &gpu {
+ 	apple,ppm-kp = <0.15>;
+ };
+ 
++&pinctrl_ap_die1 {
++	pcie_ge_pins_die1: pcie-ge1-pins {
++		pinmux = <APPLE_PINMUX(8, 1)>;
++	};
++};
++
+ #include "hwmon-common.dtsi"
+diff --git a/arch/arm64/boot/dts/apple/t602x-gpio-pins.dtsi b/arch/arm64/boot/dts/apple/t602x-gpio-pins.dtsi
+index e41b6475f792..c5de99bd2e5c 100644
+--- a/arch/arm64/boot/dts/apple/t602x-gpio-pins.dtsi
++++ b/arch/arm64/boot/dts/apple/t602x-gpio-pins.dtsi
+@@ -78,4 +78,8 @@ pcie_pins: pcie-pins {
+ 				<APPLE_PINMUX(2, 1)>,
+ 				<APPLE_PINMUX(3, 1)>;
+ 	};
++
++	pcie_ge_pins: pcie-ge-pins {
++		pinmux = <APPLE_PINMUX(8, 1)>;
++	};
+ };
+diff --git a/arch/arm64/boot/dts/apple/t602x-pcie-ge.dtsi b/arch/arm64/boot/dts/apple/t602x-pcie-ge.dtsi
+new file mode 100644
+index 000000000000..3da388c9ae58
+--- /dev/null
++++ b/arch/arm64/boot/dts/apple/t602x-pcie-ge.dtsi
+@@ -0,0 +1,89 @@
++// SPDX-License-Identifier: GPL-2.0+ OR MIT
++/*
++ * PCIe-GE Nodes present on both dies of a T6022 (M2 Ultra) and M2 Pro/Max but
++ * only used on T6022 in the Mac Pro (2023).
++ *
++ * Copyright The Asahi Linux Contributors
++ */
++
++&SOC_NODE {
++	DIE_NODE(pcie_ge): pcie@1680000000 {
++		compatible = "apple,t6020-pcie-ge", "apple,t6020-pcie";
++		device_type = "pci";
++
++		reg = <0x16 0x80000000 0x0 0x1000000>,	/* config */
++			<0x16 0x91000000 0x0 0x4000>,	/* rc */
++			<0x16 0x94008000 0x0 0x4000>,	/* port0 */
++			<0x16 0x9e01c000 0x0 0x4000>,	/* phy0 */
++			<0x16 0x9401c000 0x0 0x1000>;	/* ltssm0 */
++		reg-names = "config", "rc", "port0", "phy0", "ltssm0";
++
++		interrupt-parent = <&aic>;
++		interrupts = <AIC_IRQ DIE_NO 1356 IRQ_TYPE_LEVEL_HIGH>;
++
++		msi-controller;
++		msi-parent = <&DIE_NODE(pcie_ge)>;
++		msi-ranges = <&aic AIC_IRQ DIE_NO 1672 IRQ_TYPE_EDGE_RISING 128>;
++
++		iommu-map = <0x000 &DIE_NODE(pcie_ge_dart) 0 0>,
++			    <0x100 &DIE_NODE(pcie_ge_dart) 1 1>,
++			    <0x200 &DIE_NODE(pcie_ge_dart) 2 2>,
++			    <0x300 &DIE_NODE(pcie_ge_dart) 3 3>,
++			    <0x400 &DIE_NODE(pcie_ge_dart) 4 4>,
++			    <0x500 &DIE_NODE(pcie_ge_dart) 5 5>,
++			    <0x600 &DIE_NODE(pcie_ge_dart) 6 6>,
++			    <0x700 &DIE_NODE(pcie_ge_dart) 7 7>,
++			    <0x800 &DIE_NODE(pcie_ge_dart) 8 8>,
++			    <0x900 &DIE_NODE(pcie_ge_dart) 9 9>,
++			    <0xa00 &DIE_NODE(pcie_ge_dart) 10 10>,
++			    <0xb00 &DIE_NODE(pcie_ge_dart) 11 11>,
++			    <0xc00 &DIE_NODE(pcie_ge_dart) 12 12>,
++			    <0xd00 &DIE_NODE(pcie_ge_dart) 13 13>,
++			    <0xe00 &DIE_NODE(pcie_ge_dart) 14 14>,
++			    <0xf00 &DIE_NODE(pcie_ge_dart) 15 15>;
++		iommu-map-mask = <0xff00>;
++
++		bus-range = <0 15>;
++		#address-cells = <3>;
++		#size-cells = <2>;
++		ranges = <0x43000000 0x18 0x00000000 0x18 0x00000000 0x4 0x00000000>,
++			 <0x02000000 0x00 0x80000000 0x17 0x80000000 0x0 0x80000000>;
++
++		power-domains = <&DIE_NODE(ps_apcie_ge_sys)>;
++		pinctrl-0 = <&DIE_NODE(pcie_ge_pins)>;
++		pinctrl-names = "default";
++
++		dma-coherent;
++
++		status = "disabled";
++
++		DIE_NODE(port_ge00): pci@0,0 {
++			device_type = "pci";
++			reg = <0x0 0x0 0x0 0x0 0x0>;
++			reset-gpios = <&DIE_NODE(pinctrl_ap) 9 GPIO_ACTIVE_LOW>;
++
++			#address-cells = <3>;
++			#size-cells = <2>;
++			ranges;
++
++			interrupt-controller;
++			#interrupt-cells = <1>;
++
++			interrupt-map-mask = <0 0 0 7>;
++			interrupt-map = <0 0 0 1 &DIE_NODE(port_ge00) 0 0 0 0>,
++					<0 0 0 2 &DIE_NODE(port_ge00) 0 0 0 1>,
++					<0 0 0 3 &DIE_NODE(port_ge00) 0 0 0 2>,
++					<0 0 0 4 &DIE_NODE(port_ge00) 0 0 0 3>;
++		};
++	};
++
++	DIE_NODE(pcie_ge_dart): iommu@1694000000 {
++		compatible = "apple,t6020-dart", "apple,t8110-dart";
++		reg = <0x16 0x94000000 0x0 0x4000>;
++		#iommu-cells = <1>;
++		interrupt-parent = <&aic>;
++		interrupts = <AIC_IRQ DIE_NO 1357 IRQ_TYPE_LEVEL_HIGH>;
++		power-domains = <&DIE_NODE(ps_apcie_ge_sys)>;
++		status = "disabled";
++	};
++};
+-- 
+2.47.3
+

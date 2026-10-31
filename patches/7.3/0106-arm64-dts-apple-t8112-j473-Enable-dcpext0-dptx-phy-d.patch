@@ -1,0 +1,83 @@
+From 9816bc75ce86d926708d0331bb57da6af6ae1f74 Mon Sep 17 00:00:00 2001
+From: Janne Grunau <j@jannau.net>
+Date: Sat, 28 Oct 2023 23:40:47 +0200
+Subject: [PATCH] arm64: dts: apple: t8112-j473: Enable
+ dcpext0/dptx-phy/dp2hdmi
+
+After all parts are in place enable DCP on the M2 Mac Mini for HDMI
+output. Use dcpext for HDMI out
+
+dcp on t8112 and t602x does not wake up after sleep + reset but dcpext*
+does. Use dcpext0 for sharing the code with M1* devices.
+My interpretation of the tea leaves from Apple's marketing department
+suggests that dcpext is more capable (6k 60Hz vs 5k 60Hz) so use dcpext
+as long as only one is used.
+
+Signed-off-by: Janne Grunau <j@jannau.net>
+(cherry picked from commit 994896ac1738f853154098fe9c750a3013bb6bc5)
+---
+ arch/arm64/boot/dts/apple/t8112-j473.dts | 36 ++++++++++++++++++++++--
+ 1 file changed, 34 insertions(+), 2 deletions(-)
+
+diff --git a/arch/arm64/boot/dts/apple/t8112-j473.dts b/arch/arm64/boot/dts/apple/t8112-j473.dts
+index 886325ebe24b..02d3b7fe4cee 100644
+--- a/arch/arm64/boot/dts/apple/t8112-j473.dts
++++ b/arch/arm64/boot/dts/apple/t8112-j473.dts
+@@ -19,20 +19,52 @@ / {
+ 
+ 	aliases {
+ 		bluetooth0 = &bluetooth0;
++		/delete-property/ dcp;
++		dcpext = &dcpext;
+ 		ethernet0 = &ethernet0;
+ 		wifi0 = &wifi0;
+ 	};
+ };
+ 
+ &framebuffer0 {
+-	power-domains = <&ps_disp0_cpu0>, <&ps_dptx_ext_phy>;
++	power-domains = <&ps_dispext_cpu0>, <&ps_dptx_ext_phy>;
++};
++
++&dptxphy {
++	status = "okay";
+ };
+ 
+-/* disable dcp until it is supported */
+ &dcp {
+ 	status = "disabled";
+ };
+ 
++&display {
++	iommus = <&dispext0_dart 0 0x0 0x0 0xf 0xffff0000>;
++};
++&dispext0_dart {
++	status = "okay";
++};
++&dcpext_dart {
++	status = "okay";
++};
++&dcpext_mbox {
++	status = "okay";
++};
++&dcpext {
++	status = "okay";
++	apple,connector-type = "HDMI-A";
++
++	/*  HDMI HPD gpio, used as interrupt*/
++	hdmi-hpd-gpios = <&pinctrl_aop 49 GPIO_ACTIVE_HIGH>;
++
++	hdmi-pwren-gpios = <&smc_gpio 21 GPIO_ACTIVE_HIGH>;
++	dp2hdmi-pwren-gpios = <&smc_gpio 22 GPIO_ACTIVE_HIGH>;
++
++	phys = <&dptxphy>;
++	phy-names = "dp-phy";
++	apple,dptx-phy = <5>;
++};
++
+ /*
+  * Keep the power-domains used for the HDMI port on.
+  */
+-- 
+2.47.3
+

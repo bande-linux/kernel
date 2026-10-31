@@ -1,0 +1,32 @@
+From 8484ec9de1714d3c0405d4c96d9dcb647391f6fc Mon Sep 17 00:00:00 2001
+From: Janne Grunau <j@jannau.net>
+Date: Sat, 27 Apr 2024 12:57:52 +0200
+Subject: [PATCH] arm64: apple: t8103-j274: Enable sio explicitly
+
+To be removed after m1n1 does this after proper setup.
+
+Signed-off-by: Janne Grunau <j@jannau.net>
+(cherry picked from commit be5f064b7987ba7a3efa9099f6af31a415f1184e)
+---
+ arch/arm64/boot/dts/apple/t8103-j274.dts | 5 +++++
+ 1 file changed, 5 insertions(+)
+
+diff --git a/arch/arm64/boot/dts/apple/t8103-j274.dts b/arch/arm64/boot/dts/apple/t8103-j274.dts
+index a5039e9325a7..2d491408f32c 100644
+--- a/arch/arm64/boot/dts/apple/t8103-j274.dts
++++ b/arch/arm64/boot/dts/apple/t8103-j274.dts
+@@ -27,6 +27,11 @@ &dcp {
+ 	apple,connector-type = "HDMI-A";
+ };
+ 
++/* remove once m1n1 enables sio nodes after setup */
++&sio {
++	status = "okay";
++};
++
+ &dpaudio0 {
+ 	status = "okay";
+ };
+-- 
+2.47.3
+

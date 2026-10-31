@@ -1,0 +1,32 @@
+From 1a059be49db0308e256dfbc4b6ed706f610d0bf4 Mon Sep 17 00:00:00 2001
+From: Yureka Lilian <yureka@cyberchaos.dev>
+Date: Sun, 5 Jul 2026 15:17:24 +0200
+Subject: [PATCH] dt-bindings: power: apple,pmgr-pwrstate: Add t8132 compatible
+
+The device power state management of the PMGR blocks on Apple's t8132
+SoC (M4) is compatible with the existing driver.
+Add "apple,t8132-pmgr-pwrstate" as SoC specific compatible under the
+existing "apple,t8103-pmgr-pwrstate" used by the driver.
+
+Signed-off-by: Yureka Lilian <yureka@cyberchaos.dev>
+Acked-by: Krzysztof Kozlowski <krzysztof.kozlowski@oss.qualcomm.com>
+(cherry picked from commit e570e6246ecb4733e3988f2936efd2b77bf11514)
+---
+ Documentation/devicetree/bindings/power/apple,pmgr-pwrstate.yaml | 1 +
+ 1 file changed, 1 insertion(+)
+
+diff --git a/Documentation/devicetree/bindings/power/apple,pmgr-pwrstate.yaml b/Documentation/devicetree/bindings/power/apple,pmgr-pwrstate.yaml
+index e269f433524e..b24ea8e54e11 100644
+--- a/Documentation/devicetree/bindings/power/apple,pmgr-pwrstate.yaml
++++ b/Documentation/devicetree/bindings/power/apple,pmgr-pwrstate.yaml
+@@ -48,6 +48,7 @@ properties:
+               - apple,t6030-pmgr-pwrstate
+               - apple,t6031-pmgr-pwrstate
+               - apple,t8122-pmgr-pwrstate
++              - apple,t8132-pmgr-pwrstate
+           - const: apple,t8103-pmgr-pwrstate
+ 
+   reg:
+-- 
+2.47.3
+

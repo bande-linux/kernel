@@ -1,0 +1,29 @@
+From 236a1121ab47a5133e10a99ae48ebfa22e5dfc2b Mon Sep 17 00:00:00 2001
+From: Hector Martin <marcan@marcan.st>
+Date: Sun, 6 Feb 2022 21:22:29 +0900
+Subject: [PATCH] arm64: dts: apple: t8103: Add PCI power enable GPIOs
+
+t8103:
+- WLAN (SMC PMU GPIO #13)
+
+Signed-off-by: Hector Martin <marcan@marcan.st>
+(cherry picked from commit 8ba954bbe00a0658daff7f8aba7c77e06c63a947)
+---
+ arch/arm64/boot/dts/apple/t8103-jxxx.dtsi | 1 +
+ 1 file changed, 1 insertion(+)
+
+diff --git a/arch/arm64/boot/dts/apple/t8103-jxxx.dtsi b/arch/arm64/boot/dts/apple/t8103-jxxx.dtsi
+index 686fb1dd215d..96121fdb8468 100644
+--- a/arch/arm64/boot/dts/apple/t8103-jxxx.dtsi
++++ b/arch/arm64/boot/dts/apple/t8103-jxxx.dtsi
+@@ -205,6 +205,7 @@ atcphy1_usb3: endpoint {
+  */
+ &port00 {
+ 	bus-range = <1 1>;
++	pwren-gpios = <&smc_gpio 13 GPIO_ACTIVE_HIGH>;
+ 	wifi0: wifi@0,0 {
+ 		compatible = "pci14e4,4425";
+ 		reg = <0x10000 0x0 0x0 0x0 0x0>;
+-- 
+2.47.3
+

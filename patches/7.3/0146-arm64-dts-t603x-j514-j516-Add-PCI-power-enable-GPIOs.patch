@@ -1,0 +1,34 @@
+From a6e4fd25f2be3d6d1850ccaf73fb26ad804f5c29 Mon Sep 17 00:00:00 2001
+From: Yureka <yuka@yuka.dev>
+Date: Sat, 30 May 2026 14:31:07 +0200
+Subject: [PATCH] arm64: dts: t603x-j514-j516: Add PCI power enable GPIOs
+
+Signed-off-by: Yureka <yuka@yuka.dev>
+(cherry picked from commit 9127d49a5649a3aa3a7e115edf6cc7b76716c293)
+---
+ arch/arm64/boot/dts/apple/t603x-j514-j516.dtsi | 2 ++
+ 1 file changed, 2 insertions(+)
+
+diff --git a/arch/arm64/boot/dts/apple/t603x-j514-j516.dtsi b/arch/arm64/boot/dts/apple/t603x-j514-j516.dtsi
+index dd5ade45a829..96b0ac3cd3ee 100644
+--- a/arch/arm64/boot/dts/apple/t603x-j514-j516.dtsi
++++ b/arch/arm64/boot/dts/apple/t603x-j514-j516.dtsi
+@@ -81,6 +81,7 @@ &nco_clkref {
+ &port00 {
+ 	/* WLAN */
+ 	bus-range = <1 1>;
++	pwren-gpios = <&smc_gpio 19 GPIO_ACTIVE_HIGH>;
+ 	wifi0: wifi@0,0 {
+ 		compatible = "pci14e4,4433";
+ 		reg = <0x10000 0x0 0x0 0x0 0x0>;
+@@ -100,6 +101,7 @@ bluetooth0: bluetooth@0,1 {
+ &port01 {
+ 	/* SD card reader */
+ 	bus-range = <2 2>;
++	pwren-gpios = <&smc_gpio 25 GPIO_ACTIVE_HIGH>;
+ 	status = "okay";
+ 	sdhci0: mmc@0,0 {
+ 		compatible = "pci17a0,9755";
+-- 
+2.47.3
+

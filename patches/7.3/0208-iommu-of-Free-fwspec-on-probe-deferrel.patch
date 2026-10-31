@@ -1,0 +1,33 @@
+From ccc2d81cc230a535059431ba7278e7b82e790451 Mon Sep 17 00:00:00 2001
+From: Janne Grunau <j@jannau.net>
+Date: Sun, 24 Mar 2024 18:06:46 +0100
+Subject: [PATCH] iommu/of: Free fwspec on probe deferrel
+
+For devices with multiple iommus of_iommu_configure_device() potentially
+inits the fwspec for one of the iommus but another iommu device might
+have not yet been probe resulting in -EPROBE_DEFER. Clear the fwspec in
+such cases to ensure the next of_iommu_configure() call retries to
+configure all iommus.
+
+Signed-off-by: Janne Grunau <j@jannau.net>
+(cherry picked from commit 49392a0fc236987b70cbd87afbd287bbf494ce0c)
+---
+ drivers/iommu/of_iommu.c | 2 ++
+ 1 file changed, 2 insertions(+)
+
+diff --git a/drivers/iommu/of_iommu.c b/drivers/iommu/of_iommu.c
+index a18bb60f6f3d..926c4de0c72f 100644
+--- a/drivers/iommu/of_iommu.c
++++ b/drivers/iommu/of_iommu.c
+@@ -145,6 +145,8 @@ int of_iommu_configure(struct device *dev, struct device_node *master_np,
+ 		of_pci_check_device_ats(dev, master_np);
+ 	} else {
+ 		err = of_iommu_configure_device(master_np, dev, id);
++		if (err == -EPROBE_DEFER)
++			iommu_fwspec_free(dev);
+ 	}
+ 
+ 	if (err && dev_iommu_present)
+-- 
+2.47.3
+

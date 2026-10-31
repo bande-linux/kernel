@@ -1,0 +1,26 @@
+From eca4b60441fc1160df9eca24f024edfd107925db Mon Sep 17 00:00:00 2001
+From: Janne Grunau <j@jannau.net>
+Date: Wed, 21 Oct 2026 19:44:07 +0200
+Subject: [PATCH] fixup! arm64: dts: apple: Add pmgr-misc nodes to t60xx
+
+Signed-off-by: Janne Grunau <j@jannau.net>
+(cherry picked from commit 9684214a820435ece12499a41288e7c8bb01cace)
+---
+ arch/arm64/boot/dts/apple/t600x-die0.dtsi | 1 +
+ 1 file changed, 1 insertion(+)
+
+diff --git a/arch/arm64/boot/dts/apple/t600x-die0.dtsi b/arch/arm64/boot/dts/apple/t600x-die0.dtsi
+index 83451df18ac2..d60b94a160d2 100644
+--- a/arch/arm64/boot/dts/apple/t600x-die0.dtsi
++++ b/arch/arm64/boot/dts/apple/t600x-die0.dtsi
+@@ -29,6 +29,7 @@ pmgr_misc: power-management@28e20c000 {
+ 		reg = <0x2 0x8e20c000 0 0x400>,
+ 			<0x2 0x8e20c800 0 0x400>;
+ 		reg-names = "fabric-ps", "dcs-ps";
++		apple,dcs-min-ps = <7>;
+ 	};
+ 
+ 	pmp_dart: iommu@28e300000 {
+-- 
+2.47.3
+

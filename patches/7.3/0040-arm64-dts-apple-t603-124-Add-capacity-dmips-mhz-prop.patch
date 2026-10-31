@@ -1,0 +1,149 @@
+From 947aa4d7c8d72937be0e3bc80971d74d943558dc Mon Sep 17 00:00:00 2001
+From: Yureka <yuka@yuka.dev>
+Date: Thu, 4 Jun 2026 14:13:51 +0200
+Subject: [PATCH] arm64: dts: apple: t603[124]: Add "capacity-dmips-mhz"
+ properties
+
+Values determined using coremark.
+
+Signed-off-by: Yureka <yuka@yuka.dev>
+(cherry picked from commit 589af325db5ba7809bc4bcade307d55d74a9d860)
+---
+ arch/arm64/boot/dts/apple/t6031-base.dtsi | 16 ++++++++++++++++
+ 1 file changed, 16 insertions(+)
+
+diff --git a/arch/arm64/boot/dts/apple/t6031-base.dtsi b/arch/arm64/boot/dts/apple/t6031-base.dtsi
+index 87b579410762..55891125010e 100644
+--- a/arch/arm64/boot/dts/apple/t6031-base.dtsi
++++ b/arch/arm64/boot/dts/apple/t6031-base.dtsi
+@@ -84,6 +84,7 @@ cpu_e00: cpu@0 {
+ 			i-cache-size = <0x20000>;
+ 			d-cache-size = <0x10000>;
+ 			operating-points-v2 = <&sawtooth_opp>;
++			capacity-dmips-mhz = <870>;
+ 			performance-domains = <&cpufreq_e>;
+ 		};
+ 
+@@ -97,6 +98,7 @@ cpu_e01: cpu@1 {
+ 			i-cache-size = <0x20000>;
+ 			d-cache-size = <0x10000>;
+ 			operating-points-v2 = <&sawtooth_opp>;
++			capacity-dmips-mhz = <870>;
+ 			performance-domains = <&cpufreq_e>;
+ 		};
+ 
+@@ -110,6 +112,7 @@ cpu_e02: cpu@2 {
+ 			i-cache-size = <0x20000>;
+ 			d-cache-size = <0x10000>;
+ 			operating-points-v2 = <&sawtooth_opp>;
++			capacity-dmips-mhz = <870>;
+ 			performance-domains = <&cpufreq_e>;
+ 		};
+ 
+@@ -123,6 +126,7 @@ cpu_e03: cpu@3 {
+ 			i-cache-size = <0x20000>;
+ 			d-cache-size = <0x10000>;
+ 			operating-points-v2 = <&sawtooth_opp>;
++			capacity-dmips-mhz = <870>;
+ 			performance-domains = <&cpufreq_e>;
+ 		};
+ 
+@@ -136,6 +140,7 @@ cpu_p00: cpu@10100 {
+ 			i-cache-size = <0x30000>;
+ 			d-cache-size = <0x20000>;
+ 			operating-points-v2 = <&everest_opp>;
++			capacity-dmips-mhz = <1024>;
+ 			performance-domains = <&cpufreq_p0>;
+ 		};
+ 
+@@ -149,6 +154,7 @@ cpu_p01: cpu@10101 {
+ 			i-cache-size = <0x30000>;
+ 			d-cache-size = <0x20000>;
+ 			operating-points-v2 = <&everest_opp>;
++			capacity-dmips-mhz = <1024>;
+ 			performance-domains = <&cpufreq_p0>;
+ 		};
+ 
+@@ -162,6 +168,7 @@ cpu_p02: cpu@10102 {
+ 			i-cache-size = <0x30000>;
+ 			d-cache-size = <0x20000>;
+ 			operating-points-v2 = <&everest_opp>;
++			capacity-dmips-mhz = <1024>;
+ 			performance-domains = <&cpufreq_p0>;
+ 		};
+ 
+@@ -175,6 +182,7 @@ cpu_p03: cpu@10103 {
+ 			i-cache-size = <0x30000>;
+ 			d-cache-size = <0x20000>;
+ 			operating-points-v2 = <&everest_opp>;
++			capacity-dmips-mhz = <1024>;
+ 			performance-domains = <&cpufreq_p0>;
+ 		};
+ 
+@@ -188,6 +196,7 @@ cpu_p04: cpu@10104 {
+ 			i-cache-size = <0x30000>;
+ 			d-cache-size = <0x20000>;
+ 			operating-points-v2 = <&everest_opp>;
++			capacity-dmips-mhz = <1024>;
+ 			performance-domains = <&cpufreq_p0>;
+ 		};
+ 
+@@ -201,6 +210,7 @@ cpu_p05: cpu@10105 {
+ 			i-cache-size = <0x30000>;
+ 			d-cache-size = <0x20000>;
+ 			operating-points-v2 = <&everest_opp>;
++			capacity-dmips-mhz = <1024>;
+ 			performance-domains = <&cpufreq_p0>;
+ 		};
+ 
+@@ -214,6 +224,7 @@ cpu_p10: cpu@10200 {
+ 			i-cache-size = <0x30000>;
+ 			d-cache-size = <0x20000>;
+ 			operating-points-v2 = <&everest_opp>;
++			capacity-dmips-mhz = <1024>;
+ 			performance-domains = <&cpufreq_p1>;
+ 		};
+ 
+@@ -227,6 +238,7 @@ cpu_p11: cpu@10201 {
+ 			i-cache-size = <0x30000>;
+ 			d-cache-size = <0x20000>;
+ 			operating-points-v2 = <&everest_opp>;
++			capacity-dmips-mhz = <1024>;
+ 			performance-domains = <&cpufreq_p1>;
+ 		};
+ 
+@@ -240,6 +252,7 @@ cpu_p12: cpu@10202 {
+ 			i-cache-size = <0x30000>;
+ 			d-cache-size = <0x20000>;
+ 			operating-points-v2 = <&everest_opp>;
++			capacity-dmips-mhz = <1024>;
+ 			performance-domains = <&cpufreq_p1>;
+ 		};
+ 
+@@ -253,6 +266,7 @@ cpu_p13: cpu@10203 {
+ 			i-cache-size = <0x30000>;
+ 			d-cache-size = <0x20000>;
+ 			operating-points-v2 = <&everest_opp>;
++			capacity-dmips-mhz = <1024>;
+ 			performance-domains = <&cpufreq_p1>;
+ 		};
+ 
+@@ -266,6 +280,7 @@ cpu_p14: cpu@10204 {
+ 			i-cache-size = <0x30000>;
+ 			d-cache-size = <0x20000>;
+ 			operating-points-v2 = <&everest_opp>;
++			capacity-dmips-mhz = <1024>;
+ 			performance-domains = <&cpufreq_p1>;
+ 		};
+ 
+@@ -279,6 +294,7 @@ cpu_p15: cpu@10205 {
+ 			i-cache-size = <0x30000>;
+ 			d-cache-size = <0x20000>;
+ 			operating-points-v2 = <&everest_opp>;
++			capacity-dmips-mhz = <1024>;
+ 			performance-domains = <&cpufreq_p1>;
+ 		};
+ 
+-- 
+2.47.3
+

@@ -1,0 +1,54 @@
+From 633d99a5ad6e1d4a741a2b984b616299887a2972 Mon Sep 17 00:00:00 2001
+From: Janne Grunau <j@jannau.net>
+Date: Mon, 2 Jan 2023 19:20:55 +0100
+Subject: [PATCH] soc: apple: rtkit: Add devm_apple_rtkit_free()
+
+To be used to free a RTKit interface while the associated device remains
+alive. Probably useless since it's unknown how or if RTKit based
+co-processors can be restarted.
+
+Signed-off-by: Janne Grunau <j@jannau.net>
+(cherry picked from commit 021f569506abb9206d169be895260c47009a057e)
+---
+ drivers/soc/apple/rtkit.c       | 6 ++++++
+ include/linux/soc/apple/rtkit.h | 7 +++++++
+ 2 files changed, 13 insertions(+)
+
+diff --git a/drivers/soc/apple/rtkit.c b/drivers/soc/apple/rtkit.c
+index a3fdac8f6f06..6b0ffb1201d6 100644
+--- a/drivers/soc/apple/rtkit.c
++++ b/drivers/soc/apple/rtkit.c
+@@ -974,6 +974,12 @@ struct apple_rtkit *devm_apple_rtkit_init(struct device *dev, void *cookie,
+ }
+ EXPORT_SYMBOL_GPL(devm_apple_rtkit_init);
+ 
++void devm_apple_rtkit_free(struct device *dev, struct apple_rtkit *rtk)
++{
++	devm_release_action(dev, apple_rtkit_free_wrapper, rtk);
++}
++EXPORT_SYMBOL_GPL(devm_apple_rtkit_free);
++
+ MODULE_LICENSE("Dual MIT/GPL");
+ MODULE_AUTHOR("Sven Peter <sven@svenpeter.dev>");
+ MODULE_DESCRIPTION("Apple RTKit driver");
+diff --git a/include/linux/soc/apple/rtkit.h b/include/linux/soc/apple/rtkit.h
+index bda3c528b515..d87a14dd99d2 100644
+--- a/include/linux/soc/apple/rtkit.h
++++ b/include/linux/soc/apple/rtkit.h
+@@ -78,6 +78,13 @@ struct apple_rtkit;
+ struct apple_rtkit *devm_apple_rtkit_init(struct device *dev, void *cookie,
+ 					  const char *mbox_name, int mbox_idx,
+ 					  const struct apple_rtkit_ops *ops);
++/*
++ * Frees internal RTKit state allocated by devm_apple_rtkit_init().
++ *
++ * @dev:	Pointer to the device node this coprocessor is assocated with
++ * @rtk:	Internal RTKit state initialized by devm_apple_rtkit_init()
++ */
++void devm_apple_rtkit_free(struct device *dev, struct apple_rtkit *rtk);
+ 
+ /*
+  * Non-devm version of devm_apple_rtkit_init. Must be freed with
+-- 
+2.47.3
+

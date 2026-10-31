@@ -1,0 +1,84 @@
+From faf5ea77a4eaf3374231657fa5d2d691014dfd98 Mon Sep 17 00:00:00 2001
+From: Hector Martin <marcan@marcan.st>
+Date: Tue, 11 Apr 2023 02:34:01 +0900
+Subject: [PATCH] arm64: dts: apple: Add identity dma-ranges mapping
+
+Without this, the OF core ends up limiting all DMA masks to the default
+32-bit, since that runs before drivers set up the proper DMA mask.
+
+Skipping the highest page because it is impossible to express a full
+64-bit range in the DT.
+
+Signed-off-by: Hector Martin <marcan@marcan.st>
+(cherry picked from commit b60f1dddeb800a013841a0fa7d64e054cfc9c9a9)
+---
+ arch/arm64/boot/dts/apple/t6001.dtsi | 2 ++
+ arch/arm64/boot/dts/apple/t6002.dtsi | 4 ++++
+ arch/arm64/boot/dts/apple/t8103.dtsi | 2 ++
+ arch/arm64/boot/dts/apple/t8112.dtsi | 2 ++
+ 4 files changed, 10 insertions(+)
+
+diff --git a/arch/arm64/boot/dts/apple/t6001.dtsi b/arch/arm64/boot/dts/apple/t6001.dtsi
+index fd37790193d6..364a956663b9 100644
+--- a/arch/arm64/boot/dts/apple/t6001.dtsi
++++ b/arch/arm64/boot/dts/apple/t6001.dtsi
+@@ -32,6 +32,8 @@ soc {
+ 
+ 		ranges;
+ 		nonposted-mmio;
++		/* Required to get >32-bit DMA via DARTs */
++		dma-ranges = <0 0 0 0 0xffffffff 0xffffc000>;
+ 
+ 		// filled via templated includes at the end of the file
+ 	};
+diff --git a/arch/arm64/boot/dts/apple/t6002.dtsi b/arch/arm64/boot/dts/apple/t6002.dtsi
+index 8d20821da0be..3f391ce6e33d 100644
+--- a/arch/arm64/boot/dts/apple/t6002.dtsi
++++ b/arch/arm64/boot/dts/apple/t6002.dtsi
+@@ -240,6 +240,8 @@ die0: soc@200000000 {
+ 			 <0x5 0x80000000 0x5 0x80000000 0x1 0x80000000>,
+ 			 <0x7 0x0 0x7 0x0 0xf 0x80000000>;
+ 		nonposted-mmio;
++		/* Required to get >32-bit DMA via DARTs */
++		dma-ranges = <0 0 0 0 0xffffffff 0xffffc000>;
+ 
+ 		// filled via templated includes at the end of the file
+ 	};
+@@ -251,6 +253,8 @@ die1: soc@2200000000 {
+ 		ranges = <0x2 0x0 0x22 0x0 0x4 0x0>,
+ 			 <0x7 0x0 0x27 0x0 0xf 0x80000000>;
+ 		nonposted-mmio;
++		/* Required to get >32-bit DMA via DARTs */
++		dma-ranges = <0 0 0 0 0xffffffff 0xffffc000>;
+ 
+ 		// filled via templated includes at the end of the file
+ 	};
+diff --git a/arch/arm64/boot/dts/apple/t8103.dtsi b/arch/arm64/boot/dts/apple/t8103.dtsi
+index 3b2411a560f6..b506ca2e0039 100644
+--- a/arch/arm64/boot/dts/apple/t8103.dtsi
++++ b/arch/arm64/boot/dts/apple/t8103.dtsi
+@@ -443,6 +443,8 @@ soc {
+ 
+ 		ranges;
+ 		nonposted-mmio;
++		/* Required to get >32-bit DMA via DARTs */
++		dma-ranges = <0 0 0 0 0xffffffff 0xffffc000>;
+ 
+ 		gpu: gpu@206400000 {
+ 			compatible = "apple,agx-t8103", "apple,agx-g13g";
+diff --git a/arch/arm64/boot/dts/apple/t8112.dtsi b/arch/arm64/boot/dts/apple/t8112.dtsi
+index 6f947d8c0dfe..3569881ddc66 100644
+--- a/arch/arm64/boot/dts/apple/t8112.dtsi
++++ b/arch/arm64/boot/dts/apple/t8112.dtsi
+@@ -467,6 +467,8 @@ soc {
+ 
+ 		ranges;
+ 		nonposted-mmio;
++		/* Required to get >32-bit DMA via DARTs */
++		dma-ranges = <0 0 0 0 0xffffffff 0xffffc000>;
+ 
+ 		gpu: gpu@206400000 {
+ 			compatible = "apple,agx-t8112", "apple,agx-g14g";
+-- 
+2.47.3
+

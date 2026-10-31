@@ -1,0 +1,42 @@
+From 0d35c0c89ffe6dd464350176491456fd9c25bdd6 Mon Sep 17 00:00:00 2001
+From: Janne Grunau <j@jannau.net>
+Date: Wed, 9 Apr 2025 18:20:02 +0200
+Subject: [PATCH] iommu: apple-dart: Disallow identity domains for locked DARTs
+
+The register controlling bypass support is read-only for locked DARTs.
+In addition trnaslation can not be disabled so blocking domain has to be
+implemented with an empty translation table.
+
+Signed-off-by: Janne Grunau <j@jannau.net>
+(cherry picked from commit c51d5d37d5a2e040a8840b676c6c42f82f32f7ed)
+---
+ drivers/iommu/apple-dart.c | 6 ++++++
+ 1 file changed, 6 insertions(+)
+
+diff --git a/drivers/iommu/apple-dart.c b/drivers/iommu/apple-dart.c
+index a831aeec9d80..7dff75c574cc 100644
+--- a/drivers/iommu/apple-dart.c
++++ b/drivers/iommu/apple-dart.c
+@@ -868,6 +868,9 @@ static int apple_dart_attach_dev_identity(struct iommu_domain *domain,
+ 	if (!cfg->supports_bypass)
+ 		return -EINVAL;
+ 
++	if (cfg->locked)
++		return -EINVAL;
++
+ 	for_each_stream_map(i, cfg, stream_map)
+ 		WARN_ON(pm_runtime_get_sync(stream_map->dart->dev) < 0);
+ 
+@@ -896,6 +899,9 @@ static int apple_dart_attach_dev_blocked(struct iommu_domain *domain,
+ 	struct apple_dart_stream_map *stream_map;
+ 	int i;
+ 
++	if (cfg->locked)
++		return -EINVAL;
++
+ 	for_each_stream_map(i, cfg, stream_map)
+ 		WARN_ON(pm_runtime_get_sync(stream_map->dart->dev) < 0);
+ 
+-- 
+2.47.3
+

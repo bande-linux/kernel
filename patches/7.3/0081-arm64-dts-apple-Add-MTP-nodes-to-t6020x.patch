@@ -1,0 +1,215 @@
+From a5aa6392b8f7613dfbd51bfa21177f83960387bd Mon Sep 17 00:00:00 2001
+From: Hector Martin <marcan@marcan.st>
+Date: Mon, 10 Apr 2023 18:15:33 +0900
+Subject: [PATCH] arm64: dts: apple: Add MTP nodes to t6020x
+
+Signed-off-by: Hector Martin <marcan@marcan.st>
+(cherry picked from commit b86266dad3f7dfac633a4255b8c39475282673ce)
+---
+ arch/arm64/boot/dts/apple/t6020-j414s.dts     |  4 +
+ arch/arm64/boot/dts/apple/t6020-j416s.dts     |  4 +
+ arch/arm64/boot/dts/apple/t6021-j414c.dts     |  4 +
+ arch/arm64/boot/dts/apple/t6021-j416c.dts     |  4 +
+ arch/arm64/boot/dts/apple/t602x-die0.dtsi     | 74 +++++++++++++++++++
+ .../arm64/boot/dts/apple/t602x-j414-j416.dtsi | 42 +++++++++++
+ arch/arm64/boot/dts/apple/t8112.dtsi          |  1 +
+ 7 files changed, 133 insertions(+)
+
+diff --git a/arch/arm64/boot/dts/apple/t6020-j414s.dts b/arch/arm64/boot/dts/apple/t6020-j414s.dts
+index 18cc67a3076d..5dd97df71efc 100644
+--- a/arch/arm64/boot/dts/apple/t6020-j414s.dts
++++ b/arch/arm64/boot/dts/apple/t6020-j414s.dts
+@@ -36,3 +36,7 @@ &sound {
+ 	compatible = "apple,j414-macaudio", "apple,j314-macaudio", "apple,macaudio";
+ 	model = "MacBook Pro J414";
+ };
++
++&mtp_mt {
++	firmware-name = "apple/tpmtfw-j414s.bin";
++};
+diff --git a/arch/arm64/boot/dts/apple/t6020-j416s.dts b/arch/arm64/boot/dts/apple/t6020-j416s.dts
+index b9e0973ba37c..56ddf7c61de6 100644
+--- a/arch/arm64/boot/dts/apple/t6020-j416s.dts
++++ b/arch/arm64/boot/dts/apple/t6020-j416s.dts
+@@ -36,3 +36,7 @@ &sound {
+ 	compatible = "apple,j416-macaudio", "apple,j316-macaudio", "apple,macaudio";
+ 	model = "MacBook Pro J416";
+ };
++
++&mtp_mt {
++	firmware-name = "apple/tpmtfw-j416s.bin";
++};
+diff --git a/arch/arm64/boot/dts/apple/t6021-j414c.dts b/arch/arm64/boot/dts/apple/t6021-j414c.dts
+index b173caf0df0f..6905c7d39db0 100644
+--- a/arch/arm64/boot/dts/apple/t6021-j414c.dts
++++ b/arch/arm64/boot/dts/apple/t6021-j414c.dts
+@@ -36,3 +36,7 @@ &sound {
+ 	compatible = "apple,j414-macaudio", "apple,j314-macaudio", "apple,macaudio";
+ 	model = "MacBook Pro J414";
+ };
++
++&mtp_mt {
++	firmware-name = "apple/tpmtfw-j414c.bin";
++};
+diff --git a/arch/arm64/boot/dts/apple/t6021-j416c.dts b/arch/arm64/boot/dts/apple/t6021-j416c.dts
+index 2fbb00b364c7..786ac2393d75 100644
+--- a/arch/arm64/boot/dts/apple/t6021-j416c.dts
++++ b/arch/arm64/boot/dts/apple/t6021-j416c.dts
+@@ -56,3 +56,7 @@ &sound {
+ 	compatible = "apple,j416-macaudio", "apple,j316-macaudio", "apple,macaudio";
+ 	model = "MacBook Pro J416";
+ };
++
++&mtp_mt {
++	firmware-name = "apple/tpmtfw-j416c.bin";
++};
+diff --git a/arch/arm64/boot/dts/apple/t602x-die0.dtsi b/arch/arm64/boot/dts/apple/t602x-die0.dtsi
+index e91769f19793..04658354f9e5 100644
+--- a/arch/arm64/boot/dts/apple/t602x-die0.dtsi
++++ b/arch/arm64/boot/dts/apple/t602x-die0.dtsi
+@@ -168,6 +168,80 @@ pinctrl_smc: pinctrl@2a2820000 {
+ 				<AIC_IRQ 0 857 IRQ_TYPE_LEVEL_HIGH>;
+ 	};
+ 
++	mtp: mtp@2a9400000 {
++		compatible = "apple,t6020-mtp", "apple,t6020-rtk-helper-asc4", "apple,mtp", "apple,rtk-helper-asc4";
++		reg = <0x2 0xa9400000 0x0 0x4000>,
++			<0x2 0xa9c00000 0x0 0x100000>;
++		reg-names = "asc", "sram";
++		mboxes = <&mtp_mbox>;
++		iommus = <&mtp_dart 1 0x100 0x0 0x1 0x0>;
++		#helper-cells = <0>;
++
++		status = "disabled";
++	};
++
++	mtp_mbox: mbox@2a9408000 {
++		compatible = "apple,t6020-asc-mailbox", "apple,asc-mailbox-v4";
++		reg = <0x2 0xa9408000 0x0 0x4000>;
++		interrupt-parent = <&aic>;
++		interrupts = <AIC_IRQ 0 693 IRQ_TYPE_LEVEL_HIGH>,
++			<AIC_IRQ 0 694 IRQ_TYPE_LEVEL_HIGH>,
++			<AIC_IRQ 0 695 IRQ_TYPE_LEVEL_HIGH>,
++			<AIC_IRQ 0 696 IRQ_TYPE_LEVEL_HIGH>;
++		interrupt-names = "send-empty", "send-not-empty",
++			"recv-empty", "recv-not-empty";
++		#mbox-cells = <0>;
++
++		status = "disabled";
++	};
++
++	mtp_dart: iommu@2a9808000 {
++		compatible = "apple,t6020-dart", "apple,t8110-dart";
++		reg = <0x2 0xa9808000 0x0 0x4000>;
++		interrupt-parent = <&aic>;
++		interrupts = <AIC_IRQ 0 676 IRQ_TYPE_LEVEL_HIGH>;
++		#iommu-cells = <5>;
++
++		status = "disabled";
++	};
++
++	mtp_dockchannel: fifo@2a9b14000 {
++		compatible = "apple,t6020-dockchannel", "apple,dockchannel";
++		reg = <0x2 0xa9b14000 0x0 0x4000>;
++		reg-names = "irq";
++		interrupt-parent = <&aic>;
++		interrupts = <AIC_IRQ 0 677 IRQ_TYPE_LEVEL_HIGH>;
++
++		ranges = <0 0x2 0xa9b28000 0x20000>;
++		nonposted-mmio;
++		#address-cells = <1>;
++		#size-cells = <1>;
++
++		interrupt-controller;
++		#interrupt-cells = <2>;
++
++		status = "disabled";
++
++		mtp_hid: input@8000 {
++			compatible = "apple,dockchannel-hid";
++			reg = <0x8000 0x4000>,
++				<0xc000 0x4000>,
++				<0x0000 0x4000>,
++				<0x4000 0x4000>;
++			reg-names = "config", "data",
++				"rmt-config", "rmt-data";
++			iommus = <&mtp_dart 1 0x100 0x0 0x1 0x0>;
++			interrupt-parent = <&mtp_dockchannel>;
++			interrupts = <2 IRQ_TYPE_LEVEL_HIGH>,
++				<3 IRQ_TYPE_LEVEL_HIGH>;
++			interrupt-names = "tx", "rx";
++
++			apple,fifo-size = <0x800>;
++			apple,helper-cpu = <&mtp>;
++		};
++
++	};
++
+ 	disp0_dart: iommu@389304000 {
+ 		compatible = "apple,t6020-dart", "apple,t8110-dart";
+ 		reg = <0x3 0x89304000 0x0 0x4000>;
+diff --git a/arch/arm64/boot/dts/apple/t602x-j414-j416.dtsi b/arch/arm64/boot/dts/apple/t602x-j414-j416.dtsi
+index b0fa34282681..5df64390ef68 100644
+--- a/arch/arm64/boot/dts/apple/t602x-j414-j416.dtsi
++++ b/arch/arm64/boot/dts/apple/t602x-j414-j416.dtsi
+@@ -89,3 +89,45 @@ &bluetooth0 {
+ &port01 {
+ 	pwren-gpios = <&smc_gpio 22 GPIO_ACTIVE_HIGH>;
+ };
++
++&ps_mtp_fabric {
++	status = "okay";
++};
++
++&mtp {
++	status = "okay";
++};
++
++&mtp_mbox {
++	status = "okay";
++};
++
++&mtp_dart {
++	status = "okay";
++};
++
++&mtp_dockchannel {
++	status = "okay";
++};
++
++&mtp_hid {
++	apple,afe-reset-gpios = <&smc_gpio 25 GPIO_ACTIVE_LOW>;
++	apple,stm-reset-gpios = <&smc_gpio 26 GPIO_ACTIVE_LOW>;
++
++	mtp_mt: multi-touch {
++	};
++
++	keyboard: keyboard {
++		hid-country-code = <0>;
++		apple,keyboard-layout-id = <0>;
++	};
++
++	stm {
++	};
++
++	actuator {
++	};
++
++	tp_accel {
++	};
++};
+diff --git a/arch/arm64/boot/dts/apple/t8112.dtsi b/arch/arm64/boot/dts/apple/t8112.dtsi
+index 3569881ddc66..97e06429ad4c 100644
+--- a/arch/arm64/boot/dts/apple/t8112.dtsi
++++ b/arch/arm64/boot/dts/apple/t8112.dtsi
+@@ -1200,6 +1200,7 @@ mtp_dockchannel: fifo@24eb14000 {
+ 			interrupts = <AIC_IRQ 850 IRQ_TYPE_LEVEL_HIGH>;
+ 
+ 			ranges = <0 0x2 0x4eb28000 0x20000>;
++			nonposted-mmio;
+ 			#address-cells = <1>;
+ 			#size-cells = <1>;
+ 
+-- 
+2.47.3
+

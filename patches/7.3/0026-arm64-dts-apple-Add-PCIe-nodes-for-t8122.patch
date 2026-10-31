@@ -1,0 +1,408 @@
+From ee4729f017a5189a85329d0be104ea4e67440f06 Mon Sep 17 00:00:00 2001
+From: Alyssa Milburn <amilburn@zall.org>
+Date: Sat, 31 Jan 2026 12:27:37 +1100
+Subject: [PATCH] arm64: dts: apple: Add PCIe nodes for t8122
+
+This only includes the first port, because it's the only port that is
+present on my hardware, and only includes the pwren gpio for J613.
+
+Uses the t6020 base compatible as that is what the M3 hardware appears
+to be compatible with, rather than the configuration applied by the
+generic base compatible.
+
+Signed-off-by: Alyssa Milburn <amilburn@zall.org>
+Co-developed-by: Michael Reeves <michael.reeves077@gmail.com>
+Signed-off-by: Michael Reeves <michael.reeves077@gmail.com>
+(cherry picked from commit ba7be155ce37d2034ca2c3b2b54fb8e82d837f44)
+---
+ arch/arm64/boot/dts/apple/t8122-j433.dts  |  26 ++++
+ arch/arm64/boot/dts/apple/t8122-j434.dts  |  31 ++++
+ arch/arm64/boot/dts/apple/t8122-j504.dts  |  26 ++++
+ arch/arm64/boot/dts/apple/t8122-j613.dts  |   8 +
+ arch/arm64/boot/dts/apple/t8122-j615.dts  |   8 +
+ arch/arm64/boot/dts/apple/t8122-jxxx.dtsi |  26 ++++
+ arch/arm64/boot/dts/apple/t8122.dtsi      | 170 ++++++++++++++++++++++
+ 7 files changed, 295 insertions(+)
+
+diff --git a/arch/arm64/boot/dts/apple/t8122-j433.dts b/arch/arm64/boot/dts/apple/t8122-j433.dts
+index 34205d173a9b..937f159741b7 100644
+--- a/arch/arm64/boot/dts/apple/t8122-j433.dts
++++ b/arch/arm64/boot/dts/apple/t8122-j433.dts
+@@ -16,4 +16,30 @@
+ / {
+ 	compatible = "apple,j433", "apple,t8122", "apple,arm-platform";
+ 	model = "Apple iMac (24-inch, 2x USB-C, M3, 2023)";
++
++	aliases {
++		ethernet0 = &ethernet0;
++	};
++};
++
++&wifi0 {
++	brcm,board-type = "apple,azores";
++};
++
++&bluetooth0 {
++	brcm,board-type = "apple,azores";
++};
++
++&port01 {
++	bus-range = <2 2>;
++	status = "okay";
++	ethernet0: ethernet@0,0 {
++		reg = <0x20000 0x0 0x0 0x0 0x0>;
++		/* To be filled by the loader */
++		local-mac-address = [00 10 18 00 00 00];
++	};
++};
++
++&pcie1_dart {
++	status = "okay";
+ };
+diff --git a/arch/arm64/boot/dts/apple/t8122-j434.dts b/arch/arm64/boot/dts/apple/t8122-j434.dts
+index ead5afd77efb..f9635b6eb7ff 100644
+--- a/arch/arm64/boot/dts/apple/t8122-j434.dts
++++ b/arch/arm64/boot/dts/apple/t8122-j434.dts
+@@ -17,3 +17,34 @@ / {
+ 	compatible = "apple,j434", "apple,t8122", "apple,arm-platform";
+ 	model = "Apple iMac (24-inch, 4x USB-C, M3, 2023)";
+ };
++
++&wifi0 {
++	brcm,board-type = "apple,iona";
++};
++
++&bluetooth0 {
++	brcm,board-type = "apple,iona";
++};
++
++&port01 {
++	bus-range = <2 2>;
++	status = "okay";
++	ethernet0: ethernet@0,0 {
++		reg = <0x20000 0x0 0x0 0x0 0x0>;
++		/* To be filled by the loader */
++		local-mac-address = [00 10 18 00 00 00];
++	};
++};
++
++&port02 {
++	bus-range = <3 3>;
++	status = "okay";
++};
++
++&pcie1_dart {
++	status = "okay";
++};
++
++&pcie2_dart {
++	status = "okay";
++};
+diff --git a/arch/arm64/boot/dts/apple/t8122-j504.dts b/arch/arm64/boot/dts/apple/t8122-j504.dts
+index 464491b55b01..5f19711a489b 100644
+--- a/arch/arm64/boot/dts/apple/t8122-j504.dts
++++ b/arch/arm64/boot/dts/apple/t8122-j504.dts
+@@ -31,6 +31,32 @@ led-0 {
+ 	};
+ };
+ 
++&wifi0 {
++	brcm,board-type = "apple,tresco";
++};
++
++&bluetooth0 {
++	brcm,board-type = "apple,tresco";
++};
++
++&port01 {
++	/* SD card reader */
++	bus-range = <2 2>;
++	status = "okay";
++
++	sdhci0: mmc@0,0 {
++		compatible = "pci17a0,9755";
++		reg = <0x20000 0x0 0x0 0x0 0x0>;
++		cd-inverted;
++		wp-inverted;
++	};
++};
++
++&pcie1_dart {
++	status = "okay";
++};
++
++
+ &fpwm1 {
+ 	status = "okay";
+ };
+diff --git a/arch/arm64/boot/dts/apple/t8122-j613.dts b/arch/arm64/boot/dts/apple/t8122-j613.dts
+index 51894ea705e7..3e4e87cab2bf 100644
+--- a/arch/arm64/boot/dts/apple/t8122-j613.dts
++++ b/arch/arm64/boot/dts/apple/t8122-j613.dts
+@@ -30,6 +30,14 @@ led-0 {
+ 	};
+ };
+ 
++&wifi0 {
++	brcm,board-type = "apple,dnieper";
++};
++
++&bluetooth0 {
++	brcm,board-type = "apple,dnieper";
++};
++
+ &fpwm1 {
+ 	status = "okay";
+ };
+diff --git a/arch/arm64/boot/dts/apple/t8122-j615.dts b/arch/arm64/boot/dts/apple/t8122-j615.dts
+index 2a1970c1bc90..56ad290655dc 100644
+--- a/arch/arm64/boot/dts/apple/t8122-j615.dts
++++ b/arch/arm64/boot/dts/apple/t8122-j615.dts
+@@ -30,6 +30,14 @@ led-0 {
+ 	};
+ };
+ 
++&wifi0 {
++	brcm,board-type = "apple,tuzla";
++};
++
++&bluetooth0 {
++	brcm,board-type = "apple,tuzla";
++};
++
+ &fpwm1 {
+ 	status = "okay";
+ };
+diff --git a/arch/arm64/boot/dts/apple/t8122-jxxx.dtsi b/arch/arm64/boot/dts/apple/t8122-jxxx.dtsi
+index dd85f0c9fb1e..2d36782c920d 100644
+--- a/arch/arm64/boot/dts/apple/t8122-jxxx.dtsi
++++ b/arch/arm64/boot/dts/apple/t8122-jxxx.dtsi
+@@ -11,7 +11,9 @@
+ 
+ / {
+ 	aliases {
++		bluetooth0 = &bluetooth0;
+ 		serial0 = &serial0;
++		wifi0 = &wifi0;
+ 	};
+ 
+ 	chosen {
+@@ -46,3 +48,27 @@ memory@800000000 {
+ &serial0 {
+ 	status = "okay";
+ };
++
++/*
++ * Force the bus number assignments so that we can declare some of the
++ * on-board devices and properties that are populated by the bootloader
++ * (such as MAC addresses).
++ */
++&port00 {
++	bus-range = <1 1>;
++
++	wifi0: wifi@0,0 {
++		compatible = "pci14e4,4434";
++		reg = <0x10000 0x0 0x0 0x0 0x0>;
++		/* To be filled by the loader */
++		local-mac-address = [00 00 00 00 00 00];
++		apple,antenna-sku = "XX";
++	};
++
++	bluetooth0: bluetooth@0,1 {
++		compatible = "pci14e4,5f72";
++		reg = <0x10100 0x0 0x0 0x0 0x0>;
++		/* To be filled by the loader */
++		local-bd-address = [00 00 00 00 00 00];
++	};
++};
+diff --git a/arch/arm64/boot/dts/apple/t8122.dtsi b/arch/arm64/boot/dts/apple/t8122.dtsi
+index 9d029b0c167e..ed95da1d5ed7 100644
+--- a/arch/arm64/boot/dts/apple/t8122.dtsi
++++ b/arch/arm64/boot/dts/apple/t8122.dtsi
+@@ -357,6 +357,13 @@ i2c4_pins: i2c4-pins {
+ 					 <APPLE_PINMUX(148, 1)>;
+ 			};
+ 
++			pcie_pins: pcie-pins {
++				// clkreq pins
++				pinmux = <APPLE_PINMUX(183, 1)>,
++					 <APPLE_PINMUX(184, 1)>,
++					 <APPLE_PINMUX(185, 1)>,
++					 <APPLE_PINMUX(186, 1)>;
++			};
+ 		};
+ 
+ 		pinctrl_nub: pinctrl@2e41f0000 {
+@@ -504,6 +511,169 @@ nvme: nvme@30dcc0000 {
+ 			power-domain-names = "ans", "apcie0";
+ 			resets = <&ps_ans>;
+ 		};
++
++		pcie0: pcie@580000000 {
++			compatible = "apple,t8122-pcie", "apple,t6020-pcie";
++			device_type = "pci";
++
++			reg = <0x5 0x80000000 0x0 0x1000000>,	/* config */
++				<0x5 0x91000000 0x0 0x4000>,	/* rc */
++				<0x5 0x94008000 0x0 0x4000>,	/* port0 */
++				<0x5 0x95008000 0x0 0x4000>,	/* port1 */
++				<0x5 0x96008000 0x0 0x4000>,	/* port2 */
++				<0x5 0x97008000 0x0 0x4000>,	/* port3 */
++				<0x5 0x9e00c000 0x0 0x4000>,	/* phy0 */
++				<0x5 0x9e010000 0x0 0x4000>,	/* phy1 */
++				<0x5 0x9e014000 0x0 0x4000>,	/* phy2 */
++				<0x5 0x9e018000 0x0 0x4000>;	/* phy3 */
++			reg-names = "config", "rc",
++				    "port0", "port1", "port2", "port3",
++				    "phy0", "phy1", "phy2", "phy3";
++
++			interrupt-parent = <&aic>;
++			interrupts = <AIC_IRQ 923 IRQ_TYPE_LEVEL_HIGH>,
++				     <AIC_IRQ 932 IRQ_TYPE_LEVEL_HIGH>,
++				     <AIC_IRQ 941 IRQ_TYPE_LEVEL_HIGH>,
++				     <AIC_IRQ 950 IRQ_TYPE_LEVEL_HIGH>;
++
++			msi-controller;
++			msi-parent = <&pcie0>;
++			msi-ranges = <&aic AIC_IRQ 1075 IRQ_TYPE_EDGE_RISING 32>;
++
++			iommu-map = <0x100 &pcie0_dart 1 1>,
++				    <0x200 &pcie1_dart 1 1>,
++				    <0x300 &pcie2_dart 1 1>,
++				    <0x400 &pcie3_dart 1 1>;
++			iommu-map-mask = <0xff00>;
++
++			bus-range = <0 4>;
++			#address-cells = <3>;
++			#size-cells = <2>;
++			ranges = <0x43000000 0x5 0xa0000000 0x5 0xa0000000 0x0 0x20000000>,
++				 <0x02000000 0x0 0xc0000000 0x5 0xc0000000 0x0 0x40000000>;
++
++			power-domains = <&ps_apcie_gp>;
++			pinctrl-0 = <&pcie_pins>;
++			pinctrl-names = "default";
++
++			port00: pci@0,0 {
++				device_type = "pci";
++				reg = <0x0 0x0 0x0 0x0 0x0>;
++				reset-gpios = <&pinctrl_ap 187 GPIO_ACTIVE_LOW>; // perst
++
++				#address-cells = <3>;
++				#size-cells = <2>;
++				ranges;
++
++				interrupt-controller;
++				#interrupt-cells = <1>;
++
++				interrupt-map-mask = <0 0 0 7>;
++				interrupt-map = <0 0 0 1 &port00 0 0 0 0>,
++						<0 0 0 2 &port00 0 0 0 1>,
++						<0 0 0 3 &port00 0 0 0 2>,
++						<0 0 0 4 &port00 0 0 0 3>;
++			};
++
++			port01: pci@1,0 {
++				device_type = "pci";
++				reg = <0x800 0x0 0x0 0x0 0x0>;
++				reset-gpios = <&pinctrl_ap 188 GPIO_ACTIVE_LOW>; // perst
++
++				#address-cells = <3>;
++				#size-cells = <2>;
++				ranges;
++
++				interrupt-controller;
++				#interrupt-cells = <1>;
++
++				interrupt-map-mask = <0 0 0 7>;
++				interrupt-map = <0 0 0 1 &port01 0 0 0 0>,
++						<0 0 0 2 &port01 0 0 0 1>,
++						<0 0 0 3 &port01 0 0 0 2>,
++						<0 0 0 4 &port01 0 0 0 3>;
++				status = "disabled";
++			};
++
++			port02: pci@2,0 {
++				device_type = "pci";
++				reg = <0x1000 0x0 0x0 0x0 0x0>;
++				reset-gpios = <&pinctrl_ap 189 GPIO_ACTIVE_LOW>; // perst
++
++				#address-cells = <3>;
++				#size-cells = <2>;
++				ranges;
++
++				interrupt-controller;
++				#interrupt-cells = <1>;
++
++				interrupt-map-mask = <0 0 0 7>;
++				interrupt-map = <0 0 0 1 &port02 0 0 0 0>,
++						<0 0 0 2 &port02 0 0 0 1>,
++						<0 0 0 3 &port02 0 0 0 2>,
++						<0 0 0 4 &port02 0 0 0 3>;
++				status = "disabled";
++			};
++
++			port03: pci@3,0 {
++				device_type = "pci";
++				reg = <0x1800 0x0 0x0 0x0 0x0>;
++				reset-gpios = <&pinctrl_ap 190 GPIO_ACTIVE_LOW>; // perst
++
++				#address-cells = <3>;
++				#size-cells = <2>;
++				ranges;
++
++				interrupt-controller;
++				#interrupt-cells = <1>;
++
++				interrupt-map-mask = <0 0 0 7>;
++				interrupt-map = <0 0 0 1 &port03 0 0 0 0>,
++						<0 0 0 2 &port03 0 0 0 1>,
++						<0 0 0 3 &port03 0 0 0 2>,
++						<0 0 0 4 &port03 0 0 0 3>;
++				status = "disabled";
++			};
++		};
++
++		pcie0_dart: iommu@594000000 {
++			compatible = "apple,t8122-dart", "apple,t8110-dart";
++			reg = <0x5 0x94000000 0x0 0x4000>;
++			#iommu-cells = <1>;
++			interrupt-parent = <&aic>;
++			interrupts = <AIC_IRQ 924 IRQ_TYPE_LEVEL_HIGH>;
++			power-domains = <&ps_apcie_gp>;
++		};
++
++		pcie1_dart: iommu@595000000 {
++			compatible = "apple,t8122-dart", "apple,t8110-dart";
++			reg = <0x5 0x95000000 0x0 0x4000>;
++			#iommu-cells = <1>;
++			interrupt-parent = <&aic>;
++			interrupts = <AIC_IRQ 933 IRQ_TYPE_LEVEL_HIGH>;
++			power-domains = <&ps_apcie_gp>;
++			status = "disabled";
++		};
++
++		pcie2_dart: iommu@596000000 {
++			compatible = "apple,t8122-dart", "apple,t8110-dart";
++			reg = <0x5 0x96000000 0x0 0x4000>;
++			#iommu-cells = <1>;
++			interrupt-parent = <&aic>;
++			interrupts = <AIC_IRQ 942 IRQ_TYPE_LEVEL_HIGH>;
++			power-domains = <&ps_apcie_gp>;
++			status = "disabled";
++		};
++
++		pcie3_dart: iommu@597000000 {
++			compatible = "apple,t8122-dart", "apple,t8110-dart";
++			reg = <0x5 0x97000000 0x0 0x4000>;
++			#iommu-cells = <1>;
++			interrupt-parent = <&aic>;
++			interrupts = <AIC_IRQ 951 IRQ_TYPE_LEVEL_HIGH>;
++			power-domains = <&ps_apcie_gp>;
++			status = "disabled";
++		};
+ 	};
+ };
+ 
+-- 
+2.47.3
+

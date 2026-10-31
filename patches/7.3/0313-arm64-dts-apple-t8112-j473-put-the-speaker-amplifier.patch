@@ -1,0 +1,63 @@
+From 0dee90f0d6f765da67504fc922a2ad06b78c732f Mon Sep 17 00:00:00 2001
+From: Mikael Hug <mikaelhug@gmail.com>
+Date: Fri, 30 Oct 2026 15:14:02 +0000
+Subject: [PATCH] arm64: dts: apple: t8112-j473: put the speaker amplifier back
+ in the sound card
+
+Commit 24c6498c237f ("arm64: dts: apple: t8112-j473: leave the speaker
+amplifier out of the sound card") kept the SN012776 off because the
+image shipped no speaker protection. Debian 13 now provides that stack:
+speakersafetyd 1.1.2 with apple/j473.conf, asahi-audio with the j473 DSP
+graph and alsa-ucm-conf-asahi with "Mac mini J473", and the Bande image
+installs it.
+
+The kernel keeps the speaker safe without that daemon, as on Asahi:
+macaudio limits "Speaker Volume" to the lowest step (about -100 dB) until
+a process holds the "Speaker Volume Unlock" control and writes the magic
+value at least every 250 ms, and it fails probe if it cannot apply the
+amp gain, HPF and OCE settings. speakersafetyd is started by udev only
+when the speaker sense PCM (pcmC0D2c, TAS2764 ISENSE/VSENSE on slots 0
+and 2) exists, so the node and link have to be present for the
+protection to run at all.
+
+This restores the Asahi description of the j473 speaker unchanged.
+
+Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>
+Claude-Session: https://claude.ai/code/session_01UqitcmCNS6G33aQUShi39x
+---
+ arch/arm64/boot/dts/apple/t8112-j473.dts | 12 +++++++++++-
+ 1 file changed, 11 insertions(+), 1 deletion(-)
+
+diff --git a/arch/arm64/boot/dts/apple/t8112-j473.dts b/arch/arm64/boot/dts/apple/t8112-j473.dts
+index be08b4748842..89608bd192fb 100644
+--- a/arch/arm64/boot/dts/apple/t8112-j473.dts
++++ b/arch/arm64/boot/dts/apple/t8112-j473.dts
+@@ -170,7 +170,6 @@ speaker_amp: codec@38 {
+ 		interrupts = <11 IRQ_TYPE_LEVEL_LOW>;
+ 		ti,imon-slot-no = <0>;
+ 		ti,vmon-slot-no = <2>;
+-		status = "disabled";
+ 	};
+ 
+ 	jack_codec: codec@4b {
+@@ -190,6 +189,17 @@ sound {
+ 		compatible = "apple,j473-macaudio", "apple,macaudio";
+ 		model = "Mac mini J473";
+ 
++		dai-link@0 {
++			link-name = "Speaker";
++
++			cpu {
++				sound-dai = <&mca 0>;
++			};
++			codec {
++				sound-dai = <&speaker_amp>;
++			};
++		};
++
+ 		dai-link@1 {
+ 			link-name = "Headphone Jack";
+ 
+-- 
+2.47.3
+

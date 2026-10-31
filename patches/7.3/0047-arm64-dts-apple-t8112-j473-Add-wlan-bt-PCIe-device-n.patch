@@ -1,0 +1,51 @@
+From f2aa21739e154a94a8ff76395a2b49bc08c91586 Mon Sep 17 00:00:00 2001
+From: Janne Grunau <j@jannau.net>
+Date: Tue, 14 Feb 2023 10:07:49 +0100
+Subject: [PATCH] arm64: dts: apple: t8112-j473: Add wlan/bt PCIe device nodes
+
+Signed-off-by: Janne Grunau <j@jannau.net>
+(cherry picked from commit a48cc49e9a1dc998bac2bd07808027ca95df09b3)
+---
+ arch/arm64/boot/dts/apple/t8112-j473.dts | 18 ++++++++++++++++++
+ 1 file changed, 18 insertions(+)
+
+diff --git a/arch/arm64/boot/dts/apple/t8112-j473.dts b/arch/arm64/boot/dts/apple/t8112-j473.dts
+index 105a9d118980..9411e43868b3 100644
+--- a/arch/arm64/boot/dts/apple/t8112-j473.dts
++++ b/arch/arm64/boot/dts/apple/t8112-j473.dts
+@@ -18,7 +18,9 @@ / {
+ 	chassis-type = "desktop";
+ 
+ 	aliases {
++		bluetooth0 = &bluetooth0;
+ 		ethernet0 = &ethernet0;
++		wifi0 = &wifi0;
+ 	};
+ };
+ 
+@@ -48,6 +50,22 @@ &ps_disp0_fe {
+  */
+ &port00 {
+ 	bus-range = <1 1>;
++	wifi0: wifi@0,0 {
++		compatible = "pci14e4,4434";
++		reg = <0x10000 0x0 0x0 0x0 0x0>;
++		/* To be filled by the loader */
++		local-mac-address = [00 10 18 00 00 10];
++		apple,antenna-sku = "XX";
++		brcm,board-type = "apple,miyake";
++	};
++
++	bluetooth0: bluetooth@0,1 {
++		compatible = "pci14e4,5f72";
++		reg = <0x10100 0x0 0x0 0x0 0x0>;
++		/* To be filled by the loader */
++		local-bd-address = [00 00 00 00 00 00];
++		brcm,board-type = "apple,miyake";
++	};
+ };
+ 
+ &port01 {
+-- 
+2.47.3
+

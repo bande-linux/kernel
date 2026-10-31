@@ -1,0 +1,41 @@
+From fc361890029f380ef142ac95205206c305537598 Mon Sep 17 00:00:00 2001
+From: Asahi Lina <lina@asahilina.net>
+Date: Fri, 29 Sep 2023 22:11:47 +0900
+Subject: [PATCH] dt-bindings: power: apple,pmgr-pwrstate: Add
+ force-{disable,reset}
+
+These flags are used for some ISP power domains, that apparently require
+more aggressive behavior on power down.
+
+Signed-off-by: Asahi Lina <lina@asahilina.net>
+(cherry picked from commit 803bf82d30f057f42ded44094abc78ca8e4ae672)
+---
+ .../bindings/power/apple,pmgr-pwrstate.yaml          | 12 ++++++++++++
+ 1 file changed, 12 insertions(+)
+
+diff --git a/Documentation/devicetree/bindings/power/apple,pmgr-pwrstate.yaml b/Documentation/devicetree/bindings/power/apple,pmgr-pwrstate.yaml
+index b24ea8e54e11..7161f30314ab 100644
+--- a/Documentation/devicetree/bindings/power/apple,pmgr-pwrstate.yaml
++++ b/Documentation/devicetree/bindings/power/apple,pmgr-pwrstate.yaml
+@@ -85,6 +85,18 @@ properties:
+     minimum: 0
+     maximum: 15
+ 
++  apple,force-disable:
++    description:
++      Forces this device to be disabled (bus access blocked) when the power
++      domain is powered down.
++    type: boolean
++
++  apple,force-reset:
++    description:
++      Forces a reset/error recovery of the power control logic when the power
++      domain is powered down.
++    type: boolean
++
+ required:
+   - compatible
+   - reg
+-- 
+2.47.3
+

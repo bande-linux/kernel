@@ -1,0 +1,26 @@
+From 6ac32d48fa23be747cc8bfa1b29d9408dce5f2dd Mon Sep 17 00:00:00 2001
+From: Hojun Cho <ghwns6743@gmail.com>
+Date: Mon, 31 Aug 2026 11:14:52 +0900
+Subject: [PATCH] pmdomain: apple: Add missing spin_lock_init
+
+Signed-off-by: Hojun Cho <ghwns6743@gmail.com>
+(cherry picked from commit afffea42ac29a1f6f8b3ef3819691c1d7b0a259a)
+---
+ drivers/pmdomain/apple/pmp-report.c | 1 +
+ 1 file changed, 1 insertion(+)
+
+diff --git a/drivers/pmdomain/apple/pmp-report.c b/drivers/pmdomain/apple/pmp-report.c
+index 8050ade5ef8d..ee0dd1ff0359 100644
+--- a/drivers/pmdomain/apple/pmp-report.c
++++ b/drivers/pmdomain/apple/pmp-report.c
+@@ -40,6 +40,7 @@ static int apple_pmp_report_probe(struct platform_device *pdev)
+ 	if (!rep)
+ 		return -ENOMEM;
+ 
++	spin_lock_init(&rep->lock);
+ 	rep->dev = dev;
+ 	rep->base = devm_platform_ioremap_resource(pdev, 0);
+ 	if (IS_ERR(rep->base))
+-- 
+2.47.3
+

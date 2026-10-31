@@ -1,0 +1,167 @@
+From 73f27b32e29687fe6036f26d77dcaa9552288181 Mon Sep 17 00:00:00 2001
+From: Janne Grunau <j@jannau.net>
+Date: Mon, 6 Nov 2023 21:47:19 +0100
+Subject: [PATCH] arm64: dts: apple: t6020-j474,t6021-j475: Enable
+ dcpext0/dptx-phy/dp2hdmi
+
+After all parts are in place enable the DCP on the M2 Pro Mac Mini and
+the M2 Max Mac Studio for HDMI output. Use dcpext0 for HDMI out.
+
+dcp on t8112 and t602x does not wake up after sleep + reset but dcpext*
+does. Use dcpext0 for sharing the code with M1* devices.
+My interpretation of the tea leaves from Apple's marketing department
+suggests that dcpext is more capable (6k 60Hz vs 5k 60Hz) so use dcpext
+as long as only one is used.
+
+Signed-off-by: Janne Grunau <j@jannau.net>
+(cherry picked from commit 87db4e7eb2307a3180d96aff72e11fef2cfc3b7d)
+---
+ arch/arm64/boot/dts/apple/t6020-j474s.dts     | 51 ++++++++++++++++++
+ arch/arm64/boot/dts/apple/t6021-j475c.dts     | 52 +++++++++++++++++++
+ .../arm64/boot/dts/apple/t602x-j474-j475.dtsi |  5 --
+ 3 files changed, 103 insertions(+), 5 deletions(-)
+
+diff --git a/arch/arm64/boot/dts/apple/t6020-j474s.dts b/arch/arm64/boot/dts/apple/t6020-j474s.dts
+index 4696b039629b..96192f17da47 100644
+--- a/arch/arm64/boot/dts/apple/t6020-j474s.dts
++++ b/arch/arm64/boot/dts/apple/t6020-j474s.dts
+@@ -63,6 +63,57 @@ &sound {
+ 	model = "Mac mini J474";
+ };
+ 
++&lpdptxphy {
++	status = "okay";
++};
++
++#define USE_DCPEXT0 1
++
++#if USE_DCPEXT0
++/ {
++	aliases {
++		dcpext0 = &dcpext0;
++		/delete-property/ dcp;
++	};
++};
++
++&framebuffer0 {
++	power-domains = <&ps_dispext0_cpu0>, <&ps_dptx_phy_ps>;
++};
++
++&dcp {
++	status = "disabled";
++};
++&display {
++	iommus = <&dispext0_dart 0 0x100 0x0 0x10 0x0>;
++};
++&dispext0_dart {
++	status = "okay";
++};
++&dcpext0_dart {
++	status = "okay";
++};
++&dcpext0_mbox {
++	status = "okay";
++};
++&dcpext0 {
++#else
++&dcp {
++#endif
++	status = "okay";
++	apple,connector-type = "HDMI-A";
++
++	/*  HDMI HPD gpio, used as interrupt*/
++	hdmi-hpd-gpios = <&pinctrl_aop 25 GPIO_ACTIVE_HIGH>;
++
++	hdmi-pwren-gpios = <&smc_gpio 23 GPIO_ACTIVE_HIGH>;
++	dp2hdmi-pwren-gpios = <&smc_gpio 25 GPIO_ACTIVE_HIGH>;
++
++	phys = <&lpdptxphy>;
++	phy-names = "dp-phy";
++	apple,dptx-phy = <4>;
++};
++
+ &gpu {
+ 	/* Apple does not do this, but they probably should */
+ 	apple,perf-base-pstate = <3>;
+diff --git a/arch/arm64/boot/dts/apple/t6021-j475c.dts b/arch/arm64/boot/dts/apple/t6021-j475c.dts
+index 655a28cf57db..e6c2497e9adb 100644
+--- a/arch/arm64/boot/dts/apple/t6021-j475c.dts
++++ b/arch/arm64/boot/dts/apple/t6021-j475c.dts
+@@ -58,6 +58,58 @@ &sound {
+ 	model = "Mac Studio J475";
+ };
+ 
++&lpdptxphy {
++	status = "okay";
++};
++
++
++#define USE_DCPEXT0 1
++
++#if USE_DCPEXT0
++/ {
++	aliases {
++		dcpext0 = &dcpext0;
++		/delete-property/ dcp;
++	};
++};
++
++&framebuffer0 {
++	power-domains = <&ps_dispext0_cpu0>, <&ps_dptx_phy_ps>;
++};
++
++&dcp {
++	status = "disabled";
++};
++&display {
++	iommus = <&dispext0_dart 0 0x100 0x0 0x10 0x0>;
++};
++&dispext0_dart {
++	status = "okay";
++};
++&dcpext0_dart {
++	status = "okay";
++};
++&dcpext0_mbox {
++	status = "okay";
++};
++&dcpext0 {
++#else
++&dcp {
++#endif
++	status = "okay";
++	apple,connector-type = "HDMI-A";
++
++	/*  HDMI HPD gpio, used as interrupt*/
++	hdmi-hpd-gpios = <&pinctrl_aop 25 GPIO_ACTIVE_HIGH>;
++
++	hdmi-pwren-gpios = <&smc_gpio 23 GPIO_ACTIVE_HIGH>;
++	dp2hdmi-pwren-gpios = <&smc_gpio 25 GPIO_ACTIVE_HIGH>;
++
++	phys = <&lpdptxphy>;
++	phy-names = "dp-phy";
++	apple,dptx-phy = <4>;
++};
++
+ &gpu {
+ 	apple,idleoff-standby-timer = <3000>;
+ 	apple,perf-base-pstate = <5>;
+diff --git a/arch/arm64/boot/dts/apple/t602x-j474-j475.dtsi b/arch/arm64/boot/dts/apple/t602x-j474-j475.dtsi
+index 703d929aefdd..6606e11e2149 100644
+--- a/arch/arm64/boot/dts/apple/t602x-j474-j475.dtsi
++++ b/arch/arm64/boot/dts/apple/t602x-j474-j475.dtsi
+@@ -21,11 +21,6 @@ &framebuffer0 {
+ 	power-domains = <&ps_dispext0_cpu0>, <&ps_dptx_phy_ps>;
+ };
+ 
+-/* disable dcp until it is supported */
+-&dcp {
+-	status = "disabled";
+-};
+-
+ &hpm0 {
+ 	interrupts = <44 IRQ_TYPE_LEVEL_LOW>;
+ };
+-- 
+2.47.3
+

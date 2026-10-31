@@ -1,0 +1,66 @@
+From 04ef1bd2cec672b8c4b99951d9ff714368e7bbb7 Mon Sep 17 00:00:00 2001
+From: sofus <sofus.c@icloud.com>
+Date: Tue, 30 Jun 2026 13:27:11 +0200
+Subject: [PATCH] arm64: dts: apple: t602x: add avd nodes
+
+Signed-off-by: sofus <sofus.c@icloud.com>
+(cherry picked from commit d9bf3063314c03d520505bfa316cc79b32c6e7be)
+---
+ arch/arm64/boot/dts/apple/t602x-die0.dtsi |  1 -
+ arch/arm64/boot/dts/apple/t602x-dieX.dtsi | 28 +++++++++++++++++++++++
+ 2 files changed, 28 insertions(+), 1 deletion(-)
+
+diff --git a/arch/arm64/boot/dts/apple/t602x-die0.dtsi b/arch/arm64/boot/dts/apple/t602x-die0.dtsi
+index 350f91d1209f..cd6ed1106e82 100644
+--- a/arch/arm64/boot/dts/apple/t602x-die0.dtsi
++++ b/arch/arm64/boot/dts/apple/t602x-die0.dtsi
+@@ -114,7 +114,6 @@ pmp_report_avd_sys: report@11 {
+ 			label = "pmp-avd-sys";
+ 			#power-domain-cells = <0>;
+ 			power-domains = <&ps_avd_sys>;
+-			status = "disabled";
+ 		};
+ 
+ 		pmp_report_msr0: report@12 {
+diff --git a/arch/arm64/boot/dts/apple/t602x-dieX.dtsi b/arch/arm64/boot/dts/apple/t602x-dieX.dtsi
+index ab0b3cec00c4..b04a39cb6560 100644
+--- a/arch/arm64/boot/dts/apple/t602x-dieX.dtsi
++++ b/arch/arm64/boot/dts/apple/t602x-dieX.dtsi
+@@ -24,6 +24,34 @@ DIE_NODE(cpufreq_p1): cpufreq@212e20000 {
+ 		#performance-domain-cells = <0>;
+ 	};
+ 
++	DIE_NODE(avd): avd@287080000 {
++		compatible = "apple,t6020-avd";
++		interrupt-parent = <&aic>;
++		interrupts = <AIC_IRQ DIE_NO 1088 IRQ_TYPE_LEVEL_HIGH>,
++			<AIC_IRQ DIE_NO 1089 IRQ_TYPE_LEVEL_HIGH>;
++		#ifdef APPLE_USE_PMP
++		power-domains = <&DIE_NODE(pmp_report_avd_sys)>;
++		#else
++		power-domains = <&DIE_NODE(ps_avd_sys)>;
++		#endif
++		resets = <&DIE_NODE(ps_avd_sys)>;
++		reg = <0x2 0x87080000 0x0 0x10000>,
++			<0x2 0x87090000 0x0 0x10000>,
++			<0x2 0x870a0000 0x0 0x4000>,
++			<0x2 0x87100000 0x0 0x10000>;
++		reg-names = "code", "sram", "mbox", "ctrl";
++		iommus = <&DIE_NODE(avd_dart) 0>;
++	};
++
++	DIE_NODE(avd_dart): iommu@287010000 {
++		compatible = "apple,t6020-dart", "apple,t8110-dart";
++		reg = <0x2 0x87010000 0x0 0x4000>;
++		#iommu-cells = <1>;
++		interrupt-parent = <&aic>;
++		interrupts = <AIC_IRQ DIE_NO 1095 IRQ_TYPE_LEVEL_HIGH>;
++		power-domains = <&DIE_NODE(ps_avd_sys)>;
++	};
++
+ 	DIE_NODE(dispext0_dart): iommu@289304000 {
+ 		compatible = "apple,t6020-dart", "apple,t8110-dart";
+ 		reg = <0x2 0x89304000 0x0 0x4000>;
+-- 
+2.47.3
+

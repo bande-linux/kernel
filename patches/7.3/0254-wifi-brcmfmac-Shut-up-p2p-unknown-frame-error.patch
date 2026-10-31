@@ -1,0 +1,32 @@
+From 31b6bf4f329fc9e2bcc6f35ce25a0872d46d610a Mon Sep 17 00:00:00 2001
+From: Hector Martin <marcan@marcan.st>
+Date: Sat, 25 Mar 2023 15:23:04 +0900
+Subject: [PATCH] wifi: brcmfmac: Shut up p2p unknown frame error
+
+People keep complaining about this and think their wifi is broken for
+some reason...
+
+Signed-off-by: Hector Martin <marcan@marcan.st>
+(cherry picked from commit c499f520a326234e8ab912bb4d21cd8a3755f7fc)
+---
+ drivers/net/wireless/broadcom/brcm80211/brcmfmac/p2p.c | 4 ++--
+ 1 file changed, 2 insertions(+), 2 deletions(-)
+
+diff --git a/drivers/net/wireless/broadcom/brcm80211/brcmfmac/p2p.c b/drivers/net/wireless/broadcom/brcm80211/brcmfmac/p2p.c
+index 813cc15d8b87..db109b96c169 100644
+--- a/drivers/net/wireless/broadcom/brcm80211/brcmfmac/p2p.c
++++ b/drivers/net/wireless/broadcom/brcm80211/brcmfmac/p2p.c
+@@ -1815,8 +1815,8 @@ bool brcmf_p2p_send_action_frame(struct brcmf_if *ifp,
+ 		/* do not configure anything. it will be */
+ 		/* sent with a default configuration     */
+ 	} else {
+-		bphy_err(drvr, "Unknown Frame: category 0x%x, action 0x%x\n",
+-			 category, action);
++		bphy_info_once(drvr, "Unknown Frame: category 0x%x, action 0x%x\n",
++			       category, action);
+ 		return false;
+ 	}
+ 
+-- 
+2.47.3
+

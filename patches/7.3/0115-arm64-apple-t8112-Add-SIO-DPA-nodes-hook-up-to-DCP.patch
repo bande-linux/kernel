@@ -1,0 +1,160 @@
+From 5318805f8c41ac98045c4b9975ddbb2c166e3ba2 Mon Sep 17 00:00:00 2001
+From: Janne Grunau <j@jannau.net>
+Date: Mon, 13 Nov 2023 23:35:07 +0100
+Subject: [PATCH] arm64: apple: t8112: Add SIO, DPA nodes; hook up to DCP
+
+Signed-off-by: Janne Grunau <j@jannau.net>
+(cherry picked from commit 29aa432444911677cc93ef9a16b88803a1831e9a)
+---
+ arch/arm64/boot/dts/apple/t8112-j473.dts |  5 ++
+ arch/arm64/boot/dts/apple/t8112.dtsi     | 90 ++++++++++++++++++++++++
+ 2 files changed, 95 insertions(+)
+
+diff --git a/arch/arm64/boot/dts/apple/t8112-j473.dts b/arch/arm64/boot/dts/apple/t8112-j473.dts
+index 02d3b7fe4cee..e6d306bebc63 100644
+--- a/arch/arm64/boot/dts/apple/t8112-j473.dts
++++ b/arch/arm64/boot/dts/apple/t8112-j473.dts
+@@ -22,6 +22,7 @@ aliases {
+ 		/delete-property/ dcp;
+ 		dcpext = &dcpext;
+ 		ethernet0 = &ethernet0;
++		sio = &sio;
+ 		wifi0 = &wifi0;
+ 	};
+ };
+@@ -65,6 +66,10 @@ &dcpext {
+ 	apple,dptx-phy = <5>;
+ };
+ 
++&dpaudio1 {
++	status = "okay";
++};
++
+ /*
+  * Keep the power-domains used for the HDMI port on.
+  */
+diff --git a/arch/arm64/boot/dts/apple/t8112.dtsi b/arch/arm64/boot/dts/apple/t8112.dtsi
+index 4923d58700c3..9d6968ad34f1 100644
+--- a/arch/arm64/boot/dts/apple/t8112.dtsi
++++ b/arch/arm64/boot/dts/apple/t8112.dtsi
+@@ -743,6 +743,17 @@ disp0_piodma: piodma {
+ 				iommus = <&disp0_dart 4 0x0 0x0 0xf 0xffff0000>;
+ 				phandle = <&disp0_piodma>;
+ 			};
++
++			ports {
++				#address-cells = <1>;
++				#size-cells = <0>;
++				port@0 {
++					reg = <0>;
++					dcp_audio: endpoint {
++						remote-endpoint = <&dpaudio0_dcp>;
++					};
++				};
++			};
+ 		};
+ 
+ 		display: display-subsystem {
+@@ -897,6 +908,32 @@ serial2: serial@235208000 {
+ 			status = "disabled";
+ 		};
+ 
++		sio_mbox: mbox@236408000 {
++			compatible = "apple,t8112-asc-mailbox", "apple,asc-mailbox-v4";
++			reg = <0x2 0x36408000 0x0 0x4000>;
++			interrupt-parent = <&aic>;
++			interrupts = <AIC_IRQ 774 IRQ_TYPE_LEVEL_HIGH>,
++				<AIC_IRQ 775 IRQ_TYPE_LEVEL_HIGH>,
++				<AIC_IRQ 776 IRQ_TYPE_LEVEL_HIGH>,
++				<AIC_IRQ 777 IRQ_TYPE_LEVEL_HIGH>;
++			interrupt-names = "send-empty", "send-not-empty",
++				"recv-empty", "recv-not-empty";
++			#mbox-cells = <0>;
++			power-domains = <&ps_sio_cpu>;
++		};
++
++		sio: sio@236400000 {
++			compatible = "apple,t8112-sio", "apple,sio";
++			reg = <0x2 0x36400000 0x0 0x8000>;
++			dma-channels = <128>;
++			#dma-cells = <1>;
++			mboxes = <&sio_mbox>;
++			iommus = <&sio_dart 0>;
++			power-domains = <&ps_sio_cpu>;
++			resets = <&ps_sio>; /* TODO: verify reset does something */
++			status = "disabled";
++		};
++
+ 		admac: dma-controller@238200000 {
+ 			compatible = "apple,t8112-admac", "apple,admac";
+ 			reg = <0x2 0x38200000 0x0 0x34000>;
+@@ -911,6 +948,48 @@ admac: dma-controller@238200000 {
+ 			resets = <&ps_audio_p>;
+ 		};
+ 
++		dpaudio0: audio-controller@238330000 {
++			compatible = "apple,t8112-dpaudio", "apple,dpaudio";
++			reg = <0x2 0x38330000 0x0 0x4000>;
++			dmas = <&sio 0x64>;
++			dma-names = "tx";
++			power-domains = <&ps_dpa0>;
++			reset-domains = <&ps_dpa0>;
++			status = "disabled";
++
++			ports {
++				#address-cells = <1>;
++				#size-cells = <0>;
++				port@0 {
++					reg = <0>;
++					dpaudio0_dcp: endpoint {
++						remote-endpoint = <&dcp_audio>;
++					};
++				};
++			};
++		};
++
++		dpaudio1: audio-controller@238334000 {
++			compatible = "apple,t8112-dpaudio", "apple,dpaudio";
++			reg = <0x2 0x38334000 0x0 0x4000>;
++			dmas = <&sio 0x66>;
++			dma-names = "tx";
++			power-domains = <&ps_dpa1>;
++			reset-domains = <&ps_dpa1>;
++			status = "disabled";
++
++			ports {
++				#address-cells = <1>;
++				#size-cells = <0>;
++				port@0 {
++					reg = <0>;
++					dpaudio1_dcp: endpoint {
++						remote-endpoint = <&dcpext_audio>;
++					};
++				};
++			};
++		};
++
+ 		mca: i2s@238400000 {
+ 			compatible = "apple,t8112-mca", "apple,mca";
+ 			reg = <0x2 0x38400000 0x0 0x18000>,
+@@ -1386,6 +1465,17 @@ dcpext: dcp@271c00000 {
+ 			piodma {
+ 				iommus = <&dispext0_dart 4 0x0 0x0 0xf 0xffff0000>;
+ 			};
++
++			ports {
++				#address-cells = <1>;
++				#size-cells = <0>;
++				port@0 {
++					reg = <0>;
++					dcpext_audio: endpoint {
++						remote-endpoint = <&dpaudio1_dcp>;
++					};
++				};
++			};
+ 		};
+ 
+ 		ans_mbox: mbox@277408000 {
+-- 
+2.47.3
+

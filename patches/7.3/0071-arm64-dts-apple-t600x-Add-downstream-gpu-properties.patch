@@ -1,0 +1,251 @@
+From 6e880c2eb6331a63749542f298bd7c79afd45382 Mon Sep 17 00:00:00 2001
+From: Asahi Lina <lina@asahilina.net>
+Date: Thu, 3 Nov 2022 01:03:44 +0900
+Subject: [PATCH] arm64: dts: apple: t600x: Add downstream gpu properties
+
+to be dropped
+
+Signed-off-by: Asahi Lina <lina@asahilina.net>
+(cherry picked from commit 35f82c4c9c3057abc4fe1d635092a676e846bbc4)
+---
+ arch/arm64/boot/dts/apple/t6000.dtsi        |  4 +-
+ arch/arm64/boot/dts/apple/t6001-j375c.dts   |  9 ++++
+ arch/arm64/boot/dts/apple/t6001.dtsi        |  6 ++-
+ arch/arm64/boot/dts/apple/t6002-j375d.dts   |  9 ++++
+ arch/arm64/boot/dts/apple/t6002.dtsi        |  6 ++-
+ arch/arm64/boot/dts/apple/t600x-common.dtsi | 56 ++++++++++++++++++---
+ arch/arm64/boot/dts/apple/t600x-die0.dtsi   | 37 ++++++++++++++
+ 7 files changed, 118 insertions(+), 9 deletions(-)
+
+diff --git a/arch/arm64/boot/dts/apple/t6000.dtsi b/arch/arm64/boot/dts/apple/t6000.dtsi
+index 0ad77c98073f..c9e4e52d9aac 100644
+--- a/arch/arm64/boot/dts/apple/t6000.dtsi
++++ b/arch/arm64/boot/dts/apple/t6000.dtsi
+@@ -9,6 +9,8 @@
+ 
+ /* This chip is just a cut down version of t6001, so include it and disable the missing parts */
+ 
++#define GPU_REPEAT(x) <x x>
++
+ #include "t6001.dtsi"
+ 
+ / {
+@@ -18,5 +20,5 @@ / {
+ /delete-node/ &pmgr_south;
+ 
+ &gpu {
+-	compatible = "apple,agx-g13s";
++	compatible = "apple,agx-t6000", "apple,agx-g13x";
+ };
+diff --git a/arch/arm64/boot/dts/apple/t6001-j375c.dts b/arch/arm64/boot/dts/apple/t6001-j375c.dts
+index 5e94076e0eb3..ce684be7c8dc 100644
+--- a/arch/arm64/boot/dts/apple/t6001-j375c.dts
++++ b/arch/arm64/boot/dts/apple/t6001-j375c.dts
+@@ -46,4 +46,13 @@ usb_hub_rst-hog {
+ 	};
+ };
+ 
++&gpu {
++	apple,avg-power-ki-only = <0.6375>;
++	apple,avg-power-kp = <0.58>;
++	apple,avg-power-target-filter-tc = <1>;
++	apple,perf-base-pstate = <3>;
++	apple,ppm-ki = <5.8>;
++	apple,ppm-kp = <0.355>;
++};
++
+ #include "hwmon-fan-dual.dtsi"
+diff --git a/arch/arm64/boot/dts/apple/t6001.dtsi b/arch/arm64/boot/dts/apple/t6001.dtsi
+index e0acf2ba078b..fd37790193d6 100644
+--- a/arch/arm64/boot/dts/apple/t6001.dtsi
++++ b/arch/arm64/boot/dts/apple/t6001.dtsi
+@@ -16,6 +16,10 @@
+ 
+ #include "multi-die-cpp.h"
+ 
++#ifndef GPU_REPEAT
++# define GPU_REPEAT(x) <x x x x>
++#endif
++
+ #include "t600x-common.dtsi"
+ 
+ / {
+@@ -64,7 +68,7 @@ p-core-pmu-affinity {
+ };
+ 
+ &gpu {
+-	compatible = "apple,agx-g13c", "apple,agx-g13s";
++	compatible = "apple,agx-t6001", "apple,agx-g13c", "apple,agx-g13s";
+ };
+ 
+ #include "hwmon-common.dtsi"
+diff --git a/arch/arm64/boot/dts/apple/t6002-j375d.dts b/arch/arm64/boot/dts/apple/t6002-j375d.dts
+index 1e8b31e99136..df9b7d659c7b 100644
+--- a/arch/arm64/boot/dts/apple/t6002-j375d.dts
++++ b/arch/arm64/boot/dts/apple/t6002-j375d.dts
+@@ -213,3 +213,12 @@ atcphy5_usb3: endpoint {
+ 
+ /delete-node/ &ps_disp0_cpu0_die1;
+ /delete-node/ &ps_disp0_fe_die1;
++
++&gpu {
++	apple,avg-power-ki-only = <0.6375>;
++	apple,avg-power-kp = <0.58>;
++	apple,avg-power-target-filter-tc = <1>;
++	apple,perf-base-pstate = <3>;
++	apple,ppm-ki = <5.8>;
++	apple,ppm-kp = <0.355>;
++};
+diff --git a/arch/arm64/boot/dts/apple/t6002.dtsi b/arch/arm64/boot/dts/apple/t6002.dtsi
+index 91ce9a665cab..8d20821da0be 100644
+--- a/arch/arm64/boot/dts/apple/t6002.dtsi
++++ b/arch/arm64/boot/dts/apple/t6002.dtsi
+@@ -16,6 +16,10 @@
+ 
+ #include "multi-die-cpp.h"
+ 
++#ifndef GPU_REPEAT
++# define GPU_REPEAT(x) <x x x x x x x x>
++#endif
++
+ #include "t600x-common.dtsi"
+ 
+ / {
+@@ -301,7 +305,7 @@ &ps_gfx {
+ };
+ 
+ &gpu {
+-	compatible = "apple,agx-g13d", "apple,agx-g13s";
++	compatible = "apple,agx-t6002", "apple,agx-g13d", "apple,agx-g13s";
+ };
+ 
+ #include "hwmon-common.dtsi"
+diff --git a/arch/arm64/boot/dts/apple/t600x-common.dtsi b/arch/arm64/boot/dts/apple/t600x-common.dtsi
+index 186f0459d6b7..4a1b8a9a59a0 100644
+--- a/arch/arm64/boot/dts/apple/t600x-common.dtsi
++++ b/arch/arm64/boot/dts/apple/t600x-common.dtsi
+@@ -337,6 +337,50 @@ opp15 {
+ 		*/
+ 	};
+ 
++	gpu_opp: opp-table-gpu {
++		compatible = "operating-points-v2";
++
++		/*
++		 * NOTE: The voltage and power values are device-specific and
++		 * must be filled in by the bootloader.
++		 */
++		opp00 {
++			opp-hz = /bits/ 64 <0>;
++			opp-microvolt = GPU_REPEAT(400000);
++			opp-microwatt = <0>;
++		};
++		opp01 {
++			opp-hz = /bits/ 64 <388800000>;
++			opp-microvolt = GPU_REPEAT(634000);
++			opp-microwatt = <25011450>;
++		};
++		opp02 {
++			opp-hz = /bits/ 64 <486000000>;
++			opp-microvolt = GPU_REPEAT(650000);
++			opp-microwatt = <31681170>;
++		};
++		opp03 {
++			opp-hz = /bits/ 64 <648000000>;
++			opp-microvolt = GPU_REPEAT(668000);
++			opp-microwatt = <41685750>;
++		};
++		opp04 {
++			opp-hz = /bits/ 64 <777600000>;
++			opp-microvolt = GPU_REPEAT(715000);
++			opp-microwatt = <56692620>;
++		};
++		opp05 {
++			opp-hz = /bits/ 64 <972000000>;
++			opp-microvolt = GPU_REPEAT(778000);
++			opp-microwatt = <83371500>;
++		};
++		opp06 {
++			opp-hz = /bits/ 64 <1296000000>;
++			opp-microvolt = GPU_REPEAT(903000);
++			opp-microwatt = <166743000>;
++		};
++	};
++
+ 	pmu-e {
+ 		compatible = "apple,icestorm-pmu";
+ 		interrupt-parent = <&aic>;
+@@ -406,16 +450,16 @@ gpu_hw_cal_b: hw-cal-b {
+ 			status = "disabled";
+ 		};
+ 
+-		uat_handoff: uat-handoff {
+-			status = "disabled";
++		uat_handoff: uat-handoff@10 {
++			reg = <0 0x10 0 0>;
+ 		};
+ 
+-		uat_pagetables: uat-pagetables {
+-			status = "disabled";
++		uat_pagetables: uat-pagetables@20 {
++			reg = <0 0x20 0 0>;
+ 		};
+ 
+-		uat_ttbs: uat-ttbs {
+-			status = "disabled";
++		uat_ttbs: uat-ttbs@30 {
++			reg = <0 0x30 0 0>;
+ 		};
+ 	};
+ };
+diff --git a/arch/arm64/boot/dts/apple/t600x-die0.dtsi b/arch/arm64/boot/dts/apple/t600x-die0.dtsi
+index 74bf652068d3..3bf402f48c53 100644
+--- a/arch/arm64/boot/dts/apple/t600x-die0.dtsi
++++ b/arch/arm64/boot/dts/apple/t600x-die0.dtsi
+@@ -440,6 +440,43 @@ gpu: gpu@406400000 {
+ 				      "hw-cal-a", "hw-cal-b", "globals";
+ 
+ 		apple,firmware-abi = <0 0 0>;
++
++		apple,firmware-version = <12 3 0>;
++		apple,firmware-compat = <12 3 0>;
++
++		operating-points-v2 = <&gpu_opp>;
++		apple,perf-base-pstate = <1>;
++		apple,min-sram-microvolt = <790000>;
++		apple,avg-power-filter-tc-ms = <1000>;
++		apple,avg-power-ki-only = <2.4>;
++		apple,avg-power-kp = <1.5>;
++		apple,avg-power-min-duty-cycle = <40>;
++		apple,avg-power-target-filter-tc = <125>;
++		apple,fast-die0-integral-gain = <500.0>;
++		apple,fast-die0-proportional-gain = <72.0>;
++		apple,perf-boost-ce-step = <50>;
++		apple,perf-boost-min-util = <90>;
++		apple,perf-filter-drop-threshold = <0>;
++		apple,perf-filter-time-constant = <5>;
++		apple,perf-filter-time-constant2 = <50>;
++		apple,perf-integral-gain = <6.3>;
++		apple,perf-integral-gain2 = <0.197392>;
++		apple,perf-integral-min-clamp = <0>;
++		apple,perf-proportional-gain = <15.75>;
++		apple,perf-proportional-gain2 = <6.853981>;
++		apple,perf-tgt-utilization = <85>;
++		apple,power-sample-period = <8>;
++		apple,ppm-filter-time-constant-ms = <100>;
++		apple,ppm-ki = <30.0>;
++		apple,ppm-kp = <1.5>;
++		apple,pwr-filter-time-constant = <313>;
++		apple,pwr-integral-gain = <0.0202129>;
++		apple,pwr-integral-min-clamp = <0>;
++		apple,pwr-min-duty-cycle = <40>;
++		apple,pwr-proportional-gain = <5.2831855>;
++
++		apple,core-leak-coef = GPU_REPEAT(1200.0);
++		apple,sram-leak-coef = GPU_REPEAT(20.0);
+ 	};
+ 
+ 	agx_mbox: mbox@406408000 {
+-- 
+2.47.3
+

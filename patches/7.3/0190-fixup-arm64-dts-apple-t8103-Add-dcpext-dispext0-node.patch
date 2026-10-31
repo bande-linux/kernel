@@ -1,0 +1,27 @@
+From 4736c2a02e1d89c80d6b149059a72bdfafff2258 Mon Sep 17 00:00:00 2001
+From: Janne Grunau <j@jannau.net>
+Date: Thu, 22 Oct 2026 11:53:10 +0200
+Subject: [PATCH] fixup! arm64: dts: apple: t8103: Add dcpext/dispext0 nodes
+
+Signed-off-by: Janne Grunau <j@jannau.net>
+(cherry picked from commit ada433265555ab1c3e9c7e4bb18fd952010bff7e)
+---
+ arch/arm64/boot/dts/apple/t8103.dtsi | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/arch/arm64/boot/dts/apple/t8103.dtsi b/arch/arm64/boot/dts/apple/t8103.dtsi
+index e3a91f893107..a2aa7fb7f238 100644
+--- a/arch/arm64/boot/dts/apple/t8103.dtsi
++++ b/arch/arm64/boot/dts/apple/t8103.dtsi
+@@ -1506,7 +1506,7 @@ dcpext: dcp@271c00000 {
+ 			#size-cells = <2>;
+ 
+ 			piodma {
+-				iommus = <&dispext0_dart 4 0x0 0x0 0xf 0xffff0000>;
++				iommus = <&dispext0_dart 4 0x0 0x0 0x0 0xfc000000>;
+ 			};
+ 
+ 			ports {
+-- 
+2.47.3
+

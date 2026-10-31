@@ -1,0 +1,59 @@
+From c181c05b7f21401cecc15c456ca61c8175002a77 Mon Sep 17 00:00:00 2001
+From: Janne Grunau <j@jannau.net>
+Date: Mon, 25 Sep 2023 19:55:58 +0200
+Subject: [PATCH] arm64: dts: apple: t6020x: Mark dptx_phy_ps only on laptops
+ always-on
+
+The desktops will need to handle this on their own. On laptops it is a
+little weird since dcp seems to handle the programming of the phy which
+is apparently used for the internal display. It might be possible to
+move this to the panel node once dcp is upstream ready. The
+chosen.framebuffer node should reference the panel then.
+
+In the meantime keep it always-on on notebooks.
+
+Signed-off-by: Janne Grunau <j@jannau.net>
+(cherry picked from commit 397c44b99ceb07873c83c22801b685c45d8f57b7)
+---
+ arch/arm64/boot/dts/apple/t602x-j414-j416.dtsi | 12 ++++++++++++
+ arch/arm64/boot/dts/apple/t602x-pmgr.dtsi      |  1 -
+ 2 files changed, 12 insertions(+), 1 deletion(-)
+
+diff --git a/arch/arm64/boot/dts/apple/t602x-j414-j416.dtsi b/arch/arm64/boot/dts/apple/t602x-j414-j416.dtsi
+index 5df64390ef68..67c2f117a060 100644
+--- a/arch/arm64/boot/dts/apple/t602x-j414-j416.dtsi
++++ b/arch/arm64/boot/dts/apple/t602x-j414-j416.dtsi
+@@ -27,6 +27,18 @@ &framebuffer0 {
+ 	power-domains = <&ps_disp0_cpu0>, <&ps_dptx_phy_ps>;
+ };
+ 
++&display {
++	iommus = <&disp0_dart 0 0x100 0x0 0x10 0x0>,
++		<&dispext0_dart 0 0x100 0x0 0x10 0x0>;
++};
++
++/* HACK: keep dptx_phy_ps power-domain always-on
++ *       it is unclear how to sequence with dcp for the integrated display
++ */
++&ps_dptx_phy_ps {
++	apple,always-on;
++};
++
+ &hpm0 {
+ 	interrupts = <44 IRQ_TYPE_LEVEL_LOW>;
+ };
+diff --git a/arch/arm64/boot/dts/apple/t602x-pmgr.dtsi b/arch/arm64/boot/dts/apple/t602x-pmgr.dtsi
+index 8633a939592a..7d70e8bb0818 100644
+--- a/arch/arm64/boot/dts/apple/t602x-pmgr.dtsi
++++ b/arch/arm64/boot/dts/apple/t602x-pmgr.dtsi
+@@ -1450,7 +1450,6 @@ DIE_NODE(ps_dptx_phy_ps): power-controller@288 {
+ 		#power-domain-cells = <0>;
+ 		#reset-cells = <0>;
+ 		label = DIE_LABEL(dptx_phy_ps);
+-		apple,always-on;
+ 		power-domains = <&DIE_NODE(ps_sio)>;
+ 	};
+ 
+-- 
+2.47.3
+

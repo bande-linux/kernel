@@ -1,0 +1,73 @@
+From e4c82028865ae28915799e124c3f519d9cccf634 Mon Sep 17 00:00:00 2001
+From: Hector Martin <marcan@marcan.st>
+Date: Fri, 4 Feb 2022 12:59:39 +0900
+Subject: [PATCH] arm64: dts: apple: t8112: Add PCI power enable GPIOs
+
+Signed-off-by: Hector Martin <marcan@marcan.st>
+(cherry picked from commit 8cf1f87019f4b9a98dbbe17626c3c777be779b3a)
+---
+ arch/arm64/boot/dts/apple/t8112-j413.dts | 1 +
+ arch/arm64/boot/dts/apple/t8112-j415.dts | 1 +
+ arch/arm64/boot/dts/apple/t8112-j473.dts | 2 ++
+ arch/arm64/boot/dts/apple/t8112-j493.dts | 1 +
+ 4 files changed, 5 insertions(+)
+
+diff --git a/arch/arm64/boot/dts/apple/t8112-j413.dts b/arch/arm64/boot/dts/apple/t8112-j413.dts
+index 7ccfceb08093..c6da0ff92097 100644
+--- a/arch/arm64/boot/dts/apple/t8112-j413.dts
++++ b/arch/arm64/boot/dts/apple/t8112-j413.dts
+@@ -43,6 +43,7 @@ led-0 {
+  */
+ &port00 {
+ 	bus-range = <1 1>;
++	pwren-gpios = <&smc_gpio 13 GPIO_ACTIVE_HIGH>;
+ 	wifi0: wifi@0,0 {
+ 		compatible = "pci14e4,4433";
+ 		reg = <0x10000 0x0 0x0 0x0 0x0>;
+diff --git a/arch/arm64/boot/dts/apple/t8112-j415.dts b/arch/arm64/boot/dts/apple/t8112-j415.dts
+index fdc3409d2e07..676eca181905 100644
+--- a/arch/arm64/boot/dts/apple/t8112-j415.dts
++++ b/arch/arm64/boot/dts/apple/t8112-j415.dts
+@@ -43,6 +43,7 @@ led-0 {
+  */
+ &port00 {
+ 	bus-range = <1 1>;
++	pwren-gpios = <&smc_gpio 13 GPIO_ACTIVE_HIGH>;
+ 	wifi0: wifi@0,0 {
+ 		compatible = "pci14e4,4433";
+ 		reg = <0x10000 0x0 0x0 0x0 0x0>;
+diff --git a/arch/arm64/boot/dts/apple/t8112-j473.dts b/arch/arm64/boot/dts/apple/t8112-j473.dts
+index 9411e43868b3..7011db8cc0c5 100644
+--- a/arch/arm64/boot/dts/apple/t8112-j473.dts
++++ b/arch/arm64/boot/dts/apple/t8112-j473.dts
+@@ -50,6 +50,7 @@ &ps_disp0_fe {
+  */
+ &port00 {
+ 	bus-range = <1 1>;
++	pwren-gpios = <&smc_gpio 13 GPIO_ACTIVE_HIGH>;
+ 	wifi0: wifi@0,0 {
+ 		compatible = "pci14e4,4434";
+ 		reg = <0x10000 0x0 0x0 0x0 0x0>;
+@@ -70,6 +71,7 @@ bluetooth0: bluetooth@0,1 {
+ 
+ &port01 {
+ 	bus-range = <2 2>;
++	pwren-gpios = <&smc_gpio 24 GPIO_ACTIVE_HIGH>;
+ 	status = "okay";
+ };
+ 
+diff --git a/arch/arm64/boot/dts/apple/t8112-j493.dts b/arch/arm64/boot/dts/apple/t8112-j493.dts
+index 7cea5c594810..51af35e02a14 100644
+--- a/arch/arm64/boot/dts/apple/t8112-j493.dts
++++ b/arch/arm64/boot/dts/apple/t8112-j493.dts
+@@ -91,6 +91,7 @@ &displaydfr_dart {
+  */
+ &port00 {
+ 	bus-range = <1 1>;
++	pwren-gpios = <&smc_gpio 13 GPIO_ACTIVE_HIGH>;
+ 	wifi0: wifi@0,0 {
+ 		compatible = "pci14e4,4425";
+ 		reg = <0x10000 0x0 0x0 0x0 0x0>;
+-- 
+2.47.3
+

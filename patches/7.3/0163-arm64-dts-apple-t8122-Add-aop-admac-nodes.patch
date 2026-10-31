@@ -1,0 +1,195 @@
+From 937d4acdaf4042cef4f7125529ee84b016596414 Mon Sep 17 00:00:00 2001
+From: Sasha Finkelstein <k@chaosmail.tech>
+Date: Thu, 9 Jul 2026 22:58:25 +0200
+Subject: [PATCH] arm64: dts: apple: t8122: Add aop/admac nodes
+
+Signed-off-by: Sasha Finkelstein <k@chaosmail.tech>
+(cherry picked from commit 95e3d8837124ce311fae471cb8df777d595a03e2)
+---
+ arch/arm64/boot/dts/apple/t8122-j504.dts | 21 ++++++++
+ arch/arm64/boot/dts/apple/t8122-j613.dts | 21 ++++++++
+ arch/arm64/boot/dts/apple/t8122-j615.dts | 21 ++++++++
+ arch/arm64/boot/dts/apple/t8122.dtsi     | 64 +++++++++++++++++++++++-
+ 4 files changed, 126 insertions(+), 1 deletion(-)
+
+diff --git a/arch/arm64/boot/dts/apple/t8122-j504.dts b/arch/arm64/boot/dts/apple/t8122-j504.dts
+index f45c19883be5..e1babb6b45e1 100644
+--- a/arch/arm64/boot/dts/apple/t8122-j504.dts
++++ b/arch/arm64/boot/dts/apple/t8122-j504.dts
+@@ -101,6 +101,27 @@ tp_accel {
+ 	};
+ };
+ 
++&aop_mbox {
++	status = "okay";
++};
++
++&aop_dart {
++	status = "okay";
++};
++
++&aop_admac {
++	status = "okay";
++};
++
++&aop {
++	status = "okay";
++};
++
++&aop_audio {
++	apple,chassis-name = "J504";
++	apple,machine-kind = "MacBook Pro";
++};
++
+ &i2c1 {
+ 	status = "okay";
+ 
+diff --git a/arch/arm64/boot/dts/apple/t8122-j613.dts b/arch/arm64/boot/dts/apple/t8122-j613.dts
+index eabffb366c34..4d860ac590ed 100644
+--- a/arch/arm64/boot/dts/apple/t8122-j613.dts
++++ b/arch/arm64/boot/dts/apple/t8122-j613.dts
+@@ -38,6 +38,27 @@ &bluetooth0 {
+ 	brcm,board-type = "apple,dnieper";
+ };
+ 
++&aop_mbox {
++	status = "okay";
++};
++
++&aop_dart {
++	status = "okay";
++};
++
++&aop_admac {
++	status = "okay";
++};
++
++&aop {
++	status = "okay";
++};
++
++&aop_audio {
++	apple,chassis-name = "J613";
++	apple,machine-kind = "MacBook Air";
++};
++
+ &i2c1 {
+ 	speaker_left_woof: codec@38 {
+ 		compatible = "ti,sn012776", "ti,tas2764";
+diff --git a/arch/arm64/boot/dts/apple/t8122-j615.dts b/arch/arm64/boot/dts/apple/t8122-j615.dts
+index ffa5c6e5d4d3..9f795673a1df 100644
+--- a/arch/arm64/boot/dts/apple/t8122-j615.dts
++++ b/arch/arm64/boot/dts/apple/t8122-j615.dts
+@@ -30,6 +30,27 @@ led-0 {
+ 	};
+ };
+ 
++&aop_mbox {
++	status = "okay";
++};
++
++&aop_dart {
++	status = "okay";
++};
++
++&aop_admac {
++	status = "okay";
++};
++
++&aop {
++	status = "okay";
++};
++
++&aop_audio {
++	apple,chassis-name = "J615";
++	apple,machine-kind = "MacBook Air";
++};
++
+ &wifi0 {
+ 	brcm,board-type = "apple,tuzla";
+ };
+diff --git a/arch/arm64/boot/dts/apple/t8122.dtsi b/arch/arm64/boot/dts/apple/t8122.dtsi
+index 2386339077d8..2d4f69d943c3 100644
+--- a/arch/arm64/boot/dts/apple/t8122.dtsi
++++ b/arch/arm64/boot/dts/apple/t8122.dtsi
+@@ -529,7 +529,7 @@ serial0: serial@2a1200000 {
+ 		};
+ 
+ 		admac: dma-controller@2a3200000 {
+-			compatible = "apple,t8122-admac", "apple,t8103-admac";
++			compatible = "apple,t8122-admac";
+ 			reg = <0x2 0xa3200000 0x0 0x34000>;
+ 			dma-channels = <24>;
+ 			interrupts-extended = <0>,
+@@ -830,6 +830,68 @@ pinctrl_smc: pinctrl@2ec820000 {
+ 				     <AIC_IRQ 499 IRQ_TYPE_LEVEL_HIGH>;
+ 		};
+ 
++		aop_mbox: mbox@2f4408000 {
++			compatible = "apple,t8122-asc-mailbox", "apple,asc-mailbox-v4";
++			reg = <0x2 0xf4408000 0x0 0x4000>;
++			interrupt-parent = <&aic>;
++			interrupts = <AIC_IRQ 371 IRQ_TYPE_LEVEL_HIGH>,
++				<AIC_IRQ 372 IRQ_TYPE_LEVEL_HIGH>,
++				<AIC_IRQ 373 IRQ_TYPE_LEVEL_HIGH>,
++				<AIC_IRQ 374 IRQ_TYPE_LEVEL_HIGH>;
++			interrupt-names = "send-empty", "send-not-empty",
++				"recv-empty", "recv-not-empty";
++			#mbox-cells = <0>;
++			status = "disabled";
++		};
++
++		aop_dart: iommu@2f4818000 {
++			compatible = "apple,t8122-dart", "apple,t8110-dart";
++			reg = <0x2 0xf4818000 0x0 0x4000>;
++			#iommu-cells = <1>;
++			interrupt-parent = <&aic>;
++			interrupts = <AIC_IRQ 391 IRQ_TYPE_LEVEL_HIGH>;
++			status = "disabled";
++		};
++
++		aop_admac: dma-controller@2f4980000 {
++			compatible = "apple,t8122-admac";
++			reg = <0x2 0xf4980000 0x0 0x34000>;
++			#dma-cells = <1>;
++			dma-channels = <16>;
++			interrupts-extended = <0>,
++					      <0>,
++					      <&aic AIC_IRQ 412 IRQ_TYPE_LEVEL_HIGH>,
++					      <0>;
++			iommus = <&aop_dart 10>;
++			status = "disabled";
++		};
++
++		aop: aop@2f4c00000 {
++			compatible = "apple,t8122-aop", "apple,t6020-aop";
++			reg = <0x2 0xf4c00000 0x0 0x1e0000>,
++			      <0x2 0xf4400000 0x0 0x6c000>;
++			mboxes = <&aop_mbox>;
++			mbox-names = "mbox";
++			iommus = <&aop_dart 0>;
++
++			status = "disabled";
++
++			aop_audio: audio {
++				compatible = "apple,t8122-aop-audio", "apple,t6030-aop-audio";
++				dmas = <&aop_admac 1>;
++				dma-names = "dma";
++			};
++
++			aop_als: als {
++				compatible = "apple,t8122-aop-als", "apple,aop-als";
++				// intentionally empty
++			};
++
++			las {
++				compatible = "apple,t8122-aop-las", "apple,aop-las";
++			};
++		};
++
+ 		pinctrl_aop: pinctrl@2f4824000 {
+ 			compatible = "apple,t8122-pinctrl", "apple,t8103-pinctrl";
+ 			reg = <0x2 0xf4824000 0x0 0x4000>;
+-- 
+2.47.3
+

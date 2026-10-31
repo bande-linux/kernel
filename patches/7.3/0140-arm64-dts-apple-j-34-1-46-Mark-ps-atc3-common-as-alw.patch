@@ -1,0 +1,33 @@
+From 3e9417d657e97de699400d2aebecdd43b9cbea40 Mon Sep 17 00:00:00 2001
+From: Janne Grunau <j@jannau.net>
+Date: Thu, 25 Dec 2025 17:47:37 +0100
+Subject: [PATCH] arm64: dts: apple: j[34]1[46]: Mark ps_atc3_common as
+ always-on
+
+This works around missing (or incomplete) suspend/resume handling in
+atc/dcp for the the HDMI output on 14 and 16-inch Macbook Pros.
+
+Signed-off-by: Janne Grunau <j@jannau.net>
+(cherry picked from commit 6dc19d337dcee5bd4148e89906fe5ee4305e5089)
+---
+ arch/arm64/boot/dts/apple/t600x-j314-j316.dtsi | 4 ++++
+ 1 file changed, 4 insertions(+)
+
+diff --git a/arch/arm64/boot/dts/apple/t600x-j314-j316.dtsi b/arch/arm64/boot/dts/apple/t600x-j314-j316.dtsi
+index 8693ca9b2437..a4a194263f7a 100644
+--- a/arch/arm64/boot/dts/apple/t600x-j314-j316.dtsi
++++ b/arch/arm64/boot/dts/apple/t600x-j314-j316.dtsi
+@@ -137,6 +137,10 @@ &atcphy3_xbar {
+ 	status = "okay";
+ };
+ 
++&ps_atc3_common {
++	apple,always-on; /* Needs to stay on for HDMI resume */
++};
++
+ /* USB Type C */
+ &i2c0 {
+ 	hpm0: usb-pd@38 {
+-- 
+2.47.3
+

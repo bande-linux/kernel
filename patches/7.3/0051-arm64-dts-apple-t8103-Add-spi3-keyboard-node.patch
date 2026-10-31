@@ -1,0 +1,80 @@
+From bcbadee30df867f407c21a3a182a69e555df3f6c Mon Sep 17 00:00:00 2001
+From: Janne Grunau <j@jannau.net>
+Date: Fri, 26 Nov 2021 00:24:15 +0100
+Subject: [PATCH] arm64: dts: apple: t8103: Add spi3 keyboard node
+
+Enables keyboard and touchpad input on MacBook Air (M1, 2020) and
+MacBook Pro (13-inch, M1, 2020).
+
+Signed-off-by: Janne Grunau <j@jannau.net>
+(cherry picked from commit 34d06774b14b5925e20755b25f15cf6b229497e3)
+---
+ arch/arm64/boot/dts/apple/t8103-j293.dts | 21 +++++++++++++++++++++
+ arch/arm64/boot/dts/apple/t8103-j313.dts | 21 +++++++++++++++++++++
+ 2 files changed, 42 insertions(+)
+
+diff --git a/arch/arm64/boot/dts/apple/t8103-j293.dts b/arch/arm64/boot/dts/apple/t8103-j293.dts
+index 1d074b9e6018..d813ed7d14a9 100644
+--- a/arch/arm64/boot/dts/apple/t8103-j293.dts
++++ b/arch/arm64/boot/dts/apple/t8103-j293.dts
+@@ -59,6 +59,27 @@ &typec1 {
+ 	label = "USB-C Left-front";
+ };
+ 
++&spi3 {
++	status = "okay";
++
++	hid-transport@0 {
++		compatible = "apple,spi-hid-transport";
++		reg = <0>;
++		spi-max-frequency = <8000000>;
++		/*
++		 * Apple's ADT specifies 20us CS change delays, and the
++		 * SPI HID interface metadata specifies 45us. Using either
++		 * seems not to be reliable, but adding both works, so
++		 * best guess is they are cumulative.
++		 */
++		spi-cs-setup-delay-ns = <65000>;
++		spi-cs-hold-delay-ns = <65000>;
++		spi-cs-inactive-delay-ns = <250000>;
++		spien-gpios = <&pinctrl_ap 195 0>;
++		interrupts-extended = <&pinctrl_nub 13 IRQ_TYPE_LEVEL_LOW>;
++	};
++};
++
+ &i2c2 {
+ 	status = "okay";
+ };
+diff --git a/arch/arm64/boot/dts/apple/t8103-j313.dts b/arch/arm64/boot/dts/apple/t8103-j313.dts
+index f8b2b1637b9d..69556adbf2fc 100644
+--- a/arch/arm64/boot/dts/apple/t8103-j313.dts
++++ b/arch/arm64/boot/dts/apple/t8103-j313.dts
+@@ -55,4 +55,25 @@ &typec1 {
+ 	label = "USB-C Left-front";
+ };
+ 
++&spi3 {
++	status = "okay";
++
++	hid-transport@0 {
++		compatible = "apple,spi-hid-transport";
++		reg = <0>;
++		spi-max-frequency = <8000000>;
++		/*
++		 * Apple's ADT specifies 20us CS change delays, and the
++		 * SPI HID interface metadata specifies 45us. Using either
++		 * seems not to be reliable, but adding both works, so
++		 * best guess is they are cumulative.
++		 */
++		spi-cs-setup-delay-ns = <65000>;
++		spi-cs-hold-delay-ns = <65000>;
++		spi-cs-inactive-delay-ns = <250000>;
++		spien-gpios = <&pinctrl_ap 195 0>;
++		interrupts-extended = <&pinctrl_nub 13 IRQ_TYPE_LEVEL_LOW>;
++	};
++};
++
+ #include "hwmon-laptop.dtsi"
+-- 
+2.47.3
+

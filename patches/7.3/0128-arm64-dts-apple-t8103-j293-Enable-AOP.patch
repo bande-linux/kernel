@@ -1,0 +1,53 @@
+From a89a116228090b466caef26158f0725f219dabfd Mon Sep 17 00:00:00 2001
+From: Janne Grunau <j@jannau.net>
+Date: Mon, 30 Dec 2024 15:08:45 +0100
+Subject: [PATCH] arm64: dts: apple: t8103-j293: Enable AOP
+
+Signed-off-by: Janne Grunau <j@jannau.net>
+(cherry picked from commit fdad6e418ab77f2cbcc88867d7f2ccd9be7d544c)
+---
+ arch/arm64/boot/dts/apple/t8103-j293.dts | 21 +++++++++++++++++++++
+ 1 file changed, 21 insertions(+)
+
+diff --git a/arch/arm64/boot/dts/apple/t8103-j293.dts b/arch/arm64/boot/dts/apple/t8103-j293.dts
+index fb2299799388..1211fb8e4d8a 100644
+--- a/arch/arm64/boot/dts/apple/t8103-j293.dts
++++ b/arch/arm64/boot/dts/apple/t8103-j293.dts
+@@ -24,6 +24,7 @@ / {
+ 	 */
+ 	aliases {
+ 		touchbar0 = &touchbar0;
++		sep = &sep;
+ 	};
+ 
+ 	led-controller {
+@@ -233,6 +234,26 @@ &displaydfr_dart {
+ 	status = "okay";
+ };
+ 
++&aop_mbox {
++       status = "okay";
++};
++
++&aop_dart {
++       status = "okay";
++};
++
++&aop_admac {
++       status = "okay";
++};
++
++&aop {
++	status = "okay";
++};
++
++&sep {
++	status = "okay";
++};
++
+ &aop_audio {
+ 	apple,chassis-name = "J293";
+ 	apple,machine-kind = "MacBook Pro";
+-- 
+2.47.3
+

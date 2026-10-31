@@ -1,0 +1,69 @@
+From a26a424ce216c19eb2f4884bd38bef3614e5b4cb Mon Sep 17 00:00:00 2001
+From: Mikael Hug <mikaelhug@gmail.com>
+Date: Fri, 30 Oct 2026 16:40:20 +0000
+Subject: [PATCH] ASoC: macaudio: cancel the volume limit works after the card
+ is gone
+
+remove() cancelled only lock_timeout_work, and it ran before devm
+unregistered the card. lock_update_work was never cancelled: a speaker
+trigger or a control write during unbind could queue it, and it could
+re-arm lock_timeout_work after the cancel, both then running on the
+freed card.
+
+Cancel both from a devm action added before the card is registered, so
+it runs after the card and its control files are gone and nothing can
+queue them again: the update work first, because it arms the timeout
+work.
+
+Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>
+Claude-Session: https://claude.ai/code/session_01UqitcmCNS6G33aQUShi39x
+---
+ sound/soc/apple/macaudio.c | 20 ++++++++++++--------
+ 1 file changed, 12 insertions(+), 8 deletions(-)
+
+diff --git a/sound/soc/apple/macaudio.c b/sound/soc/apple/macaudio.c
+index 772238ee7148..e17d999e83d8 100644
+--- a/sound/soc/apple/macaudio.c
++++ b/sound/soc/apple/macaudio.c
+@@ -1656,6 +1656,14 @@ static const struct of_device_id macaudio_snd_device_id[]  = {
+ };
+ MODULE_DEVICE_TABLE(of, macaudio_snd_device_id);
+ 
++static void macaudio_cancel_vlimit_works(void *data)
++{
++	struct macaudio_snd_data *ma = data;
++
++	cancel_work_sync(&ma->lock_update_work);
++	cancel_delayed_work_sync(&ma->lock_timeout_work);
++}
++
+ static int macaudio_snd_platform_probe(struct platform_device *pdev)
+ {
+ 	struct snd_soc_card *card;
+@@ -1725,19 +1733,15 @@ static int macaudio_snd_platform_probe(struct platform_device *pdev)
+ 	INIT_WORK(&data->lock_update_work, macaudio_vlimit_update_work);
+ 	INIT_DELAYED_WORK(&data->lock_timeout_work, macaudio_vlimit_timeout_work);
+ 
+-	return devm_snd_soc_register_card(dev, card);
+-}
+-
+-static void macaudio_snd_platform_remove(struct platform_device *pdev)
+-{
+-	struct macaudio_snd_data *ma = dev_get_drvdata(&pdev->dev);
++	ret = devm_add_action(dev, macaudio_cancel_vlimit_works, data);
++	if (ret)
++		return ret;
+ 
+-	cancel_delayed_work_sync(&ma->lock_timeout_work);
++	return devm_snd_soc_register_card(dev, card);
+ }
+ 
+ static struct platform_driver macaudio_snd_driver = {
+ 	.probe = macaudio_snd_platform_probe,
+-	.remove = macaudio_snd_platform_remove,
+ 	.driver = {
+ 		.name = DRIVER_NAME,
+ 		.of_match_table = macaudio_snd_device_id,
+-- 
+2.47.3
+

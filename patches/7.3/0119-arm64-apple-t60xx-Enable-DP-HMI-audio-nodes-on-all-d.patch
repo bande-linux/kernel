@@ -1,0 +1,166 @@
+From d35cd573382f4f6aa66eb14df21b66f3d84d29a1 Mon Sep 17 00:00:00 2001
+From: Janne Grunau <j@jannau.net>
+Date: Sun, 7 Apr 2024 23:10:55 +0200
+Subject: [PATCH] arm64: apple: t60xx: Enable DP/HMI audio nodes on all devices
+
+Signed-off-by: Janne Grunau <j@jannau.net>
+(cherry picked from commit 9008a9eee61c6abbb9a8f9398b9de7856f3f29b5)
+---
+ arch/arm64/boot/dts/apple/t6001-j375c.dts      | 4 ++++
+ arch/arm64/boot/dts/apple/t6002-j375d.dts      | 4 ++++
+ arch/arm64/boot/dts/apple/t600x-j314-j316.dtsi | 5 +++++
+ arch/arm64/boot/dts/apple/t600x-j375.dtsi      | 1 +
+ arch/arm64/boot/dts/apple/t6020-j474s.dts      | 6 ++++++
+ arch/arm64/boot/dts/apple/t6021-j475c.dts      | 6 ++++++
+ arch/arm64/boot/dts/apple/t6022-j475d.dts      | 5 +++++
+ arch/arm64/boot/dts/apple/t6022-jxxxd.dtsi     | 5 +++++
+ 8 files changed, 36 insertions(+)
+
+diff --git a/arch/arm64/boot/dts/apple/t6001-j375c.dts b/arch/arm64/boot/dts/apple/t6001-j375c.dts
+index ce684be7c8dc..f3f98f038009 100644
+--- a/arch/arm64/boot/dts/apple/t6001-j375c.dts
++++ b/arch/arm64/boot/dts/apple/t6001-j375c.dts
+@@ -25,6 +25,10 @@ &bluetooth0 {
+ 	brcm,board-type = "apple,okinawa";
+ };
+ 
++&dpaudio0 {
++	status = "okay";
++};
++
+ &sound {
+ 	compatible = "apple,j375-macaudio", "apple,macaudio";
+ 	model = "Mac Studio J375";
+diff --git a/arch/arm64/boot/dts/apple/t6002-j375d.dts b/arch/arm64/boot/dts/apple/t6002-j375d.dts
+index 78a5ad020fbd..d04e6ff01b35 100644
+--- a/arch/arm64/boot/dts/apple/t6002-j375d.dts
++++ b/arch/arm64/boot/dts/apple/t6002-j375d.dts
+@@ -21,6 +21,10 @@ aliases {
+ 	};
+ };
+ 
++&dpaudio0 {
++	status = "okay";
++};
++
+ &sound {
+ 	compatible = "apple,j375-macaudio", "apple,macaudio";
+ 	model = "Mac Studio J375";
+diff --git a/arch/arm64/boot/dts/apple/t600x-j314-j316.dtsi b/arch/arm64/boot/dts/apple/t600x-j314-j316.dtsi
+index 5a95785c61c1..e4a5e8294e76 100644
+--- a/arch/arm64/boot/dts/apple/t600x-j314-j316.dtsi
++++ b/arch/arm64/boot/dts/apple/t600x-j314-j316.dtsi
+@@ -26,6 +26,7 @@ aliases {
+ 		disp0_piodma = &disp0_piodma;
+ 		disp0-piodma = &disp0_piodma;
+ 		serial0 = &serial0;
++		sio = &sio;
+ 		wifi0 = &wifi0;
+ 	};
+ 
+@@ -110,6 +111,10 @@ &dcpext0 {
+ 	apple,dptx-phy = <3>;
+ };
+ 
++&dpaudio1 {
++	status = "okay";
++};
++
+ &atcphy3_xbar {
+ 	status = "okay";
+ };
+diff --git a/arch/arm64/boot/dts/apple/t600x-j375.dtsi b/arch/arm64/boot/dts/apple/t600x-j375.dtsi
+index 39cb7229d9f2..13a8cdb20c58 100644
+--- a/arch/arm64/boot/dts/apple/t600x-j375.dtsi
++++ b/arch/arm64/boot/dts/apple/t600x-j375.dtsi
+@@ -26,6 +26,7 @@ aliases {
+ 		#endif
+ 		ethernet0 = &ethernet0;
+ 		serial0 = &serial0;
++		sio = &sio;
+ 		wifi0 = &wifi0;
+ 	};
+ 
+diff --git a/arch/arm64/boot/dts/apple/t6020-j474s.dts b/arch/arm64/boot/dts/apple/t6020-j474s.dts
+index 96192f17da47..936bd4210a86 100644
+--- a/arch/arm64/boot/dts/apple/t6020-j474s.dts
++++ b/arch/arm64/boot/dts/apple/t6020-j474s.dts
+@@ -96,8 +96,14 @@ &dcpext0_dart {
+ &dcpext0_mbox {
+ 	status = "okay";
+ };
++&dpaudio1 {
++	status = "okay";
++};
+ &dcpext0 {
+ #else
++&dpaudio0 {
++	status = "okay";
++};
+ &dcp {
+ #endif
+ 	status = "okay";
+diff --git a/arch/arm64/boot/dts/apple/t6021-j475c.dts b/arch/arm64/boot/dts/apple/t6021-j475c.dts
+index e6c2497e9adb..bff00df1b340 100644
+--- a/arch/arm64/boot/dts/apple/t6021-j475c.dts
++++ b/arch/arm64/boot/dts/apple/t6021-j475c.dts
+@@ -92,8 +92,14 @@ &dcpext0_dart {
+ &dcpext0_mbox {
+ 	status = "okay";
+ };
++&dpaudio1 {
++	status = "okay";
++};
+ &dcpext0 {
+ #else
++&dpaudio0 {
++	status = "okay";
++};
+ &dcp {
+ #endif
+ 	status = "okay";
+diff --git a/arch/arm64/boot/dts/apple/t6022-j475d.dts b/arch/arm64/boot/dts/apple/t6022-j475d.dts
+index 0f859a44f3ad..bb7fafc8b644 100644
+--- a/arch/arm64/boot/dts/apple/t6022-j475d.dts
++++ b/arch/arm64/boot/dts/apple/t6022-j475d.dts
+@@ -23,9 +23,14 @@ aliases {
+ 		atcphy4 = &atcphy0_die1;
+ 		atcphy5 = &atcphy1_die1;
+ 		/delete-property/ dcp;
++		/delete-property/ sio;
+ 	};
+ };
+ 
++&sio {
++	status = "disabled";
++};
++
+ &framebuffer0 {
+ 	power-domains = <&ps_dispext0_cpu0_die1>, <&ps_dptx_phy_ps_die1>;
+ };
+diff --git a/arch/arm64/boot/dts/apple/t6022-jxxxd.dtsi b/arch/arm64/boot/dts/apple/t6022-jxxxd.dtsi
+index 94eca4f7d8cc..31231251f7de 100644
+--- a/arch/arm64/boot/dts/apple/t6022-jxxxd.dtsi
++++ b/arch/arm64/boot/dts/apple/t6022-jxxxd.dtsi
+@@ -13,6 +13,7 @@ / {
+ 	aliases {
+ 		dcpext4 = &dcpext0_die1;
+ 		disp0 = &display;
++		sio1 = &sio_die1;
+ 	};
+ };
+ 
+@@ -53,6 +54,10 @@ &dcpext0_die1 {
+ 	apple,dptx-die = <1>;
+ };
+ 
++&dpaudio1_die1 {
++	status = "okay";
++};
++
+ /* delete missing dcp0/disp0 */
+ /delete-node/ &disp0_dart;
+ /delete-node/ &dcp_dart;
+-- 
+2.47.3
+

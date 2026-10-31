@@ -1,0 +1,36 @@
+From 04ffed428e06b984f33f28953429a93ffb288d7c Mon Sep 17 00:00:00 2001
+From: Janne Grunau <j@jannau.net>
+Date: Mon, 13 Nov 2023 23:58:10 +0100
+Subject: [PATCH] arm64: apple: t8112-pmgr: SIO: Add audio, spi and uart
+ power-domains
+
+The power-domains AUDIO_P, SPI_P and UART_P are necessary for SIO's ASC
+firmware to run. This is not explicitly expressed in the ADT (probably
+since the power-domains are implicitly turned on when macOS uses SIO).
+Since we plan to use SIO only for DP/HDMI audio add the power-domains
+explicitly as dependency of ps_sio_cpu.
+They might be better placed directly into the SIO node but the SIO
+driver doesn't support multiple power-domains.
+
+Signed-off-by: Janne Grunau <j@jannau.net>
+(cherry picked from commit c29e46d0f7fe6eca56df4097ba6070f99bb505e8)
+---
+ arch/arm64/boot/dts/apple/t8112-pmgr.dtsi | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/arch/arm64/boot/dts/apple/t8112-pmgr.dtsi b/arch/arm64/boot/dts/apple/t8112-pmgr.dtsi
+index 102ff3ad0535..ab8ec9bd4e44 100644
+--- a/arch/arm64/boot/dts/apple/t8112-pmgr.dtsi
++++ b/arch/arm64/boot/dts/apple/t8112-pmgr.dtsi
+@@ -176,7 +176,7 @@ ps_sio_cpu: power-controller@1c0 {
+ 		#power-domain-cells = <0>;
+ 		#reset-cells = <0>;
+ 		label = "sio_cpu";
+-		power-domains = <&ps_sio>;
++		power-domains = <&ps_sio &ps_uart_p &ps_spi_p &ps_dpa0>;
+ 	};
+ 
+ 	ps_fpwm0: power-controller@1c8 {
+-- 
+2.47.3
+

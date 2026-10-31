@@ -1,0 +1,61 @@
+From b01a07dd44fcd70155ad1921116c991f70b74ab6 Mon Sep 17 00:00:00 2001
+From: Janne Grunau <j@jannau.net>
+Date: Sun, 21 Dec 2025 20:25:56 +0100
+Subject: [PATCH] arm64: dts: apple: Connect dcp and atc-phy for dp2hdmi on
+ Macbook Pros
+
+The type-c mux lookup requires a graph connection between dcp and
+atc-phy.
+
+Signed-off-by: Janne Grunau <j@jannau.net>
+(cherry picked from commit 7cbb7baecddc501298c72a2035550517c535eb42)
+---
+ .../arm64/boot/dts/apple/t600x-j314-j316.dtsi | 25 ++++++++++++++++++-
+ 1 file changed, 24 insertions(+), 1 deletion(-)
+
+diff --git a/arch/arm64/boot/dts/apple/t600x-j314-j316.dtsi b/arch/arm64/boot/dts/apple/t600x-j314-j316.dtsi
+index 6b7de4ef31e1..8693ca9b2437 100644
+--- a/arch/arm64/boot/dts/apple/t600x-j314-j316.dtsi
++++ b/arch/arm64/boot/dts/apple/t600x-j314-j316.dtsi
+@@ -109,6 +109,19 @@ &dcpext0 {
+ 	mux-control-names = "dp-xbar";
+ 	mux-index = <0>;
+ 	apple,dptx-phy = <3>;
++
++	ports {
++		#address-cells = <1>;
++		#size-cells = <0>;
++
++		port@1 {
++			reg = <1>;
++
++			decpext0_dpout: endpoint {
++				remote-endpoint = <&atcphy3_dp>;
++			};
++		};
++	};
+ };
+ 
+ /* remove once m1n1 enables sio nodes after setup */
+@@ -546,7 +559,17 @@ atcphy2_usb3: endpoint {
+ };
+ 
+ &atcphy3 {
+-	status = "disabled";
++	ports {
++		#address-cells = <1>;
++		#size-cells = <0>;
++
++		port@2 {
++			reg = <2>;
++			atcphy3_dp: endpoint {
++				remote-endpoint = <&decpext0_dpout>;
++			};
++		};
++	};
+ };
+ 
+ &aop_mbox {
+-- 
+2.47.3
+

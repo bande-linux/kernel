@@ -1,0 +1,96 @@
+From 1f6f6c98c25dc8e0121494e49857676ae047bec8 Mon Sep 17 00:00:00 2001
+From: Sasha Finkelstein <k@chaosmail.tech>
+Date: Tue, 2 Jun 2026 23:19:54 +0200
+Subject: [PATCH] dts: apple: t8122: Add SMC hwmon nodes
+
+Signed-off-by: Sasha Finkelstein <k@chaosmail.tech>
+(cherry picked from commit ca1ce4d3c48c9ae8fc33932625321871249a6816)
+---
+ arch/arm64/boot/dts/apple/t8122-j433.dts  | 2 ++
+ arch/arm64/boot/dts/apple/t8122-j434.dts  | 2 ++
+ arch/arm64/boot/dts/apple/t8122-j504.dts  | 2 ++
+ arch/arm64/boot/dts/apple/t8122-j613.dts  | 2 ++
+ arch/arm64/boot/dts/apple/t8122-j615.dts  | 2 ++
+ arch/arm64/boot/dts/apple/t8122-jxxx.dtsi | 2 ++
+ arch/arm64/boot/dts/apple/t8122.dtsi      | 4 ++++
+ 7 files changed, 16 insertions(+)
+
+diff --git a/arch/arm64/boot/dts/apple/t8122-j433.dts b/arch/arm64/boot/dts/apple/t8122-j433.dts
+index 937f159741b7..3cd4a899856d 100644
+--- a/arch/arm64/boot/dts/apple/t8122-j433.dts
++++ b/arch/arm64/boot/dts/apple/t8122-j433.dts
+@@ -43,3 +43,5 @@ ethernet0: ethernet@0,0 {
+ &pcie1_dart {
+ 	status = "okay";
+ };
++
++#include "hwmon-fan-dual.dtsi"
+diff --git a/arch/arm64/boot/dts/apple/t8122-j434.dts b/arch/arm64/boot/dts/apple/t8122-j434.dts
+index f9635b6eb7ff..ecfd9e9b9ccf 100644
+--- a/arch/arm64/boot/dts/apple/t8122-j434.dts
++++ b/arch/arm64/boot/dts/apple/t8122-j434.dts
+@@ -48,3 +48,5 @@ &pcie1_dart {
+ &pcie2_dart {
+ 	status = "okay";
+ };
++
++#include "hwmon-fan-dual.dtsi"
+diff --git a/arch/arm64/boot/dts/apple/t8122-j504.dts b/arch/arm64/boot/dts/apple/t8122-j504.dts
+index 5f19711a489b..d83b7e5b32e6 100644
+--- a/arch/arm64/boot/dts/apple/t8122-j504.dts
++++ b/arch/arm64/boot/dts/apple/t8122-j504.dts
+@@ -61,3 +61,5 @@ &fpwm1 {
+ 	status = "okay";
+ };
+ 
++#include "hwmon-fan-dual.dtsi"
++#include "hwmon-laptop.dtsi"
+diff --git a/arch/arm64/boot/dts/apple/t8122-j613.dts b/arch/arm64/boot/dts/apple/t8122-j613.dts
+index 3e4e87cab2bf..222fa8477249 100644
+--- a/arch/arm64/boot/dts/apple/t8122-j613.dts
++++ b/arch/arm64/boot/dts/apple/t8122-j613.dts
+@@ -41,3 +41,5 @@ &bluetooth0 {
+ &fpwm1 {
+ 	status = "okay";
+ };
++
++#include "hwmon-laptop.dtsi"
+diff --git a/arch/arm64/boot/dts/apple/t8122-j615.dts b/arch/arm64/boot/dts/apple/t8122-j615.dts
+index 56ad290655dc..3366d92c0228 100644
+--- a/arch/arm64/boot/dts/apple/t8122-j615.dts
++++ b/arch/arm64/boot/dts/apple/t8122-j615.dts
+@@ -41,3 +41,5 @@ &bluetooth0 {
+ &fpwm1 {
+ 	status = "okay";
+ };
++
++#include "hwmon-laptop.dtsi"
+diff --git a/arch/arm64/boot/dts/apple/t8122-jxxx.dtsi b/arch/arm64/boot/dts/apple/t8122-jxxx.dtsi
+index 34a9465ba61a..786adeeb7620 100644
+--- a/arch/arm64/boot/dts/apple/t8122-jxxx.dtsi
++++ b/arch/arm64/boot/dts/apple/t8122-jxxx.dtsi
+@@ -77,4 +77,6 @@ &nco_clkref {
+ 	clock-frequency = <900000000>;
+ };
+ 
++#include "hwmon-common.dtsi"
++
+ #include "spi1-nvram.dtsi"
+diff --git a/arch/arm64/boot/dts/apple/t8122.dtsi b/arch/arm64/boot/dts/apple/t8122.dtsi
+index f9ac4d4b9fc8..d2ce284b69a8 100644
+--- a/arch/arm64/boot/dts/apple/t8122.dtsi
++++ b/arch/arm64/boot/dts/apple/t8122.dtsi
+@@ -766,6 +766,10 @@ smc_gpio: gpio {
+ 				#gpio-cells = <2>;
+ 			};
+ 
++			smc_hwmon: hwmon {
++				compatible = "apple,smc-hwmon";
++			};
++
+ 			smc_reboot: reboot {
+ 				compatible = "apple,smc-reboot";
+ 				nvmem-cells = <&shutdown_flag>, <&boot_stage>,
+-- 
+2.47.3
+

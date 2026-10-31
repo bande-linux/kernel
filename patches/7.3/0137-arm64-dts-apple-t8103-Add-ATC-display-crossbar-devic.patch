@@ -1,0 +1,50 @@
+From 5099da5ba7cf17c76685c2078b13ef32309c3eb2 Mon Sep 17 00:00:00 2001
+From: Janne Grunau <j@jannau.net>
+Date: Mon, 22 Dec 2025 22:33:21 +0100
+Subject: [PATCH] arm64: dts: apple: t8103: Add ATC display crossbar devices
+
+These are mux devices which control which DCP source is routed to DP
+complex in ATC. The display signals are either routed to the DP phy for
+DP-altmode or one of two DP in Thunderbolt/USB4 tunnels.
+
+Signed-off-by: Janne Grunau <j@jannau.net>
+(cherry picked from commit a3d9b808986764c226ef2244f1cb8cc7550e2d48)
+---
+ arch/arm64/boot/dts/apple/t8103.dtsi | 14 ++++++++++++++
+ 1 file changed, 14 insertions(+)
+
+diff --git a/arch/arm64/boot/dts/apple/t8103.dtsi b/arch/arm64/boot/dts/apple/t8103.dtsi
+index 4e5bf4e8997c..e8ec24a99b49 100644
+--- a/arch/arm64/boot/dts/apple/t8103.dtsi
++++ b/arch/arm64/boot/dts/apple/t8103.dtsi
+@@ -1567,6 +1567,13 @@ atcphy0: phy@383000000 {
+ 			power-domains = <&ps_atc0_usb>;
+ 		};
+ 
++		atcphy0_xbar: mux@38304c000 {
++			compatible = "apple,t8103-display-crossbar";
++			reg = <0x3 0x8304c000 0x0 0x4000>;
++			#mux-control-cells = <1>;
++			power-domains = <&ps_atc0_usb>;
++		};
++
+ 		dwc3_1: usb@502280000 {
+ 			compatible = "apple,t8103-dwc3";
+ 			reg = <0x5 0x02280000 0x0 0xcd00>, <0x5 0x0228cd00 0x0 0x3200>;
+@@ -1619,6 +1626,13 @@ atcphy1: phy@503000000 {
+ 			power-domains = <&ps_atc1_usb>;
+ 		};
+ 
++		atcphy1_xbar: mux@50304c000 {
++			compatible = "apple,t8103-display-crossbar";
++			reg = <0x5 0x0304c000 0x0 0x4000>;
++			#mux-control-cells = <1>;
++			power-domains = <&ps_atc1_usb>;
++		};
++
+ 		pcie0_dart_0: iommu@681008000 {
+ 			compatible = "apple,t8103-dart";
+ 			reg = <0x6 0x81008000 0x0 0x4000>;
+-- 
+2.47.3
+

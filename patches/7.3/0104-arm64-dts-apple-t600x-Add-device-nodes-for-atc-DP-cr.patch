@@ -1,0 +1,96 @@
+From ed4320a637e39f8755261c0ead1d9de618828553 Mon Sep 17 00:00:00 2001
+From: Janne Grunau <j@jannau.net>
+Date: Mon, 6 Nov 2023 00:35:54 +0100
+Subject: [PATCH] arm64: dts: apple: t600x: Add device nodes for atc DP
+ crossbar
+
+Signed-off-by: Janne Grunau <j@jannau.net>
+(cherry picked from commit b8b1e24d66e96cea090e6c5015ae4e7ea754627b)
+---
+ arch/arm64/boot/dts/apple/t6002-j375d.dts |  2 ++
+ arch/arm64/boot/dts/apple/t600x-dieX.dtsi | 32 +++++++++++++++++++++++
+ 2 files changed, 34 insertions(+)
+
+diff --git a/arch/arm64/boot/dts/apple/t6002-j375d.dts b/arch/arm64/boot/dts/apple/t6002-j375d.dts
+index df9b7d659c7b..78a5ad020fbd 100644
+--- a/arch/arm64/boot/dts/apple/t6002-j375d.dts
++++ b/arch/arm64/boot/dts/apple/t6002-j375d.dts
+@@ -197,11 +197,13 @@ atcphy5_usb3: endpoint {
+ /delete-node/ &dwc3_2_dart_1_die1;
+ /delete-node/ &dwc3_2_die1;
+ /delete-node/ &atcphy2_die1;
++/delete-node/ &atcphy2_xbar_die1;
+ 
+ /delete-node/ &dwc3_3_dart_0_die1;
+ /delete-node/ &dwc3_3_dart_1_die1;
+ /delete-node/ &dwc3_3_die1;
+ /delete-node/ &atcphy3_die1;
++/delete-node/ &atcphy3_xbar_die1;
+ 
+ /* delete unused always-on power-domains on die 1 */
+ 
+diff --git a/arch/arm64/boot/dts/apple/t600x-dieX.dtsi b/arch/arm64/boot/dts/apple/t600x-dieX.dtsi
+index eb6e9a5135ea..4fae2ebd54e1 100644
+--- a/arch/arm64/boot/dts/apple/t600x-dieX.dtsi
++++ b/arch/arm64/boot/dts/apple/t600x-dieX.dtsi
+@@ -302,6 +302,14 @@ DIE_NODE(atcphy0): phy@703000000 {
+ 		power-domains = <&DIE_NODE(ps_atc0_usb)>;
+ 	};
+ 
++	DIE_NODE(atcphy0_xbar): mux@70304c000 {
++		compatible = "apple,t6000-display-crossbar";
++		reg = <0x7 0x0304c000 0x0 0x4000>;
++		#mux-control-cells = <1>;
++		power-domains = <&DIE_NODE(ps_atc0_usb)>;
++		status = "disabled";
++	};
++
+ 	DIE_NODE(dwc3_1): usb@b02280000 {
+ 		compatible = "apple,t6000-dwc3", "apple,t8103-dwc3";
+ 		reg = <0xb 0x02280000 0x0 0xcd00>, <0xb 0x0228cd00 0x0 0x3200>;
+@@ -355,6 +363,14 @@ DIE_NODE(atcphy1): phy@b03000000 {
+ 		power-domains = <&DIE_NODE(ps_atc1_usb)>;
+ 	};
+ 
++	DIE_NODE(atcphy1_xbar): mux@b0304c000 {
++		compatible = "apple,t6000-display-crossbar";
++		reg = <0xb 0x0304c000 0x0 0x4000>;
++		#mux-control-cells = <1>;
++		power-domains = <&DIE_NODE(ps_atc1_usb)>;
++		status = "disabled";
++	};
++
+ 	DIE_NODE(dwc3_2): usb@f02280000 {
+ 		compatible = "apple,t6000-dwc3", "apple,t8103-dwc3";
+ 		reg = <0xf 0x02280000 0x0 0xcd00>, <0xf 0x0228cd00 0x0 0x3200>;
+@@ -408,6 +424,14 @@ DIE_NODE(atcphy2): phy@f03000000 {
+ 		power-domains = <&DIE_NODE(ps_atc2_usb)>;
+ 	};
+ 
++	DIE_NODE(atcphy2_xbar): mux@f0304c000 {
++		compatible = "apple,t6000-display-crossbar";
++		reg = <0xf 0x0304c000 0x0 0x4000>;
++		#mux-control-cells = <1>;
++		power-domains = <&DIE_NODE(ps_atc2_usb)>;
++		status = "disabled";
++	};
++
+ 	DIE_NODE(dwc3_3): usb@1302280000 {
+ 		compatible = "apple,t6000-dwc3", "apple,t8103-dwc3";
+ 		reg = <0x13 0x02280000 0x0 0xcd00>, <0x13 0x0228cd00 0x0 0x3200>;
+@@ -460,4 +484,12 @@ DIE_NODE(atcphy3): phy@1303000000 {
+ 		mode-switch;
+ 		power-domains = <&DIE_NODE(ps_atc3_usb)>;
+ 	};
++
++	DIE_NODE(atcphy3_xbar): mux@130304c000 {
++		compatible = "apple,t6000-display-crossbar";
++		reg = <0x13 0x0304c000 0x0 0x4000>;
++		#mux-control-cells = <1>;
++		power-domains = <&DIE_NODE(ps_atc3_usb)>;
++		status = "disabled";
++	};
+ };
+-- 
+2.47.3
+

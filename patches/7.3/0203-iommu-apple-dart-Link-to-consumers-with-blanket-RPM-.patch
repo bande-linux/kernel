@@ -1,0 +1,52 @@
+From c6fe8793c099663226cbdb6c8e8e224ced306837 Mon Sep 17 00:00:00 2001
+From: =?UTF-8?q?Martin=20Povi=C5=A1er?= <povik+lin@cutebit.org>
+Date: Fri, 28 Apr 2023 19:10:56 +0200
+Subject: [PATCH] iommu: apple-dart: Link to consumers with blanket RPM_ACTIVE
+MIME-Version: 1.0
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 8bit
+
+Without the RPM_ACTIVE flag, runtime PM core only seems to consider
+the link insofar as it prevents the DART from suspending in case of
+consumers *considered active by runtime PM*. Other devices, like those
+on which runtime PM has yet to be enabled, or which lack any runtime PM
+support, are not considered in preventing the DART from suspending.
+
+DART going through suspend/resume cycle with active consumers can break
+the consumers' operation by the DART being reset in its resume path,
+among other things.
+
+Add RPM_ACTIVE flag to the link to have the consumer in the link prevent
+the DART from being suspended, unless the consumer itself is runtime PM
+suspended. This supersedes an earlier PCIe-only workaround.
+
+(TODO: Does this mean devices without bound drivers will keep their
+DARTs up indefinitely? This depends on the timing of the iommu
+probe_device/release_device calls. Investigate.)
+
+Signed-off-by: Martin Povišer <povik+lin@cutebit.org>
+(cherry picked from commit 0bf4019cb8994abb6589f6235e03017651a48f69)
+---
+ drivers/iommu/apple-dart.c | 6 +++---
+ 1 file changed, 3 insertions(+), 3 deletions(-)
+
+diff --git a/drivers/iommu/apple-dart.c b/drivers/iommu/apple-dart.c
+index 0bb7cef4ea52..cf7cab4e2b99 100644
+--- a/drivers/iommu/apple-dart.c
++++ b/drivers/iommu/apple-dart.c
+@@ -750,9 +750,9 @@ static struct iommu_device *apple_dart_probe_device(struct device *dev)
+ 		return ERR_PTR(-ENODEV);
+ 
+ 	for_each_stream_map(i, cfg, stream_map)
+-		device_link_add(
+-			dev, stream_map->dart->dev,
+-			DL_FLAG_PM_RUNTIME | DL_FLAG_AUTOREMOVE_SUPPLIER);
++		device_link_add(dev, stream_map->dart->dev,
++			DL_FLAG_PM_RUNTIME | DL_FLAG_AUTOREMOVE_SUPPLIER |
++			DL_FLAG_RPM_ACTIVE);
+ 
+ 	return &cfg->stream_maps[0].dart->iommu;
+ }
+-- 
+2.47.3
+

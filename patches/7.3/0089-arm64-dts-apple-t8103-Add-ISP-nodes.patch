@@ -1,0 +1,209 @@
+From 47c1093e6b4600cbe684405e4c39245294f10133 Mon Sep 17 00:00:00 2001
+From: Eileen Yoon <eyn@gmx.com>
+Date: Thu, 31 Aug 2023 19:10:27 +0900
+Subject: [PATCH] arm64: dts: apple: t8103: Add ISP nodes
+
+Signed-off-by: Eileen Yoon <eyn@gmx.com>
+(cherry picked from commit 6c4d17f6406ef67fb58eb8c5cfb46a3659d8ec69)
+---
+ arch/arm64/boot/dts/apple/t8103-pmgr.dtsi | 117 ++++++++++++++++++++++
+ arch/arm64/boot/dts/apple/t8103.dtsi      |  55 ++++++++++
+ 2 files changed, 172 insertions(+)
+
+diff --git a/arch/arm64/boot/dts/apple/t8103-pmgr.dtsi b/arch/arm64/boot/dts/apple/t8103-pmgr.dtsi
+index a97d64b66573..4d1422d7e8b5 100644
+--- a/arch/arm64/boot/dts/apple/t8103-pmgr.dtsi
++++ b/arch/arm64/boot/dts/apple/t8103-pmgr.dtsi
+@@ -1009,6 +1009,123 @@ ps_disp0_cpu0: power-controller@10018 {
+ 		power-domains = <&ps_disp0_fe>;
+ 		apple,min-state = <4>;
+ 	};
++
++	/* There is a dependency tree involved with these PDs,
++	 * but we do not express it here since the ISP driver
++	 * is supposed to sequence them in the right order anyway
++	 * (and we do not know the exact tree structure).
++	 *
++	 * This also works around spurious parent PD activation
++	 * on machines with ISP disabled (desktops).
++	 */
++	ps_isp_set0: power-controller@4000 {
++		compatible = "apple,t8103-pmgr-pwrstate", "apple,pmgr-pwrstate";
++		reg = <0x4000 4>;
++		#power-domain-cells = <0>;
++		#reset-cells = <0>;
++		label = "isp_set0";
++		apple,force-disable;
++	};
++
++	ps_isp_set1: power-controller@4008 {
++		compatible = "apple,t8103-pmgr-pwrstate", "apple,pmgr-pwrstate";
++		reg = <0x4008 4>;
++		#power-domain-cells = <0>;
++		#reset-cells = <0>;
++		label = "isp_set1";
++		apple,force-disable;
++		apple,force-reset;
++	};
++
++	ps_isp_set2: power-controller@4010 {
++		compatible = "apple,t8103-pmgr-pwrstate", "apple,pmgr-pwrstate";
++		reg = <0x4010 4>;
++		#power-domain-cells = <0>;
++		#reset-cells = <0>;
++		label = "isp_set2";
++		apple,force-disable;
++		apple,force-reset;
++	};
++
++	ps_isp_fe: power-controller@4018 {
++		compatible = "apple,t8103-pmgr-pwrstate", "apple,pmgr-pwrstate";
++		reg = <0x4018 4>;
++		#power-domain-cells = <0>;
++		#reset-cells = <0>;
++		label = "isp_fe";
++	};
++
++	ps_isp_set4: power-controller@4020 {
++		compatible = "apple,t8103-pmgr-pwrstate", "apple,pmgr-pwrstate";
++		reg = <0x4020 4>;
++		#power-domain-cells = <0>;
++		#reset-cells = <0>;
++		label = "isp_set4";
++	};
++
++	ps_isp_set5: power-controller@4028 {
++		compatible = "apple,t8103-pmgr-pwrstate", "apple,pmgr-pwrstate";
++		reg = <0x4028 4>;
++		#power-domain-cells = <0>;
++		#reset-cells = <0>;
++		label = "isp_set5";
++	};
++
++	ps_isp_set6: power-controller@4030 {
++		compatible = "apple,t8103-pmgr-pwrstate", "apple,pmgr-pwrstate";
++		reg = <0x4030 4>;
++		#power-domain-cells = <0>;
++		#reset-cells = <0>;
++		label = "isp_set6";
++	};
++
++	ps_isp_set7: power-controller@4038 {
++		compatible = "apple,t8103-pmgr-pwrstate", "apple,pmgr-pwrstate";
++		reg = <0x4038 4>;
++		#power-domain-cells = <0>;
++		#reset-cells = <0>;
++		label = "isp_set7";
++	};
++
++	ps_isp_set8: power-controller@4040 {
++		compatible = "apple,t8103-pmgr-pwrstate", "apple,pmgr-pwrstate";
++		reg = <0x4040 4>;
++		#power-domain-cells = <0>;
++		#reset-cells = <0>;
++		label = "isp_set8";
++	};
++
++	ps_isp_set9: power-controller@4048 {
++		compatible = "apple,t8103-pmgr-pwrstate", "apple,pmgr-pwrstate";
++		reg = <0x4048 4>;
++		#power-domain-cells = <0>;
++		#reset-cells = <0>;
++		label = "isp_set9";
++	};
++
++	ps_isp_set10: power-controller@4050 {
++		compatible = "apple,t8103-pmgr-pwrstate", "apple,pmgr-pwrstate";
++		reg = <0x4050 4>;
++		#power-domain-cells = <0>;
++		#reset-cells = <0>;
++		label = "isp_set10";
++	};
++
++	ps_isp_set11: power-controller@4058 {
++		compatible = "apple,t8103-pmgr-pwrstate", "apple,pmgr-pwrstate";
++		reg = <0x4058 4>;
++		#power-domain-cells = <0>;
++		#reset-cells = <0>;
++		label = "isp_set11";
++	};
++
++	ps_isp_set12: power-controller@4060 {
++		compatible = "apple,t8103-pmgr-pwrstate", "apple,pmgr-pwrstate";
++		reg = <0x4060 4>;
++		#power-domain-cells = <0>;
++		#reset-cells = <0>;
++		label = "isp_set12";
++	};
+ };
+ 
+ &pmgr_mini {
+diff --git a/arch/arm64/boot/dts/apple/t8103.dtsi b/arch/arm64/boot/dts/apple/t8103.dtsi
+index 135d8ad2e93b..35f1fe7956ae 100644
+--- a/arch/arm64/boot/dts/apple/t8103.dtsi
++++ b/arch/arm64/boot/dts/apple/t8103.dtsi
+@@ -670,6 +670,61 @@ display: display-subsystem {
+ 			phandle = <&display>;
+ 		};
+ 
++		isp_dart0: iommu@22c0e8000 {
++			compatible = "apple,t8103-dart";
++			reg = <0x2 0x2c0e8000 0x0 0x4000>;
++			#iommu-cells = <1>;
++			interrupt-parent = <&aic>;
++			interrupts = <AIC_IRQ 251 IRQ_TYPE_LEVEL_HIGH>;
++			power-domains = <&ps_isp_sys>;
++
++			status = "disabled";
++		};
++
++		isp_dart1: iommu@22c0f4000 {
++			compatible = "apple,t8103-dart";
++			reg = <0x2 0x2c0f4000 0x0 0x4000>;
++			#iommu-cells = <1>;
++			interrupt-parent = <&aic>;
++			interrupts = <AIC_IRQ 251 IRQ_TYPE_LEVEL_HIGH>;
++			power-domains = <&ps_isp_sys>;
++
++			status = "disabled";
++		};
++
++		isp_dart2: iommu@22c0fc000 {
++			compatible = "apple,t8103-dart";
++			reg = <0x2 0x2c0fc000 0x0 0x4000>;
++			#iommu-cells = <1>;
++			interrupt-parent = <&aic>;
++			interrupts = <AIC_IRQ 251 IRQ_TYPE_LEVEL_HIGH>;
++			power-domains = <&ps_isp_sys>;
++
++			status = "disabled";
++		};
++
++		isp: isp@22a000000 {
++			compatible = "apple,t8103-isp", "apple,isp";
++			iommus = <&isp_dart0 0>, <&isp_dart1 0>, <&isp_dart2 0>;
++			reg-names = "coproc", "mbox", "gpio", "mbox2";
++			reg = <0x2 0x2a000000 0x0 0x2000000>,
++				<0x2 0x2c104000 0x0 0x100>,
++				<0x2 0x2c104170 0x0 0x100>,
++				<0x2 0x2c1043f0 0x0 0x100>;
++			interrupt-parent = <&aic>;
++			interrupts = <AIC_IRQ 246 IRQ_TYPE_LEVEL_HIGH>;
++			power-domains = <&ps_isp_sys>, <&ps_isp_set0>,
++				<&ps_isp_set1>, <&ps_isp_set2>, <&ps_isp_fe>,
++				<&ps_isp_set4>, <&ps_isp_set5>, <&ps_isp_set6>,
++				<&ps_isp_set7>, <&ps_isp_set8>, <&ps_isp_set9>,
++				<&ps_isp_set10>, <&ps_isp_set11>,
++				<&ps_isp_set12>;
++
++			apple,dart-vm-size = <0x0 0xa0000000>;
++
++			status = "disabled";
++		};
++
+ 		sio_dart: iommu@235004000 {
+ 			compatible = "apple,t8103-dart";
+ 			reg = <0x2 0x35004000 0x0 0x4000>;
+-- 
+2.47.3
+

@@ -1,0 +1,40 @@
+From 3c4db9bc11f3c714aa7c9b6c6abaa5e0d6ec76b4 Mon Sep 17 00:00:00 2001
+From: Janne Grunau <j@jannau.net>
+Date: Sun, 29 Oct 2023 10:39:17 +0100
+Subject: [PATCH] arm64: dts: apple: t602x: Add lpdptx-phy node
+
+On M2 desktop devices more parts of the HDMI output pipeline are under
+the OS' control. One of this parts is the primary DPTX phy which drives
+the the HDMI port through an integrated MCDP29XX DP to HDMI converter.
+
+Signed-off-by: Janne Grunau <j@jannau.net>
+(cherry picked from commit d58dc0df3a14b86c7344c144e004da1af89f9bf8)
+---
+ arch/arm64/boot/dts/apple/t602x-dieX.dtsi | 11 +++++++++++
+ 1 file changed, 11 insertions(+)
+
+diff --git a/arch/arm64/boot/dts/apple/t602x-dieX.dtsi b/arch/arm64/boot/dts/apple/t602x-dieX.dtsi
+index abcd2dc861f1..6c040e51bb01 100644
+--- a/arch/arm64/boot/dts/apple/t602x-dieX.dtsi
++++ b/arch/arm64/boot/dts/apple/t602x-dieX.dtsi
+@@ -248,6 +248,17 @@ DIE_NODE(pinctrl_ap): pinctrl@39b028000 {
+ 		#interrupt-cells = <2>;
+ 	};
+ 
++	DIE_NODE(lpdptxphy): phy@39c000000 {
++		compatible = "apple,t6020-dptx-phy", "apple,dptx-phy";
++		reg = <0x3 0x9c000000 0x0 0x4000>,
++			<0x3 0x9c040000 0x0 0xc000>;
++		reg-names = "core", "dptx";
++		power-domains = <&DIE_NODE(ps_dptx_phy_ps)>;
++		#phy-cells = <0>;
++		#reset-cells = <0>;
++		status = "disabled"; /* only exposed on desktop devices */
++	};
++
+ 	DIE_NODE(pmgr_gfx): power-management@404e80000 {
+ 		compatible = "apple,t6020-pmgr", "apple,t8103-pmgr", "syscon", "simple-mfd";
+ 		#address-cells = <1>;
+-- 
+2.47.3
+

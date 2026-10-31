@@ -1,0 +1,30 @@
+From 71942418badab69696d9f3db1a0b448bcf98011c Mon Sep 17 00:00:00 2001
+From: Yureka Lilian <yureka@cyberchaos.dev>
+Date: Sun, 5 Jul 2026 15:17:26 +0200
+Subject: [PATCH] dt-bindings: i2c: apple,i2c: Add t8132 compatible
+
+The i2c block on the Apple silicon t8132 (M4) SoC is compatible with the
+existing driver. Add "apple,t8132-i2c" as SoC specific compatible under
+"apple,t8103-i2c" used by the driver.
+
+Signed-off-by: Yureka Lilian <yureka@cyberchaos.dev>
+(cherry picked from commit 9071fd0a6b1cd0eafee22fa478ec1963e67f4d10)
+---
+ Documentation/devicetree/bindings/i2c/apple,i2c.yaml | 1 +
+ 1 file changed, 1 insertion(+)
+
+diff --git a/Documentation/devicetree/bindings/i2c/apple,i2c.yaml b/Documentation/devicetree/bindings/i2c/apple,i2c.yaml
+index d39f5e3f1df4..641f24b0ef4b 100644
+--- a/Documentation/devicetree/bindings/i2c/apple,i2c.yaml
++++ b/Documentation/devicetree/bindings/i2c/apple,i2c.yaml
+@@ -27,6 +27,7 @@ properties:
+               - apple,t6030-i2c
+               - apple,t6031-i2c
+               - apple,t8122-i2c
++              - apple,t8132-i2c
+           - const: apple,t8103-i2c
+       - items:
+           - enum:
+-- 
+2.47.3
+

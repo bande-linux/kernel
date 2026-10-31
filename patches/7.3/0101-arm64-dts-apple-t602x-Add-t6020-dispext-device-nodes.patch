@@ -1,0 +1,226 @@
+From 103c564f8dc03c6a3b1e25da66dd2a414e46587d Mon Sep 17 00:00:00 2001
+From: Janne Grunau <j@jannau.net>
+Date: Thu, 17 Aug 2023 19:45:46 +0200
+Subject: [PATCH] arm64: dts: apple: t602x: Add t6020 dispext device nodes
+
+While thunderbolt and DP-altmode are not working 2 dispext/dcpext
+devices are enough. "dispext0" will be used for the HDMI output and
+dispext1 can be used for DP-altmopde experiments.
+All nodes are disabled and have be enabled explicitly in device .dts
+or .dtsi.
+
+Signed-off-by: Janne Grunau <j@jannau.net>
+(cherry picked from commit 36f658e74f0ed62daf173ff9211db73bad9fd1df)
+---
+ arch/arm64/boot/dts/apple/t6022.dtsi        |   8 ++
+ arch/arm64/boot/dts/apple/t602x-common.dtsi |  28 +++++
+ arch/arm64/boot/dts/apple/t602x-dieX.dtsi   | 128 ++++++++++++++++++++
+ 3 files changed, 164 insertions(+)
+
+diff --git a/arch/arm64/boot/dts/apple/t6022.dtsi b/arch/arm64/boot/dts/apple/t6022.dtsi
+index 26850a1441c4..a14cdc6c45db 100644
+--- a/arch/arm64/boot/dts/apple/t6022.dtsi
++++ b/arch/arm64/boot/dts/apple/t6022.dtsi
+@@ -344,6 +344,14 @@ &cpu_p20 &cpu_p21 &cpu_p22 &cpu_p23
+ 	};
+ };
+ 
++&dcpext0_die1 {
++	apple,bw-scratch = <&pmgr_dcp 0 4 0x1240>;
++};
++
++&dcpext1_die1 {
++	apple,bw-scratch = <&pmgr_dcp 0 4 0x1248>;
++};
++
+ &ps_gfx {
+ 	// On t6022, the die0 GPU power domain needs both AFR power domains
+ 	power-domains = <&ps_afr>, <&ps_afr_die1>;
+diff --git a/arch/arm64/boot/dts/apple/t602x-common.dtsi b/arch/arm64/boot/dts/apple/t602x-common.dtsi
+index 617ff2415345..a7cad364e895 100644
+--- a/arch/arm64/boot/dts/apple/t602x-common.dtsi
++++ b/arch/arm64/boot/dts/apple/t602x-common.dtsi
+@@ -558,6 +558,34 @@ clk_disp0: clock-disp0 {
+ 		clock-output-names = "clk_disp0";
+ 	};
+ 
++	clk_dispext0: clock-dispext0 {
++		compatible = "fixed-clock";
++		#clock-cells = <0>;
++		clock-frequency = <0>;
++		clock-output-names = "clk_dispext0";
++	};
++
++	clk_dispext0_die1: clock-dispext0_die1 {
++		compatible = "fixed-clock";
++		#clock-cells = <0>;
++		clock-frequency = <0>;
++		clock-output-names = "clk_dispext0_die1";
++	};
++
++	clk_dispext1: clock-dispext1 {
++		compatible = "fixed-clock";
++		#clock-cells = <0>;
++		clock-frequency = <0>;
++		clock-output-names = "clk_dispext1";
++	};
++
++	clk_dispext1_die1: clock-dispext1_die1 {
++		compatible = "fixed-clock";
++		#clock-cells = <0>;
++		clock-frequency = <0>;
++		clock-output-names = "clk_dispext1_die1";
++	};
++
+ 	/*
+ 	 * This is a fabulated representation of the input clock
+ 	 * to NCO since we don't know the true clock tree.
+diff --git a/arch/arm64/boot/dts/apple/t602x-dieX.dtsi b/arch/arm64/boot/dts/apple/t602x-dieX.dtsi
+index b4a45f9a5daf..abcd2dc861f1 100644
+--- a/arch/arm64/boot/dts/apple/t602x-dieX.dtsi
++++ b/arch/arm64/boot/dts/apple/t602x-dieX.dtsi
+@@ -24,6 +24,70 @@ DIE_NODE(cpufreq_p1): cpufreq@212e20000 {
+ 		#performance-domain-cells = <0>;
+ 	};
+ 
++	DIE_NODE(dispext0_dart): iommu@289304000 {
++		compatible = "apple,t6020-dart", "apple,t8110-dart";
++		reg = <0x2 0x89304000 0x0 0x4000>;
++		#iommu-cells = <5>;
++		interrupt-parent = <&aic>;
++		interrupts = <AIC_IRQ DIE_NO 950 IRQ_TYPE_LEVEL_HIGH>;
++		power-domains = <&DIE_NODE(ps_dispext0_cpu0)>;
++		status = "disabled";
++	};
++
++	DIE_NODE(dcpext0_dart): iommu@28930c000 {
++		compatible = "apple,t6020-dart", "apple,t8110-dart";
++		reg = <0x2 0x8930c000 0x0 0x4000>;
++		#iommu-cells = <5>;
++		interrupt-parent = <&aic>;
++		interrupts = <AIC_IRQ DIE_NO 950 IRQ_TYPE_LEVEL_HIGH>;
++		power-domains = <&DIE_NODE(ps_dispext0_cpu0)>;
++		status = "disabled";
++	};
++
++	DIE_NODE(dcpext0_mbox): mbox@289c08000 {
++		compatible = "apple,t6020-asc-mailbox", "apple,asc-mailbox-v4";
++		reg = <0x2 0x89c08000 0x0 0x4000>;
++		interrupt-parent = <&aic>;
++		interrupts = <AIC_IRQ DIE_NO 971 IRQ_TYPE_LEVEL_HIGH>,
++			<AIC_IRQ DIE_NO 972 IRQ_TYPE_LEVEL_HIGH>,
++			<AIC_IRQ DIE_NO 973 IRQ_TYPE_LEVEL_HIGH>,
++			<AIC_IRQ DIE_NO 974 IRQ_TYPE_LEVEL_HIGH>;
++		interrupt-names = "send-empty", "send-not-empty",
++			"recv-empty", "recv-not-empty";
++		#mbox-cells = <0>;
++		power-domains = <&DIE_NODE(ps_dispext0_cpu0)>;
++		resets = <&DIE_NODE(ps_dispext0_cpu0)>;
++		status = "disabled";
++	};
++
++	DIE_NODE(dcpext0):  dcp@289c00000 {
++		compatible = "apple,t6020-dcpext", "apple,dcpext";
++		mboxes = <&DIE_NODE(dcpext0_mbox)>;
++		mbox-names = "mbox";
++		iommus = <&DIE_NODE(dcpext0_dart) 5 0x100 0x0 0x10 0x0>;
++
++		reg-names = "coproc", "disp-0", "disp-1", "disp-2", "disp-3";
++		reg = <0x2 0x89c00000 0x0 0x4000>,
++			<0x2 0x88000000 0x0 0x4000000>,
++			<0x2 0x89320000 0x0 0x4000>,
++			<0x2 0x89344000 0x0 0x4000>,
++			<0x2 0x89800000 0x0 0x800000>;
++		apple,bw-scratch = <&pmgr_dcp 0 4 0x1210>;
++		power-domains = <&DIE_NODE(ps_dispext0_cpu0)>;
++		resets = <&DIE_NODE(ps_dispext0_cpu0)>;
++		clocks = <&DIE_NODE(clk_dispext0)>;
++		phandle = <&DIE_NODE(dcpext0)>;
++		apple,dcp-index = <1>;
++		status = "disabled";
++		// required bus properties for 'piodma' subdevice
++		#address-cells = <2>;
++		#size-cells = <2>;
++
++		piodma {
++			iommus = <&DIE_NODE(dispext0_dart) 4 0x100 0x0 0x10 0x0>;
++		};
++	};
++
+ 	DIE_NODE(pmgr): power-management@28e080000 {
+ 		compatible = "apple,t6020-pmgr", "apple,t8103-pmgr", "syscon", "simple-mfd";
+ 		#address-cells = <1>;
+@@ -95,6 +159,70 @@ DIE_NODE(pinctrl_aop): pinctrl@2a6820000 {
+ 				<AIC_IRQ DIE_NO 604 IRQ_TYPE_LEVEL_HIGH>;
+ 	};
+ 
++	DIE_NODE(dispext1_dart): iommu@315304000 {
++		compatible = "apple,t6020-dart", "apple,t8110-dart";
++		reg = <0x3 0x15304000 0x0 0x4000>;
++		#iommu-cells = <5>;
++		interrupt-parent = <&aic>;
++		interrupts = <AIC_IRQ DIE_NO 986 IRQ_TYPE_LEVEL_HIGH>;
++		power-domains = <&DIE_NODE(ps_dispext1_cpu0)>;
++		status = "disabled";
++	};
++
++	DIE_NODE(dcpext1_dart): iommu@31530c000 {
++		compatible = "apple,t6020-dart", "apple,t8110-dart";
++		reg = <0x3 0x1530c000 0x0 0x4000>;
++		#iommu-cells = <5>;
++		interrupt-parent = <&aic>;
++		interrupts = <AIC_IRQ DIE_NO 986 IRQ_TYPE_LEVEL_HIGH>;
++		power-domains = <&DIE_NODE(ps_dispext1_cpu0)>;
++		status = "disabled";
++	};
++
++	DIE_NODE(dcpext1_mbox): mbox@315c08000 {
++		compatible = "apple,t6020-asc-mailbox", "apple,asc-mailbox-v4";
++		reg = <0x3 0x15c08000 0x0 0x4000>;
++		interrupt-parent = <&aic>;
++		interrupts = <AIC_IRQ DIE_NO 1007 IRQ_TYPE_LEVEL_HIGH>,
++			<AIC_IRQ DIE_NO 1008 IRQ_TYPE_LEVEL_HIGH>,
++			<AIC_IRQ DIE_NO 1009 IRQ_TYPE_LEVEL_HIGH>,
++			<AIC_IRQ DIE_NO 1010 IRQ_TYPE_LEVEL_HIGH>;
++		interrupt-names = "send-empty", "send-not-empty",
++			"recv-empty", "recv-not-empty";
++		#mbox-cells = <0>;
++		power-domains = <&DIE_NODE(ps_dispext1_cpu0)>;
++		resets = <&DIE_NODE(ps_dispext1_cpu0)>;
++		status = "disabled";
++	};
++
++	DIE_NODE(dcpext1):  dcp@315c00000 {
++		compatible = "apple,t6020-dcpext", "apple,dcpext";
++		mboxes = <&DIE_NODE(dcpext1_mbox)>;
++		mbox-names = "mbox";
++		iommus = <&DIE_NODE(dcpext1_dart) 5 0x100 0x0 0x10 0x0>;
++
++		reg-names = "coproc", "disp-0", "disp-1", "disp-2", "disp-3";
++		reg = <0x3 0x15c00000 0x0 0x4000>,
++			<0x3 0x14000000 0x0 0x4000000>,
++			<0x3 0x15320000 0x0 0x4000>,
++			<0x3 0x15344000 0x0 0x4000>,
++			<0x3 0x15800000 0x0 0x800000>;
++		apple,bw-scratch = <&pmgr_dcp 0 4 0x1218>;
++		power-domains = <&DIE_NODE(ps_dispext1_cpu0)>;
++		resets = <&DIE_NODE(ps_dispext1_cpu0)>;
++		clocks = <&DIE_NODE(clk_dispext1)>;
++		phandle = <&DIE_NODE(dcpext1)>;
++		apple,dcp-index = <2>;
++		status = "disabled";
++		// required bus properties for 'piodma' subdevice
++		#address-cells = <2>;
++		#size-cells = <2>;
++
++		piodma {
++			iommus = <&DIE_NODE(dispext1_dart) 4 0x100 0x0 0x10 0x0>;
++		};
++	};
++
+ 	DIE_NODE(pinctrl_ap): pinctrl@39b028000 {
+ 		compatible = "apple,t6020-pinctrl", "apple,t8103-pinctrl", "apple,pinctrl";
+ 		reg = <0x3 0x9b028000 0x0 0x4000>;
+-- 
+2.47.3
+

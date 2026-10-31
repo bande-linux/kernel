@@ -1,0 +1,316 @@
+From fabf3dcf8fe710f69a6a599ca4bc3ad94ea09b4e Mon Sep 17 00:00:00 2001
+From: Janne Grunau <j@jannau.net>
+Date: Fri, 11 Mar 2022 22:14:52 +0100
+Subject: [PATCH] arm64: apple: t600x: Add display controller related device
+ tree nodes
+
+The display system is initialized by the bootloader to provide a simple
+framebuffer at startup. Memory for the framebuffer and heap for the
+display co-processor are alreay mapped through the IOMMU. IOMMU
+intialization must preserve this mappings to avoid crashing the display
+co-processor. The exisitng mappings are caried in the devicetree. They
+are applied during device attach to ensure the IOMMU framework is aware
+of these mapping.
+
+Mappings are filled by m1n1 during boot.
+
+Based on https://lore.kernel.org/asahi/20220923123557.866972-1-thierry.reding@gmail.com
+
+arch: arm64: apple: t600x: Add connector type property for DCP*
+
+arch: arm64: apple: Add dcp panel node for t600x based laptops
+
+The panel node will contain among other properties backlight control
+related properties from the "backlight" node in the ADT.
+
+arm64: dts: apple: t600x: Add "ps_disp0_cpu0" as resets for dcp
+
+Signed-off-by: Janne Grunau <j@jannau.net>
+(cherry picked from commit a8dd486c77c86ad02fea9c44c9a99295bac6ab5d)
+---
+ arch/arm64/boot/dts/apple/t6000-j314s.dts     |  7 ++
+ arch/arm64/boot/dts/apple/t6000-j316s.dts     |  7 ++
+ arch/arm64/boot/dts/apple/t6001-j314c.dts     |  7 ++
+ arch/arm64/boot/dts/apple/t6001-j316c.dts     |  7 ++
+ arch/arm64/boot/dts/apple/t600x-common.dtsi   |  6 ++
+ arch/arm64/boot/dts/apple/t600x-die0.dtsi     | 73 +++++++++++++++++++
+ .../arm64/boot/dts/apple/t600x-j314-j316.dtsi | 13 ++++
+ arch/arm64/boot/dts/apple/t600x-j375.dtsi     |  9 +++
+ arch/arm64/boot/dts/apple/t600x-pmgr.dtsi     |  2 -
+ 9 files changed, 129 insertions(+), 2 deletions(-)
+
+diff --git a/arch/arm64/boot/dts/apple/t6000-j314s.dts b/arch/arm64/boot/dts/apple/t6000-j314s.dts
+index dab8e99fa324..ae79e3236614 100644
+--- a/arch/arm64/boot/dts/apple/t6000-j314s.dts
++++ b/arch/arm64/boot/dts/apple/t6000-j314s.dts
+@@ -25,6 +25,13 @@ &bluetooth0 {
+ 	brcm,board-type = "apple,maldives";
+ };
+ 
++&panel {
++	compatible = "apple,panel-j314", "apple,panel-mini-led", "apple,panel";
++	width-mm = <302>;
++	height-mm = <196>;
++	adj-height-mm = <189>;
++};
++
+ &sound {
+ 	compatible = "apple,j314-macaudio", "apple,macaudio";
+ 	model = "MacBook Pro J314";
+diff --git a/arch/arm64/boot/dts/apple/t6000-j316s.dts b/arch/arm64/boot/dts/apple/t6000-j316s.dts
+index 2cdfac3c40c8..272fa1c17124 100644
+--- a/arch/arm64/boot/dts/apple/t6000-j316s.dts
++++ b/arch/arm64/boot/dts/apple/t6000-j316s.dts
+@@ -25,6 +25,13 @@ &bluetooth0 {
+ 	brcm,board-type = "apple,madagascar";
+ };
+ 
++&panel {
++	compatible = "apple,panel-j316", "apple,panel-mini-led", "apple,panel";
++	width-mm = <346>;
++	height-mm = <223>;
++	adj-height-mm = <216>;
++};
++
+ &sound {
+ 	compatible = "apple,j316-macaudio", "apple,macaudio";
+ 	model = "MacBook Pro J316";
+diff --git a/arch/arm64/boot/dts/apple/t6001-j314c.dts b/arch/arm64/boot/dts/apple/t6001-j314c.dts
+index 7495698beb02..81d34507ed81 100644
+--- a/arch/arm64/boot/dts/apple/t6001-j314c.dts
++++ b/arch/arm64/boot/dts/apple/t6001-j314c.dts
+@@ -25,6 +25,13 @@ &bluetooth0 {
+ 	brcm,board-type = "apple,maldives";
+ };
+ 
++&panel {
++	compatible = "apple,panel-j314", "apple,panel-mini-led", "apple,panel";
++	width-mm = <302>;
++	height-mm = <196>;
++	adj-height-mm = <189>;
++};
++
+ &sound {
+ 	compatible = "apple,j314-macaudio", "apple,macaudio";
+ 	model = "MacBook Pro J314";
+diff --git a/arch/arm64/boot/dts/apple/t6001-j316c.dts b/arch/arm64/boot/dts/apple/t6001-j316c.dts
+index 6622b6e225a6..564d927f2fec 100644
+--- a/arch/arm64/boot/dts/apple/t6001-j316c.dts
++++ b/arch/arm64/boot/dts/apple/t6001-j316c.dts
+@@ -25,6 +25,13 @@ &bluetooth0 {
+ 	brcm,board-type = "apple,madagascar";
+ };
+ 
++&panel {
++	compatible = "apple,panel-j316", "apple,panel-mini-led", "apple,panel";
++	width-mm = <346>;
++	height-mm = <223>;
++	adj-height-mm = <216>;
++};
++
+ &sound {
+ 	compatible = "apple,j316-macaudio", "apple,macaudio";
+ 	model = "MacBook Pro J316";
+diff --git a/arch/arm64/boot/dts/apple/t600x-common.dtsi b/arch/arm64/boot/dts/apple/t600x-common.dtsi
+index e20234ef2135..186f0459d6b7 100644
+--- a/arch/arm64/boot/dts/apple/t600x-common.dtsi
++++ b/arch/arm64/boot/dts/apple/t600x-common.dtsi
+@@ -373,6 +373,12 @@ clk_200m: clock-200m {
+ 		clock-output-names = "clk_200m";
+ 	};
+ 
++	clk_disp0: clock-disp0 {
++		compatible = "fixed-clock";
++		#clock-cells = <0>;
++		clock-frequency = <237333328>;
++		clock-output-names = "clk_disp0";
++	};
+ 	/*
+ 	 * This is a fabulated representation of the input clock
+ 	 * to NCO since we don't know the true clock tree.
+diff --git a/arch/arm64/boot/dts/apple/t600x-die0.dtsi b/arch/arm64/boot/dts/apple/t600x-die0.dtsi
+index 5569a490a866..74bf652068d3 100644
+--- a/arch/arm64/boot/dts/apple/t600x-die0.dtsi
++++ b/arch/arm64/boot/dts/apple/t600x-die0.dtsi
+@@ -31,6 +31,12 @@ pmgr_misc: power-management@28e20c000 {
+ 		reg-names = "fabric-ps", "dcs-ps";
+ 	};
+ 
++	pmgr_dcp: power-management@28e3d0000 {
++		reg = <0x2 0x8e3d0000 0x0 0x4000>;
++		reg-names = "dcp-fw-pmgr";
++		#apple,bw-scratch-cells = <3>;
++	};
++
+ 	smc: smc@290400000 {
+ 		compatible = "apple,t6000-smc", "apple,smc";
+ 		reg = <0x2 0x90400000 0x0 0x4000>,
+@@ -162,6 +168,73 @@ wdt: watchdog@2922b0000 {
+ 		interrupts = <AIC_IRQ 0 631 IRQ_TYPE_LEVEL_HIGH>;
+ 	};
+ 
++	disp0_dart: iommu@38b304000 {
++		compatible = "apple,t6000-dart";
++		reg = <0x3 0x8b304000 0x0 0x4000>;
++		#iommu-cells = <5>;
++		interrupt-parent = <&aic>;
++		interrupts = <AIC_IRQ 0 821 IRQ_TYPE_LEVEL_HIGH>;
++		status = "disabled";
++		power-domains = <&ps_disp0_cpu0>;
++	};
++
++	dcp_dart: iommu@38b30c000 {
++		compatible = "apple,t6000-dart";
++		reg = <0x3 0x8b30c000 0x0 0x4000>;
++		#iommu-cells = <5>;
++		interrupt-parent = <&aic>;
++		interrupts = <AIC_IRQ 0 821 IRQ_TYPE_LEVEL_HIGH>;
++		power-domains = <&ps_disp0_cpu0>;
++	};
++
++	dcp_mbox: mbox@38bc08000 {
++		compatible = "apple,t6000-asc-mailbox", "apple,asc-mailbox-v4";
++		reg = <0x3 0x8bc08000 0x0 0x4000>;
++		interrupt-parent = <&aic>;
++		interrupts = <AIC_IRQ 0 842 IRQ_TYPE_LEVEL_HIGH>,
++			<AIC_IRQ 0 843 IRQ_TYPE_LEVEL_HIGH>,
++			<AIC_IRQ 0 844 IRQ_TYPE_LEVEL_HIGH>,
++			<AIC_IRQ 0 845 IRQ_TYPE_LEVEL_HIGH>;
++		interrupt-names = "send-empty", "send-not-empty",
++			"recv-empty", "recv-not-empty";
++		#mbox-cells = <0>;
++		power-domains = <&ps_disp0_cpu0>;
++	};
++
++	dcp: dcp@38bc00000 {
++		compatible = "apple,t6000-dcp", "apple,dcp";
++		mboxes = <&dcp_mbox>;
++		mbox-names = "mbox";
++		iommus = <&dcp_dart 0 0x0 0x0 0x0 0xfc000000>;
++
++		reg-names = "coproc", "disp-0", "disp-1", "disp-2", "disp-3";
++		reg = <0x3 0x8bc00000 0x0 0x4000>,
++			<0x3 0x8a000000 0x0 0x3000000>,
++			<0x3 0x8b320000 0x0 0x4000>,
++			<0x3 0x8b344000 0x0 0x4000>,
++			<0x3 0x8b800000 0x0 0x800000>;
++		apple,bw-scratch = <&pmgr_dcp 0 4 0x988>;
++		power-domains = <&ps_disp0_cpu0>;
++		resets = <&ps_disp0_cpu0>;
++		clocks = <&clk_disp0>;
++		phandle = <&dcp>;
++		// required bus properties for 'piodma' subdevice
++		#address-cells = <2>;
++		#size-cells = <2>;
++
++		disp0_piodma: piodma {
++			iommus = <&disp0_dart 4 0x0 0x0 0x0 0xfc000000>;
++			phandle = <&disp0_piodma>;
++		};
++	};
++
++	display: display-subsystem {
++		compatible = "apple,display-subsystem";
++		iommus = <&disp0_dart 0 0x0 0x0 0x0 0xfc000000>;
++		/* generate phandle explicitly for use in loader */
++		phandle = <&display>;
++	};
++
+ 	sio_dart_0: iommu@39b004000 {
+ 		compatible = "apple,t6000-dart";
+ 		reg = <0x3 0x9b004000 0x0 0x4000>;
+diff --git a/arch/arm64/boot/dts/apple/t600x-j314-j316.dtsi b/arch/arm64/boot/dts/apple/t600x-j314-j316.dtsi
+index 790f4269eccd..8756ad40bc64 100644
+--- a/arch/arm64/boot/dts/apple/t600x-j314-j316.dtsi
++++ b/arch/arm64/boot/dts/apple/t600x-j314-j316.dtsi
+@@ -20,6 +20,10 @@ aliases {
+ 		atcphy2 = &atcphy2;
+ 		atcphy3 = &atcphy3;
+ 		bluetooth0 = &bluetooth0;
++		dcp = &dcp;
++		disp0 = &display;
++		disp0_piodma = &disp0_piodma;
++		disp0-piodma = &disp0_piodma;
+ 		serial0 = &serial0;
+ 		wifi0 = &wifi0;
+ 	};
+@@ -36,6 +40,9 @@ framebuffer0: framebuffer@0 {
+ 			reg = <0 0 0 0>; /* To be filled by loader */
+ 			/* Format properties will be added by loader */
+ 			status = "disabled";
++			panel = <&panel>;
++			post-init-providers = <&panel>;
++			power-domains = <&ps_disp0_cpu0>;
+ 		};
+ 	};
+ 
+@@ -61,6 +68,12 @@ &serial0 {
+ 	status = "okay";
+ };
+ 
++&dcp {
++	panel: panel {
++		apple,max-brightness = <500>;
++	};
++};
++
+ /* USB Type C */
+ &i2c0 {
+ 	hpm0: usb-pd@38 {
+diff --git a/arch/arm64/boot/dts/apple/t600x-j375.dtsi b/arch/arm64/boot/dts/apple/t600x-j375.dtsi
+index 65b2abd521b1..3fe684d0bbb0 100644
+--- a/arch/arm64/boot/dts/apple/t600x-j375.dtsi
++++ b/arch/arm64/boot/dts/apple/t600x-j375.dtsi
+@@ -18,6 +18,10 @@ aliases {
+ 		atcphy2 = &atcphy2;
+ 		atcphy3 = &atcphy3;
+ 		bluetooth0 = &bluetooth0;
++		dcp = &dcp;
++		disp0 = &display;
++		disp0_piodma = &disp0_piodma;
++		disp0-piodma = &disp0_piodma;
+ 		ethernet0 = &ethernet0;
+ 		serial0 = &serial0;
+ 		wifi0 = &wifi0;
+@@ -35,6 +39,7 @@ framebuffer0: framebuffer@0 {
+ 			reg = <0 0 0 0>; /* To be filled by loader */
+ 			/* Format properties will be added by loader */
+ 			status = "disabled";
++			power-domains = <&ps_disp0_cpu0>;
+ 		};
+ 	};
+ 
+@@ -48,6 +53,10 @@ &serial0 {
+ 	status = "okay";
+ };
+ 
++&dcp {
++	apple,connector-type = "HDMI-A";
++};
++
+ /* USB Type C */
+ &i2c0 {
+ 	hpm0: usb-pd@38 {
+diff --git a/arch/arm64/boot/dts/apple/t600x-pmgr.dtsi b/arch/arm64/boot/dts/apple/t600x-pmgr.dtsi
+index cc2627eafc89..3f507cbc65f0 100644
+--- a/arch/arm64/boot/dts/apple/t600x-pmgr.dtsi
++++ b/arch/arm64/boot/dts/apple/t600x-pmgr.dtsi
+@@ -1297,7 +1297,6 @@ DIE_NODE(ps_disp0_fe): power-controller@328 {
+ 		#reset-cells = <0>;
+ 		label = DIE_LABEL(disp0_fe);
+ 		power-domains = <&DIE_NODE(ps_afnc2_lw0)>;
+-		apple,always-on; /* TODO: figure out if we can enable PM here */
+ 	};
+ 
+ 	DIE_NODE(ps_disp0_cpu0): power-controller@350 {
+@@ -1307,7 +1306,6 @@ DIE_NODE(ps_disp0_cpu0): power-controller@350 {
+ 		#reset-cells = <0>;
+ 		label = DIE_LABEL(disp0_cpu0);
+ 		power-domains = <&DIE_NODE(ps_disp0_fe)>;
+-		apple,always-on; /* TODO: figure out if we can enable PM here */
+ 		apple,min-state = <4>;
+ 	};
+ 
+-- 
+2.47.3
+

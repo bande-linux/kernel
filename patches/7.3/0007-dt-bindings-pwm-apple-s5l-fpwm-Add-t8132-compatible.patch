@@ -1,0 +1,30 @@
+From e510b810d15bb97c1a5da2807eb4d060a2040fb1 Mon Sep 17 00:00:00 2001
+From: Yureka Lilian <yureka@cyberchaos.dev>
+Date: Sun, 5 Jul 2026 15:17:27 +0200
+Subject: [PATCH] dt-bindings: pwm: apple,s5l-fpwm: Add t8132 compatible
+
+The PWM controller on the Apple silicon t8132 (M4) SoC is compatible
+with the existing driver. Add "apple,t8132-fpwm" as SoC specific
+compatible under "apple,s5l-fpwm" used by the driver.
+
+Signed-off-by: Yureka Lilian <yureka@cyberchaos.dev>
+(cherry picked from commit 0a737844f7fda62de05a903aabc12acfd7a3a71e)
+---
+ Documentation/devicetree/bindings/pwm/apple,s5l-fpwm.yaml | 1 +
+ 1 file changed, 1 insertion(+)
+
+diff --git a/Documentation/devicetree/bindings/pwm/apple,s5l-fpwm.yaml b/Documentation/devicetree/bindings/pwm/apple,s5l-fpwm.yaml
+index dd95037ea5ee..ae8baa5f7bcd 100644
+--- a/Documentation/devicetree/bindings/pwm/apple,s5l-fpwm.yaml
++++ b/Documentation/devicetree/bindings/pwm/apple,s5l-fpwm.yaml
+@@ -19,6 +19,7 @@ properties:
+           - apple,t8103-fpwm
+           - apple,t8112-fpwm
+           - apple,t8122-fpwm
++          - apple,t8132-fpwm
+           - apple,t6000-fpwm
+           - apple,t6020-fpwm
+           - apple,t6030-fpwm
+-- 
+2.47.3
+

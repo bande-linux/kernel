@@ -1,0 +1,362 @@
+From 784af10593bff6be19697c70f401e31ba7024a88 Mon Sep 17 00:00:00 2001
+From: Yureka Lilian <yureka@cyberchaos.dev>
+Date: Fri, 4 Sep 2026 11:13:31 +0200
+Subject: [PATCH] arm64: dts: apple: t603[124]: PMP support
+
+Tested on t6034
+
+Signed-off-by: Yureka Lilian <yureka@cyberchaos.dev>
+(cherry picked from commit 6ea00d80b900d90ed183bfd42c4201e75c56724b)
+---
+ arch/arm64/boot/dts/apple/t6031-base.dtsi |   6 +
+ arch/arm64/boot/dts/apple/t6031-die0.dtsi | 201 ++++++++++++++++++++++
+ arch/arm64/boot/dts/apple/t6031-dieX.dtsi |   6 +-
+ arch/arm64/boot/dts/apple/t6031-nvme.dtsi |  12 ++
+ arch/arm64/boot/dts/apple/t6031-pmgr.dtsi |   2 +
+ arch/arm64/boot/dts/apple/t6032.dtsi      |  18 ++
+ 6 files changed, 244 insertions(+), 1 deletion(-)
+
+diff --git a/arch/arm64/boot/dts/apple/t6031-base.dtsi b/arch/arm64/boot/dts/apple/t6031-base.dtsi
+index 4bf7ce8535ca..61d584387f46 100644
+--- a/arch/arm64/boot/dts/apple/t6031-base.dtsi
++++ b/arch/arm64/boot/dts/apple/t6031-base.dtsi
+@@ -11,6 +11,12 @@ / {
+ 	#address-cells = <2>;
+ 	#size-cells = <2>;
+ 
++	aliases {
++		#ifdef APPLE_USE_PMP
++		pmp = &pmp;
++		#endif
++	};
++
+ 	cpus {
+ 		#address-cells = <2>;
+ 		#size-cells = <0>;
+diff --git a/arch/arm64/boot/dts/apple/t6031-die0.dtsi b/arch/arm64/boot/dts/apple/t6031-die0.dtsi
+index 7ca801e7c2f6..47d868a323e8 100644
+--- a/arch/arm64/boot/dts/apple/t6031-die0.dtsi
++++ b/arch/arm64/boot/dts/apple/t6031-die0.dtsi
+@@ -25,6 +25,207 @@ aic: interrupt-controller@292400000 {
+ 		power-domains = <&ps_aic>;
+ 	};
+ 
++	pmp_dart: iommu@290300000 {
++		compatible = "apple,t6031-dart", "apple,t8110-dart";
++		reg = <0x2 0x90300000 0x0 0x4000>;
++		#iommu-cells = <1>;
++		interrupt-parent = <&aic>;
++		interrupts = <AIC_IRQ 0 1184 IRQ_TYPE_LEVEL_HIGH>;
++		power-domains = <&ps_pmp>;
++	};
++
++	pmp_report: pmp_report@2903c0000 {
++		compatible = "apple,t6031-pmp-v2-report","apple,t6020-pmp-v2-report";
++		reg = <0x2 0x903c0000 0x0 0x30000>;
++		power-domains = <&ps_pms_sram>;
++		#address-cells = <1>;
++		#size-cells = <0>;
++
++		pmp_report_ane_sys: report@e {
++			compatible = "apple,t6031-pmp-v2-report-entry",
++			             "apple,t6000-pmp-v2-report-entry";
++			reg = <0xe>;
++			label = "pmp-ane-sys";
++			#power-domain-cells = <0>;
++			power-domains = <&ps_ane_sys>;
++			status = "disabled";
++		};
++
++		pmp_report_isp_sys: report@f {
++			compatible = "apple,t6031-pmp-v2-report-entry",
++			             "apple,t6000-pmp-v2-report-entry";
++			reg = <0xf>;
++			label = "pmp-isp-sys";
++			#power-domain-cells = <0>;
++			power-domains = <&ps_isp_sys>;
++			status = "disabled";
++		};
++
++		pmp_report_disp: report@10 {
++			compatible = "apple,t6031-pmp-v2-report-entry",
++			             "apple,t6000-pmp-v2-report-entry";
++			reg = <0x10>;
++			label = "pmp-disp";
++			#power-domain-cells = <0>;
++			power-domains = <&ps_disp_fe>;
++			apple,always-on;
++		};
++
++		pmp_report_dispext0: report@11 {
++			compatible = "apple,t6031-pmp-v2-report-entry",
++			             "apple,t6000-pmp-v2-report-entry";
++			reg = <0x11>;
++			label = "pmp-dispext0";
++			#power-domain-cells = <0>;
++			power-domains = <&ps_dispext0_fe>;
++			status = "disabled";
++		};
++
++		pmp_report_dispext1: report@12 {
++			compatible = "apple,t6031-pmp-v2-report-entry",
++			             "apple,t6000-pmp-v2-report-entry";
++			reg = <0x12>;
++			label = "pmp-dispext1";
++			#power-domain-cells = <0>;
++			power-domains = <&ps_dispext1_fe>;
++			status = "disabled";
++		};
++
++		pmp_report_dispext2: report@13 {
++			compatible = "apple,t6031-pmp-v2-report-entry",
++			             "apple,t6000-pmp-v2-report-entry";
++			reg = <0x13>;
++			label = "pmp-dispext2";
++			#power-domain-cells = <0>;
++			power-domains = <&ps_dispext2_fe>;
++			status = "disabled";
++		};
++
++		pmp_report_dispext3: report@14 {
++			compatible = "apple,t6031-pmp-v2-report-entry",
++			             "apple,t6000-pmp-v2-report-entry";
++			reg = <0x14>;
++			label = "pmp-dispext3";
++			#power-domain-cells = <0>;
++			power-domains = <&ps_dispext3_fe>;
++			status = "disabled";
++		};
++
++		pmp_report_venc0_sys: report@15 {
++			compatible = "apple,t6031-pmp-v2-report-entry",
++			             "apple,t6000-pmp-v2-report-entry";
++			reg = <0x15>;
++			label = "pmp-venc0-sys";
++			#power-domain-cells = <0>;
++			power-domains = <&ps_venc0_sys>;
++			status = "disabled";
++		};
++
++		pmp_report_venc1_sys: report@16 {
++			compatible = "apple,t6031-pmp-v2-report-entry",
++			             "apple,t6000-pmp-v2-report-entry";
++			reg = <0x16>;
++			label = "pmp-venc1-sys";
++			#power-domain-cells = <0>;
++			power-domains = <&ps_venc1_sys>;
++			status = "disabled";
++		};
++
++		pmp_report_avd_sys: report@17 {
++			compatible = "apple,t6031-pmp-v2-report-entry",
++			             "apple,t6000-pmp-v2-report-entry";
++			reg = <0x17>;
++			label = "pmp-avd-sys";
++			#power-domain-cells = <0>;
++			power-domains = <&ps_avd_sys>;
++		};
++
++		pmp_report_msr0: report@18 {
++			compatible = "apple,t6031-pmp-v2-report-entry",
++			        "apple,t6000-pmp-v2-report-entry";
++			reg = <0x18>;
++			label = "pmp-msr0";
++			#power-domain-cells = <0>;
++			power-domains = <&ps_msr0>;
++			status = "disabled";
++		};
++
++		pmp_report_msr1: report@19 {
++			compatible = "apple,t6031-pmp-v2-report-entry",
++			             "apple,t6000-pmp-v2-report-entry";
++			reg = <0x19>;
++			label = "pmp-msr1";
++			#power-domain-cells = <0>;
++			power-domains = <&ps_msr1>;
++			status = "disabled";
++		};
++
++		pmp_report_jpg: report@1a {
++			compatible = "apple,t6031-pmp-v2-report-entry",
++			             "apple,t6000-pmp-v2-report-entry";
++			reg = <0x1a>;
++			label = "pmp-jpg";
++			#power-domain-cells = <0>;
++			power-domains = <&ps_jpg>;
++			status = "disabled";
++		};
++
++		pmp_report_scodec: report@1b {
++			compatible = "apple,t6031-pmp-v2-report-entry",
++			             "apple,t6000-pmp-v2-report-entry";
++			reg = <0x1b>;
++			label = "pmp-scodec";
++			#power-domain-cells = <0>;
++			power-domains = <&ps_scodec>;
++			status = "disabled";
++		};
++
++		pmp_report_prores: report@1c {
++			compatible = "apple,t6031-pmp-v2-report-entry",
++			             "apple,t6000-pmp-v2-report-entry";
++			reg = <0x1c>;
++			label = "pmp-prores";
++			#power-domain-cells = <0>;
++			power-domains = <&ps_prores>;
++			status = "disabled";
++		};
++
++		pmp_report_ans: report@21 {
++			compatible = "apple,t6031-pmp-v2-report-entry",
++			             "apple,t6000-pmp-v2-report-entry";
++			reg = <0x21>;
++			label = "pmp-ans";
++			#power-domain-cells = <0>;
++			power-domains = <&ps_ans>;
++		};
++	};
++
++	pmp: pmp@290700000 {
++		compatible = "apple,t6031-pmp-v2", "apple,t6000-pmp-v2";
++		reg = <0x2 0x90700000 0x0 0x100000>,
++		      <0x2 0x90c00000 0x0 0x4000>;
++		reg-names = "pmp", "asc";
++		mboxes = <&pmp_mbox>;
++		mbox-names = "mbox";
++		iommus = <&pmp_dart 0>;
++		power-domains = <&ps_pmp>;
++		status = "disabled";
++	};
++
++	pmp_mbox: mbox@290c08000 {
++		compatible = "apple,t6031-asc-mailbox", "apple,asc-mailbox-v4";
++		reg = <0x2 0x90c08000 0x0 0x4000>;
++		interrupt-parent = <&aic>;
++		interrupts = <AIC_IRQ 0 1180 IRQ_TYPE_LEVEL_HIGH>,
++		             <AIC_IRQ 0 1181 IRQ_TYPE_LEVEL_HIGH>,
++		             <AIC_IRQ 0 1182 IRQ_TYPE_LEVEL_HIGH>,
++		             <AIC_IRQ 0 1183 IRQ_TYPE_LEVEL_HIGH>;
++		interrupt-names = "send-empty", "send-not-empty",
++		                  "recv-empty", "recv-not-empty";
++		#mbox-cells = <0>;
++		power-domains = <&ps_pmp>, <&ps_pms_sram>;
++	};
++
+ 	wdt: watchdog@2a02d4000 {
+ 		compatible = "apple,t6031-wdt", "apple,t8103-wdt";
+ 		reg = <0x2 0xa02d4000 0x0 0x4000>;
+diff --git a/arch/arm64/boot/dts/apple/t6031-dieX.dtsi b/arch/arm64/boot/dts/apple/t6031-dieX.dtsi
+index f5ab9bb5f1dc..37fc4d2001d6 100644
+--- a/arch/arm64/boot/dts/apple/t6031-dieX.dtsi
++++ b/arch/arm64/boot/dts/apple/t6031-dieX.dtsi
+@@ -122,7 +122,11 @@ DIE_NODE(avd): avd@2cc000000 {
+ 		interrupt-parent = <&aic>;
+ 		interrupts = <AIC_IRQ DIE_NO 1185 IRQ_TYPE_LEVEL_HIGH>,
+ 			<AIC_IRQ DIE_NO 1186 IRQ_TYPE_LEVEL_HIGH>;
+-		power-domains = <&DIE_NODE(ps_avd_sys)>;
++		#if defined(APPLE_USE_PMP)
++		power-domains = <&pmp_report_avd_sys>;
++		#else
++		power-domains = <&ps_avd_sys>;
++		#endif
+ 		resets = <&DIE_NODE(ps_avd_sys)>;
+ 		reg = <0x2 0xcd080000 0x0 0x12000>,
+ 			<0x2 0xcd092000 0x0 0x12000>,
+diff --git a/arch/arm64/boot/dts/apple/t6031-nvme.dtsi b/arch/arm64/boot/dts/apple/t6031-nvme.dtsi
+index bb6d6785b7ae..44b0b8960be8 100644
+--- a/arch/arm64/boot/dts/apple/t6031-nvme.dtsi
++++ b/arch/arm64/boot/dts/apple/t6031-nvme.dtsi
+@@ -16,14 +16,22 @@ DIE_NODE(ans_mbox): mbox@349408000 {
+ 			<AIC_IRQ DIE_NO 1277 IRQ_TYPE_LEVEL_HIGH>;
+ 		interrupt-names = "send-empty", "send-not-empty",
+ 			"recv-empty", "recv-not-empty";
++		#if defined(APPLE_USE_PMP)
++		power-domains = <&DIE_NODE(pmp_report_ans)>;
++		#else
+ 		power-domains = <&DIE_NODE(ps_ans)>;
++		#endif
+ 		#mbox-cells = <0>;
+ 	};
+ 
+ 	DIE_NODE(sart): sart@34dc50000 {
+ 		compatible = "apple,t6031-sart", "apple,t6000-sart";
+ 		reg = <0x3 0x4dc50000 0x0 0x10000>;
++		#if defined(APPLE_USE_PMP)
++		power-domains = <&DIE_NODE(pmp_report_ans)>;
++		#else
+ 		power-domains = <&DIE_NODE(ps_ans)>;
++		#endif
+ 	};
+ 
+ 	DIE_NODE(nvme): nvme@34dcc0000 {
+@@ -36,7 +44,11 @@ DIE_NODE(nvme): nvme@34dcc0000 {
+ 		interrupts = <AIC_IRQ 0 2366 IRQ_TYPE_LEVEL_HIGH>;
+ 		mboxes = <&DIE_NODE(ans_mbox)>;
+ 		apple,sart = <&DIE_NODE(sart)>;
++		#if defined(APPLE_USE_PMP)
++		power-domains = <&DIE_NODE(pmp_report_ans)>,
++		#else
+ 		power-domains = <&DIE_NODE(ps_ans)>,
++		#endif
+ 				<&DIE_NODE(ps_apcie_sys_st)>,
+ 				<&DIE_NODE(ps_apcie_sys_st1)>;
+ 		power-domain-names = "ans", "apcie0", "apcie1";
+diff --git a/arch/arm64/boot/dts/apple/t6031-pmgr.dtsi b/arch/arm64/boot/dts/apple/t6031-pmgr.dtsi
+index 02e62cda7852..f22448e2f13a 100644
+--- a/arch/arm64/boot/dts/apple/t6031-pmgr.dtsi
++++ b/arch/arm64/boot/dts/apple/t6031-pmgr.dtsi
+@@ -1900,6 +1900,7 @@ DIE_NODE(ps_pmp): power-controller@550 {
+ 		#power-domain-cells = <0>;
+ 		#reset-cells = <0>;
+ 		label = DIE_LABEL(pmp);
++		apple,always-on;
+ 	};
+ 
+ 	DIE_NODE(ps_pms_sram): power-controller@560 {
+@@ -1908,6 +1909,7 @@ DIE_NODE(ps_pms_sram): power-controller@560 {
+ 		#power-domain-cells = <0>;
+ 		#reset-cells = <0>;
+ 		label = DIE_LABEL(pms_sram);
++		apple,always-on;
+ 	};
+ 
+ 	DIE_NODE(ps_atc0_cio_pcie): power-controller@598 {
+diff --git a/arch/arm64/boot/dts/apple/t6032.dtsi b/arch/arm64/boot/dts/apple/t6032.dtsi
+index 93f08643dba1..1b15114f1389 100644
+--- a/arch/arm64/boot/dts/apple/t6032.dtsi
++++ b/arch/arm64/boot/dts/apple/t6032.dtsi
+@@ -350,6 +350,8 @@ die1: soc@2200000000 {
+ /delete-node/ &ps_disp_sys;
+ /delete-node/ &ps_disp_sys_die1;
+ 
++/delete-node/ &pmp_report_disp;
++
+ /* delete non-present ISP power-states */
+ /delete-node/ &isp_dart0;
+ /delete-node/ &isp_dart1;
+@@ -370,6 +372,22 @@ die1: soc@2200000000 {
+ /delete-node/ &ps_isp_sys;
+ /delete-node/ &ps_isp_sys_die1;
+ 
++/delete-node/ &pmp_report_isp_sys;
++
++/* Disable ANS PMP reporting */
++/delete-node/ &pmp_report_ans;
++&ans_mbox_die1 {
++	power-domains = <&ps_ans_die1>;
++};
++&sart_die1 {
++	power-domains = <&ps_ans_die1>;
++};
++&nvme_die1 {
++	power-domains = <&ps_ans_die1>,
++	                <&ps_apcie_sys_st_die1>,
++	                <&ps_apcie_sys_st1_die1>;
++};
++
+ &ps_afi_d2d_0 {
+ 	status = "okay";
+ };
+-- 
+2.47.3
+

@@ -1,0 +1,37 @@
+From 35e09e292c8f2c256f969ec4279c1f689fd86da1 Mon Sep 17 00:00:00 2001
+From: Hector Martin <marcan@marcan.st>
+Date: Thu, 27 Apr 2023 13:54:30 +0900
+Subject: [PATCH] arm64: dts: apple: t8112: Enable turbo CPU p-states
+
+These should work now that we have cpuidle.
+
+Signed-off-by: Hector Martin <marcan@marcan.st>
+(cherry picked from commit 14644e087650a9852ed1058b61bf129e92c062ae)
+---
+ arch/arm64/boot/dts/apple/t8112.dtsi | 3 ---
+ 1 file changed, 3 deletions(-)
+
+diff --git a/arch/arm64/boot/dts/apple/t8112.dtsi b/arch/arm64/boot/dts/apple/t8112.dtsi
+index 26993dcfa21b..6f947d8c0dfe 100644
+--- a/arch/arm64/boot/dts/apple/t8112.dtsi
++++ b/arch/arm64/boot/dts/apple/t8112.dtsi
+@@ -302,8 +302,6 @@ opp14 {
+ 			opp-level = <14>;
+ 			clock-latency-ns = <46000>;
+ 		};
+-		/* Not available until CPU deep sleep is implemented */
+-#if 0
+ 		opp15 {
+ 			opp-hz = /bits/ 64 <3324000000>;
+ 			opp-level = <15>;
+@@ -322,7 +320,6 @@ opp17 {
+ 			clock-latency-ns = <62000>;
+ 			turbo-mode;
+ 		};
+-#endif
+ 	};
+ 
+ 	gpu_opp: opp-table-gpu {
+-- 
+2.47.3
+

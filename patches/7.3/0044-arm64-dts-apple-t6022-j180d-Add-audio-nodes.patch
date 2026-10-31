@@ -1,0 +1,103 @@
+From a0cb9e53ed4cabdfe97352bb3f524f53de13c641 Mon Sep 17 00:00:00 2001
+From: Hector Martin <marcan@marcan.st>
+Date: Sun, 9 Apr 2023 23:48:38 +0900
+Subject: [PATCH] arm64: dts: apple: t6022-j180d: Add audio nodes
+
+Signed-off-by: Hector Martin <marcan@marcan.st>
+Co-developed-by: Janne Grunau <j@jannau.net>
+Signed-off-by: Janne Grunau <j@jannau.net>
+(cherry picked from commit 2a41e8ee49ac528eae1b77fdd23ed61b757b1be4)
+---
+ arch/arm64/boot/dts/apple/t6022-j180d.dts | 76 +++++++++++++++++++++++
+ 1 file changed, 76 insertions(+)
+
+diff --git a/arch/arm64/boot/dts/apple/t6022-j180d.dts b/arch/arm64/boot/dts/apple/t6022-j180d.dts
+index f76b887429dd..7d92505e3fd2 100644
+--- a/arch/arm64/boot/dts/apple/t6022-j180d.dts
++++ b/arch/arm64/boot/dts/apple/t6022-j180d.dts
+@@ -521,6 +521,82 @@ atcphy7_usb3: endpoint {
+ 	};
+ };
+ 
++/* Audio */
++&i2c1 {
++	status = "okay";
++
++	speaker_tweeter: codec@38 {
++		compatible = "ti,sn012776", "ti,tas2764";
++		reg = <0x38>;
++		shutdown-gpios = <&pinctrl_ap 57 GPIO_ACTIVE_HIGH>;
++		#sound-dai-cells = <0>;
++		sound-name-prefix = "Tweeter";
++		interrupts-extended = <&pinctrl_ap 58 IRQ_TYPE_LEVEL_LOW>;
++	};
++
++	speaker_woofer: codec@39 {
++		compatible = "ti,sn012776", "ti,tas2764";
++		reg = <0x39>;
++		shutdown-gpios = <&pinctrl_ap 57 GPIO_ACTIVE_HIGH>;
++		#sound-dai-cells = <0>;
++		sound-name-prefix = "Woofer";
++		interrupts-extended = <&pinctrl_ap 58 IRQ_TYPE_LEVEL_LOW>;
++	};
++};
++
++&i2c2 {
++	status = "okay";
++
++	jack_codec: codec@4b {
++		compatible = "cirrus,cs42l84";
++		reg = <0x4b>;
++		reset-gpios = <&pinctrl_nub 8 GPIO_ACTIVE_HIGH>;
++		#sound-dai-cells = <0>;
++		interrupts-extended = <&pinctrl_ap 59 IRQ_TYPE_LEVEL_LOW>;
++		sound-name-prefix = "Jack";
++	};
++};
++
++&nco_clkref {
++	clock-frequency = <1068000000>;
++};
++
++/ {
++	sound: sound {
++		compatible = "apple,j180-macaudio", "apple,macaudio";
++		model = "Mac Pro J180";
++
++		dai-link@0 {
++			link-name = "Speakers";
++			/*
++			* DANGER ZONE: You can blow your speakers!
++			*
++			* The drivers are not ready, and unless you are careful
++			* to attenuate the audio stream, you run the risk of
++			* blowing your speakers.
++			*/
++			status = "disabled";
++			cpu {
++				sound-dai = <&mca 0>;
++			};
++			codec {
++				sound-dai = <&speaker_woofer>, <&speaker_tweeter>;
++			};
++		};
++
++		dai-link@1 {
++			link-name = "Headphone Jack";
++
++			cpu {
++				sound-dai = <&mca 2>;
++			};
++			codec {
++				sound-dai = <&jack_codec>;
++			};
++		};
++	};
++};
++
+ /*
+  * Delete unused PCIe nodes, the Mac Pro uses slightly different PCIe
+  * controllers with a single port connected to a PM40100 PCIe switch
+-- 
+2.47.3
+

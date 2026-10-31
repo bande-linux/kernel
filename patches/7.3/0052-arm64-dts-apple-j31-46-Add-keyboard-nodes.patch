@@ -1,0 +1,49 @@
+From b14a0b3ce77f435a96f49ffd8dba827cc5844734 Mon Sep 17 00:00:00 2001
+From: Janne Grunau <j@jannau.net>
+Date: Thu, 11 Nov 2021 21:31:21 +0100
+Subject: [PATCH] arm64: dts: apple: j31[46]: Add keyboard nodes
+
+Enables keyboard and touchpad input on MacBook Pro (14/16-inch,
+M1 Pro/Max, 2021).
+
+Signed-off-by: Janne Grunau <j@jannau.net>
+(cherry picked from commit 1f0c29b52059b0cbb1c0a9b128f9adc96fed1c3e)
+---
+ .../arm64/boot/dts/apple/t600x-j314-j316.dtsi | 21 +++++++++++++++++++
+ 1 file changed, 21 insertions(+)
+
+diff --git a/arch/arm64/boot/dts/apple/t600x-j314-j316.dtsi b/arch/arm64/boot/dts/apple/t600x-j314-j316.dtsi
+index 369084fd0c34..f634b97b81b6 100644
+--- a/arch/arm64/boot/dts/apple/t600x-j314-j316.dtsi
++++ b/arch/arm64/boot/dts/apple/t600x-j314-j316.dtsi
+@@ -173,6 +173,27 @@ &nco_clkref {
+ 	clock-frequency = <1068000000>;
+ };
+ 
++&spi3 {
++	status = "okay";
++
++	hid-transport@0 {
++		compatible = "apple,spi-hid-transport";
++		reg = <0>;
++		spi-max-frequency = <8000000>;
++		/*
++		 * Apple's ADT specifies 20us CS change delays, and the
++		 * SPI HID interface metadata specifies 45us. Using either
++		 * seems not to be reliable, but adding both works, so
++		 * best guess is they are cumulative.
++		 */
++		spi-cs-setup-delay-ns = <65000>;
++		spi-cs-hold-delay-ns = <65000>;
++		spi-cs-inactive-delay-ns = <250000>;
++		spien-gpios = <&pinctrl_ap 194 0>;
++		interrupts-extended = <&pinctrl_nub 6 IRQ_TYPE_LEVEL_LOW>;
++	};
++};
++
+ /* PCIe devices */
+ &port00 {
+ 	/* WLAN */
+-- 
+2.47.3
+

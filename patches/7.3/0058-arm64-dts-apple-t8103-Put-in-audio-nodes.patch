@@ -1,0 +1,365 @@
+From 2a3c14f80ab03d9ca6faf21b5ee43b93dc9d9335 Mon Sep 17 00:00:00 2001
+From: =?UTF-8?q?Martin=20Povi=C5=A1er?= <povik+lin@cutebit.org>
+Date: Sat, 19 Feb 2022 09:49:59 +0100
+Subject: [PATCH] arm64: dts: apple: t8103*: Put in audio nodes
+MIME-Version: 1.0
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 8bit
+
+arm64: dts: apple: t8103-j274: Add speaker I/V sense slots
+
+Specify TDM slots for the speaker amp IC to transmit I/V sense
+measurements in.
+
+arm64: dts: apple: j293/j313: Model SDZ GPIO as a regulator
+
+Signed-off-by: Martin Povišer <povik+lin@cutebit.org>
+Co-developed-by: Hector Martin <marcan@marcan.st>
+Signed-off-by: Hector Martin <marcan@marcan.st>
+(cherry picked from commit e4dd810d7275159cac2cfaec34dfc1664680173b)
+---
+ arch/arm64/boot/dts/apple/t8103-j274.dts | 53 +++++++++++++
+ arch/arm64/boot/dts/apple/t8103-j293.dts | 95 ++++++++++++++++++++++++
+ arch/arm64/boot/dts/apple/t8103-j313.dts | 68 +++++++++++++++++
+ arch/arm64/boot/dts/apple/t8103-j456.dts | 31 ++++++++
+ arch/arm64/boot/dts/apple/t8103-j457.dts | 31 ++++++++
+ 5 files changed, 278 insertions(+)
+
+diff --git a/arch/arm64/boot/dts/apple/t8103-j274.dts b/arch/arm64/boot/dts/apple/t8103-j274.dts
+index 1212852251e0..5304de8d7253 100644
+--- a/arch/arm64/boot/dts/apple/t8103-j274.dts
++++ b/arch/arm64/boot/dts/apple/t8103-j274.dts
+@@ -71,8 +71,61 @@ &pcie0_dart_2 {
+ 	status = "okay";
+ };
+ 
++&i2c1 {
++	speaker_amp: codec@31 {
++		compatible = "ti,tas5770l", "ti,tas2770";
++		reg = <0x31>;
++		shutdown-gpios = <&pinctrl_ap 181 GPIO_ACTIVE_HIGH>;
++		#sound-dai-cells = <0>;
++		ti,imon-slot-no = <0>;
++		ti,vmon-slot-no = <2>;
++		ti,sdout-zero-fill;
++	};
++};
++
+ &i2c2 {
+ 	status = "okay";
++
++	jack_codec: codec@48 {
++		compatible = "cirrus,cs42l83";
++		reg = <0x48>;
++		reset-gpios = <&pinctrl_nub 11 GPIO_ACTIVE_HIGH>;
++		interrupt-parent = <&pinctrl_ap>;
++		interrupts = <183 IRQ_TYPE_LEVEL_LOW>;
++		#sound-dai-cells = <0>;
++		cirrus,ts-inv = <1>;
++		sound-name-prefix = "Jack";
++	};
++};
++
++/ {
++	sound {
++		compatible = "apple,j274-macaudio", "apple,macaudio";
++		model = "Mac mini J274";
++
++		dai-link@0 {
++			link-name = "Speaker";
++
++			cpu {
++				sound-dai = <&mca 0>;
++			};
++			codec {
++				sound-dai = <&speaker_amp>;
++			};
++		};
++
++		dai-link@1 {
++			link-name = "Headphone Jack";
++
++			cpu {
++				sound-dai = <&mca 2>;
++			};
++			codec {
++				sound-dai = <&jack_codec>;
++			};
++		};
++
++	};
+ };
+ 
+ #include "hwmon-mini.dtsi"
+diff --git a/arch/arm64/boot/dts/apple/t8103-j293.dts b/arch/arm64/boot/dts/apple/t8103-j293.dts
+index d813ed7d14a9..95f00d9b21d8 100644
+--- a/arch/arm64/boot/dts/apple/t8103-j293.dts
++++ b/arch/arm64/boot/dts/apple/t8103-j293.dts
+@@ -80,8 +80,73 @@ hid-transport@0 {
+ 	};
+ };
+ 
++&i2c1 {
++	speaker_left_rear: codec@31 {
++		compatible = "ti,tas5770l", "ti,tas2770";
++		reg = <0x31>;
++		shutdown-gpios = <&pinctrl_ap 181 GPIO_ACTIVE_HIGH>;
++		#sound-dai-cells = <0>;
++		sound-name-prefix = "Left Rear";
++		interrupts-extended = <&pinctrl_ap 182 IRQ_TYPE_LEVEL_LOW>;
++		ti,imon-slot-no = <8>;
++		ti,vmon-slot-no = <10>;
++		ti,pdm-slot-no = <12>;
++	};
++
++	speaker_left_front: codec@32 {
++		compatible = "ti,tas5770l", "ti,tas2770";
++		reg = <0x32>;
++		shutdown-gpios = <&pinctrl_ap 181 GPIO_ACTIVE_HIGH>;
++		#sound-dai-cells = <0>;
++		sound-name-prefix = "Left Front";
++		interrupts-extended = <&pinctrl_ap 182 IRQ_TYPE_LEVEL_LOW>;
++		ti,imon-slot-no = <0>;
++		ti,vmon-slot-no = <2>;
++		ti,pdm-slot-no = <4>;
++		ti,sdout-pull-down;
++	};
++};
++
+ &i2c2 {
+ 	status = "okay";
++
++	jack_codec: codec@48 {
++		compatible = "cirrus,cs42l83";
++		reg = <0x48>;
++		reset-gpios = <&pinctrl_nub 11 GPIO_ACTIVE_HIGH>;
++		interrupt-parent = <&pinctrl_ap>;
++		interrupts = <183 IRQ_TYPE_LEVEL_LOW>;
++		#sound-dai-cells = <0>;
++		cirrus,ts-inv = <1>;
++		sound-name-prefix = "Jack";
++	};
++};
++
++&i2c3 {
++	speaker_right_rear: codec@34 {
++		compatible = "ti,tas5770l", "ti,tas2770";
++		reg = <0x34>;
++		shutdown-gpios = <&pinctrl_ap 181 GPIO_ACTIVE_HIGH>;
++		#sound-dai-cells = <0>;
++		sound-name-prefix = "Right Rear";
++		interrupts-extended = <&pinctrl_ap 182 IRQ_TYPE_LEVEL_LOW>;
++		ti,imon-slot-no = <12>;
++		ti,vmon-slot-no = <14>;
++		ti,pdm-slot-no = <16>;
++	};
++
++	speaker_right_front: codec@35 {
++		compatible = "ti,tas5770l", "ti,tas2770";
++		reg = <0x35>;
++		shutdown-gpios = <&pinctrl_ap 181 GPIO_ACTIVE_HIGH>;
++		#sound-dai-cells = <0>;
++		sound-name-prefix = "Right Front";
++		interrupts-extended = <&pinctrl_ap 182 IRQ_TYPE_LEVEL_LOW>;
++		ti,imon-slot-no = <4>;
++		ti,vmon-slot-no = <6>;
++		ti,pdm-slot-no = <8>;
++		ti,sdout-pull-down;
++	};
+ };
+ 
+ &i2c4 {
+@@ -154,5 +219,35 @@ &displaydfr_dart {
+ 	status = "okay";
+ };
+ 
++/ {
++	sound {
++		compatible = "apple,j293-macaudio", "apple,macaudio";
++		model = "MacBook Pro J293";
++
++		dai-link@0 {
++			link-name = "Speakers";
++
++			cpu {
++				sound-dai = <&mca 0>, <&mca 1>;
++			};
++			codec {
++				sound-dai = <&speaker_left_front>, <&speaker_left_rear>,
++					    <&speaker_right_front>, <&speaker_right_rear>;
++			};
++		};
++
++		dai-link@1 {
++			link-name = "Headphone Jack";
++
++			cpu {
++				sound-dai = <&mca 2>;
++			};
++			codec {
++				sound-dai = <&jack_codec>;
++			};
++		};
++	};
++};
++
+ #include "hwmon-laptop.dtsi"
+ #include "hwmon-fan.dtsi"
+diff --git a/arch/arm64/boot/dts/apple/t8103-j313.dts b/arch/arm64/boot/dts/apple/t8103-j313.dts
+index 69556adbf2fc..d41defd42b99 100644
+--- a/arch/arm64/boot/dts/apple/t8103-j313.dts
++++ b/arch/arm64/boot/dts/apple/t8103-j313.dts
+@@ -76,4 +76,72 @@ hid-transport@0 {
+ 	};
+ };
+ 
++&i2c1 {
++	speaker_left: codec@31 {
++		compatible = "ti,tas5770l", "ti,tas2770";
++		reg = <0x31>;
++		shutdown-gpios = <&pinctrl_ap 181 GPIO_ACTIVE_HIGH>;
++		#sound-dai-cells = <0>;
++		sound-name-prefix = "Left";
++		interrupts-extended = <&pinctrl_ap 182 IRQ_TYPE_LEVEL_LOW>;
++		ti,imon-slot-no = <0>;
++		ti,vmon-slot-no = <2>;
++		ti,sdout-zero-fill;
++	};
++};
++
++&i2c3 {
++	speaker_right: codec@34 {
++		compatible = "ti,tas5770l", "ti,tas2770";
++		reg = <0x34>;
++		shutdown-gpios = <&pinctrl_ap 181 GPIO_ACTIVE_HIGH>;
++		#sound-dai-cells = <0>;
++		sound-name-prefix = "Right";
++		interrupts-extended = <&pinctrl_ap 182 IRQ_TYPE_LEVEL_LOW>;
++		ti,imon-slot-no = <4>;
++		ti,vmon-slot-no = <6>;
++		ti,sdout-zero-fill;
++	};
++
++	jack_codec: codec@48 {
++		compatible = "cirrus,cs42l83";
++		reg = <0x48>;
++		reset-gpios = <&pinctrl_nub 11 GPIO_ACTIVE_HIGH>;
++		interrupt-parent = <&pinctrl_ap>;
++		interrupts = <183 IRQ_TYPE_LEVEL_LOW>;
++		#sound-dai-cells = <0>;
++		cirrus,ts-inv = <1>;
++		sound-name-prefix = "Jack";
++	};
++};
++
++/ {
++	sound {
++		compatible = "apple,j313-macaudio", "apple,macaudio";
++		model = "MacBook Air J313";
++
++		dai-link@0 {
++			link-name = "Speakers";
++
++			cpu {
++				sound-dai = <&mca 0>, <&mca 1>;
++			};
++			codec {
++				sound-dai = <&speaker_left>, <&speaker_right>;
++			};
++		};
++
++		dai-link@1 {
++			link-name = "Headphone Jack";
++
++			cpu {
++				sound-dai = <&mca 2>;
++			};
++			codec {
++				sound-dai = <&jack_codec>;
++			};
++		};
++	};
++};
++
+ #include "hwmon-laptop.dtsi"
+diff --git a/arch/arm64/boot/dts/apple/t8103-j456.dts b/arch/arm64/boot/dts/apple/t8103-j456.dts
+index 090c97bb781b..d277704b988b 100644
+--- a/arch/arm64/boot/dts/apple/t8103-j456.dts
++++ b/arch/arm64/boot/dts/apple/t8103-j456.dts
+@@ -88,3 +88,34 @@ &pcie0_dart_1 {
+ &pcie0_dart_2 {
+ 	status = "okay";
+ };
++
++&i2c1 {
++	jack_codec: codec@48 {
++		compatible = "cirrus,cs42l83";
++		reg = <0x48>;
++		reset-gpios = <&pinctrl_nub 11 GPIO_ACTIVE_HIGH>;
++		interrupt-parent = <&pinctrl_ap>;
++		interrupts = <183 IRQ_TYPE_LEVEL_LOW>;
++		#sound-dai-cells = <0>;
++		cirrus,ts-inv = <1>;
++		sound-name-prefix = "Jack";
++	};
++};
++
++/ {
++	sound {
++		compatible = "apple,j456-macaudio", "apple,macaudio";
++		model = "iMac J456";
++
++		dai-link@1 {
++			link-name = "Headphone Jack";
++
++			cpu {
++				sound-dai = <&mca 2>;
++			};
++			codec {
++				sound-dai = <&jack_codec>;
++			};
++		};
++	};
++};
+diff --git a/arch/arm64/boot/dts/apple/t8103-j457.dts b/arch/arm64/boot/dts/apple/t8103-j457.dts
+index ebddde75455c..2e7d344f88a5 100644
+--- a/arch/arm64/boot/dts/apple/t8103-j457.dts
++++ b/arch/arm64/boot/dts/apple/t8103-j457.dts
+@@ -69,3 +69,34 @@ ethernet0: ethernet@0,0 {
+ &pcie0_dart_2 {
+ 	status = "okay";
+ };
++
++&i2c1 {
++	jack_codec: codec@48 {
++		compatible = "cirrus,cs42l83";
++		reg = <0x48>;
++		reset-gpios = <&pinctrl_nub 11 GPIO_ACTIVE_HIGH>;
++		interrupt-parent = <&pinctrl_ap>;
++		interrupts = <183 IRQ_TYPE_LEVEL_LOW>;
++		#sound-dai-cells = <0>;
++		cirrus,ts-inv = <1>;
++		sound-name-prefix = "Jack";
++	};
++};
++
++/ {
++	sound {
++		compatible = "apple,j457-macaudio", "apple,macaudio";
++		model = "iMac J457";
++
++		dai-link@1 {
++			link-name = "Headphone Jack";
++
++			cpu {
++				sound-dai = <&mca 2>;
++			};
++			codec {
++				sound-dai = <&jack_codec>;
++			};
++		};
++	};
++};
+-- 
+2.47.3
+

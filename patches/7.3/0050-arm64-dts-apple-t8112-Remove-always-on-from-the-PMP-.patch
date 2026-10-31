@@ -1,0 +1,51 @@
+From a00289341771629ea7436e950ecf37340103a59c Mon Sep 17 00:00:00 2001
+From: Hector Martin <marcan@marcan.st>
+Date: Mon, 24 Apr 2023 23:31:20 +0900
+Subject: [PATCH] arm64: dts: apple: t8112: Remove always-on from the PMP node
+
+This should now work properly with power domain dependencies.
+
+With "apple,always-on" removed from ps_pmp add it as dependency for the
+dcp* power-domains. Fixes dcp crashes on power state changes.
+TODO: investigate if it is enough to power ps_pmp on during
+SetPowerState calls.
+
+Signed-off-by: Janne Grunau <j@jannau.net>
+(cherry picked from commit a5cdefbc897b04d8fcc2790a111814521c55b296)
+---
+ arch/arm64/boot/dts/apple/t8112-pmgr.dtsi | 5 ++---
+ 1 file changed, 2 insertions(+), 3 deletions(-)
+
+diff --git a/arch/arm64/boot/dts/apple/t8112-pmgr.dtsi b/arch/arm64/boot/dts/apple/t8112-pmgr.dtsi
+index 7c050c6f2707..118694dd9b5f 100644
+--- a/arch/arm64/boot/dts/apple/t8112-pmgr.dtsi
++++ b/arch/arm64/boot/dts/apple/t8112-pmgr.dtsi
+@@ -672,7 +672,7 @@ ps_disp0_fe: power-controller@378 {
+ 		#power-domain-cells = <0>;
+ 		#reset-cells = <0>;
+ 		label = "disp0_fe";
+-		power-domains = <&ps_disp0_sys>;
++		power-domains = <&ps_disp0_sys>, <&ps_pmp>;
+ 		apple,always-on; /* TODO: figure out if we can enable PM here */
+ 	};
+ 
+@@ -691,7 +691,7 @@ ps_dispext_fe: power-controller@388 {
+ 		#power-domain-cells = <0>;
+ 		#reset-cells = <0>;
+ 		label = "dispext_fe";
+-		power-domains = <&ps_dispext_sys>;
++		power-domains = <&ps_dispext_sys>, <&ps_pmp>;
+ 	};
+ 
+ 	ps_dispext_cpu0: power-controller@3c8 {
+@@ -773,7 +773,6 @@ ps_pmp: power-controller@410 {
+ 		#power-domain-cells = <0>;
+ 		#reset-cells = <0>;
+ 		label = "pmp";
+-		apple,always-on;
+ 	};
+ 
+ 	ps_pms_sram: power-controller@418 {
+-- 
+2.47.3
+

@@ -1,0 +1,102 @@
+From c5da0ce1405bc129aeaa4dc5db800113ca905eda Mon Sep 17 00:00:00 2001
+From: Janne Grunau <j@jannau.net>
+Date: Thu, 21 May 2026 23:31:32 +0200
+Subject: [PATCH] arm64: dts: apple: t6030: Add MTP device nodes
+
+Signed-off-by: Janne Grunau <j@jannau.net>
+(cherry picked from commit 3bfef362576cd38af72da9edd60c5c369ea6bf2f)
+---
+ arch/arm64/boot/dts/apple/t6030.dtsi | 77 ++++++++++++++++++++++++++++
+ 1 file changed, 77 insertions(+)
+
+diff --git a/arch/arm64/boot/dts/apple/t6030.dtsi b/arch/arm64/boot/dts/apple/t6030.dtsi
+index d85cda6416a0..c22c6d078f41 100644
+--- a/arch/arm64/boot/dts/apple/t6030.dtsi
++++ b/arch/arm64/boot/dts/apple/t6030.dtsi
+@@ -929,6 +929,83 @@ pinctrl_aop: pinctrl@374824000 {
+ 			#interrupt-cells = <2>;
+ 		};
+ 
++		mtp: mtp@37a400000 {
++			compatible = "apple,t6030-mtp", "apple,t6030-rtk-helper-asc4", "apple,mtp", "apple,rtk-helper-asc4";
++			reg = <0x3 0x7a400000 0x0 0x4000>,
++				<0x3 0x7ac00000 0x0 0x100000>;
++			reg-names = "asc", "sram";
++
++			mboxes = <&mtp_mbox>;
++			iommus = <&mtp_dart 1>;
++			#helper-cells = <0>;
++
++			status = "disabled";
++		};
++
++		mtp_mbox: mbox@37a408000 {
++			compatible = "apple,t6030-asc-mailbox", "apple,asc-mailbox-v4";
++			reg = <0x3 0x7a408000 0x0 0x4000>;
++
++			interrupt-parent = <&aic>;
++			interrupts = <AIC_IRQ 953 IRQ_TYPE_LEVEL_HIGH>,
++				<AIC_IRQ 954 IRQ_TYPE_LEVEL_HIGH>,
++				<AIC_IRQ 955 IRQ_TYPE_LEVEL_HIGH>,
++				<AIC_IRQ 956 IRQ_TYPE_LEVEL_HIGH>;
++			interrupt-names = "send-empty", "send-not-empty",
++				"recv-empty", "recv-not-empty";
++			#mbox-cells = <0>;
++			status = "disabled";
++		};
++
++		mtp_dart: iommu@37a808000 {
++			compatible = "apple,t6030-dart", "apple,t8110-dart";
++			reg = <0x3 0x7a808000 0x0 0x4000>;
++
++			interrupt-parent = <&aic>;
++			interrupts = <AIC_IRQ 937 IRQ_TYPE_LEVEL_HIGH>;
++
++			#iommu-cells = <1>;
++
++			status = "disabled";
++		};
++
++		mtp_dockchannel: fifo@37ab30000 {
++			compatible = "apple,t6030-dockchannel", "apple,dockchannel";
++			reg = <0x3 0x7ab14000 0x0 0x4000>;
++			reg-names = "irq";
++			interrupt-parent = <&aic>;
++			interrupts = <AIC_IRQ 939 IRQ_TYPE_LEVEL_HIGH>;
++
++			ranges = <0 0x3 0x7ab28000 0x20000>;
++			nonposted-mmio;
++			#address-cells = <1>;
++			#size-cells = <1>;
++
++			interrupt-controller;
++			#interrupt-cells = <2>;
++
++			status = "disabled";
++
++			mtp_hid: input@0 {
++				compatible = "apple,dockchannel-hid";
++				reg = <0x0000 0x4000>,
++				      <0x4000 0x4000>,
++				      <0x8000 0x4000>,
++				      <0xc000 0x4000>;
++				reg-names = "rmt-config", "rmt-data", "config", "data";
++
++				iommus = <&mtp_dart 1>;
++
++				interrupt-parent = <&mtp_dockchannel>;
++				interrupts = <2 IRQ_TYPE_LEVEL_HIGH>,
++					<3 IRQ_TYPE_LEVEL_HIGH>;
++				interrupt-names = "tx", "rx";
++
++				apple,fifo-size = <0x800>;
++				apple,helper-cpu = <&mtp>;
++			};
++		};
++
+ 		ans_mbox: mbox@389408000 {
+ 			compatible = "apple,t6030-asc-mailbox", "apple,asc-mailbox-v4";
+ 			reg = <0x3 0x89408000 0x0 0x4000>;
+-- 
+2.47.3
+

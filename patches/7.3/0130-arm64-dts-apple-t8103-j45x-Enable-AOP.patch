@@ -1,0 +1,88 @@
+From 478297ac3d61bebcd4d2049e6b797a39dcb2f663 Mon Sep 17 00:00:00 2001
+From: Janne Grunau <j@jannau.net>
+Date: Mon, 30 Dec 2024 15:19:31 +0100
+Subject: [PATCH] arm64: dts: apple: t8103-j45x: Enable AOP
+
+Probing is blocked by the "apple,no-beamforming" property until
+userspace is ready.
+
+Signed-off-by: Janne Grunau <j@jannau.net>
+(cherry picked from commit 73348883089a98dc9e37df48924c31ba24c9bb97)
+---
+ arch/arm64/boot/dts/apple/t8103-j456.dts | 21 +++++++++++++++++++++
+ arch/arm64/boot/dts/apple/t8103-j457.dts | 21 +++++++++++++++++++++
+ 2 files changed, 42 insertions(+)
+
+diff --git a/arch/arm64/boot/dts/apple/t8103-j456.dts b/arch/arm64/boot/dts/apple/t8103-j456.dts
+index bca316baac70..740d6783d36c 100644
+--- a/arch/arm64/boot/dts/apple/t8103-j456.dts
++++ b/arch/arm64/boot/dts/apple/t8103-j456.dts
+@@ -116,9 +116,30 @@ jack_codec: codec@48 {
+ 	};
+ };
+ 
++&aop_mbox {
++       status = "okay";
++};
++
++&aop_dart {
++       status = "okay";
++};
++
++&aop_admac {
++       status = "okay";
++};
++
++&aop {
++	status = "okay";
++};
++
++&sep {
++	status = "okay";
++};
++
+ &aop_audio {
+ 	apple,chassis-name = "J456";
+ 	apple,machine-kind = "iMac";
++	apple,no-beamforming;
+ };
+ 
+ / {
+diff --git a/arch/arm64/boot/dts/apple/t8103-j457.dts b/arch/arm64/boot/dts/apple/t8103-j457.dts
+index e48a49fb7cac..5b0505e97d84 100644
+--- a/arch/arm64/boot/dts/apple/t8103-j457.dts
++++ b/arch/arm64/boot/dts/apple/t8103-j457.dts
+@@ -97,9 +97,30 @@ jack_codec: codec@48 {
+ 	};
+ };
+ 
++&aop_mbox {
++       status = "okay";
++};
++
++&aop_dart {
++       status = "okay";
++};
++
++&aop_admac {
++       status = "okay";
++};
++
++&aop {
++	status = "okay";
++};
++
++&sep {
++	status = "okay";
++};
++
+ &aop_audio {
+ 	apple,chassis-name = "J457";
+ 	apple,machine-kind = "iMac";
++	apple,no-beamforming;
+ };
+ 
+ / {
+-- 
+2.47.3
+

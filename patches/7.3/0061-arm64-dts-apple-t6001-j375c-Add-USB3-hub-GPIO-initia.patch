@@ -1,0 +1,48 @@
+From e4cd8cb944cdd56efe68d9bb7e1fb84e08afcda7 Mon Sep 17 00:00:00 2001
+From: Hector Martin <marcan@marcan.st>
+Date: Mon, 17 Oct 2022 18:29:28 +0900
+Subject: [PATCH] arm64: dts: apple: t6001-j375c: Add USB3 hub GPIO
+ initialization
+
+The Mac Studio M1 Max (t6001) model has a built-in USB3 hub. This hub
+has a firmware flash which is also connected to an AP SPI controller.
+The hub starts out in reset and the host is expected to bring it out of
+reset, potentially after upgrading/validating the firmware.
+
+We won't be doing anything with the firmware, so just use gpio-hog to
+flip the two GPIOs needed to bring up the hub chip.
+
+Signed-off-by: Hector Martin <marcan@marcan.st>
+(cherry picked from commit d937467ecab6e3a1e04a727915f6cdd455810cb9)
+---
+ arch/arm64/boot/dts/apple/t6001-j375c.dts | 16 ++++++++++++++++
+ 1 file changed, 16 insertions(+)
+
+diff --git a/arch/arm64/boot/dts/apple/t6001-j375c.dts b/arch/arm64/boot/dts/apple/t6001-j375c.dts
+index bfaafad6f60b..5e94076e0eb3 100644
+--- a/arch/arm64/boot/dts/apple/t6001-j375c.dts
++++ b/arch/arm64/boot/dts/apple/t6001-j375c.dts
+@@ -30,4 +30,20 @@ &sound {
+ 	model = "Mac Studio J375";
+ };
+ 
++&pinctrl_ap {
++	usb_hub_oe-hog {
++		gpio-hog;
++		gpios = <230 0>;
++		input;
++		line-name = "usb-hub-oe";
++	};
++
++	usb_hub_rst-hog {
++		gpio-hog;
++		gpios = <231 GPIO_ACTIVE_LOW>;
++		output-low;
++		line-name = "usb-hub-rst";
++	};
++};
++
+ #include "hwmon-fan-dual.dtsi"
+-- 
+2.47.3
+

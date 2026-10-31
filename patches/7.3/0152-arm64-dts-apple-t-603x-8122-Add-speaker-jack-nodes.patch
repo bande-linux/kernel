@@ -1,0 +1,835 @@
+From 85aa8bc64470688e64e803f65a694296bdd49b60 Mon Sep 17 00:00:00 2001
+From: Sasha Finkelstein <k@chaosmail.tech>
+Date: Thu, 4 Jun 2026 15:08:51 +0200
+Subject: [PATCH] arm64: dts: apple: t[603x,8122]: Add speaker/jack nodes
+
+Signed-off-by: Sasha Finkelstein <k@chaosmail.tech>
+(cherry picked from commit 9baaa68db581982cfa8339713ba5e9dd00e77b2c)
+---
+ arch/arm64/boot/dts/apple/t6030-j514s.dts     |  40 ++++++
+ arch/arm64/boot/dts/apple/t6030-j516s.dts     |  40 ++++++
+ arch/arm64/boot/dts/apple/t6031-j514c.dts     |   5 +
+ arch/arm64/boot/dts/apple/t6031-j516c.dts     |   5 +
+ arch/arm64/boot/dts/apple/t6032-j575d.dts     |  56 ++++++++
+ arch/arm64/boot/dts/apple/t6034-j514m.dts     |   5 +
+ arch/arm64/boot/dts/apple/t6034-j516m.dts     |   5 +
+ .../arm64/boot/dts/apple/t603x-j514-j516.dtsi | 131 +++++++++++++++++-
+ arch/arm64/boot/dts/apple/t8122-j433.dts      |  31 +++++
+ arch/arm64/boot/dts/apple/t8122-j434.dts      |  31 +++++
+ arch/arm64/boot/dts/apple/t8122-j504.dts      | 119 ++++++++++++++++
+ arch/arm64/boot/dts/apple/t8122-j613.dts      |  89 ++++++++++++
+ arch/arm64/boot/dts/apple/t8122-j615.dts      |  89 ++++++++++++
+ arch/arm64/boot/dts/apple/t8122-jxxx.dtsi     |  12 ++
+ 14 files changed, 654 insertions(+), 4 deletions(-)
+
+diff --git a/arch/arm64/boot/dts/apple/t6030-j514s.dts b/arch/arm64/boot/dts/apple/t6030-j514s.dts
+index a53624afae2e..67da7fc9edc3 100644
+--- a/arch/arm64/boot/dts/apple/t6030-j514s.dts
++++ b/arch/arm64/boot/dts/apple/t6030-j514s.dts
+@@ -32,3 +32,43 @@ &wifi0 {
+ &bluetooth0 {
+ 	brcm,board-type = "apple,texa";
+ };
++
++&speaker_left_tweet {
++	shutdown-gpios = <&pinctrl_ap 171 GPIO_ACTIVE_HIGH>;
++	interrupts-extended = <&pinctrl_ap 29 IRQ_TYPE_LEVEL_LOW>;
++};
++
++&speaker_left_woof1 {
++	shutdown-gpios = <&pinctrl_ap 171 GPIO_ACTIVE_HIGH>;
++	interrupts-extended = <&pinctrl_ap 29 IRQ_TYPE_LEVEL_LOW>;
++};
++
++&speaker_left_woof2 {
++	shutdown-gpios = <&pinctrl_ap 171 GPIO_ACTIVE_HIGH>;
++	interrupts-extended = <&pinctrl_ap 29 IRQ_TYPE_LEVEL_LOW>;
++};
++
++&speaker_right_tweet {
++	shutdown-gpios = <&pinctrl_ap 171 GPIO_ACTIVE_HIGH>;
++	interrupts-extended = <&pinctrl_ap 29 IRQ_TYPE_LEVEL_LOW>;
++};
++
++&speaker_right_woof1 {
++	shutdown-gpios = <&pinctrl_ap 171 GPIO_ACTIVE_HIGH>;
++	interrupts-extended = <&pinctrl_ap 29 IRQ_TYPE_LEVEL_LOW>;
++};
++
++&speaker_right_woof2 {
++	shutdown-gpios = <&pinctrl_ap 171 GPIO_ACTIVE_HIGH>;
++	interrupts-extended = <&pinctrl_ap 29 IRQ_TYPE_LEVEL_LOW>;
++};
++
++&jack_codec {
++	reset-gpios = <&pinctrl_nub 21 GPIO_ACTIVE_HIGH>;
++	interrupts-extended = <&pinctrl_ap 100 IRQ_TYPE_LEVEL_LOW>;
++};
++
++&sound {
++	compatible = "apple,j514-macaudio", "apple,j314-macaudio", "apple,macaudio";
++	model = "MacBook Pro J514";
++};
+diff --git a/arch/arm64/boot/dts/apple/t6030-j516s.dts b/arch/arm64/boot/dts/apple/t6030-j516s.dts
+index 8837d7175277..91b932c935d7 100644
+--- a/arch/arm64/boot/dts/apple/t6030-j516s.dts
++++ b/arch/arm64/boot/dts/apple/t6030-j516s.dts
+@@ -32,3 +32,43 @@ &wifi0 {
+ &bluetooth0 {
+ 	brcm,board-type = "apple,jura";
+ };
++
++&speaker_left_tweet {
++	shutdown-gpios = <&pinctrl_ap 171 GPIO_ACTIVE_HIGH>;
++	interrupts-extended = <&pinctrl_ap 29 IRQ_TYPE_LEVEL_LOW>;
++};
++
++&speaker_left_woof1 {
++	shutdown-gpios = <&pinctrl_ap 171 GPIO_ACTIVE_HIGH>;
++	interrupts-extended = <&pinctrl_ap 29 IRQ_TYPE_LEVEL_LOW>;
++};
++
++&speaker_left_woof2 {
++	shutdown-gpios = <&pinctrl_ap 171 GPIO_ACTIVE_HIGH>;
++	interrupts-extended = <&pinctrl_ap 29 IRQ_TYPE_LEVEL_LOW>;
++};
++
++&speaker_right_tweet {
++	shutdown-gpios = <&pinctrl_ap 171 GPIO_ACTIVE_HIGH>;
++	interrupts-extended = <&pinctrl_ap 29 IRQ_TYPE_LEVEL_LOW>;
++};
++
++&speaker_right_woof1 {
++	shutdown-gpios = <&pinctrl_ap 171 GPIO_ACTIVE_HIGH>;
++	interrupts-extended = <&pinctrl_ap 29 IRQ_TYPE_LEVEL_LOW>;
++};
++
++&speaker_right_woof2 {
++	shutdown-gpios = <&pinctrl_ap 171 GPIO_ACTIVE_HIGH>;
++	interrupts-extended = <&pinctrl_ap 29 IRQ_TYPE_LEVEL_LOW>;
++};
++
++&jack_codec {
++	reset-gpios = <&pinctrl_nub 21 GPIO_ACTIVE_HIGH>;
++	interrupts-extended = <&pinctrl_ap 100 IRQ_TYPE_LEVEL_LOW>;
++};
++
++&sound {
++	compatible = "apple,j516-macaudio", "apple,j316-macaudio", "apple,macaudio";
++	model = "MacBook Pro J516";
++};
+diff --git a/arch/arm64/boot/dts/apple/t6031-j514c.dts b/arch/arm64/boot/dts/apple/t6031-j514c.dts
+index ad9250eac9ad..1bfb9f2c6392 100644
+--- a/arch/arm64/boot/dts/apple/t6031-j514c.dts
++++ b/arch/arm64/boot/dts/apple/t6031-j514c.dts
+@@ -28,3 +28,8 @@ &wifi0 {
+ &bluetooth0 {
+ 	brcm,board-type = "apple,texa";
+ };
++
++&sound {
++	compatible = "apple,j514-macaudio", "apple,j314-macaudio", "apple,macaudio";
++	model = "MacBook Pro J514";
++};
+diff --git a/arch/arm64/boot/dts/apple/t6031-j516c.dts b/arch/arm64/boot/dts/apple/t6031-j516c.dts
+index 23d928a61f34..a199b0b11814 100644
+--- a/arch/arm64/boot/dts/apple/t6031-j516c.dts
++++ b/arch/arm64/boot/dts/apple/t6031-j516c.dts
+@@ -28,3 +28,8 @@ &wifi0 {
+ &bluetooth0 {
+ 	brcm,board-type = "apple,jura";
+ };
++
++&sound {
++	compatible = "apple,j516-macaudio", "apple,j316-macaudio", "apple,macaudio";
++	model = "MacBook Pro J516";
++};
+diff --git a/arch/arm64/boot/dts/apple/t6032-j575d.dts b/arch/arm64/boot/dts/apple/t6032-j575d.dts
+index 9448c7a84b6a..1bf14006807e 100644
+--- a/arch/arm64/boot/dts/apple/t6032-j575d.dts
++++ b/arch/arm64/boot/dts/apple/t6032-j575d.dts
+@@ -45,11 +45,67 @@ &serial0 {
+ 	status = "okay";
+ };
+ 
++/* Audio */
++&i2c1 {
++	status = "okay";
++
++	speaker: codec@38 {
++		compatible = "ti,sn012776", "ti,tas2764";
++		reg = <0x38>;
++		shutdown-gpios = <&pinctrl_ap 28 GPIO_ACTIVE_HIGH>;
++		#sound-dai-cells = <0>;
++		interrupts-extended = <&pinctrl_ap 29 IRQ_TYPE_LEVEL_LOW>;
++		ti,imon-slot-no = <0>;
++		ti,vmon-slot-no = <2>;
++	};
++};
++
++&i2c2 {
++	status = "okay";
++
++	jack_codec: codec@4b {
++		compatible = "cirrus,cs42l84";
++		reg = <0x4b>;
++		reset-gpios = <&pinctrl_nub 58 GPIO_ACTIVE_HIGH>;
++		#sound-dai-cells = <0>;
++		interrupts-extended = <&pinctrl_ap 30 IRQ_TYPE_LEVEL_LOW>;
++		sound-name-prefix = "Jack";
++	};
++};
+ 
+ &nco_clkref {
+ 	clock-frequency = <900000000>;
+ };
+ 
++/ {
++	sound: sound {
++		compatible = "apple,j575-macaudio", "apple,j375-macaudio", "apple,macaudio";
++		model = "Mac Studio J575";
++
++		dai-link@0 {
++			link-name = "Speaker";
++
++			cpu {
++				sound-dai = <&mca 0>;
++			};
++			codec {
++				sound-dai = <&speaker>;
++			};
++		};
++
++		dai-link@1 {
++			link-name = "Headphone Jack";
++
++			cpu {
++				sound-dai = <&mca 2>;
++			};
++			codec {
++				sound-dai = <&jack_codec>;
++			};
++		};
++	};
++};
++
+ #include "spi1-nvram.dtsi"
+ #include "hwmon-common.dtsi"
+ #include "hwmon-fan-dual.dtsi"
+diff --git a/arch/arm64/boot/dts/apple/t6034-j514m.dts b/arch/arm64/boot/dts/apple/t6034-j514m.dts
+index 679f82a0e7da..7ef946c9ea27 100644
+--- a/arch/arm64/boot/dts/apple/t6034-j514m.dts
++++ b/arch/arm64/boot/dts/apple/t6034-j514m.dts
+@@ -28,3 +28,8 @@ &wifi0 {
+ &bluetooth0 {
+ 	brcm,board-type = "apple,texa";
+ };
++
++&sound {
++	compatible = "apple,j514-macaudio", "apple,j314-macaudio", "apple,macaudio";
++	model = "MacBook Pro J514";
++};
+diff --git a/arch/arm64/boot/dts/apple/t6034-j516m.dts b/arch/arm64/boot/dts/apple/t6034-j516m.dts
+index bc337313b2f0..a2b5abed0747 100644
+--- a/arch/arm64/boot/dts/apple/t6034-j516m.dts
++++ b/arch/arm64/boot/dts/apple/t6034-j516m.dts
+@@ -28,3 +28,8 @@ &wifi0 {
+ &bluetooth0 {
+ 	brcm,board-type = "apple,jura";
+ };
++
++&sound {
++	compatible = "apple,j516-macaudio", "apple,j316-macaudio", "apple,macaudio";
++	model = "MacBook Pro J516";
++};
+diff --git a/arch/arm64/boot/dts/apple/t603x-j514-j516.dtsi b/arch/arm64/boot/dts/apple/t603x-j514-j516.dtsi
+index a580287e70bb..592db69e1720 100644
+--- a/arch/arm64/boot/dts/apple/t603x-j514-j516.dtsi
++++ b/arch/arm64/boot/dts/apple/t603x-j514-j516.dtsi
+@@ -67,10 +67,6 @@ &fpwm0 {
+ 	status = "okay";
+ };
+ 
+-&nco_clkref {
+-	clock-frequency = <900000000>;
+-};
+-
+ &mtp {
+ 	status = "okay";
+ };
+@@ -109,6 +105,100 @@ tp_accel {
+ 	};
+ };
+ 
++&i2c1 {
++	status = "okay";
++
++	speaker_left_tweet: codec@3a {
++		compatible = "ti,sn012776", "ti,tas2764";
++		reg = <0x3a>;
++		shutdown-gpios = <&pinctrl_ap 28 GPIO_ACTIVE_HIGH>;
++		#sound-dai-cells = <0>;
++		sound-name-prefix = "Left Tweeter";
++		interrupts-extended = <&pinctrl_ap 29 IRQ_TYPE_LEVEL_LOW>;
++		ti,imon-slot-no = <8>;
++		ti,vmon-slot-no = <10>;
++	};
++
++	speaker_left_woof1: codec@38 {
++		compatible = "ti,sn012776", "ti,tas2764";
++		reg = <0x38>;
++		shutdown-gpios = <&pinctrl_ap 28 GPIO_ACTIVE_HIGH>;
++		#sound-dai-cells = <0>;
++		sound-name-prefix = "Left Woofer 1";
++		interrupts-extended = <&pinctrl_ap 29 IRQ_TYPE_LEVEL_LOW>;
++		ti,imon-slot-no = <0>;
++		ti,vmon-slot-no = <2>;
++		ti,sdout-force-zero-mask = <0xf0f0f0>;
++	};
++
++	speaker_left_woof2: codec@39 {
++		compatible = "ti,sn012776", "ti,tas2764";
++		reg = <0x39>;
++		shutdown-gpios = <&pinctrl_ap 28 GPIO_ACTIVE_HIGH>;
++		#sound-dai-cells = <0>;
++		sound-name-prefix = "Left Woofer 2";
++		interrupts-extended = <&pinctrl_ap 29 IRQ_TYPE_LEVEL_LOW>;
++		ti,imon-slot-no = <16>;
++		ti,vmon-slot-no = <18>;
++	};
++};
++
++&i2c2 {
++	status = "okay";
++
++	jack_codec: codec@4b {
++		compatible = "cirrus,cs42l84";
++		reg = <0x4b>;
++		reset-gpios = <&pinctrl_nub 58 GPIO_ACTIVE_HIGH>;
++		#sound-dai-cells = <0>;
++		interrupts-extended = <&pinctrl_ap 30 IRQ_TYPE_LEVEL_LOW>;
++		sound-name-prefix = "Jack";
++	};
++};
++
++&i2c3 {
++	status = "okay";
++
++	speaker_right_tweet: codec@3d {
++		compatible = "ti,sn012776", "ti,tas2764";
++		reg = <0x3d>;
++		shutdown-gpios = <&pinctrl_ap 28 GPIO_ACTIVE_HIGH>;
++		#sound-dai-cells = <0>;
++		sound-name-prefix = "Right Tweeter";
++		interrupts-extended = <&pinctrl_ap 29 IRQ_TYPE_LEVEL_LOW>;
++		ti,imon-slot-no = <12>;
++		ti,vmon-slot-no = <14>;
++	};
++
++	speaker_right_woof1: codec@3b {
++		compatible = "ti,sn012776", "ti,tas2764";
++		reg = <0x3b>;
++		shutdown-gpios = <&pinctrl_ap 28 GPIO_ACTIVE_HIGH>;
++		#sound-dai-cells = <0>;
++		sound-name-prefix = "Right Woofer 1";
++		interrupts-extended = <&pinctrl_ap 29 IRQ_TYPE_LEVEL_LOW>;
++		ti,imon-slot-no = <4>;
++		ti,vmon-slot-no = <6>;
++		ti,sdout-force-zero-mask = <0x0f0f0f>;
++	};
++
++	speaker_right_woof2: codec@3c {
++		compatible = "ti,sn012776", "ti,tas2764";
++		reg = <0x3c>;
++		shutdown-gpios = <&pinctrl_ap 28 GPIO_ACTIVE_HIGH>;
++		#sound-dai-cells = <0>;
++		sound-name-prefix = "Right Woofer 2";
++		interrupts-extended = <&pinctrl_ap 29 IRQ_TYPE_LEVEL_LOW>;
++		ti,imon-slot-no = <20>;
++		ti,vmon-slot-no = <22>;
++	};
++};
++
++&nco_clkref {
++	clock-frequency = <900000000>;
++};
++
++
+ /* PCIe devices */
+ 
+ /*
+@@ -153,6 +243,39 @@ &pcie0_dart_1 {
+ 	status = "okay";
+ };
+ 
++/ {
++	sound: sound {
++		/* compatible is set per machine */
++
++		dai-link@0 {
++			link-name = "Speakers";
++
++			cpu {
++				sound-dai = <&mca 0>, <&mca 1>;
++			};
++			codec {
++				sound-dai = <&speaker_left_woof1>,
++					    <&speaker_left_tweet>,
++					    <&speaker_left_woof2>,
++					    <&speaker_right_woof1>,
++					    <&speaker_right_tweet>,
++					    <&speaker_right_woof2>;
++			};
++		};
++
++		dai-link@1 {
++			link-name = "Headphone Jack";
++
++			cpu {
++				sound-dai = <&mca 2>;
++			};
++			codec {
++				sound-dai = <&jack_codec>;
++			};
++		};
++	};
++};
++
+ #include "spi1-nvram.dtsi"
+ #include "hwmon-common.dtsi"
+ #include "hwmon-fan-dual.dtsi"
+diff --git a/arch/arm64/boot/dts/apple/t8122-j433.dts b/arch/arm64/boot/dts/apple/t8122-j433.dts
+index 3cd4a899856d..e8d5f0964564 100644
+--- a/arch/arm64/boot/dts/apple/t8122-j433.dts
++++ b/arch/arm64/boot/dts/apple/t8122-j433.dts
+@@ -44,4 +44,35 @@ &pcie1_dart {
+ 	status = "okay";
+ };
+ 
++&i2c1 {
++	jack_codec: codec@4b {
++		compatible = "cirrus,cs42l84";
++		reg = <0x4b>;
++		reset-gpios = <&pinctrl_nub 17 GPIO_ACTIVE_HIGH>;
++		interrupt-parent = <&pinctrl_ap>;
++		interrupts = <173 IRQ_TYPE_LEVEL_LOW>;
++		#sound-dai-cells = <0>;
++		cirrus,ts-inv = <1>;
++		sound-name-prefix = "Jack";
++	};
++};
++
++/ {
++	sound {
++		compatible = "apple,j433-macaudio", "apple,macaudio";
++		model = "iMac J433";
++
++		dai-link@1 {
++			link-name = "Headphone Jack";
++
++			cpu {
++				sound-dai = <&mca 2>;
++			};
++			codec {
++				sound-dai = <&jack_codec>;
++			};
++		};
++	};
++};
++
+ #include "hwmon-fan-dual.dtsi"
+diff --git a/arch/arm64/boot/dts/apple/t8122-j434.dts b/arch/arm64/boot/dts/apple/t8122-j434.dts
+index 32a9d7c3df8c..a374c16f794e 100644
+--- a/arch/arm64/boot/dts/apple/t8122-j434.dts
++++ b/arch/arm64/boot/dts/apple/t8122-j434.dts
+@@ -50,4 +50,35 @@ &pcie2_dart {
+ 	status = "okay";
+ };
+ 
++&i2c1 {
++	jack_codec: codec@4b {
++		compatible = "cirrus,cs42l84";
++		reg = <0x4b>;
++		reset-gpios = <&pinctrl_nub 17 GPIO_ACTIVE_HIGH>;
++		interrupt-parent = <&pinctrl_ap>;
++		interrupts = <173 IRQ_TYPE_LEVEL_LOW>;
++		#sound-dai-cells = <0>;
++		cirrus,ts-inv = <1>;
++		sound-name-prefix = "Jack";
++	};
++};
++
++/ {
++	sound {
++		compatible = "apple,j434-macaudio", "apple,macaudio";
++		model = "iMac J434";
++
++		dai-link@1 {
++			link-name = "Headphone Jack";
++
++			cpu {
++				sound-dai = <&mca 2>;
++			};
++			codec {
++				sound-dai = <&jack_codec>;
++			};
++		};
++	};
++};
++
+ #include "hwmon-fan-dual.dtsi"
+diff --git a/arch/arm64/boot/dts/apple/t8122-j504.dts b/arch/arm64/boot/dts/apple/t8122-j504.dts
+index 54950a66f89e..47441684f77a 100644
+--- a/arch/arm64/boot/dts/apple/t8122-j504.dts
++++ b/arch/arm64/boot/dts/apple/t8122-j504.dts
+@@ -101,5 +101,124 @@ tp_accel {
+ 	};
+ };
+ 
++&i2c1 {
++	status = "okay";
++
++	speaker_left_tweet: codec@3a {
++		compatible = "ti,sn012776", "ti,tas2764";
++		reg = <0x3a>;
++		shutdown-gpios = <&pinctrl_ap 13 GPIO_ACTIVE_HIGH>;
++		#sound-dai-cells = <0>;
++		sound-name-prefix = "Left Tweeter";
++		interrupts-extended = <&pinctrl_ap 12 IRQ_TYPE_LEVEL_LOW>;
++		ti,imon-slot-no = <8>;
++		ti,vmon-slot-no = <10>;
++	};
++
++	speaker_left_woof1: codec@38 {
++		compatible = "ti,sn012776", "ti,tas2764";
++		reg = <0x38>;
++		shutdown-gpios = <&pinctrl_ap 13 GPIO_ACTIVE_HIGH>;
++		#sound-dai-cells = <0>;
++		sound-name-prefix = "Left Woofer 1";
++		interrupts-extended = <&pinctrl_ap 12 IRQ_TYPE_LEVEL_LOW>;
++		ti,imon-slot-no = <0>;
++		ti,vmon-slot-no = <2>;
++		ti,sdout-force-zero-mask = <0x0f0f0f>;
++	};
++
++	speaker_left_woof2: codec@39 {
++		compatible = "ti,sn012776", "ti,tas2764";
++		reg = <0x39>;
++		shutdown-gpios = <&pinctrl_ap 13 GPIO_ACTIVE_HIGH>;
++		#sound-dai-cells = <0>;
++		sound-name-prefix = "Left Woofer 2";
++		interrupts-extended = <&pinctrl_ap 12 IRQ_TYPE_LEVEL_LOW>;
++		ti,imon-slot-no = <16>;
++		ti,vmon-slot-no = <18>;
++	};
++
++	jack_codec: codec@4b {
++		compatible = "cirrus,cs42l84";
++		reg = <0x4b>;
++		reset-gpios = <&pinctrl_nub 17 GPIO_ACTIVE_HIGH>;
++		#sound-dai-cells = <0>;
++		interrupts-extended = <&pinctrl_ap 173 IRQ_TYPE_LEVEL_LOW>;
++		sound-name-prefix = "Jack";
++	};
++};
++
++&i2c3 {
++	status = "okay";
++
++	speaker_right_tweet: codec@3d {
++		compatible = "ti,sn012776", "ti,tas2764";
++		reg = <0x3d>;
++		shutdown-gpios = <&pinctrl_ap 13 GPIO_ACTIVE_HIGH>;
++		#sound-dai-cells = <0>;
++		sound-name-prefix = "Right Tweeter";
++		interrupts-extended = <&pinctrl_ap 12 IRQ_TYPE_LEVEL_LOW>;
++		ti,imon-slot-no = <12>;
++		ti,vmon-slot-no = <14>;
++	};
++
++	speaker_right_woof1: codec@3b {
++		compatible = "ti,sn012776", "ti,tas2764";
++		reg = <0x3b>;
++		shutdown-gpios = <&pinctrl_ap 13 GPIO_ACTIVE_HIGH>;
++		#sound-dai-cells = <0>;
++		sound-name-prefix = "Right Woofer 1";
++		interrupts-extended = <&pinctrl_ap 12 IRQ_TYPE_LEVEL_LOW>;
++		ti,imon-slot-no = <4>;
++		ti,vmon-slot-no = <6>;
++		ti,sdout-force-zero-mask = <0xf0f0f0>;
++	};
++
++	speaker_right_woof2: codec@3c {
++		compatible = "ti,sn012776", "ti,tas2764";
++		reg = <0x3c>;
++		shutdown-gpios = <&pinctrl_ap 13 GPIO_ACTIVE_HIGH>;
++		#sound-dai-cells = <0>;
++		sound-name-prefix = "Right Woofer 2";
++		interrupts-extended = <&pinctrl_ap 12 IRQ_TYPE_LEVEL_LOW>;
++		ti,imon-slot-no = <20>;
++		ti,vmon-slot-no = <22>;
++	};
++};
++
++/ {
++	sound: sound {
++		compatible = "apple,j314-macaudio", "apple,j504-macaudio", "apple,macaudio";
++		model = "MacBook Pro J504";
++
++		dai-link@0 {
++			link-name = "Speakers";
++
++			cpu {
++				sound-dai = <&mca 0>, <&mca 1>;
++			};
++			codec {
++				sound-dai = <&speaker_left_woof1>,
++					    <&speaker_left_tweet>,
++					    <&speaker_left_woof2>,
++					    <&speaker_right_woof1>,
++					    <&speaker_right_tweet>,
++					    <&speaker_right_woof2>;
++			};
++		};
++
++		dai-link@1 {
++			link-name = "Headphone Jack";
++
++			cpu {
++				sound-dai = <&mca 2>;
++			};
++			codec {
++				sound-dai = <&jack_codec>;
++			};
++		};
++	};
++};
++
+ #include "hwmon-fan-dual.dtsi"
+ #include "hwmon-laptop.dtsi"
+diff --git a/arch/arm64/boot/dts/apple/t8122-j613.dts b/arch/arm64/boot/dts/apple/t8122-j613.dts
+index 7f5e0be62da2..40596f31a3b1 100644
+--- a/arch/arm64/boot/dts/apple/t8122-j613.dts
++++ b/arch/arm64/boot/dts/apple/t8122-j613.dts
+@@ -38,6 +38,95 @@ &bluetooth0 {
+ 	brcm,board-type = "apple,dnieper";
+ };
+ 
++&i2c1 {
++	speaker_left_woof: codec@38 {
++		compatible = "ti,sn012776", "ti,tas2764";
++		reg = <0x38>;
++		shutdown-gpios = <&pinctrl_ap 13 GPIO_ACTIVE_HIGH>;
++		#sound-dai-cells = <0>;
++		sound-name-prefix = "Left Woofer";
++		interrupts-extended = <&pinctrl_ap 12 IRQ_TYPE_LEVEL_LOW>;
++		ti,imon-slot-no = <0>;
++		ti,vmon-slot-no = <2>;
++		ti,sdout-force-zero-mask = <0x0f0f>;
++	};
++
++	speaker_left_tweet: codec@39 {
++		compatible = "ti,sn012776", "ti,tas2764";
++		reg = <0x39>;
++		shutdown-gpios = <&pinctrl_ap 13 GPIO_ACTIVE_HIGH>;
++		#sound-dai-cells = <0>;
++		sound-name-prefix = "Left Tweeter";
++		interrupts-extended = <&pinctrl_ap 12 IRQ_TYPE_LEVEL_LOW>;
++		ti,imon-slot-no = <8>;
++		ti,vmon-slot-no = <10>;
++	};
++};
++
++&i2c3 {
++	speaker_right_woof: codec@3b {
++		compatible = "ti,sn012776", "ti,tas2764";
++		reg = <0x3b>;
++		shutdown-gpios = <&pinctrl_ap 13 GPIO_ACTIVE_HIGH>;
++		#sound-dai-cells = <0>;
++		sound-name-prefix = "Right Woofer";
++		interrupts-extended = <&pinctrl_ap 12 IRQ_TYPE_LEVEL_LOW>;
++		ti,imon-slot-no = <4>;
++		ti,vmon-slot-no = <6>;
++		ti,sdout-force-zero-mask = <0xf0f0>;
++	};
++
++	speaker_right_tweet: codec@3c {
++		compatible = "ti,sn012776", "ti,tas2764";
++		reg = <0x3c>;
++		shutdown-gpios = <&pinctrl_ap 13 GPIO_ACTIVE_HIGH>;
++		#sound-dai-cells = <0>;
++		sound-name-prefix = "Right Tweeter";
++		interrupts-extended = <&pinctrl_ap 12 IRQ_TYPE_LEVEL_LOW>;
++		ti,imon-slot-no = <12>;
++		ti,vmon-slot-no = <14>;
++	};
++
++	jack_codec: codec@4b {
++		compatible = "cirrus,cs42l84";
++		reg = <0x4b>;
++		reset-gpios = <&pinctrl_nub 17 GPIO_ACTIVE_HIGH>;
++		#sound-dai-cells = <0>;
++		interrupts-extended = <&pinctrl_ap 173 IRQ_TYPE_LEVEL_LOW>;
++		sound-name-prefix = "Jack";
++	};
++};
++
++/ {
++	sound {
++		compatible = "apple,j613-macaudio", "apple,j413-macaudio", "apple,macaudio";
++		model = "MacBook Air J613";
++
++		dai-link@0 {
++			link-name = "Speakers";
++
++			cpu {
++				sound-dai = <&mca 0>, <&mca 1>;
++			};
++			codec {
++				sound-dai = <&speaker_left_woof>, <&speaker_left_tweet>,
++					    <&speaker_right_woof>, <&speaker_right_tweet>;
++			};
++		};
++
++		dai-link@1 {
++			link-name = "Headphone Jack";
++
++			cpu {
++				sound-dai = <&mca 2>;
++			};
++			codec {
++				sound-dai = <&jack_codec>;
++			};
++		};
++	};
++};
++
+ &fpwm1 {
+ 	status = "okay";
+ };
+diff --git a/arch/arm64/boot/dts/apple/t8122-j615.dts b/arch/arm64/boot/dts/apple/t8122-j615.dts
+index 13e1a3158c2c..df3e10c197e0 100644
+--- a/arch/arm64/boot/dts/apple/t8122-j615.dts
++++ b/arch/arm64/boot/dts/apple/t8122-j615.dts
+@@ -38,6 +38,95 @@ &bluetooth0 {
+ 	brcm,board-type = "apple,tuzla";
+ };
+ 
++&i2c1 {
++	speaker_left_woof: codec@38 {
++		compatible = "ti,sn012776", "ti,tas2764";
++		reg = <0x38>;
++		shutdown-gpios = <&pinctrl_ap 13 GPIO_ACTIVE_HIGH>;
++		#sound-dai-cells = <0>;
++		sound-name-prefix = "Left Woofer";
++		interrupts-extended = <&pinctrl_ap 12 IRQ_TYPE_LEVEL_LOW>;
++		ti,imon-slot-no = <0>;
++		ti,vmon-slot-no = <2>;
++		ti,sdout-force-zero-mask = <0x0f0f>;
++	};
++
++	speaker_left_tweet: codec@39 {
++		compatible = "ti,sn012776", "ti,tas2764";
++		reg = <0x39>;
++		shutdown-gpios = <&pinctrl_ap 13 GPIO_ACTIVE_HIGH>;
++		#sound-dai-cells = <0>;
++		sound-name-prefix = "Left Tweeter";
++		interrupts-extended = <&pinctrl_ap 12 IRQ_TYPE_LEVEL_LOW>;
++		ti,imon-slot-no = <8>;
++		ti,vmon-slot-no = <10>;
++	};
++};
++
++&i2c3 {
++	speaker_right_woof: codec@3b {
++		compatible = "ti,sn012776", "ti,tas2764";
++		reg = <0x3b>;
++		shutdown-gpios = <&pinctrl_ap 13 GPIO_ACTIVE_HIGH>;
++		#sound-dai-cells = <0>;
++		sound-name-prefix = "Right Woofer";
++		interrupts-extended = <&pinctrl_ap 12 IRQ_TYPE_LEVEL_LOW>;
++		ti,imon-slot-no = <4>;
++		ti,vmon-slot-no = <6>;
++		ti,sdout-force-zero-mask = <0xf0f0>;
++	};
++
++	speaker_right_tweet: codec@3c {
++		compatible = "ti,sn012776", "ti,tas2764";
++		reg = <0x3c>;
++		shutdown-gpios = <&pinctrl_ap 13 GPIO_ACTIVE_HIGH>;
++		#sound-dai-cells = <0>;
++		sound-name-prefix = "Right Tweeter";
++		interrupts-extended = <&pinctrl_ap 12 IRQ_TYPE_LEVEL_LOW>;
++		ti,imon-slot-no = <12>;
++		ti,vmon-slot-no = <14>;
++	};
++
++	jack_codec: codec@4b {
++		compatible = "cirrus,cs42l84";
++		reg = <0x4b>;
++		reset-gpios = <&pinctrl_nub 17 GPIO_ACTIVE_HIGH>;
++		#sound-dai-cells = <0>;
++		interrupts-extended = <&pinctrl_ap 173 IRQ_TYPE_LEVEL_LOW>;
++		sound-name-prefix = "Jack";
++	};
++};
++
++/ {
++	sound {
++		compatible = "apple,j615-macaudio", "apple,j415-macaudio", "apple,macaudio";
++		model = "MacBook Air J615";
++
++		dai-link@0 {
++			link-name = "Speakers";
++
++			cpu {
++				sound-dai = <&mca 0>, <&mca 1>;
++			};
++			codec {
++				sound-dai = <&speaker_left_woof>, <&speaker_left_tweet>,
++					    <&speaker_right_woof>, <&speaker_right_tweet>;
++			};
++		};
++
++		dai-link@1 {
++			link-name = "Headphone Jack";
++
++			cpu {
++				sound-dai = <&mca 2>;
++			};
++			codec {
++				sound-dai = <&jack_codec>;
++			};
++		};
++	};
++};
++
+ &fpwm1 {
+ 	status = "okay";
+ };
+diff --git a/arch/arm64/boot/dts/apple/t8122-jxxx.dtsi b/arch/arm64/boot/dts/apple/t8122-jxxx.dtsi
+index 064b72f2075e..e5de3e680523 100644
+--- a/arch/arm64/boot/dts/apple/t8122-jxxx.dtsi
++++ b/arch/arm64/boot/dts/apple/t8122-jxxx.dtsi
+@@ -74,6 +74,18 @@ bluetooth0: bluetooth@0,1 {
+ 	};
+ };
+ 
++&i2c1 {
++	status = "okay";
++};
++
++&i2c2 {
++	status = "okay";
++};
++
++&i2c3 {
++	status = "okay";
++};
++
+ &nco_clkref {
+ 	clock-frequency = <900000000>;
+ };
+-- 
+2.47.3
+

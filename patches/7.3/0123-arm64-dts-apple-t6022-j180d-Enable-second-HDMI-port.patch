@@ -1,0 +1,74 @@
+From 24d7dfb7197f1998a44a85125a9f111063037f77 Mon Sep 17 00:00:00 2001
+From: Janne Grunau <j@jannau.net>
+Date: Sat, 12 Apr 2025 15:25:24 +0200
+Subject: [PATCH] arm64: dts: apple: t6022-j180d: Enable second HDMI port
+
+Signed-off-by: Janne Grunau <j@jannau.net>
+(cherry picked from commit 71a1c1c8b358c10cf4b3372e6641faa8f8ceb873)
+---
+ arch/arm64/boot/dts/apple/t6022-j180d.dts | 42 +++++++++++++++++++++++
+ 1 file changed, 42 insertions(+)
+
+diff --git a/arch/arm64/boot/dts/apple/t6022-j180d.dts b/arch/arm64/boot/dts/apple/t6022-j180d.dts
+index 570cf88e5b20..2c0640fa9d38 100644
+--- a/arch/arm64/boot/dts/apple/t6022-j180d.dts
++++ b/arch/arm64/boot/dts/apple/t6022-j180d.dts
+@@ -28,6 +28,7 @@ aliases {
+ 		atcphy6 = &atcphy2_die1;
+ 		atcphy7 = &atcphy3_die1;
+ 		bluetooth0 = &bluetooth0;
++		dcpext0 = &dcpext0;
+ 		ethernet0 = &ethernet0;
+ 		ethernet1 = &ethernet1;
+ 		serial0 = &serial0;
+@@ -67,6 +68,47 @@ &serial0 {
+ 	status = "okay";
+ };
+ 
++&lpdptxphy {
++	status = "okay";
++};
++
++&display {
++	iommus = <&dispext0_dart_die1 0 0x100 0x0 0x10 0x0>,
++		<&dispext0_dart 0 0x100 0x0 0x10 0x0>;
++};
++
++&dispext0_dart {
++	status = "okay";
++};
++
++&dcpext0_dart {
++	status = "okay";
++};
++
++&dcpext0_mbox {
++	status = "okay";
++};
++
++&dcpext0 {
++	status = "okay";
++	apple,connector-type = "HDMI-A";
++
++	/*  HDMI HPD gpio, used as interrupt*/
++	hdmi-hpd-gpios = <&pinctrl_aop 25 GPIO_ACTIVE_HIGH>;
++
++	// shared between dp2hdmi-gpio0 / dp2hdmi-gpio1
++	// hdmi-pwren-gpios = <&smc_gpio 23 GPIO_ACTIVE_HIGH>;
++
++	phys = <&lpdptxphy>;
++	phy-names = "dp-phy";
++	apple,dptx-phy = <4>;
++	apple,dptx-die = <0>;
++};
++
++&dpaudio1 {
++	status = "okay";
++};
++
+ /* USB Type C Rear */
+ &i2c0 {
+ 	hpm2: usb-pd@3b {
+-- 
+2.47.3
+

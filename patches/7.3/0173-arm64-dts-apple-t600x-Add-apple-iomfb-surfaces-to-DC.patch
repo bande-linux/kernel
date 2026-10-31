@@ -1,0 +1,50 @@
+From 82a73725d3c3b4766c4b3674f0b0c4082b67a00f Mon Sep 17 00:00:00 2001
+From: James Calligeros <jcalligeros99@gmail.com>
+Date: Fri, 19 Jun 2026 20:30:08 +1000
+Subject: [PATCH] arm64: dts: apple: t600x: Add apple,iomfb-surfaces to DCP
+ nodes
+
+All T600x DCPs support simultaneous scanout on surfaces 0 and 1.
+
+Signed-off-by: James Calligeros <jcalligeros99@gmail.com>
+(cherry picked from commit 3f54862e2c5dc9ee68271494351cbc8b7e5de479)
+---
+ arch/arm64/boot/dts/apple/t600x-die0.dtsi | 1 +
+ arch/arm64/boot/dts/apple/t600x-dieX.dtsi | 2 ++
+ 2 files changed, 3 insertions(+)
+
+diff --git a/arch/arm64/boot/dts/apple/t600x-die0.dtsi b/arch/arm64/boot/dts/apple/t600x-die0.dtsi
+index 1bcbc1a2a234..83451df18ac2 100644
+--- a/arch/arm64/boot/dts/apple/t600x-die0.dtsi
++++ b/arch/arm64/boot/dts/apple/t600x-die0.dtsi
+@@ -520,6 +520,7 @@ dcp: dcp@38bc00000 {
+ 			<0x3 0x8b344000 0x0 0x4000>,
+ 			<0x3 0x8b800000 0x0 0x800000>;
+ 		apple,bw-scratch = <&pmgr_dcp 0 4 0x988>;
++		apple,iomfb-surfaces = <1 1 0 0>;
+ 		#ifdef APPLE_USE_PMP
+ 		power-domains = <&pmp_report_disp0>;
+ 		#else
+diff --git a/arch/arm64/boot/dts/apple/t600x-dieX.dtsi b/arch/arm64/boot/dts/apple/t600x-dieX.dtsi
+index 0ea31d76dcd8..943f2294eede 100644
+--- a/arch/arm64/boot/dts/apple/t600x-dieX.dtsi
++++ b/arch/arm64/boot/dts/apple/t600x-dieX.dtsi
+@@ -102,6 +102,7 @@ DIE_NODE(dcpext0):  dcp@289c00000 {
+ 			<0x2 0x89344000 0x0 0x4000>,
+ 			<0x2 0x89800000 0x0 0x800000>;
+ 		apple,bw-scratch = <&pmgr_dcp 0 4 0x990>;
++		apple,iomfb-surfaces = <1 1 0 0>;
+ 		#ifdef APPLE_USE_PMP
+ 		power-domains = <&DIE_NODE(pmp_report_dispext0)>;
+ 		#else
+@@ -181,6 +182,7 @@ DIE_NODE(dcpext1):  dcp@28cc00000 {
+ 			<0x2 0x8c344000 0x0 0x4000>,
+ 			<0x2 0x8c800000 0x0 0x800000>;
+ 		apple,bw-scratch = <&pmgr_dcp 0 4 0x998>;
++		apple,iomfb-surfaces = <1 1 0 0>;
+ 		#ifdef APPLE_USE_PMP
+ 		power-domains = <&DIE_NODE(pmp_report_dispext1)>;
+ 		#else
+-- 
+2.47.3
+

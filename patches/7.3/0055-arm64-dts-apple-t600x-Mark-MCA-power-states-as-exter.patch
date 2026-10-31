@@ -1,0 +1,51 @@
+From 9b3253da858dad202d3fa41bc2e06214f79375f9 Mon Sep 17 00:00:00 2001
+From: Hector Martin <marcan@marcan.st>
+Date: Thu, 12 Oct 2023 23:20:26 +0900
+Subject: [PATCH] arm64: dts: apple: t600x: Mark MCA power states as
+ externally-clocked
+
+Signed-off-by: Hector Martin <marcan@marcan.st>
+(cherry picked from commit 352a97cef651a42e12bcbf26af0df7799e530e14)
+---
+ arch/arm64/boot/dts/apple/t600x-pmgr.dtsi | 4 ++++
+ 1 file changed, 4 insertions(+)
+
+diff --git a/arch/arm64/boot/dts/apple/t600x-pmgr.dtsi b/arch/arm64/boot/dts/apple/t600x-pmgr.dtsi
+index 0bd44753b76a..cc2627eafc89 100644
+--- a/arch/arm64/boot/dts/apple/t600x-pmgr.dtsi
++++ b/arch/arm64/boot/dts/apple/t600x-pmgr.dtsi
+@@ -1113,6 +1113,7 @@ DIE_NODE(ps_mca0): power-controller@288 {
+ 		#reset-cells = <0>;
+ 		label = DIE_LABEL(mca0);
+ 		power-domains = <&DIE_NODE(ps_audio_p)>, <&DIE_NODE(ps_sio_adma)>;
++		apple,externally-clocked;
+ 	};
+ 
+ 	DIE_NODE(ps_mca1): power-controller@290 {
+@@ -1122,6 +1123,7 @@ DIE_NODE(ps_mca1): power-controller@290 {
+ 		#reset-cells = <0>;
+ 		label = DIE_LABEL(mca1);
+ 		power-domains = <&DIE_NODE(ps_audio_p)>, <&DIE_NODE(ps_sio_adma)>;
++		apple,externally-clocked;
+ 	};
+ 
+ 	DIE_NODE(ps_mca2): power-controller@298 {
+@@ -1131,6 +1133,7 @@ DIE_NODE(ps_mca2): power-controller@298 {
+ 		#reset-cells = <0>;
+ 		label = DIE_LABEL(mca2);
+ 		power-domains = <&DIE_NODE(ps_audio_p)>, <&DIE_NODE(ps_sio_adma)>;
++		apple,externally-clocked;
+ 	};
+ 
+ 	DIE_NODE(ps_mca3): power-controller@2a0 {
+@@ -1140,6 +1143,7 @@ DIE_NODE(ps_mca3): power-controller@2a0 {
+ 		#reset-cells = <0>;
+ 		label = DIE_LABEL(mca3);
+ 		power-domains = <&DIE_NODE(ps_audio_p)>, <&DIE_NODE(ps_sio_adma)>;
++		apple,externally-clocked;
+ 	};
+ 
+ 	DIE_NODE(ps_dpa0): power-controller@2a8 {
+-- 
+2.47.3
+

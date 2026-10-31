@@ -1,0 +1,53 @@
+From 375dd11dff972cda39987a76d9c934a1abbf7c29 Mon Sep 17 00:00:00 2001
+From: Hector Martin <marcan@marcan.st>
+Date: Mon, 24 Apr 2023 23:13:14 +0900
+Subject: [PATCH] soc: apple: apple-pmgr-pwrstate: Mark on-at-boot PDs as
+ DEFER_OFF
+
+We consider any domains that are found to be powered on at boot as
+potentially critical for probing consumer devices. This prevents
+badness like the boot-time display controller being powered down as soon
+as its IOMMU probes.
+
+Fixes a pile of PD probe order dependencies and races that have required
+ALWAYS_ON workaround hacks until now, including:
+
+- ANS2 (NVMe) breaking if left on at handoff.
+- DISP0/DCP (boot display) completely breaking.
+- PM domains failing to probe when their parent was inadvertently shut
+  down before the child probed.
+- PCIe losing state/fuse info/etc when it powers down before the driver
+  is ready.
+- Touch Bar (DFR) display controller losing bootloader-configured state
+  before its driver can probe and save it.
+
+The downside is that any spuriously on domains will remain on if their
+drivers are missing. We consider missing drivers that never get loaded a
+downstream bug. For older kernels running on newer DTs with extra
+devices, this shouldn't cause any major problems other than perhaps
+slightly increased power consumption (and we can always fix it in the
+bootloader by powering down those PDs if they don't need to be left on,
+since the bootloader is updated together with the DTs).
+
+Signed-off-by: Hector Martin <marcan@marcan.st>
+(cherry picked from commit b7773ff92ce26d88bc28861bcd361b564cd09ed5)
+---
+ drivers/pmdomain/apple/pmgr-pwrstate.c | 2 ++
+ 1 file changed, 2 insertions(+)
+
+diff --git a/drivers/pmdomain/apple/pmgr-pwrstate.c b/drivers/pmdomain/apple/pmgr-pwrstate.c
+index 52bf2bf92f5b..c7fb7252b1a5 100644
+--- a/drivers/pmdomain/apple/pmgr-pwrstate.c
++++ b/drivers/pmdomain/apple/pmgr-pwrstate.c
+@@ -288,6 +288,8 @@ static int apple_pmgr_ps_probe(struct platform_device *pdev)
+ 			/* Turn it on so pm_genpd_init does not fail */
+ 			active = apple_pmgr_ps_power_on(&ps->genpd) == 0;
+ 		}
++	} else if (active) {
++		ps->genpd.flags |= GENPD_FLAG_DEFER_OFF;
+ 	}
+ 
+ 	/* Turn on auto-PM if the domain is already on */
+-- 
+2.47.3
+

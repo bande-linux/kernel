@@ -1,0 +1,5282 @@
+From 1262627ae0afadd5b8dfe153bf5f33ba15c622e8 Mon Sep 17 00:00:00 2001
+From: Mikael Hug <mikaelhug@gmail.com>
+Date: Sat, 31 Oct 2026 00:51:22 +0000
+Subject: [PATCH] Merge prep/hw-test4: the review fixes and hardware branches verified on the mini
+
+Test kernel 4 (7.3.0-bande-00873-g3912d92a8cb9) booted on the j473 and
+passed its checks: no WARN, display and greeter, i2c, cpufreq boost, the
+MCA sense-frame fix and Wi-Fi. This merges what it carries that
+integration does not have yet, with the conflict resolutions recorded in
+its merge commits:
+review/platform, review/rust, review/gpu, review/display, review/audio,
+review/usb, review/wifi, review/smc, review/dt, review/misc,
+prep/hw-reboot, prep/hw-usbc-3, prep/hw-display2/3/4 and prep/hw-pm.
+
+Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>
+Claude-Session: https://claude.ai/code/session_01UqitcmCNS6G33aQUShi39x
+
+---
+ .../devicetree/bindings/arm/apple.yaml        |   4 +-
+ .../devicetree/bindings/dma/apple,sio.yaml    |   5 +
+ arch/arm64/boot/dts/apple/t6022-j180d.dts     |   4 -
+ arch/arm64/boot/dts/apple/t6030.dtsi          |   4 +-
+ arch/arm64/boot/dts/apple/t6031-dieX.dtsi     |   4 +-
+ arch/arm64/boot/dts/apple/t8112-j473.dts      |   4 -
+ arch/arm64/boot/dts/apple/t8122-j504.dts      |   2 +-
+ drivers/base/core.c                           |   1 +
+ drivers/cpufreq/apple-soc-cpufreq.c           |  10 +
+ drivers/cpufreq/cpufreq.c                     |   6 +
+ drivers/gpu/drm/apple/afk.c                   |  34 +--
+ drivers/gpu/drm/apple/apple_drv.c             |  11 +-
+ drivers/gpu/drm/apple/audio.c                 |  26 +-
+ drivers/gpu/drm/apple/av.c                    |  19 +-
+ drivers/gpu/drm/apple/dcp-internal.h          |  11 +
+ drivers/gpu/drm/apple/dcp.c                   | 248 +++++++++++----
+ drivers/gpu/drm/apple/dcp.h                   |   1 +
+ drivers/gpu/drm/apple/dcp_backlight.c         |   2 +-
+ drivers/gpu/drm/apple/dptxep.c                |  16 +-
+ drivers/gpu/drm/apple/dptxep.h                |   2 +
+ drivers/gpu/drm/apple/epic/dpavservep.c       |   2 +-
+ drivers/gpu/drm/apple/iomfb.c                 |  93 +++++-
+ drivers/gpu/drm/apple/iomfb_internal.h        |   6 +
+ drivers/gpu/drm/apple/iomfb_template.c        | 282 ++++++++++++------
+ drivers/gpu/drm/apple/iomfb_template.h        |   2 +-
+ drivers/gpu/drm/apple/parser.c                |  21 +-
+ drivers/gpu/drm/apple/plane.c                 |  20 +-
+ drivers/gpu/drm/asahi/file.rs                 |   4 +-
+ drivers/gpu/drm/asahi/mmu.rs                  |  14 +-
+ drivers/gpu/drm/asahi/slotalloc.rs            |   7 +-
+ drivers/i2c/busses/i2c-pasemi-core.c          |  23 ++
+ drivers/i2c/busses/i2c-pasemi-core.h          |   1 +
+ drivers/i2c/busses/i2c-pasemi-platform.c      |  26 ++
+ drivers/input/misc/Makefile                   |   2 +-
+ drivers/input/misc/macsmc-input.c             |  67 ++++-
+ drivers/iommu/apple-dart.c                    |  22 +-
+ drivers/iommu/iommu.c                         |   9 +-
+ drivers/iommu/of_iommu.c                      |   7 +
+ drivers/mfd/macsmc.c                          |  17 +-
+ .../broadcom/brcm80211/brcmfmac/cfg80211.c    |  60 ++--
+ .../broadcom/brcm80211/brcmfmac/cfg80211.h    |  16 -
+ .../broadcom/brcm80211/brcmfmac/core.h        |   4 +-
+ .../broadcom/brcm80211/brcmfmac/fweh.c        | 112 ++++---
+ .../broadcom/brcm80211/brcmfmac/fwil_types.h  |   2 +-
+ .../brcm80211/brcmfmac/interface_create.c     |   4 +-
+ .../broadcom/brcm80211/brcmfmac/join_param.c  |   2 +-
+ .../broadcom/brcm80211/brcmfmac/p2p.c         |   6 +
+ .../broadcom/brcm80211/brcmfmac/pcie.c        |  19 +-
+ .../broadcom/brcm80211/brcmfmac/pno.c         |  22 +-
+ .../broadcom/brcm80211/brcmfmac/scan_param.c  |   1 +
+ .../broadcom/brcm80211/include/brcmu_wifi.h   |  25 +-
+ drivers/nvme/host/apple.c                     |   5 +
+ drivers/pci/controller/pcie-apple.c           |  36 ++-
+ drivers/pmdomain/apple/pmgr-pwrstate.c        |   4 +-
+ drivers/pmdomain/apple/pmp-report.c           |   5 +-
+ drivers/tty/hvc/Kconfig                       |  22 +-
+ drivers/tty/hvc/hvc_dockchannel.c             |  28 +-
+ drivers/tty/serial/samsung_tty.c              |  41 ++-
+ drivers/usb/dwc3/core.c                       |  24 +-
+ drivers/usb/dwc3/dwc3-apple.c                 |  82 ++++-
+ drivers/usb/dwc3/glue.h                       |  13 +
+ drivers/usb/host/xhci-pci-asmedia.c           |  37 ++-
+ drivers/usb/host/xhci-pci-core.c              |   6 +-
+ drivers/usb/roles/class.c                     |  20 +-
+ drivers/usb/typec/tipd/core.c                 | 199 ++++++++----
+ include/linux/pm_domain.h                     |   1 -
+ rust/helpers/dma-fence.c                      |  10 +-
+ rust/helpers/dma-mapping.c                    |   2 +-
+ rust/helpers/drm_syncobj.c                    |   6 +-
+ rust/helpers/helpers.c                        |   2 +-
+ rust/helpers/of.c                             |  15 +-
+ rust/helpers/page.c                           |  10 +-
+ rust/kernel/alloc/kvec.rs                     |  37 ++-
+ rust/kernel/alloc/kvec/drain.rs               |   9 +-
+ rust/kernel/dma_fence.rs                      |  12 +-
+ rust/kernel/drm/gem/mod.rs                    |   4 +-
+ rust/kernel/drm/mm.rs                         |  28 +-
+ rust/kernel/drm/sched.rs                      |   4 +-
+ rust/kernel/soc/apple/rtkit.rs                |  63 ++--
+ rust/kernel/soc/mod.rs                        |   6 +
+ rust/kernel/sync/lock.rs                      |   4 +-
+ rust/kernel/xarray.rs                         |   7 +-
+ rust/macros/versions.rs                       |  55 ++--
+ rust/pin-init/src/lib.rs                      |   3 +-
+ scripts/dtc/dtc-parser.y                      |  12 +-
+ sound/core/pcm_lib.c                          |  20 +-
+ sound/soc/apple/macaudio.c                    |  36 ++-
+ sound/soc/apple/mca.c                         |   6 +-
+ sound/soc/codecs/tas2764.c                    |  25 +-
+ sound/soc/codecs/tas2770.c                    |  11 +-
+ sound/soc/soc-ops.c                           |  30 +-
+ 91 files changed, 1571 insertions(+), 681 deletions(-)
+
+diff --git a/Documentation/devicetree/bindings/arm/apple.yaml b/Documentation/devicetree/bindings/arm/apple.yaml
+index c967cfcecdbe..acba013ba85e 100644
+--- a/Documentation/devicetree/bindings/arm/apple.yaml
++++ b/Documentation/devicetree/bindings/arm/apple.yaml
+@@ -329,8 +329,8 @@ properties:
+               - apple,j604  # MacBook Pro (14-inch, M4, 2024)
+               - apple,j623  # iMac (24-inch, 2x USB-C, M4, 2024)
+               - apple,j624  # iMac (24-inch, 4x USB-C, M4, 2024)
+-              - apple,j713  # MacBook Air (13-inch, M3, 2025)
+-              - apple,j715  # MacBook Air (15-inch, M3, 2025)
++              - apple,j713  # MacBook Air (13-inch, M4, 2025)
++              - apple,j715  # MacBook Air (15-inch, M4, 2025)
+               - apple,j773g # Mac mini (M4, 2024)
+           - const: apple,t8132
+           - const: apple,arm-platform
+diff --git a/Documentation/devicetree/bindings/dma/apple,sio.yaml b/Documentation/devicetree/bindings/dma/apple,sio.yaml
+index 0e3780ad9dd7..74c84beaff54 100644
+--- a/Documentation/devicetree/bindings/dma/apple,sio.yaml
++++ b/Documentation/devicetree/bindings/dma/apple,sio.yaml
+@@ -22,7 +22,9 @@ properties:
+     items:
+       - enum:
+           - apple,t6000-sio
++          - apple,t6020-sio
+           - apple,t8103-sio
++          - apple,t8112-sio
+       - const: apple,sio
+ 
+   reg:
+@@ -46,6 +48,9 @@ properties:
+   power-domains:
+     maxItems: 1
+ 
++  resets:
++    maxItems: 1
++
+   memory-region:
+     minItems: 2
+     maxItems: 8
+diff --git a/arch/arm64/boot/dts/apple/t6022-j180d.dts b/arch/arm64/boot/dts/apple/t6022-j180d.dts
+index cbfa09273c41..15fffd0f1420 100644
+--- a/arch/arm64/boot/dts/apple/t6022-j180d.dts
++++ b/arch/arm64/boot/dts/apple/t6022-j180d.dts
+@@ -1055,10 +1055,6 @@ &pcie_ge_dart_die1 {
+ /delete-node/ &pcie0_dart_2;
+ /delete-node/ &pcie0_dart_3;
+ 
+-&nco_clkref {
+-	clock-frequency = <1068000000>;
+-};
+-
+ /* USB4 on die 1 */
+ &usb4_2_acio_die1 {
+ 	ports {
+diff --git a/arch/arm64/boot/dts/apple/t6030.dtsi b/arch/arm64/boot/dts/apple/t6030.dtsi
+index 8f1b57bc2bb3..57555747a1ac 100644
+--- a/arch/arm64/boot/dts/apple/t6030.dtsi
++++ b/arch/arm64/boot/dts/apple/t6030.dtsi
+@@ -696,7 +696,7 @@ isp_dart2: iommu@2ca4bc000 {
+ 			status = "disabled";
+ 		};
+ 
+-		avd: avd@30a000000 {
++		avd: avd@30b080000 {
+ 			compatible = "apple,t6030-avd", "apple,t8122-avd";
+ 			interrupt-parent = <&aic>;
+ 			interrupts = <AIC_IRQ 788 IRQ_TYPE_LEVEL_HIGH>,
+@@ -1315,7 +1315,7 @@ mtp_dart: iommu@37a808000 {
+ 			status = "disabled";
+ 		};
+ 
+-		mtp_dockchannel: fifo@37ab30000 {
++		mtp_dockchannel: fifo@37ab14000 {
+ 			compatible = "apple,t6030-dockchannel", "apple,dockchannel";
+ 			reg = <0x3 0x7ab14000 0x0 0x4000>;
+ 			reg-names = "irq";
+diff --git a/arch/arm64/boot/dts/apple/t6031-dieX.dtsi b/arch/arm64/boot/dts/apple/t6031-dieX.dtsi
+index 37fc4d2001d6..d9a5926b4459 100644
+--- a/arch/arm64/boot/dts/apple/t6031-dieX.dtsi
++++ b/arch/arm64/boot/dts/apple/t6031-dieX.dtsi
+@@ -117,7 +117,7 @@ DIE_NODE(acio2_pins): acio2-pins {
+ 		};
+ 	};
+ 
+-	DIE_NODE(avd): avd@2cc000000 {
++	DIE_NODE(avd): avd@2cd080000 {
+ 		compatible = "apple,t6031-avd", "apple,t8122-avd";
+ 		interrupt-parent = <&aic>;
+ 		interrupts = <AIC_IRQ DIE_NO 1185 IRQ_TYPE_LEVEL_HIGH>,
+@@ -125,7 +125,7 @@ DIE_NODE(avd): avd@2cc000000 {
+ 		#if defined(APPLE_USE_PMP)
+ 		power-domains = <&pmp_report_avd_sys>;
+ 		#else
+-		power-domains = <&ps_avd_sys>;
++		power-domains = <&DIE_NODE(ps_avd_sys)>;
+ 		#endif
+ 		resets = <&DIE_NODE(ps_avd_sys)>;
+ 		reg = <0x2 0xcd080000 0x0 0x12000>,
+diff --git a/arch/arm64/boot/dts/apple/t8112-j473.dts b/arch/arm64/boot/dts/apple/t8112-j473.dts
+index 89608bd192fb..f146094d18a0 100644
+--- a/arch/arm64/boot/dts/apple/t8112-j473.dts
++++ b/arch/arm64/boot/dts/apple/t8112-j473.dts
+@@ -31,10 +31,6 @@ &dockchannel_uart {
+ 	status = "okay";
+ };
+ 
+-&framebuffer0 {
+-	power-domains = <&ps_dispext_cpu0>, <&ps_dptx_ext_phy>;
+-};
+-
+ &dptxphy {
+ 	status = "okay";
+ };
+diff --git a/arch/arm64/boot/dts/apple/t8122-j504.dts b/arch/arm64/boot/dts/apple/t8122-j504.dts
+index 4c36e01bae64..91a52c2fa80c 100644
+--- a/arch/arm64/boot/dts/apple/t8122-j504.dts
++++ b/arch/arm64/boot/dts/apple/t8122-j504.dts
+@@ -217,7 +217,7 @@ speaker_right_woof2: codec@3c {
+ 
+ / {
+ 	sound: sound {
+-		compatible = "apple,j314-macaudio", "apple,j504-macaudio", "apple,macaudio";
++		compatible = "apple,j504-macaudio", "apple,j314-macaudio", "apple,macaudio";
+ 		model = "MacBook Pro J504";
+ 
+ 		dai-link@0 {
+diff --git a/drivers/base/core.c b/drivers/base/core.c
+index 39d23da8aa5b..3a750aa04ef8 100644
+--- a/drivers/base/core.c
++++ b/drivers/base/core.c
+@@ -2420,6 +2420,7 @@ int fw_devlink_count_absent_consumers(struct fwnode_handle *fwnode)
+ 		if (dlink->consumer->links.status != DL_DEV_DRIVER_BOUND)
+ 			count++;
+ 
++	put_device(sup_dev);
+ 	return count;
+ }
+ EXPORT_SYMBOL_GPL(fw_devlink_count_absent_consumers);
+diff --git a/drivers/cpufreq/apple-soc-cpufreq.c b/drivers/cpufreq/apple-soc-cpufreq.c
+index 7c50ce74f911..9680b54ebc02 100644
+--- a/drivers/cpufreq/apple-soc-cpufreq.c
++++ b/drivers/cpufreq/apple-soc-cpufreq.c
+@@ -278,6 +278,15 @@ static int apple_soc_cpufreq_init(struct cpufreq_policy *policy)
+ 		goto out_free_table;
+ 	}
+ 
++	/*
++	 * The turbo-mode OPPs are the top of the range the SoC normally runs
++	 * at. Start a new policy with boost enabled, so that cpuinfo.max_freq
++	 * and the reference frequency derived from it when the policy is
++	 * created include them. A policy coming back online keeps its setting.
++	 */
++	if (!policy->boost_supported)
++		policy->boost_enabled = cpufreq_boost_enabled();
++
+ 	/* Get OPP levels (p-state indexes) and stash them in driver_data */
+ 	for (i = 0; freq_table[i].frequency != CPUFREQ_TABLE_END; i++) {
+ 		unsigned long rate = freq_table[i].frequency * 1000UL + 999;
+@@ -341,6 +350,7 @@ static struct cpufreq_driver apple_soc_cpufreq_driver = {
+ 	.fast_switch	= apple_soc_cpufreq_fast_switch,
+ 	.register_em	= cpufreq_register_em_with_opp,
+ 	.set_boost	= cpufreq_boost_set_sw,
++	.boost_enabled	= true,
+ 	.suspend	= cpufreq_generic_suspend,
+ };
+ 
+diff --git a/drivers/cpufreq/cpufreq.c b/drivers/cpufreq/cpufreq.c
+index 54dde8419bdc..509dd6f707e5 100644
+--- a/drivers/cpufreq/cpufreq.c
++++ b/drivers/cpufreq/cpufreq.c
+@@ -2802,6 +2802,12 @@ int cpufreq_boost_set_sw(struct cpufreq_policy *policy, int state)
+ 	if (!policy->freq_table)
+ 		return -ENXIO;
+ 
++	/*
++	 * cpufreq_frequency_table_cpuinfo() never lowers a cpuinfo.max_freq
++	 * set before it runs. Clear the limit so that disabling boost drops it
++	 * back to the highest non-boost frequency in the table.
++	 */
++	policy->cpuinfo.max_freq = 0;
+ 	ret = cpufreq_frequency_table_cpuinfo(policy);
+ 	if (ret)
+ 		pr_err("%s: Policy frequency update failed\n", __func__);
+diff --git a/drivers/gpu/drm/apple/afk.c b/drivers/gpu/drm/apple/afk.c
+index b7f162988269..37bfedb57491 100644
+--- a/drivers/gpu/drm/apple/afk.c
++++ b/drivers/gpu/drm/apple/afk.c
+@@ -7,6 +7,8 @@
+ #include <linux/kconfig.h>
+ #include <linux/of_platform.h>
+ #include <linux/slab.h>
++#include <linux/string.h>
++#include <linux/uaccess.h>
+ #include <linux/workqueue.h>
+ #include <linux/soc/apple/rtkit.h>
+ 
+@@ -213,7 +215,8 @@ afk_match_service(struct apple_dcp_afkep *ep, const char *name)
+ {
+ 	const struct apple_epic_service_ops *ops;
+ 
+-	if (!name[0])
++	/* name is the NULL epic_name if the service has no init properties */
++	if (!name || !name[0])
+ 		return NULL;
+ 	if (!ep->ops)
+ 		return NULL;
+@@ -628,7 +631,7 @@ static bool afk_recv(struct apple_dcp_afkep *ep)
+ 	 * the current dummy queue entry and we have to advance to the next one
+ 	 * which will contain the real data.
+ 	*/
+-	if (rptr + size + sizeof(*hdr) > ep->rxbfr.bufsz) {
++	if ((size_t)rptr + size + sizeof(*hdr) > ep->rxbfr.bufsz) {
+ 		rptr = 0;
+ 		hdr = ep->rxbfr.buf + rptr;
+ 		magic = le32_to_cpu(hdr->magic);
+@@ -645,10 +648,11 @@ static bool afk_recv(struct apple_dcp_afkep *ep)
+ 		ep->rxbfr.hdr->rptr = cpu_to_le32(rptr);
+ 	}
+ 
+-	if (rptr + size + sizeof(*hdr) > ep->rxbfr.bufsz) {
++	if ((size_t)rptr + size + sizeof(*hdr) > ep->rxbfr.bufsz) {
+ 		dev_warn(ep->dcp->dev,
+-			 "AFK[ep:%02x]: queue entry out of bounds: 0x%lx > 0x%lx\n",
+-			 ep->endpoint, rptr + size + sizeof(*hdr), ep->rxbfr.bufsz);
++			 "AFK[ep:%02x]: queue entry out of bounds: 0x%zx > 0x%zx\n",
++			 ep->endpoint, (size_t)rptr + size + sizeof(*hdr),
++			 ep->rxbfr.bufsz);
+ 		return false;
+ 	}
+ 
+@@ -1062,20 +1066,14 @@ static ssize_t service_call_write_file(struct file *file, const char __user *use
+ 			return -ENOMEM;
+ 	}
+ 
+-	ret = copy_from_user(&call_info, user_buf, sizeof(call_info));
+-	if (ret == sizeof(call_info))
++	if (copy_from_user(&call_info, user_buf, sizeof(call_info)))
+ 		return -EFAULT;
+ 	user_buf += sizeof(call_info);
+ 	count -= sizeof(call_info);
+ 
+-	buf = kmalloc(count, GFP_KERNEL);
+-	if (!buf)
+-		return -ENOMEM;
+-	ret = copy_from_user(buf, user_buf, count);
+-	if (ret == count) {
+-		kfree(buf);
+-		return -EFAULT;
+-	}
++	buf = memdup_user(user_buf, count);
++	if (IS_ERR(buf))
++		return PTR_ERR(buf);
+ 
+ 	memset(srv->debugfs.scratch, 0, AFK_DEBUGFS_MAX_REPLY);
+ 	dma_mb();
+@@ -1122,9 +1120,11 @@ static ssize_t service_raw_call_write_file(struct file *file, const char __user
+ 			return -ENOMEM;
+ 	}
+ 
++	if (count > AFK_DEBUGFS_MAX_REPLY)
++		return -EINVAL;
++
+ 	memset(srv->debugfs.scratch, 0, AFK_DEBUGFS_MAX_REPLY);
+-	ret = copy_from_user(srv->debugfs.scratch, user_buf, count);
+-	if (ret == count)
++	if (copy_from_user(srv->debugfs.scratch, user_buf, count))
+ 		return -EFAULT;
+ 
+ 	ret = afk_send_command(srv, EPIC_SUBTYPE_STD_SERVICE, srv->debugfs.scratch, count,
+diff --git a/drivers/gpu/drm/apple/apple_drv.c b/drivers/gpu/drm/apple/apple_drv.c
+index 85d8302d30c6..c8e859927c89 100644
+--- a/drivers/gpu/drm/apple/apple_drv.c
++++ b/drivers/gpu/drm/apple/apple_drv.c
+@@ -403,15 +403,19 @@ static int apple_drm_init_dcp(struct device *dev)
+ 
+ 	for_each_matching_node(np, apple_dcp_id_tbl) {
+ 		bool dcp_ext;
+-		if (!of_device_is_available(np)) {
+-			of_node_put(np);
++
++		/* for_each_matching_node() drops the reference to np itself */
++		if (!of_device_is_available(np))
++			continue;
++		if (num_dcp >= MAX_COPROCESSORS) {
++			dev_warn(dev, "ignoring DCP %pOF, only %d supported\n",
++				 np, MAX_COPROCESSORS);
+ 			continue;
+ 		}
+ 		dcp_ext = of_device_is_compatible(np, "apple,dcpext") ||
+ 		          of_property_present(np, "phys");
+ 
+ 		dcp[num_dcp] = of_find_device_by_node(np);
+-		of_node_put(np);
+ 		if (!dcp[num_dcp])
+ 			continue;
+ 
+@@ -600,7 +604,6 @@ static int add_dcp_components(struct device *dev,
+ 				of_node_put(port);
+ 			}
+ 		}
+-		of_node_put(np);
+ 	}
+ 
+ 	return num;
+diff --git a/drivers/gpu/drm/apple/audio.c b/drivers/gpu/drm/apple/audio.c
+index 844375987bf1..909930b63383 100644
+--- a/drivers/gpu/drm/apple/audio.c
++++ b/drivers/gpu/drm/apple/audio.c
+@@ -44,6 +44,7 @@ struct dcp_audio {
+ 	struct snd_pcm_substream *substream;
+ 	unsigned int open_cookie;
+ 
++	struct mutex report_lock;
+ 	struct mutex data_lock;
+ 	bool dcp_connected; /// dcp status keep for delayed initialization
+ 	bool connected;
+@@ -249,8 +250,10 @@ static int dcp_pcm_open(struct snd_pcm_substream *substream)
+ 
+ 	mutex_lock(&dcpaud->data_lock);
+ 	ret = dcpaud_init_dma(dcpaud);
+-	if (ret < 0)
++	if (ret < 0) {
++		mutex_unlock(&dcpaud->data_lock);
+ 		return ret;
++	}
+ 
+ 	if (!dcpaud->connected) {
+ 		mutex_unlock(&dcpaud->data_lock);
+@@ -584,18 +587,15 @@ void dcpaud_connect(struct platform_device *pdev, bool connected)
+ {
+ 	struct dcp_audio *dcpaud = platform_get_drvdata(pdev);
+ 
++	mutex_lock(&dcpaud->report_lock);
+ 	mutex_lock(&dcpaud->data_lock);
+-
+ 	dcpaud_report_hotplug(dcpaud, connected);
++	mutex_unlock(&dcpaud->report_lock);
+ }
+ 
+ void dcpaud_disconnect(struct platform_device *pdev)
+ {
+-	struct dcp_audio *dcpaud = platform_get_drvdata(pdev);
+-
+-	mutex_lock(&dcpaud->data_lock);
+-
+-	dcpaud_report_hotplug(dcpaud, false);
++	dcpaud_connect(pdev, false);
+ }
+ 
+ static int dcpaud_comp_bind(struct device *dev, struct device *main, void *data)
+@@ -681,9 +681,18 @@ static void dcpaud_comp_unbind(struct device *dev, struct device *main,
+ 			       void *data)
+ {
+ 	struct dcp_audio *dcpaud = dev_get_drvdata(dev);
++	struct snd_card *card;
++
++	mutex_lock(&dcpaud->report_lock);
++	mutex_lock(&dcpaud->data_lock);
++	card = dcpaud->card;
++	dcpaud->card = NULL;
++	dcpaud->connected = false;
++	mutex_unlock(&dcpaud->data_lock);
++	mutex_unlock(&dcpaud->report_lock);
+ 
+ 	/* snd_card_free_when_closed() checks for NULL */
+-	snd_card_free_when_closed(dcpaud->card);
++	snd_card_free_when_closed(card);
+ 
+ 	if (dcpaud->dma_link)
+ 		device_link_del(dcpaud->dma_link);
+@@ -713,6 +722,7 @@ static int dcpaud_probe(struct platform_device *pdev)
+ 		return -ENOMEM;
+ 
+ 	dcpaud->dev = &pdev->dev;
++	mutex_init(&dcpaud->report_lock);
+ 	mutex_init(&dcpaud->data_lock);
+ 	platform_set_drvdata(pdev, dcpaud);
+ 
+diff --git a/drivers/gpu/drm/apple/av.c b/drivers/gpu/drm/apple/av.c
+index ca4612df8696..76b5a1e94da3 100644
+--- a/drivers/gpu/drm/apple/av.c
++++ b/drivers/gpu/drm/apple/av.c
+@@ -196,7 +196,7 @@ dcp_audiosrv_osobject_call(struct apple_epic_service *service, u16 group,
+ 	} __attribute__((packed)) *hdr;
+ 	static_assert(sizeof(*hdr) == 48);
+ 	size_t bfr_len = output_maxsize + sizeof(*hdr);
+-	void *bfr;
++	void *bfr __free(kfree) = NULL;
+ 	int ret;
+ 
+ 	bfr = kzalloc(bfr_len, GFP_KERNEL);
+@@ -231,9 +231,11 @@ int dcp_audiosrv_get_elements(struct device *dev, void *elements, size_t maxsize
+ 					 elements, maxsize, &size);
+ 	up_write(&asrv->srv_rwsem);
+ 
+-	if (ret && asrv->warned_get_elements) {
+-		dev_err(dev, "audiosrv: error getting elements: %d\n", ret);
+-		asrv->warned_get_elements = true;
++	if (ret) {
++		if (!asrv->warned_get_elements) {
++			dev_err(dev, "audiosrv: error getting elements: %d\n", ret);
++			asrv->warned_get_elements = true;
++		}
+ 	} else {
+ 		dev_dbg(dev, "audiosrv: got %zd bytes worth of elements\n", size);
+ 	}
+@@ -254,9 +256,12 @@ int dcp_audiosrv_get_product_attrs(struct device *dev, void *attrs, size_t maxsi
+ 					 maxsize, &size);
+ 	up_write(&asrv->srv_rwsem);
+ 
+-	if (ret && asrv->warned_get_product_attrs) {
+-		dev_err(dev, "audiosrv: error getting product attributes: %d\n", ret);
+-		asrv->warned_get_product_attrs = true;
++	if (ret) {
++		if (!asrv->warned_get_product_attrs) {
++			dev_err(dev, "audiosrv: error getting product attributes: %d\n",
++				ret);
++			asrv->warned_get_product_attrs = true;
++		}
+ 	} else {
+ 		dev_dbg(dev, "audiosrv: got %zd bytes worth of product attributes\n", size);
+ 	}
+diff --git a/drivers/gpu/drm/apple/dcp-internal.h b/drivers/gpu/drm/apple/dcp-internal.h
+index 82679c784516..f087d4bcd11a 100644
+--- a/drivers/gpu/drm/apple/dcp-internal.h
++++ b/drivers/gpu/drm/apple/dcp-internal.h
+@@ -183,7 +183,12 @@ struct apple_dcp {
+ 	ktime_t swap_start;
+ 
+ 	/* Current display mode */
++	spinlock_t hotplug_lock;
+ 	bool during_modeset;
++	bool hotplug_deferred;
++	bool hotplug_deferred_connected;
++	u32 publish_seq;
++	u32 connect_seq;
+ 	bool valid_mode;
+ 	bool use_timestamps;
+ 	struct dcp_set_digital_out_mode_req mode;
+@@ -204,6 +209,7 @@ struct apple_dcp {
+ 	bool crc_enabled;
+ 
+ 	/* Modes valid for the connected display */
++	struct mutex modes_lock;
+ 	struct dcp_display_mode *modes;
+ 	unsigned int nr_modes;
+ 
+@@ -263,8 +269,13 @@ struct apple_dcp {
+ 
+ 	struct mutex power_mutex;
+ 	bool powered;
++	bool stopping;
++	bool iomfb_on;
+ 	bool client_open;
+ 	struct completion timings_done;
++	struct work_struct sink_modes_wq;
++	struct work_struct hpd_resume_wq;
++	struct delayed_work release_wq;
+ 
+ 	u32 dptx_phy;
+ 	u32 dptx_die;
+diff --git a/drivers/gpu/drm/apple/dcp.c b/drivers/gpu/drm/apple/dcp.c
+index 0419c167aad4..0aaec0ac4f16 100644
+--- a/drivers/gpu/drm/apple/dcp.c
++++ b/drivers/gpu/drm/apple/dcp.c
+@@ -184,10 +184,12 @@ void dcp_set_dimensions(struct apple_dcp *dcp)
+ 	 * TimingElements, dimensions are calculated when parsing
+ 	 * DisplayAttributes, and TimingElements may be sent first
+ 	 */
++	mutex_lock(&dcp->modes_lock);
+ 	for (i = 0; i < dcp->nr_modes; ++i) {
+ 		dcp->modes[i].mode.width_mm = width_mm;
+ 		dcp->modes[i].mode.height_mm = height_mm;
+ 	}
++	mutex_unlock(&dcp->modes_lock);
+ }
+ 
+ bool dcp_has_panel(struct apple_dcp *dcp)
+@@ -379,6 +381,8 @@ static int dcp_dptx_connect(struct apple_dcp *dcp, u32 port)
+ 
+ 	reinit_completion(&dcp->dptxport[port].linkcfg_completion);
+ 	reinit_completion(&dcp->timings_done);
++	dcp->connect_seq = READ_ONCE(dcp->publish_seq);
++	dcp->dptxport[port].not_responding = false;
+ 	dcp->dptxport[port].atcphy = dcp->phy;
+ 	dptxport_connect(dcp->dptxport[port].service, 0, dcp->dptx_phy, dcp->dptx_die);
+ 	dptxport_request_display(dcp->dptxport[port].service);
+@@ -431,8 +435,6 @@ static int dcp_dptx_disconnect(struct apple_dcp *dcp, u32 port)
+ 	return 0;
+ }
+ 
+-static void dcp_read_sink_modes(struct apple_dcp *dcp);
+-
+ int dcp_dptx_connect_oob(struct platform_device *pdev, u32 port)
+ {
+ 	struct apple_dcp *dcp = platform_get_drvdata(pdev);
+@@ -441,7 +443,7 @@ int dcp_dptx_connect_oob(struct platform_device *pdev, u32 port)
+ 
+ 	ret = dcp_dptx_connect(dcp, port);
+ 	if (!ret && !was_connected)
+-		dcp_read_sink_modes(dcp);
++		schedule_work(&dcp->sink_modes_wq);
+ 
+ 	return ret;
+ }
+@@ -482,7 +484,7 @@ static irqreturn_t dcp_dp2hdmi_hpd(int irq, void *data)
+ 
+ 	if (connected && !dcp->dptxport[0].connected &&
+ 	    !dcp_dptx_connect(dcp, 0))
+-		dcp_read_sink_modes(dcp);
++		schedule_work(&dcp->sink_modes_wq);
+ 
+ 	return IRQ_HANDLED;
+ }
+@@ -608,10 +610,14 @@ static int dcp_enable_dp2hdmi_hpd(struct apple_dcp *dcp)
+ 		bool connected = gpiod_get_value_cansleep(dcp->hdmi_hpd);
+ 		dev_info(dcp->dev, "%s: DP2HDMI HPD connected:%d\n", __func__, connected);
+ 
+-		if (connected)
++		if (connected) {
+ 			dcp_dptx_connect(dcp, 0);
+-		else
++		} else {
++			mutex_lock(&dcp->power_mutex);
+ 			_dcp_poweroff(dcp);
++			dcp->iomfb_on = false;
++			mutex_unlock(&dcp->power_mutex);
++		}
+ 	}
+ 
+ 	if (dcp->hdmi_hpd_irq)
+@@ -663,17 +669,17 @@ static void __maybe_unused dcp_sleep(struct apple_dcp *dcp)
+ 	}
+ }
+ 
+-static void _dcp_poweron(struct apple_dcp *dcp)
++static void _dcp_poweron(struct apple_dcp *dcp, bool open_client)
+ {
+ 	switch (dcp->fw_compat) {
+ 	case DCP_FIRMWARE_V_12_3:
+-		iomfb_poweron_v12_3(dcp);
++		iomfb_poweron_v12_3(dcp, open_client);
+ 		break;
+ 	case DCP_FIRMWARE_V_13_5:
+-		iomfb_poweron_v13_3(dcp);
++		iomfb_poweron_v13_3(dcp, open_client);
+ 		break;
+ 	case DCP_FIRMWARE_V_14_7:
+-		iomfb_poweron_v14_7_0(dcp);
++		iomfb_poweron_v14_7_0(dcp, open_client);
+ 		break;
+ 	default:
+ 		WARN_ONCE(true, "Unexpected firmware version: %u\n", dcp->fw_compat);
+@@ -681,47 +687,128 @@ static void _dcp_poweron(struct apple_dcp *dcp)
+ 	}
+ }
+ 
++/* TimingElements arrived 1.1 s after the display was requested (j473 trace) */
+ #define DCP_TIMINGS_TIMEOUT msecs_to_jiffies(3000)
++/* HDMI monitors drop HPD for about 0.6 s when they wake (j473 trace) */
++#define DCP_RELEASE_DELAY msecs_to_jiffies(2000)
++
++static bool dcp_has_modes(struct apple_dcp *dcp)
++{
++	bool ret;
++
++	mutex_lock(&dcp->modes_lock);
++	ret = dcp->nr_modes > 0;
++	mutex_unlock(&dcp->modes_lock);
++
++	return ret;
++}
+ 
+ /*
+- * A display requested while IOMFB is powered off is published with empty
+- * TimingElements, ColorElements and DisplayAttributes (DCP 13.5 trace, j473).
++ * A display released and requested again while IOMFB was powered off was
++ * published with empty TimingElements, ColorElements and DisplayAttributes
++ * (DCP 13.5 trace, j473). firstClientOpen() makes the DCP send them at start.
+  */
+-static void dcp_read_sink_modes(struct apple_dcp *dcp)
++static void dcp_work_sink_modes(struct work_struct *work)
+ {
+-	mutex_lock(&dcp->power_mutex);
+-	if (dcp->powered)
+-		goto out_unlock;
++	struct apple_dcp *dcp = container_of(work, struct apple_dcp, sink_modes_wq);
++	bool was_on;
+ 
+ 	if (!wait_for_completion_timeout(&dcp->timings_done, DCP_TIMINGS_TIMEOUT) ||
+-	    dcp->nr_modes)
+-		goto out_unlock;
++	    dcp->crashed || dcp_has_modes(dcp))
++		return;
+ 
++	mutex_lock(&dcp->power_mutex);
++	if (dcp->powered || dcp->stopping || dcp->crashed) {
++		mutex_unlock(&dcp->power_mutex);
++		return;
++	}
++	was_on = dcp->iomfb_on;
+ 	reinit_completion(&dcp->timings_done);
+-	_dcp_poweron(dcp);
++	_dcp_poweron(dcp, true);
++	dcp->iomfb_on = true;
++	mutex_unlock(&dcp->power_mutex);
++
+ 	if (!wait_for_completion_timeout(&dcp->timings_done, DCP_TIMINGS_TIMEOUT))
+-		dev_err(dcp->dev, "no TimingElements after power on\n");
+-	_dcp_poweroff(dcp);
++		dev_err(dcp->dev, "no TimingElements after reopening IOMFB\n");
+ 
+-out_unlock:
++	mutex_lock(&dcp->power_mutex);
++	if (!dcp->powered && !dcp->stopping && !was_on) {
++		_dcp_poweroff(dcp);
++		dcp->iomfb_on = false;
++	}
++	mutex_unlock(&dcp->power_mutex);
++}
++
++static void dcp_work_release_display(struct work_struct *work)
++{
++	struct apple_dcp *dcp = container_of(to_delayed_work(work), struct apple_dcp,
++					     release_wq);
++
++	if (gpiod_get_value_cansleep(dcp->hdmi_hpd) || READ_ONCE(dcp->powered))
++		return;
++
++	disconnected_hpd_event(dcp->connector);
++	dcp_dptx_disconnect(dcp, 0);
++}
++
++static void dcp_work_hpd_resume(struct work_struct *work)
++{
++	struct apple_dcp *dcp = container_of(work, struct apple_dcp, hpd_resume_wq);
++
++	if (!gpiod_get_value_cansleep(dcp->hdmi_hpd)) {
++		if (dcp->dptxport[0].connected && !READ_ONCE(dcp->powered))
++			schedule_delayed_work(&dcp->release_wq, DCP_RELEASE_DELAY);
++		return;
++	}
++
++	if (!dcp->dptxport[0].connected && !dcp_dptx_connect(dcp, 0))
++		schedule_work(&dcp->sink_modes_wq);
++}
++
++static void dcp_stop_hpd_work(struct apple_dcp *dcp)
++{
++	mutex_lock(&dcp->power_mutex);
++	dcp->stopping = true;
+ 	mutex_unlock(&dcp->power_mutex);
++	complete_all(&dcp->timings_done);
++	cancel_work_sync(&dcp->hpd_resume_wq);
++	cancel_work_sync(&dcp->sink_modes_wq);
++	cancel_delayed_work_sync(&dcp->release_wq);
+ }
+ 
+ void dcp_poweron(struct platform_device *pdev)
+ {
+ 	struct apple_dcp *dcp = platform_get_drvdata(pdev);
+ 
++	mutex_lock(&dcp->power_mutex);
++	dcp->powered = true;
++	mutex_unlock(&dcp->power_mutex);
++	complete_all(&dcp->timings_done);
++	cancel_work_sync(&dcp->sink_modes_wq);
++	cancel_delayed_work_sync(&dcp->release_wq);
++
+ 	mutex_lock(&dcp->power_mutex);
+ 	if (dcp->hdmi_hpd) {
+ 		bool connected = gpiod_get_value_cansleep(dcp->hdmi_hpd);
+ 		dev_info(dcp->dev, "%s: DP2HDMI HPD connected:%d\n", __func__, connected);
+ 
+-		if (connected)
++		/*
++		 * After s2idle the DCP called DeviceNotResponding and failed
++		 * prepareLink() for the requested display (j473).
++		 */
++		if (connected && dcp->dptxport[0].not_responding)
++			dcp_dptx_disconnect(dcp, 0);
++		if (connected && !dcp->dptxport[0].connected)
+ 			dcp_dptx_connect(dcp, 0);
++		if (connected && dcp->dptxport[0].connected &&
++		    !wait_var_event_timeout(&dcp->publish_seq,
++					    READ_ONCE(dcp->publish_seq) != dcp->connect_seq,
++					    DCP_TIMINGS_TIMEOUT))
++			dev_err(dcp->dev, "display not published before modeset\n");
+ 	}
+ 
+-	_dcp_poweron(dcp);
+-	dcp->powered = true;
++	_dcp_poweron(dcp, false);
++	dcp->iomfb_on = true;
+ 	mutex_unlock(&dcp->power_mutex);
+ 
+ 	if (dcp->avep)
+@@ -738,15 +825,11 @@ void dcp_poweroff(struct platform_device *pdev)
+ 	mutex_lock(&dcp->power_mutex);
+ 	_dcp_poweroff(dcp);
+ 	dcp->powered = false;
++	dcp->iomfb_on = false;
+ 	mutex_unlock(&dcp->power_mutex);
+ 
+-	if (dcp->hdmi_hpd) {
+-		bool connected = gpiod_get_value_cansleep(dcp->hdmi_hpd);
+-		if (!connected) {
+-			disconnected_hpd_event(dcp->connector);
+-			dcp_dptx_disconnect(dcp, 0);
+-		}
+-	}
++	if (dcp->hdmi_hpd && !gpiod_get_value_cansleep(dcp->hdmi_hpd))
++		schedule_delayed_work(&dcp->release_wq, DCP_RELEASE_DELAY);
+ }
+ 
+ static void dcp_work_register_backlight(struct work_struct *work)
+@@ -804,12 +887,12 @@ static int dcp_create_piodma_iommu_dev(struct apple_dcp *dcp)
+ 		goto err_destroy_pdev;
+ 	}
+ 
++	/* iommu_get_domain_for_dev() returns NULL, not an ERR_PTR, on failure */
+ 	dcp->iommu_dom = iommu_get_domain_for_dev(&dcp->piodma->dev);
+-	if (IS_ERR(dcp->iommu_dom)) {
+-		ret = dev_err_probe(dcp->dev, PTR_ERR(dcp->iommu_dom),
++	if (!dcp->iommu_dom) {
++		ret = dev_err_probe(dcp->dev, -ENODEV,
+ 				    "Failed to get default iommu domain for "
+ 				    "piodma device\n");
+-		dcp->iommu_dom = NULL;
+ 		goto err_destroy_pdev;
+ 	}
+ 
+@@ -1031,6 +1114,16 @@ static enum dcp_firmware_version dcp_check_firmware_version(struct device *dev)
+ 	return DCP_FIRMWARE_UNKNOWN;
+ }
+ 
++/* Clearing RUN halts the coprocessor's CPU (m1n1 asc_cpu_stop()) */
++static void dcp_stop_coproc(struct apple_dcp *dcp)
++{
++	u32 cpu_ctrl;
++
++	cpu_ctrl = readl_relaxed(dcp->coproc_reg + APPLE_DCP_COPROC_CPU_CONTROL);
++	writel_relaxed(cpu_ctrl & ~APPLE_DCP_COPROC_CPU_CONTROL_RUN,
++		       dcp->coproc_reg + APPLE_DCP_COPROC_CPU_CONTROL);
++}
++
+ static int dcp_comp_bind(struct device *dev, struct device *main, void *data)
+ {
+ 	struct device_node *panel_np;
+@@ -1056,8 +1149,18 @@ static int dcp_comp_bind(struct device *dev, struct device *main, void *data)
+ 		dev_info(dev, "DCP index:%u dptx target phy: %u dptx die: %u\n",
+ 			 dcp->index, dcp->dptx_phy, dcp->dptx_die);
+ 	mutex_init(&dcp->hpd_mutex);
++	spin_lock_init(&dcp->hotplug_lock);
++	mutex_init(&dcp->modes_lock);
+ 	mutex_init(&dcp->power_mutex);
+ 	init_completion(&dcp->timings_done);
++	INIT_WORK(&dcp->sink_modes_wq, dcp_work_sink_modes);
++	INIT_WORK(&dcp->hpd_resume_wq, dcp_work_hpd_resume);
++	INIT_DELAYED_WORK(&dcp->release_wq, dcp_work_release_display);
++	dcp->powered = false;
++	dcp->stopping = false;
++	/* DCP syslog at start: "set_device_enabled_gated: current state: 1" */
++	dcp->iomfb_on = true;
++	dcp->client_open = false;
+ 
+ 	if (!show_notch)
+ 		ret = of_property_read_u32(dev->of_node, "apple,notch-height",
+@@ -1135,16 +1238,22 @@ static int dcp_comp_bind(struct device *dev, struct device *main, void *data)
+ 	writel_relaxed(cpu_ctrl | APPLE_DCP_COPROC_CPU_CONTROL_RUN,
+ 		       dcp->coproc_reg + APPLE_DCP_COPROC_CPU_CONTROL);
+ 
+-	dcp->rtk = devm_apple_rtkit_init(dev, dcp, "mbox", 0, &rtkit_ops);
+-	if (IS_ERR(dcp->rtk))
+-		return dev_err_probe(dev, PTR_ERR(dcp->rtk),
+-				     "Failed to initialize RTKit\n");
++	dcp->rtk = apple_rtkit_init(dev, dcp, "mbox", 0, &rtkit_ops);
++	if (IS_ERR(dcp->rtk)) {
++		ret = PTR_ERR(dcp->rtk);
++		dcp->rtk = NULL;
++		dcp_stop_coproc(dcp);
++		return dev_err_probe(dev, ret, "Failed to initialize RTKit\n");
++	}
+ 
+ 	ret = apple_rtkit_wake(dcp->rtk);
+-	if (ret)
+-		return dev_err_probe(dev, ret,
+-				     "Failed to boot RTKit: %d\n", ret);
+-	return ret;
++	if (ret) {
++		dcp_stop_coproc(dcp);
++		apple_rtkit_free(dcp->rtk);
++		dcp->rtk = NULL;
++		return dev_err_probe(dev, ret, "Failed to boot RTKit\n");
++	}
++	return 0;
+ }
+ 
+ /*
+@@ -1161,8 +1270,12 @@ static void dcp_comp_unbind(struct device *dev, struct device *main, void *data)
+ 
+ 	if (dcp->hdmi_hpd_irq)
+ 		disable_irq(dcp->hdmi_hpd_irq);
++	dcp_stop_hpd_work(dcp);
+ 
+-	typec_mux_put(dcp->typec_mux);
++	if (dcp->connector_type == DRM_MODE_CONNECTOR_eDP) {
++		cancel_work_sync(&dcp->bl_register_wq);
++		cancel_work_sync(&dcp->bl_update_wq);
++	}
+ 
+ 	if (dcp->avep) {
+ 		av_service_disconnect(dcp);
+@@ -1193,14 +1306,21 @@ static void dcp_comp_unbind(struct device *dev, struct device *main, void *data)
+ 	if (dcp->shmem)
+ 		iomfb_shutdown(dcp);
+ 
+-	/* The bootloader hands the DCP over quiesced (m1n1 display_shutdown()) */
+-	if (!dcp->crashed && apple_rtkit_is_running(dcp->rtk)) {
+-		ret = apple_rtkit_quiesce(dcp->rtk);
+-		if (ret)
+-			dev_err(dev, "failed to quiesce RTKit: %d\n", ret);
++	if (dcp->rtk) {
++		/* apple_rtkit_wake() boots a quiesced DCP (m1n1, internal panels) */
++		ret = dcp->crashed ? -EIO : 0;
++		if (!ret && apple_rtkit_is_running(dcp->rtk))
++			ret = apple_rtkit_quiesce(dcp->rtk);
++		if (ret) {
++			dev_err(dev, "DCP not quiesced (%d), halting it\n", ret);
++			dcp_stop_coproc(dcp);
++		}
++		apple_rtkit_free(dcp->rtk);
++		dcp->rtk = NULL;
+ 	}
+-	devm_apple_rtkit_free(dev, dcp->rtk);
+-	dcp->rtk = NULL;
++	cancel_work_sync(&dcp->vblank_wq);
++
++	dcp_release_memdescs(dcp);
+ 
+ 	if (dcp->shmem) {
+ 		dma_free_coherent(dev, DCP_SHMEM_SIZE, dcp->shmem, dcp->shmem_iova);
+@@ -1213,12 +1333,6 @@ static void dcp_comp_unbind(struct device *dev, struct device *main, void *data)
+ 		dcp->piodma = NULL;
+ 	}
+ 
+-	if (dcp->connector_type == DRM_MODE_CONNECTOR_eDP) {
+-		cancel_work_sync(&dcp->bl_register_wq);
+-		cancel_work_sync(&dcp->bl_update_wq);
+-	}
+-	cancel_work_sync(&dcp->vblank_wq);
+-
+ 	devm_clk_put(dev, dcp->clk);
+ 	dcp->clk = NULL;
+ }
+@@ -1236,6 +1350,7 @@ static int dcp_platform_probe(struct platform_device *pdev)
+ 	int surf, num_surfs;
+ 	u32 surf_en;
+ 	u32 mux_index;
++	int ret;
+ 
+ 	fw_compat = dcp_check_firmware_version(dev);
+ 	if (fw_compat == DCP_FIRMWARE_UNKNOWN)
+@@ -1292,7 +1407,6 @@ static int dcp_platform_probe(struct platform_device *pdev)
+ 	}
+ 
+ 	if (dcp->phy) {
+-		int ret;
+ 		/*
+ 		 * Request DP2HDMI related GPIOs as optional for DP-altmode
+ 		 * compatibility. J180D misses a dp2hdmi-pwren GPIO in the
+@@ -1368,12 +1482,19 @@ static int dcp_platform_probe(struct platform_device *pdev)
+ 		}
+ 	}
+ 
+-	return component_add(&pdev->dev, &dcp_comp_ops);
++	ret = component_add(&pdev->dev, &dcp_comp_ops);
++	if (ret)
++		typec_mux_put(dcp->typec_mux);
++
++	return ret;
+ }
+ 
+ static void dcp_platform_remove(struct platform_device *pdev)
+ {
++	struct apple_dcp *dcp = platform_get_drvdata(pdev);
++
+ 	component_del(&pdev->dev, &dcp_comp_ops);
++	typec_mux_put(dcp->typec_mux);
+ }
+ 
+ static void dcp_platform_shutdown(struct platform_device *pdev)
+@@ -1390,7 +1511,7 @@ static int dcp_platform_suspend(struct device *dev)
+ 
+ 	if (dcp->hdmi_hpd_irq) {
+ 		disable_irq(dcp->hdmi_hpd_irq);
+-		disconnected_hpd_event(dcp->connector);
++		dcp_stop_hpd_work(dcp);
+ 		dcp_dptx_disconnect(dcp, 0);
+ 	}
+ 	/*
+@@ -1407,8 +1528,13 @@ static int dcp_platform_resume(struct device *dev)
+ {
+ 	struct apple_dcp *dcp = dev_get_drvdata(dev);
+ 
+-	if (dcp->hdmi_hpd_irq)
++	if (dcp->hdmi_hpd_irq) {
++		mutex_lock(&dcp->power_mutex);
++		dcp->stopping = false;
++		mutex_unlock(&dcp->power_mutex);
+ 		enable_irq(dcp->hdmi_hpd_irq);
++		schedule_work(&dcp->hpd_resume_wq);
++	}
+ 
+ 	if (dcp->avep)
+ 		av_service_connect(dcp);
+diff --git a/drivers/gpu/drm/apple/dcp.h b/drivers/gpu/drm/apple/dcp.h
+index 086ac70b0cc3..c16346934351 100644
+--- a/drivers/gpu/drm/apple/dcp.h
++++ b/drivers/gpu/drm/apple/dcp.h
+@@ -60,6 +60,7 @@ int dcp_dptx_disconnect_oob(struct platform_device *pdev, u32 port);
+ 
+ int iomfb_start_rtkit(struct apple_dcp *dcp);
+ void iomfb_shutdown(struct apple_dcp *dcp);
++void dcp_release_memdescs(struct apple_dcp *dcp);
+ /* rtkit message handler for IOMFB messages */
+ void iomfb_recv_msg(struct apple_dcp *dcp, u64 message);
+ 
+diff --git a/drivers/gpu/drm/apple/dcp_backlight.c b/drivers/gpu/drm/apple/dcp_backlight.c
+index 8531b51ac550..db7e3de23163 100644
+--- a/drivers/gpu/drm/apple/dcp_backlight.c
++++ b/drivers/gpu/drm/apple/dcp_backlight.c
+@@ -120,7 +120,7 @@ static u32 calculate_dac(struct apple_dcp *dcp, int val)
+ 	else if (val == MIN_BRIGHTNESS_PART2)
+ 		return 16 * brightness_part2[0];
+ 	else if (val >= MAX_BRIGHTNESS_PART2)
+-		return brightness_part2[ARRAY_SIZE(brightness_part2) - 1];
++		return 16 * brightness_part2[ARRAY_SIZE(brightness_part2) - 1];
+ 
+ 	if (val < MAX_BRIGHTNESS_PART1) {
+ 		dac = interpolate(val, MIN_BRIGHTNESS_PART1, MAX_BRIGHTNESS_PART1,
+diff --git a/drivers/gpu/drm/apple/dptxep.c b/drivers/gpu/drm/apple/dptxep.c
+index c9f3f529bb1e..0daf9fb0181c 100644
+--- a/drivers/gpu/drm/apple/dptxep.c
++++ b/drivers/gpu/drm/apple/dptxep.c
+@@ -193,11 +193,11 @@ dptxport_call_get_drive_settings(struct apple_epic_service *service,
+ 	 * retcode appears to be lane count, seeing 2 for USB-C dp alt mode
+ 	 * with lanes splitted for DP/USB3.
+ 	 */
+-	if (!dptx->lane_count)
++	if (!dptx->lane_count_set)
+ 		dptx->lane_count = le32_to_cpu(reply->retcode);
+ 	else if (le32_to_cpu(reply->retcode) != dptx->lane_count)
+ 		dev_err(service->ep->dcp->dev,
+-			"get_drive_settings: lane count %u, active %u\n",
++			"get_drive_settings: DCP lane count %u, driver %u\n",
+ 			le32_to_cpu(reply->retcode), dptx->lane_count);
+ 
+ 	reply->retcode = cpu_to_le32(dptx->lane_count);
+@@ -328,6 +328,7 @@ static int dptxport_call_set_active_lane_count(struct apple_epic_service *servic
+ 		dptx->phy_ops.dp.set_lanes = 0;
+ 	}
+ 	dptx->lane_count = lane_count;
++	dptx->lane_count_set = true;
+ 
+ 	reply->retcode = cpu_to_le32(retcode);
+ 	reply->lane_count = cpu_to_le64(lane_count);
+@@ -552,6 +553,12 @@ static int dptxport_call(struct apple_epic_service *service, u32 idx,
+         case DPTX_APCALL_ACTIVATE:
+ 		return dptxport_call_activate(service, data, data_size,
+ 					      reply, reply_size);
++	case DPTX_APCALL_DEVICE_NOT_RESPONDING:
++		dptx->not_responding = true;
++		memcpy(reply, data, min(reply_size, data_size));
++		if (reply_size >= 4)
++			memset(reply, 0, 4);
++		return 0;
+ 	case DPTX_APCALL_DEACTIVATE:
+ 		return dptxport_call_deactivate(service, data, data_size,
+ 						reply, reply_size);
+@@ -573,9 +580,10 @@ static void dptxport_init(struct apple_epic_service *service, const char *name,
+ 			  const char *class, s64 unit)
+ {
+ 
+-	if (strcmp(name, "dcpdptx-port-epic"))
++	/* name and class are NULL if the service has no init properties */
++	if (!name || strcmp(name, "dcpdptx-port-epic"))
+ 		return;
+-	if (strcmp(class, "AppleDCPDPTXRemotePort"))
++	if (!class || strcmp(class, "AppleDCPDPTXRemotePort"))
+ 		return;
+ 
+ 	trace_dptxport_init(service->ep->dcp, unit);
+diff --git a/drivers/gpu/drm/apple/dptxep.h b/drivers/gpu/drm/apple/dptxep.h
+index 4549fcf6fe27..e3af7df3e78d 100644
+--- a/drivers/gpu/drm/apple/dptxep.h
++++ b/drivers/gpu/drm/apple/dptxep.h
+@@ -57,6 +57,8 @@ struct dptx_port {
+ 	struct mux_control *mux;
+ 	u32 max_lane_count;
+ 	u32 lane_count;
++	bool lane_count_set;
++	bool not_responding;
+ 	u32 link_rate, pending_link_rate;
+ 	u32 drive_settings[2];
+ };
+diff --git a/drivers/gpu/drm/apple/epic/dpavservep.c b/drivers/gpu/drm/apple/epic/dpavservep.c
+index 2de9d2fe4c24..dc70752d4010 100644
+--- a/drivers/gpu/drm/apple/epic/dpavservep.c
++++ b/drivers/gpu/drm/apple/epic/dpavservep.c
+@@ -170,7 +170,7 @@ const struct drm_edid *dcpavserv_copy_edid(struct apple_epic_service *service)
+ 		return ERR_PTR(-ENOMEM);
+ 
+ 	ret = afk_service_call(service, 1, 7, &cmd, sizeof(cmd), EDID_BUF_SIZE, resp,
+-			       sizeof(resp) + EDID_BUF_SIZE, 0);
++			       sizeof(*resp) + EDID_BUF_SIZE, 0);
+ 	if (ret < 0)
+ 		return ERR_PTR(ret);
+ 
+diff --git a/drivers/gpu/drm/apple/iomfb.c b/drivers/gpu/drm/apple/iomfb.c
+index 2704f7929c04..a6fcb99d1362 100644
+--- a/drivers/gpu/drm/apple/iomfb.c
++++ b/drivers/gpu/drm/apple/iomfb.c
+@@ -351,20 +351,25 @@ int dcp_get_modes(struct drm_connector *connector)
+ 
+ 	struct drm_device *dev = connector->dev;
+ 	struct drm_display_mode *mode;
++	unsigned int nr_modes;
+ 	int i;
+ 
+-	for (i = 0; i < dcp->nr_modes; ++i) {
++	mutex_lock(&dcp->modes_lock);
++	nr_modes = dcp->nr_modes;
++	for (i = 0; i < nr_modes; ++i) {
+ 		mode = drm_mode_duplicate(dev, &dcp->modes[i].mode);
+ 
+ 		if (!mode) {
++			mutex_unlock(&dcp->modes_lock);
+ 			dev_err(dev->dev, "Failed to duplicate display mode\n");
+ 			return 0;
+ 		}
+ 
+ 		drm_mode_probed_add(connector, mode);
+ 	}
++	mutex_unlock(&dcp->modes_lock);
+ 
+-	if (dcp->nr_modes && dcp->dcpavserv.enabled &&
++	if (nr_modes && dcp->dcpavserv.enabled &&
+ 	    !apple_connector->drm_edid) {
+ 		const struct drm_edid *edid;
+ 		edid = dcpavserv_copy_edid(dcp->dcpavserv.service);
+@@ -375,10 +380,47 @@ int dcp_get_modes(struct drm_connector *connector)
+ 			apple_connector->drm_edid = edid;
+ 		}
+ 	}
+-	if (dcp->nr_modes && apple_connector->drm_edid)
++	if (nr_modes && apple_connector->drm_edid)
+ 		drm_edid_connector_update(connector, apple_connector->drm_edid);
+ 
+-	return dcp->nr_modes;
++	return nr_modes;
++}
++
++static bool dcp_modes_equal(const struct dcp_display_mode *a, unsigned int nr_a,
++			    const struct dcp_display_mode *b, unsigned int nr_b)
++{
++	unsigned int i;
++
++	if (nr_a != nr_b)
++		return false;
++
++	for (i = 0; i < nr_a; i++) {
++		if (!drm_mode_equal(&a[i].mode, &b[i].mode) ||
++		    a[i].mode.type != b[i].mode.type ||
++		    a[i].color_mode_id != b[i].color_mode_id ||
++		    a[i].timing_mode_id != b[i].timing_mode_id)
++			return false;
++	}
++
++	return true;
++}
++
++bool dcp_replace_modes(struct apple_dcp *dcp, struct dcp_display_mode *modes,
++		       unsigned int nr_modes)
++{
++	struct dcp_display_mode *old;
++	bool changed;
++
++	mutex_lock(&dcp->modes_lock);
++	changed = !dcp_modes_equal(dcp->modes, dcp->nr_modes, modes, nr_modes);
++	old = dcp->modes;
++	dcp->modes = modes;
++	dcp->nr_modes = nr_modes;
++	mutex_unlock(&dcp->modes_lock);
++
++	kfree(old);
++
++	return changed;
+ }
+ 
+ /* The user may own drm_display_mode, so we need to search for our copy */
+@@ -387,6 +429,8 @@ struct dcp_display_mode *lookup_mode(struct apple_dcp *dcp,
+ {
+ 	int i;
+ 
++	lockdep_assert_held(&dcp->modes_lock);
++
+ 	for (i = 0; i < dcp->nr_modes; ++i) {
+ 		if (drm_mode_match(mode, &dcp->modes[i].mode,
+ 				   DRM_MODE_MATCH_TIMINGS |
+@@ -403,8 +447,13 @@ enum drm_mode_status dcp_mode_valid(struct drm_connector *connector,
+ 	struct apple_connector *apple_connector = to_apple_connector(connector);
+ 	struct platform_device *pdev = apple_connector->dcp;
+ 	struct apple_dcp *dcp = platform_get_drvdata(pdev);
++	bool found;
++
++	mutex_lock(&dcp->modes_lock);
++	found = lookup_mode(dcp, mode);
++	mutex_unlock(&dcp->modes_lock);
+ 
+-	return lookup_mode(dcp, mode) ? MODE_OK : MODE_BAD;
++	return found ? MODE_OK : MODE_BAD;
+ }
+ 
+ int dcp_crtc_atomic_modeset(struct drm_crtc *crtc,
+@@ -455,9 +504,14 @@ bool dcp_crtc_mode_fixup(struct drm_crtc *crtc,
+ 	struct apple_crtc *apple_crtc = to_apple_crtc(crtc);
+ 	struct platform_device *pdev = apple_crtc->dcp;
+ 	struct apple_dcp *dcp = platform_get_drvdata(pdev);
++	bool found;
+ 
+ 	/* TODO: support synthesized modes through scaling */
+-	return lookup_mode(dcp, mode) != NULL;
++	mutex_lock(&dcp->modes_lock);
++	found = lookup_mode(dcp, mode);
++	mutex_unlock(&dcp->modes_lock);
++
++	return found;
+ }
+ 
+ 
+@@ -548,12 +602,39 @@ int iomfb_start_rtkit(struct apple_dcp *dcp)
+ 	return 0;
+ }
+ 
++void dcp_release_memdesc(struct apple_dcp *dcp,
++			 struct dcp_mem_descriptor *memdesc)
++{
++	if (memdesc->buf) {
++		sg_free_table(&memdesc->map);
++		dma_free_coherent(dcp->dev, ALIGN(memdesc->size, SZ_16K),
++				  memdesc->buf, memdesc->dva);
++	} else if (memdesc->reg) {
++		dma_unmap_resource(dcp->dev, memdesc->dva, memdesc->size,
++				   DMA_BIDIRECTIONAL, 0);
++	}
++	memset(memdesc, 0, sizeof(*memdesc));
++}
++
++void dcp_release_memdescs(struct apple_dcp *dcp)
++{
++	unsigned int id = 1;
++
++	for_each_set_bit_from(id, dcp->memdesc_map, DCP_MAX_MAPPINGS) {
++		dcp_release_memdesc(dcp, &dcp->memdesc[id]);
++		clear_bit(id, dcp->memdesc_map);
++	}
++}
++
+ void iomfb_shutdown(struct apple_dcp *dcp)
+ {
+ 	/* We're going down */
+ 	dcp->active = false;
+ 	dcp->valid_mode = false;
+ 
++	if (dcp->crashed)
++		return;
++
+ 	switch (dcp->fw_compat) {
+ 	case DCP_FIRMWARE_V_12_3:
+ 		iomfb_shutdown_v12_3(dcp);
+diff --git a/drivers/gpu/drm/apple/iomfb_internal.h b/drivers/gpu/drm/apple/iomfb_internal.h
+index 75e9d7b0e8cc..91c9aa336428 100644
+--- a/drivers/gpu/drm/apple/iomfb_internal.h
++++ b/drivers/gpu/drm/apple/iomfb_internal.h
+@@ -109,6 +109,12 @@ int dcp_parse_tag(char tag[4]);
+ 
+ void dcp_ack(struct apple_dcp *dcp, enum dcp_context_id context);
+ 
++void dcp_release_memdesc(struct apple_dcp *dcp,
++			 struct dcp_mem_descriptor *memdesc);
++
++bool dcp_replace_modes(struct apple_dcp *dcp, struct dcp_display_mode *modes,
++		       unsigned int nr_modes);
++
+ /* The user may own drm_display_mode, so we need to search for our copy */
+ struct dcp_display_mode *lookup_mode(struct apple_dcp *dcp,
+ 					    const struct drm_display_mode *mode);
+diff --git a/drivers/gpu/drm/apple/iomfb_template.c b/drivers/gpu/drm/apple/iomfb_template.c
+index e8f69dd3eded..e062bfceb77c 100644
+--- a/drivers/gpu/drm/apple/iomfb_template.c
++++ b/drivers/gpu/drm/apple/iomfb_template.c
+@@ -37,6 +37,7 @@
+ struct dcp_wait_cookie {
+ 	struct kref refcount;
+ 	struct completion done;
++	u32 result;
+ };
+ 
+ static void release_wait_cookie(struct kref *ref)
+@@ -369,6 +370,13 @@ dcpep_cb_allocate_buffer(struct apple_dcp *dcp,
+ 	size = ALIGN(resp.dva_size, SZ_16K);
+ 	memdesc->buf = dma_alloc_coherent(dcp->dev, size,
+ 					  &memdesc->dva, GFP_KERNEL);
++	if (!memdesc->buf) {
++		dev_warn(dcp->dev, "failed to allocate %zu byte DCP buffer\n",
++			 size);
++		memdesc->size = 0;
++		clear_bit(id, dcp->memdesc_map);
++		return (struct dcp_allocate_buffer_resp){ 0 };
++	}
+ 
+ 	dma_get_sgtable(dcp->dev, &memdesc->map, memdesc->buf, memdesc->dva,
+ 			size);
+@@ -379,8 +387,6 @@ dcpep_cb_allocate_buffer(struct apple_dcp *dcp,
+ 
+ static u8 dcpep_cb_release_mem_desc(struct apple_dcp *dcp, u32 *mem_desc_id)
+ {
+-	struct dcp_mem_descriptor *memdesc;
+-	size_t size;
+ 	u32 id = *mem_desc_id;
+ 
+ 	if (id >= DCP_MAX_MAPPINGS) {
+@@ -395,17 +401,7 @@ static u8 dcpep_cb_release_mem_desc(struct apple_dcp *dcp, u32 *mem_desc_id)
+ 		return 0;
+ 	}
+ 
+-	memdesc = &dcp->memdesc[id];
+-	size = ALIGN(memdesc->size, SZ_16K);
+-	if (memdesc->buf) {
+-		dma_free_coherent(dcp->dev, size, memdesc->buf, memdesc->dva);
+-		memdesc->buf = NULL;
+-		memset(&memdesc->map, 0, sizeof(memdesc->map));
+-	} else {
+-		memdesc->reg = 0;
+-	}
+-
+-	memdesc->size = 0;
++	dcp_release_memdesc(dcp, &dcp->memdesc[id]);
+ 
+ 	return 1;
+ }
+@@ -445,12 +441,22 @@ dcpep_cb_map_physical(struct apple_dcp *dcp, struct dcp_map_physical_req *req)
+ 	}
+ 
+ 	id = find_first_zero_bit(dcp->memdesc_map, DCP_MAX_MAPPINGS);
++	if (id >= DCP_MAX_MAPPINGS) {
++		dev_warn(dcp->dev, "DCP overflowed mapping table, ignoring\n");
++		return (struct dcp_map_physical_resp){};
++	}
++
++	dva = dma_map_resource(dcp->dev, req->paddr, size, DMA_BIDIRECTIONAL, 0);
++	if (dma_mapping_error(dcp->dev, dva)) {
++		dev_err(dcp->dev, "failed to map phys address %llx size %x\n",
++			req->paddr, size);
++		return (struct dcp_map_physical_resp){};
++	}
++
+ 	set_bit(id, dcp->memdesc_map);
+ 	dcp->memdesc[id].size = size;
+ 	dcp->memdesc[id].reg = req->paddr;
+-
+-	dva = dma_map_resource(dcp->dev, req->paddr, size, DMA_BIDIRECTIONAL, 0);
+-	WARN_ON(dva == DMA_MAPPING_ERROR);
++	dcp->memdesc[id].dva = dva;
+ 
+ 	return (struct dcp_map_physical_resp){
+ 		.dva_size = size,
+@@ -569,22 +575,29 @@ static bool dcpep_process_chunks(struct apple_dcp *dcp,
+ 	}
+ 
+ 	if (!strcmp(req->key, "TimingElements")) {
+-		dcp->modes = enumerate_modes(&ctx, &dcp->nr_modes,
+-					     dcp->width_mm, dcp->height_mm,
+-					     dcp->notch_height);
++		struct dcp_display_mode *modes;
++		unsigned int nr_modes = 0;
++		bool parsed = true;
+ 
+-		if (IS_ERR(dcp->modes)) {
++		modes = enumerate_modes(&ctx, &nr_modes, dcp->width_mm,
++					dcp->height_mm, dcp->notch_height);
++		if (IS_ERR(modes)) {
+ 			dev_warn(dcp->dev, "failed to parse modes\n");
+-			dcp->modes = NULL;
+-			dcp->nr_modes = 0;
+-			return false;
+-		}
+-		if (dcp->nr_modes == 0)
++			modes = NULL;
++			nr_modes = 0;
++			parsed = false;
++		} else if (nr_modes == 0) {
+ 			dev_warn(dcp->dev, "TimingElements without valid modes!\n");
++		}
+ 
+-		complete_all(&dcp->timings_done);
+-		if (dcp->connector && dcp->connector->connected)
++		if (dcp_replace_modes(dcp, modes, nr_modes) && !dcp->main_display &&
++		    dcp->connector && dcp->connector->connected)
+ 			schedule_work(&dcp->connector->hotplug_wq);
++		complete_all(&dcp->timings_done);
++		WRITE_ONCE(dcp->publish_seq, dcp->publish_seq + 1);
++		wake_up_var(&dcp->publish_seq);
++
++		return parsed;
+ 	} else if (!strcmp(req->key, "DisplayAttributes")) {
+ 		ret = parse_display_attributes(&ctx, &dcp->width_mm,
+ 					&dcp->height_mm);
+@@ -807,11 +820,10 @@ static void dcp_on_set_parameter(struct apple_dcp *dcp, void *out, void *cookie)
+ 	dcp_set_parameter_dcp(dcp, false, &param, dcp_on_set_power_state, cookie);
+ }
+ 
+-static void dcp_on_client_open(struct apple_dcp *dcp, void *out, void *cookie)
++static void dcp_set_display(struct apple_dcp *dcp, void *out, void *cookie)
+ {
+ 	u32 handle;
+ 
+-	dcp->client_open = true;
+ 	if (dcp->main_display) {
+ 		handle = 0;
+ 		dcp_set_display_device(dcp, false, &handle, dcp_on_set_power_state,
+@@ -823,7 +835,13 @@ static void dcp_on_client_open(struct apple_dcp *dcp, void *out, void *cookie)
+ 	}
+ }
+ 
+-void DCP_FW_NAME(iomfb_poweron)(struct apple_dcp *dcp)
++static void dcp_on_client_open(struct apple_dcp *dcp, void *out, void *cookie)
++{
++	dcp->client_open = true;
++	dcp_set_display(dcp, out, cookie);
++}
++
++void DCP_FW_NAME(iomfb_poweron)(struct apple_dcp *dcp, bool open_client)
+ {
+ 	struct dcp_wait_cookie *cookie;
+ 	int ret;
+@@ -838,10 +856,10 @@ void DCP_FW_NAME(iomfb_poweron)(struct apple_dcp *dcp)
+ 	/* increase refcount to ensure the receiver has a reference */
+ 	kref_get(&cookie->refcount);
+ 
+-	if (dcp->client_open)
+-		dcp_on_client_open(dcp, NULL, cookie);
+-	else
++	if (open_client && !dcp->client_open)
+ 		dcp_first_client_open(dcp, false, dcp_on_client_open, cookie);
++	else
++		dcp_set_display(dcp, NULL, cookie);
+ 	ret = wait_for_completion_timeout(&cookie->done, msecs_to_jiffies(10000));
+ 
+ 	if (ret == 0) {
+@@ -917,6 +935,8 @@ void DCP_FW_NAME(iomfb_poweroff)(struct apple_dcp *dcp)
+ 	struct dcp_swap_start_req swap_req = { 0 };
+ 	struct DCP_FW_NAME(dcp_swap_submit_req) *swap = &DCP_FW_UNION(dcp->swap);
+ 
++	dcp->valid_mode = false;
++
+ 	cookie = kzalloc(sizeof(*cookie), GFP_KERNEL);
+ 	if (!cookie)
+ 		return;
+@@ -998,7 +1018,6 @@ void DCP_FW_NAME(iomfb_poweroff)(struct apple_dcp *dcp)
+ 
+ static void last_client_closed_sleep(struct apple_dcp *dcp, void *out, void *cookie)
+ {
+-	dcp->client_open = false;
+ 	struct dcp_set_power_state_req power_req = {
+ 		.unklong = 0,
+ 	};
+@@ -1042,10 +1061,32 @@ void DCP_FW_NAME(iomfb_sleep)(struct apple_dcp *dcp)
+ 	dev_info(dcp->dev, "dcp_sleep() done\n");
+ }
+ 
+-static void dcpep_cb_hotplug(struct apple_dcp *dcp, u64 *connected)
++static void dcp_apply_hotplug(struct apple_dcp *dcp, bool connected)
+ {
+ 	struct apple_connector *connector = dcp->connector;
+ 
++	dev_info(dcp->dev, "cb_hotplug() connected:%d, valid_mode:%d\n",
++		 connected, dcp->valid_mode);
++
++	/* Hotplug invalidates mode. DRM doesn't always handle this. */
++	if (!connected) {
++		dcp->valid_mode = false;
++		/* after unplug swap will not complete until the next
++		 * set_digital_out_mode */
++		schedule_work(&dcp->vblank_wq);
++	}
++
++	if (connector && connector->connected != connected) {
++		connector->connected = connected;
++		dcp->valid_mode = false;
++		schedule_work(&connector->hotplug_wq);
++	}
++}
++
++static void dcpep_cb_hotplug(struct apple_dcp *dcp, u64 *connected)
++{
++	bool deferred;
++
+ 	/* DCP issues hotplug_gated callbacks after SetPowerState() calls on
+ 	 * devices with display (macbooks, imacs). This must not result in
+ 	 * connector state changes on DRM side. Some applications won't enable
+@@ -1056,29 +1097,16 @@ static void dcpep_cb_hotplug(struct apple_dcp *dcp, u64 *connected)
+ 	if (dcp->main_display)
+ 		return;
+ 
+-	if (dcp->during_modeset) {
+-		dev_info(dcp->dev,
+-			 "cb_hotplug() ignored during modeset connected:%llu\n",
+-			 *connected);
+-		return;
++	spin_lock(&dcp->hotplug_lock);
++	deferred = dcp->during_modeset;
++	if (deferred) {
++		dcp->hotplug_deferred = true;
++		dcp->hotplug_deferred_connected = !!*connected;
+ 	}
++	spin_unlock(&dcp->hotplug_lock);
+ 
+-	dev_info(dcp->dev, "cb_hotplug() connected:%llu, valid_mode:%d\n",
+-		 *connected, dcp->valid_mode);
+-
+-	/* Hotplug invalidates mode. DRM doesn't always handle this. */
+-	if (!(*connected)) {
+-		dcp->valid_mode = false;
+-		/* after unplug swap will not complete until the next
+-		 * set_digital_out_mode */
+-		schedule_work(&dcp->vblank_wq);
+-	}
+-
+-	if (connector && connector->connected != !!(*connected)) {
+-		connector->connected = !!(*connected);
+-		dcp->valid_mode = false;
+-		schedule_work(&connector->hotplug_wq);
+-	}
++	if (!deferred)
++		dcp_apply_hotplug(dcp, !!*connected);
+ }
+ 
+ static void
+@@ -1221,21 +1249,86 @@ static void complete_set_digital_out_mode(struct apple_dcp *dcp, void *data,
+ 	struct dcp_wait_cookie *wait = cookie;
+ 
+ 	if (wait) {
++		wait->result = *(u32 *)data;
+ 		complete(&wait->done);
+ 		kref_put(&wait->refcount, release_wait_cookie);
+ 	}
+ }
+ 
++/* TimingElements arrived 1.1 s after the display was requested (j473 trace) */
++#define DCP_PUBLISH_TIMEOUT msecs_to_jiffies(3000)
++
++static int dcp_set_mode(struct apple_dcp *dcp, u32 *result)
++{
++	struct dcp_wait_cookie *cookie;
++	bool deferred, connected;
++	int ret;
++
++	cookie = kzalloc_obj(*cookie);
++	if (!cookie)
++		return -ENOMEM;
++
++	init_completion(&cookie->done);
++	kref_init(&cookie->refcount);
++	/* increase refcount to ensure the receiver has a reference */
++	kref_get(&cookie->refcount);
++
++	spin_lock(&dcp->hotplug_lock);
++	dcp->during_modeset = true;
++	dcp->hotplug_deferred = false;
++	spin_unlock(&dcp->hotplug_lock);
++
++	dcp_set_digital_out_mode(dcp, false, &dcp->mode,
++				 complete_set_digital_out_mode, cookie);
++
++	/*
++	 * The DCP firmware has an internal timeout of ~8 seconds for
++	 * modesets. Add an extra 500ms to safe side that the modeset
++	 * call has returned.
++	 */
++	ret = wait_for_completion_timeout(&cookie->done,
++					  msecs_to_jiffies(8500));
++	*result = ret > 0 ? cookie->result : 0;
++
++	kref_put(&cookie->refcount, release_wait_cookie);
++
++	spin_lock(&dcp->hotplug_lock);
++	dcp->during_modeset = false;
++	deferred = dcp->hotplug_deferred;
++	connected = dcp->hotplug_deferred_connected;
++	spin_unlock(&dcp->hotplug_lock);
++	dev_info(dcp->dev, "set_digital_out_mode finished:%d\n", ret);
++
++	if (deferred)
++		dcp_apply_hotplug(dcp, connected);
++
++	if (ret == 0) {
++		dev_info(dcp->dev, "set_digital_out_mode timed out\n");
++		return -EIO;
++	} else if (ret < 0) {
++		dev_info(dcp->dev,
++			 "waiting on set_digital_out_mode failed:%d\n", ret);
++		return -EIO;
++	}
++
++	return 0;
++}
++
+ int DCP_FW_NAME(iomfb_modeset)(struct apple_dcp *dcp,
+ 			       struct drm_crtc_state *crtc_state)
+ {
+-	struct dcp_display_mode *mode;
+-	struct dcp_wait_cookie *cookie;
++	struct dcp_display_mode found, *mode = &found;
++	struct dcp_display_mode *match;
+ 	struct dcp_color_mode *cmode = NULL;
++	u32 result, seq;
+ 	int ret;
+ 
+-	mode = lookup_mode(dcp, &crtc_state->mode);
+-	if (!mode) {
++	mutex_lock(&dcp->modes_lock);
++	match = lookup_mode(dcp, &crtc_state->mode);
++	if (match)
++		found = *match;
++	mutex_unlock(&dcp->modes_lock);
++	if (!match) {
+ 		dev_err(dcp->dev, "no match for " DRM_MODE_FMT "\n",
+ 			DRM_MODE_ARG(&crtc_state->mode));
+ 		return -EIO;
+@@ -1268,45 +1361,40 @@ int DCP_FW_NAME(iomfb_modeset)(struct apple_dcp *dcp,
+ 	/* Keep track of suspected vrr modes */
+ 	dcp->use_timestamps = mode->vrr;
+ 
+-	cookie = kzalloc(sizeof(*cookie), GFP_KERNEL);
+-	if (!cookie) {
+-		return -ENOMEM;
+-	}
+-
+-	init_completion(&cookie->done);
+-	kref_init(&cookie->refcount);
+-	/* increase refcount to ensure the receiver has a reference */
+-	kref_get(&cookie->refcount);
+-
+-	dcp->during_modeset = true;
+-
+-	dcp_set_digital_out_mode(dcp, false, &dcp->mode,
+-				 complete_set_digital_out_mode, cookie);
++	dcp->valid_mode = false;
++	seq = READ_ONCE(dcp->publish_seq);
++	ret = dcp_set_mode(dcp, &result);
++	if (ret)
++		return ret;
+ 
+ 	/*
+-	 * The DCP firmware has an internal timeout of ~8 seconds for
+-	 * modesets. Add an extra 500ms to safe side that the modeset
+-	 * call has returned.
++	 * After s2idle the DCP rejected the modeset with "Modeset done, but
++	 * pipe not enabled" and published the display again later (j473).
+ 	 */
+-	ret = wait_for_completion_timeout(&cookie->done,
+-					  msecs_to_jiffies(8500));
+-
+-	kref_put(&cookie->refcount, release_wait_cookie);
+-	dcp->during_modeset = false;
+-	dev_info(dcp->dev, "set_digital_out_mode finished:%d\n", ret);
++	if (result &&
++	    wait_var_event_timeout(&dcp->publish_seq,
++				   READ_ONCE(dcp->publish_seq) != seq,
++				   DCP_PUBLISH_TIMEOUT)) {
++		mutex_lock(&dcp->modes_lock);
++		match = lookup_mode(dcp, &crtc_state->mode);
++		if (match)
++			dcp->mode = (struct dcp_set_digital_out_mode_req){
++				.color_mode_id = match->color_mode_id,
++				.timing_mode_id = match->timing_mode_id,
++			};
++		mutex_unlock(&dcp->modes_lock);
++		if (!match) {
++			dev_err(dcp->dev, "set_digital_out_mode failed: %#x\n", result);
++			return -EIO;
++		}
++		ret = dcp_set_mode(dcp, &result);
++		if (ret)
++			return ret;
++	}
+ 
+-	if (ret == 0) {
+-		dev_info(dcp->dev, "set_digital_out_mode timed out\n");
+-		return -EIO;
+-	} else if (ret < 0) {
+-		dev_info(dcp->dev,
+-			 "waiting on set_digital_out_mode failed:%d\n", ret);
++	if (result) {
++		dev_err(dcp->dev, "set_digital_out_mode failed: %#x\n", result);
+ 		return -EIO;
+-
+-	} else if (ret > 0) {
+-		dev_dbg(dcp->dev,
+-			"set_digital_out_mode finished with %d to spare\n",
+-			jiffies_to_msecs(ret));
+ 	}
+ 	dcp->valid_mode = true;
+ 
+@@ -1324,6 +1412,12 @@ void DCP_FW_NAME(iomfb_flush)(struct apple_dcp *dcp, struct drm_crtc *crtc, stru
+ 
+ 	crtc_state = drm_atomic_get_new_crtc_state(commit, crtc);
+ 
++	/* The DCP swallows swaps without a working mode and never completes them */
++	if (!dcp->valid_mode) {
++		schedule_work(&dcp->vblank_wq);
++		return;
++	}
++
+ 	/* Reset all surfaces to defaults */
+ 	memset(req, 0, sizeof(*req));
+ 	for (l = 0; l < SWAP_SURFACES; l++)
+diff --git a/drivers/gpu/drm/apple/iomfb_template.h b/drivers/gpu/drm/apple/iomfb_template.h
+index 8aea39d6664c..c0028cf8abae 100644
+--- a/drivers/gpu/drm/apple/iomfb_template.h
++++ b/drivers/gpu/drm/apple/iomfb_template.h
+@@ -182,7 +182,7 @@ struct apple_dcp;
+ int DCP_FW_NAME(iomfb_modeset)(struct apple_dcp *dcp,
+ 			       struct drm_crtc_state *crtc_state);
+ void DCP_FW_NAME(iomfb_flush)(struct apple_dcp *dcp, struct drm_crtc *crtc, struct drm_atomic_commit *commit);
+-void DCP_FW_NAME(iomfb_poweron)(struct apple_dcp *dcp);
++void DCP_FW_NAME(iomfb_poweron)(struct apple_dcp *dcp, bool open_client);
+ void DCP_FW_NAME(iomfb_poweroff)(struct apple_dcp *dcp);
+ void DCP_FW_NAME(iomfb_sleep)(struct apple_dcp *dcp);
+ void DCP_FW_NAME(iomfb_start)(struct apple_dcp *dcp);
+diff --git a/drivers/gpu/drm/apple/parser.c b/drivers/gpu/drm/apple/parser.c
+index 3dc6fe8f0e7d..6496ab5bb978 100644
+--- a/drivers/gpu/drm/apple/parser.c
++++ b/drivers/gpu/drm/apple/parser.c
+@@ -171,10 +171,10 @@ static char *parse_string(struct dcp_parse_ctx *handle)
+ 	if (IS_ERR(in))
+ 		return (void *)in;
+ 
+-	out = kmalloc(tag->size + 1, GFP_KERNEL);
++	out = kmemdup_nul(in, tag->size, GFP_KERNEL);
++	if (!out)
++		return ERR_PTR(-ENOMEM);
+ 
+-	memcpy(out, in, tag->size);
+-	out[tag->size] = '\0';
+ 	return out;
+ }
+ 
+@@ -455,6 +455,11 @@ static int parse_mode(struct dcp_parse_ctx *handle,
+ 	bool is_preferred = false;
+ 	struct drm_display_mode *mode = &out->mode;
+ 
++	/* The mode slot may be uninitialized or reused from a failed mode */
++	out->vrr = false;
++	out->min_vrr = 0;
++	out->max_vrr = 0;
++
+ 	dcp_parse_foreach_in_dict(handle, it) {
+ 		char *key = parse_string(it.handle);
+ 
+@@ -582,6 +587,7 @@ struct dcp_display_mode *enumerate_modes(struct dcp_parse_ctx *handle,
+ 	struct dcp_display_mode *mode, *modes;
+ 	struct dcp_display_mode *best_mode = NULL;
+ 	s64 score, best_score = -1;
++	unsigned int nr_modes = 0;
+ 
+ 	ret = iterator_begin(handle, &it, false);
+ 
+@@ -589,14 +595,14 @@ struct dcp_display_mode *enumerate_modes(struct dcp_parse_ctx *handle,
+ 		return ERR_PTR(ret);
+ 
+ 	/* Start with a worst case allocation */
+-	modes = kmalloc_array(it.len, sizeof(*modes), GFP_KERNEL);
+-	*count = 0;
++	modes = kcalloc(it.len, sizeof(*modes), GFP_KERNEL);
+ 
+ 	if (!modes)
+ 		return ERR_PTR(-ENOMEM);
+ 
+ 	for (; it.idx < it.len; ++it.idx) {
+-		mode = &modes[*count];
++		mode = &modes[nr_modes];
++		score = -1;
+ 		ret = parse_mode(it.handle, mode, &score, width_mm, height_mm, notch_height);
+ 
+ 		/* Errors for a single mode are recoverable -- just skip it. */
+@@ -604,7 +610,7 @@ struct dcp_display_mode *enumerate_modes(struct dcp_parse_ctx *handle,
+ 			continue;
+ 
+ 		/* Process a successful mode */
+-		(*count)++;
++		nr_modes++;
+ 
+ 		if (score > best_score) {
+ 			best_score = score;
+@@ -615,6 +621,7 @@ struct dcp_display_mode *enumerate_modes(struct dcp_parse_ctx *handle,
+ 	if (best_mode != NULL)
+ 		best_mode->mode.type |= DRM_MODE_TYPE_PREFERRED;
+ 
++	*count = nr_modes;
+ 	return modes;
+ }
+ 
+diff --git a/drivers/gpu/drm/apple/plane.c b/drivers/gpu/drm/apple/plane.c
+index 960040f1414e..a973f4366a86 100644
+--- a/drivers/gpu/drm/apple/plane.c
++++ b/drivers/gpu/drm/apple/plane.c
+@@ -24,6 +24,18 @@
+ #define APPLE_GPU_CACHELINE	16
+ #define FRAC_16_16(mult, div)    (((mult) << 16) / (div))
+ 
++/*
++ * Bits per pixel for Interchange layout calculations. Unlike
++ * drm_format_info_bpp() this does not return 0 for formats with a
++ * non-integer bpp (e.g. the 3x1 block P030/P230 formats).
++ */
++static u32 apple_ix_bpp(const struct drm_format_info *fmt, u32 plane)
++{
++	return fmt->char_per_block[plane] * 8 /
++	       (drm_format_info_block_width(fmt, plane) *
++		drm_format_info_block_height(fmt, plane));
++}
++
+ static struct dcp_image_layout
+ apple_get_ix_layout(u32 width, u32 height, u32 bpp, u32 plane,  bool yuv)
+ {
+@@ -154,7 +166,7 @@ static int apple_plane_atomic_check(struct drm_plane *plane,
+ 
+ 			u32 width = drm_format_info_plane_width(fb->format, fb->width, i);
+ 			u32 height = drm_format_info_plane_height(fb->format, fb->height, i);
+-			u32 bpp = drm_format_info_bpp(fb->format, i);
++			u32 bpp = apple_ix_bpp(fb->format, i);
+ 
+ 			layout = apple_get_ix_layout(width, height, bpp, i,
+ 						     fb->format->is_yuv);
+@@ -316,13 +328,13 @@ static void apple_plane_atomic_update(struct drm_plane *plane,
+ 	struct drm_framebuffer *fb = base->fb;
+ 	const struct drm_format_info *fmt = fb->format;
+ 	/*
+-	 * DCP doesn't support XBGR8 / XRGB8 / XBGR2101010 natively. Blending as
++	 * DCP doesn't support XBGR8 / XRGB8 / XRGB2101010 natively. Blending as
+ 	 * pre-multiplied alpha with a black background can be used as
+ 	 * workaround for the bottommost plane.
+ 	 */
+ 	if (fmt->format == DRM_FORMAT_XRGB8888 ||
+ 	    fmt->format == DRM_FORMAT_XBGR8888 ||
+-	    fmt->format == DRM_FORMAT_XBGR2101010)
++	    fmt->format == DRM_FORMAT_XRGB2101010)
+ 		is_premultiplied = true;
+ 	else if (fmt->has_alpha)
+ 		is_premultiplied = base->pixel_blend_mode == DRM_MODE_BLEND_PREMULTI;
+@@ -372,7 +384,7 @@ static void apple_plane_atomic_update(struct drm_plane *plane,
+ 		case DRM_FORMAT_MOD_APPLE_INTERCHANGE:
+ 			struct dcp_image_layout layout;
+ 
+-			bpp = fmt->char_per_block[i] * 8 / (bw * bh);
++			bpp = apple_ix_bpp(fmt, i);
+ 			layout = apple_get_ix_layout(width, height, bpp, i, fmt->is_yuv);
+ 
+ 			surf->planes[i].tile_w = layout.tile_w;
+diff --git a/drivers/gpu/drm/asahi/file.rs b/drivers/gpu/drm/asahi/file.rs
+index 978cb0a60db7..5cc54fc1ac5a 100644
+--- a/drivers/gpu/drm/asahi/file.rs
++++ b/drivers/gpu/drm/asahi/file.rs
+@@ -169,7 +169,7 @@ fn parse_array(
+         in_count: u32,
+         out_count: u32,
+     ) -> Result<KVec<SyncItem>> {
+-        let count = in_count + out_count;
++        let count = in_count.checked_add(out_count).ok_or(EINVAL)?;
+         let mut vec = KVec::with_capacity(count as usize, GFP_KERNEL)?;
+ 
+         const STRIDE: usize = core::mem::size_of::<uapi::drm_asahi_sync>();
+@@ -577,7 +577,7 @@ pub(crate) fn vm_bind(
+         let vm_id = data.vm_id.try_into()?;
+ 
+         let mut vec = KVec::new();
+-        let size = (data.stride * data.num_binds) as usize;
++        let size = data.stride.checked_mul(data.num_binds).ok_or(EINVAL)? as usize;
+         let reader = UserSlice::new(UserPtr::from_addr(data.userptr as _), size).reader();
+         reader.read_all(&mut vec, GFP_KERNEL)?;
+         let mut reader = Reader::new(&vec);
+diff --git a/drivers/gpu/drm/asahi/mmu.rs b/drivers/gpu/drm/asahi/mmu.rs
+index b79b5ab4e7d0..51957bde60f4 100644
+--- a/drivers/gpu/drm/asahi/mmu.rs
++++ b/drivers/gpu/drm/asahi/mmu.rs
+@@ -750,6 +750,11 @@ fn remap_uncached_and_flush(&mut self, owner: &mut VmInner) {
+         //          - lock handoff dekker
+         //              change TTB
+ 
++        let dev = owner.dev.clone();
++        let Some(guard) = dev.registration_guard() else {
++            return;
++        };
++
+         // Lock this flush slot, and write the range to it
+         let flush = self.0.uat_inner.lock_flush(flush_slot);
+         let pages = self.size() >> UAT_PGBIT;
+@@ -770,9 +775,6 @@ fn remap_uncached_and_flush(&mut self, owner: &mut VmInner) {
+             unk_12: 2, // ?
+         };
+ 
+-        let dev = owner.dev.clone();
+-        let guard = dev.registration_guard().expect("Device is not registered!");
+-
+         // Tell the firmware to do a cache flush
+         guard.registration_data_with(|reg_data| {
+             if let Err(e) = reg_data.gpu.fwctl(cmd) {
+@@ -1372,13 +1374,13 @@ pub(crate) fn unmap_range<'drm>(
+         iova: u64,
+         size: u64,
+     ) -> Result {
+-        // Unmapping a range can only do a single split, so just preallocate
+-        // two GPUVAs.
++        // Unmapping a range can remap the mappings at both of its ends, and each
++        // remap takes two GPUVAs before handing back the unused one.
+         let mut resources = VmOpResources {
+             preallocated_gpuvas: [
+                 Some(GpuVaAlloc::<VmInner>::new(GFP_KERNEL)?),
+                 Some(GpuVaAlloc::<VmInner>::new(GFP_KERNEL)?),
+-                None,
++                Some(GpuVaAlloc::<VmInner>::new(GFP_KERNEL)?),
+             ],
+         };
+         let mut ctx = StepContext::new(dev, Prot::default(), false, &mut resources)?;
+diff --git a/drivers/gpu/drm/asahi/slotalloc.rs b/drivers/gpu/drm/asahi/slotalloc.rs
+index fde7470fe577..d42d8b891491 100644
+--- a/drivers/gpu/drm/asahi/slotalloc.rs
++++ b/drivers/gpu/drm/asahi/slotalloc.rs
+@@ -36,9 +36,12 @@
+ };
+ 
+ /// Trait representing a single item within a slot.
+-pub(crate) trait SlotItem {
++///
++/// Items and allocator data live inside a `Mutex` and are mutated through its guard, so they
++/// must be `Unpin`.
++pub(crate) trait SlotItem: Unpin {
+     /// Arbitrary user data associated with the SlotAllocator.
+-    type Data;
++    type Data: Unpin;
+ 
+     /// Called eagerly when this item is released back into the available pool.
+     fn release(&mut self, _data: &mut Self::Data, _slot: u32) {}
+diff --git a/drivers/i2c/busses/i2c-pasemi-core.c b/drivers/i2c/busses/i2c-pasemi-core.c
+index f4eca44ed183..5afb8373b311 100644
+--- a/drivers/i2c/busses/i2c-pasemi-core.c
++++ b/drivers/i2c/busses/i2c-pasemi-core.c
+@@ -244,6 +244,16 @@ static int pasemi_i2c_xfer(struct i2c_adapter *adapter,
+ 	struct pasemi_smbus *smbus = adapter->algo_data;
+ 	int ret, i;
+ 
++	/*
++	 * A read without STOP leaves the transaction open for further reads
++	 * (see the SMBus block read sequence below): the controller neither
++	 * ends the transfer nor signals XEN, so a repeated START can't follow
++	 * it and the bus is left stuck. Only allow a read as the last message.
++	 */
++	for (i = 0; i < num - 1; i++)
++		if (msgs[i].flags & I2C_M_RD)
++			return -EOPNOTSUPP;
++
+ 	ret = pasemi_smb_clear(smbus);
+ 	if (ret)
+ 		return ret;
+@@ -414,6 +424,11 @@ static u32 pasemi_smb_func(struct i2c_adapter *adapter)
+ 	       I2C_FUNC_SMBUS_BLOCK_PROC_CALL | I2C_FUNC_I2C;
+ }
+ 
++/* pasemi_i2c_xfer_msg() needs at least one byte to attach START/STOP to */
++static const struct i2c_adapter_quirks pasemi_i2c_quirks = {
++	.flags = I2C_AQ_NO_ZERO_LEN,
++};
++
+ static const struct i2c_algorithm smbus_algorithm = {
+ 	.xfer = pasemi_i2c_xfer,
+ 	.smbus_xfer = pasemi_smb_xfer,
+@@ -428,6 +443,7 @@ int pasemi_i2c_common_probe(struct pasemi_smbus *smbus)
+ 	snprintf(smbus->adapter.name, sizeof(smbus->adapter.name),
+ 		 "PA Semi SMBus adapter (%s)", dev_name(smbus->dev));
+ 	smbus->adapter.algo = &smbus_algorithm;
++	smbus->adapter.quirks = &pasemi_i2c_quirks;
+ 	smbus->adapter.algo_data = smbus;
+ 
+ 	/* set up the sysfs linkage to our parent device */
+@@ -450,6 +466,13 @@ int pasemi_i2c_common_probe(struct pasemi_smbus *smbus)
+ }
+ EXPORT_SYMBOL_GPL(pasemi_i2c_common_probe);
+ 
++void pasemi_i2c_reinit(struct pasemi_smbus *smbus)
++{
++	reg_write(smbus, REG_IMASK, 0);
++	pasemi_reset(smbus);
++}
++EXPORT_SYMBOL_GPL(pasemi_i2c_reinit);
++
+ irqreturn_t pasemi_irq_handler(int irq, void *dev_id)
+ {
+ 	struct pasemi_smbus *smbus = dev_id;
+diff --git a/drivers/i2c/busses/i2c-pasemi-core.h b/drivers/i2c/busses/i2c-pasemi-core.h
+index 88821f4e8a9f..2678df6ad433 100644
+--- a/drivers/i2c/busses/i2c-pasemi-core.h
++++ b/drivers/i2c/busses/i2c-pasemi-core.h
+@@ -22,5 +22,6 @@ struct pasemi_smbus {
+ };
+ 
+ int pasemi_i2c_common_probe(struct pasemi_smbus *smbus);
++void pasemi_i2c_reinit(struct pasemi_smbus *smbus);
+ 
+ irqreturn_t pasemi_irq_handler(int irq, void *dev_id);
+diff --git a/drivers/i2c/busses/i2c-pasemi-platform.c b/drivers/i2c/busses/i2c-pasemi-platform.c
+index a486a37d3863..b310a12303f1 100644
+--- a/drivers/i2c/busses/i2c-pasemi-platform.c
++++ b/drivers/i2c/busses/i2c-pasemi-platform.c
+@@ -91,6 +91,31 @@ static int pasemi_platform_i2c_probe(struct platform_device *pdev)
+ 
+ static void pasemi_platform_i2c_remove(struct platform_device *pdev) { }
+ 
++static int pasemi_platform_i2c_suspend_noirq(struct device *dev)
++{
++	struct pasemi_platform_i2c_data *data = dev_get_drvdata(dev);
++
++	i2c_mark_adapter_suspended(&data->smbus.adapter);
++
++	return 0;
++}
++
++static int pasemi_platform_i2c_resume_noirq(struct device *dev)
++{
++	struct pasemi_platform_i2c_data *data = dev_get_drvdata(dev);
++
++	/* The controller loses its configuration when its power domain is off. */
++	pasemi_i2c_reinit(&data->smbus);
++	i2c_mark_adapter_resumed(&data->smbus.adapter);
++
++	return 0;
++}
++
++static const struct dev_pm_ops pasemi_platform_i2c_pm_ops = {
++	NOIRQ_SYSTEM_SLEEP_PM_OPS(pasemi_platform_i2c_suspend_noirq,
++				  pasemi_platform_i2c_resume_noirq)
++};
++
+ static const struct of_device_id pasemi_platform_i2c_of_match[] = {
+ 	{ .compatible = "apple,t8103-i2c" },
+ 	{ .compatible = "apple,i2c" },
+@@ -102,6 +127,7 @@ static struct platform_driver pasemi_platform_i2c_driver = {
+ 	.driver	= {
+ 		.name			= "i2c-apple",
+ 		.of_match_table		= pasemi_platform_i2c_of_match,
++		.pm			= pm_sleep_ptr(&pasemi_platform_i2c_pm_ops),
+ 	},
+ 	.probe	= pasemi_platform_i2c_probe,
+ 	.remove = pasemi_platform_i2c_remove,
+diff --git a/drivers/input/misc/Makefile b/drivers/input/misc/Makefile
+index 00ecff502bd0..fc0563b963d6 100644
+--- a/drivers/input/misc/Makefile
++++ b/drivers/input/misc/Makefile
+@@ -54,7 +54,7 @@ obj-$(CONFIG_INPUT_ISA1200_HAPTIC)	+= isa1200.o
+ obj-$(CONFIG_INPUT_KEYSPAN_REMOTE)	+= keyspan_remote.o
+ obj-$(CONFIG_INPUT_KXTJ9)		+= kxtj9.o
+ obj-$(CONFIG_INPUT_M68K_BEEP)		+= m68kspkr.o
+-obj-$(CONFIG_INPUT_MACSMC_INPUT)        += macsmc-input.o
++obj-$(CONFIG_INPUT_MACSMC_INPUT)	+= macsmc-input.o
+ obj-$(CONFIG_INPUT_MAX7360_ROTARY)	+= max7360-rotary.o
+ obj-$(CONFIG_INPUT_MAX77650_ONKEY)	+= max77650-onkey.o
+ obj-$(CONFIG_INPUT_MAX77693_HAPTIC)	+= max77693-haptic.o
+diff --git a/drivers/input/misc/macsmc-input.c b/drivers/input/misc/macsmc-input.c
+index 2cead3b7f45f..4e2cb5c03b23 100644
+--- a/drivers/input/misc/macsmc-input.c
++++ b/drivers/input/misc/macsmc-input.c
+@@ -8,11 +8,13 @@
+  */
+ 
+ #include <linux/device.h>
++#include <linux/devm-helpers.h>
+ #include <linux/input.h>
+ #include <linux/mfd/core.h>
+ #include <linux/mfd/macsmc.h>
+ #include <linux/module.h>
+ #include <linux/reboot.h>
++#include <linux/workqueue.h>
+ 
+ /**
+  * struct macsmc_input
+@@ -20,6 +22,7 @@
+  * @smc: Pointer to apple_smc struct of the mfd parent
+  * @input: Allocated input_dev; devres managed
+  * @nb: Notifier block used for incoming events from SMC (e.g. button pressed down)
++ * @poweroff_work: Emergency power off, run outside the SMC event worker
+  * @wakeup_mode: Set to true when system is suspended and power button events should wake it
+  */
+ struct macsmc_input {
+@@ -27,6 +30,7 @@ struct macsmc_input {
+ 	struct apple_smc *smc;
+ 	struct input_dev *input;
+ 	struct notifier_block nb;
++	struct work_struct poweroff_work;
+ 	bool wakeup_mode;
+ };
+ 
+@@ -38,6 +42,19 @@ struct macsmc_input {
+ #define BTN_POWER_HELD_SHORT	0xfe /* power button briefly held down */
+ #define BTN_POWER_HELD_LONG	0x00 /* power button held down; sent just before forced poweroff */
+ 
++static void macsmc_input_poweroff_work(struct work_struct *work)
++{
++	/* The kernel is already shutting down (reboot(2)): let it finish */
++	if (system_state == SYSTEM_HALT || system_state == SYSTEM_POWER_OFF ||
++	    system_state == SYSTEM_RESTART)
++		return;
++
++	if (kernel_can_power_off())
++		kernel_power_off();
++	else /* Missing macsmc-reboot driver? */
++		kernel_restart("SMC power button triggered restart");
++}
++
+ static void macsmc_input_event_button(struct macsmc_input *smcin, unsigned long event)
+ {
+ 	u8 button = (event >> 8) & 0xff;
+@@ -48,10 +65,12 @@ static void macsmc_input_event_button(struct macsmc_input *smcin, unsigned long
+ 	case BTN_TOUCHID:
+ 		pm_wakeup_dev_event(smcin->dev, 0, (smcin->wakeup_mode && state));
+ 		/*
+-		 * Suppress KEY_POWER reports when suspended to avoid powering down
+-		 * immediately after waking from s2idle.
+-		 * */
+-		if (smcin->wakeup_mode)
++		 * Suppress KEY_POWER presses when suspended to avoid powering down
++		 * immediately after waking from s2idle. Releases are still reported
++		 * so a key pressed before suspend cannot be left stuck down; the
++		 * input core drops releases of keys that are not pressed.
++		 */
++		if (smcin->wakeup_mode && state)
+ 			return;
+ 
+ 		input_report_key(smcin->input, KEY_POWER, state);
+@@ -65,17 +84,19 @@ static void macsmc_input_event_button(struct macsmc_input *smcin, unsigned long
+ 		 * we have about 4 seconds before forced power-off is triggered by SMC.
+ 		 * Try to do an emergency shutdown to make sure the NVMe cache is
+ 		 * flushed. macOS actually does this by panicing (!)...
++		 *
++		 * This runs in the SMC's RTKit receive worker, which must keep
++		 * running while devices shut down, so power off from a work item
++		 * of our own.
+ 		 */
+ 		if (state) {
+ 			dev_crit(smcin->dev, "Triggering forced shutdown!\n");
+-			if (kernel_can_power_off())
+-				kernel_power_off();
+-			else /* Missing macsmc-reboot driver? */
+-				kernel_restart("SMC power button triggered restart");
++			queue_work(system_unbound_wq, &smcin->poweroff_work);
+ 		}
+ 		break;
+ 	default:
+-		dev_warn(smcin->dev, "Unknown SMC button event: %04lx\n", event & 0xffff);
++		dev_warn_ratelimited(smcin->dev, "Unknown SMC button event: %04lx\n",
++				     event & 0xffff);
+ 	}
+ }
+ 
+@@ -106,6 +127,13 @@ static int macsmc_input_event(struct notifier_block *nb, unsigned long event, vo
+ 	}
+ }
+ 
++static void macsmc_input_unregister_notifier(void *data)
++{
++	struct macsmc_input *smcin = data;
++
++	blocking_notifier_chain_unregister(&smcin->smc->event_handlers, &smcin->nb);
++}
++
+ static int macsmc_input_probe(struct platform_device *pdev)
+ {
+ 	struct apple_smc *smc = dev_get_drvdata(pdev->dev.parent);
+@@ -127,6 +155,11 @@ static int macsmc_input_probe(struct platform_device *pdev)
+ 	smcin->smc = smc;
+ 	platform_set_drvdata(pdev, smcin);
+ 
++	error = devm_work_autocancel(&pdev->dev, &smcin->poweroff_work,
++				     macsmc_input_poweroff_work);
++	if (error)
++		return error;
++
+ 	smcin->input = devm_input_allocate_device(&pdev->dev);
+ 	if (!smcin->input)
+ 		return -ENOMEM;
+@@ -134,24 +167,21 @@ static int macsmc_input_probe(struct platform_device *pdev)
+ 	smcin->input->phys = "macsmc-input (0)";
+ 	smcin->input->name = "Apple SMC power/lid events";
+ 
+-	if (have_lid)
+-		input_set_capability(smcin->input, EV_SW, SW_LID);
+-	if (have_power)
+-		input_set_capability(smcin->input, EV_KEY, KEY_POWER);
+-
+ 	if (have_lid) {
+ 		u8 val;
+ 
++		input_set_capability(smcin->input, EV_SW, SW_LID);
+ 		error = apple_smc_read_u8(smc, SMC_KEY(MSLD), &val);
+ 		if (error < 0)
+ 			dev_warn(&pdev->dev, "Failed to read initial lid state\n");
+ 		else
+-			input_report_switch(smcin->input, SW_LID, val);
++			input_report_switch(smcin->input, SW_LID, !!val);
+ 	}
+ 
+ 	if (have_power) {
+ 		u32 val;
+ 
++		input_set_capability(smcin->input, EV_KEY, KEY_POWER);
+ 		error = apple_smc_read_u32(smc, SMC_KEY(bHLD), &val);
+ 		if (error < 0)
+ 			dev_warn(&pdev->dev, "Failed to read initial power button state\n");
+@@ -169,8 +199,13 @@ static int macsmc_input_probe(struct platform_device *pdev)
+ 
+ 	smcin->nb.notifier_call = macsmc_input_event;
+ 	blocking_notifier_chain_register(&smc->event_handlers, &smcin->nb);
++	error = devm_add_action_or_reset(&pdev->dev, macsmc_input_unregister_notifier, smcin);
++	if (error)
++		return error;
+ 
+-	device_init_wakeup(&pdev->dev, true);
++	error = devm_device_init_wakeup(&pdev->dev);
++	if (error)
++		return dev_err_probe(&pdev->dev, error, "Failed to init wakeup\n");
+ 
+ 	return 0;
+ }
+diff --git a/drivers/iommu/apple-dart.c b/drivers/iommu/apple-dart.c
+index 9d1f6cd6649a..1372900914ff 100644
+--- a/drivers/iommu/apple-dart.c
++++ b/drivers/iommu/apple-dart.c
+@@ -244,6 +244,7 @@ struct apple_dart {
+ 
+ 	u32 save_tcr[DART_MAX_STREAMS];
+ 	u32 save_ttbr[DART_MAX_STREAMS][DART_MAX_TTBR];
++	u32 save_remap[DART_MAX_STREAMS / 4];
+ 
+ 	u64 *locked_ttbr[DART_MAX_STREAMS][DART_MAX_TTBR];
+ };
+@@ -433,6 +434,10 @@ apple_dart_hw_map_locked_ttbr(struct apple_dart_stream_map *stream_map, u8 idx)
+ 		phys_addr_t phys;
+ 		u64 *l1_tbl;
+ 
++		/* already mapped by an earlier attach of this stream */
++		if (dart->locked_ttbr[sid][idx])
++			continue;
++
+ 		ttbr = readl(dart->regs + DART_TTBR(dart, sid, idx));
+ 
+ 		if (!(ttbr & dart->hw->ttbr_valid)) {
+@@ -449,8 +454,8 @@ apple_dart_hw_map_locked_ttbr(struct apple_dart_stream_map *stream_map, u8 idx)
+ 
+ 		l1_tbl = devm_memremap(dart->dev, phys, dart->pgsize,
+ 				       MEMREMAP_WB);
+-		if (!l1_tbl)
+-			return -ENOMEM;
++		if (IS_ERR(l1_tbl))
++			return PTR_ERR(l1_tbl);
+ 
+ 		dart->locked_ttbr[sid][idx] = l1_tbl;
+ 	}
+@@ -553,8 +558,6 @@ apple_dart_t8110_hw_tlb_command(struct apple_dart_stream_map *stream_map,
+ 
+ 		if (ret)
+ 			break;
+-		/* Since remap is used only the first sid needs to be invalidated. */
+-		break;
+ 	}
+ 
+ 	spin_unlock_irqrestore(&dart->lock, flags);
+@@ -1560,7 +1563,7 @@ static int apple_dart_probe(struct platform_device *pdev)
+ err_free_irq:
+ 	free_irq(dart->irq, dart);
+ err_clk_disable:
+-	pm_runtime_put(dev);
++	pm_runtime_put_noidle(dev);
+ 	clk_bulk_disable_unprepare(dart->num_clks, dart->clks);
+ 
+ 	return ret;
+@@ -1705,6 +1708,11 @@ static __maybe_unused int apple_dart_suspend(struct device *dev)
+ 				readl(dart->regs + DART_TTBR(dart, sid, idx));
+ 	}
+ 
++	/* T8020-style DARTs keep the stream remap table outside the TCRs. */
++	if (dart->hw->type != DART_T8110)
++		for (sid = 0; sid < dart->num_streams; sid += 4)
++			dart->save_remap[sid / 4] = readl(DART_REMAP(dart, sid));
++
+ 	return 0;
+ }
+ 
+@@ -1724,6 +1732,10 @@ static __maybe_unused int apple_dart_resume(struct device *dev)
+ 		return ret;
+ 	}
+ 
++	if (dart->hw->type != DART_T8110)
++		for (sid = 0; sid < dart->num_streams; sid += 4)
++			writel(dart->save_remap[sid / 4], DART_REMAP(dart, sid));
++
+ 	for (sid = 0; sid < dart->num_streams; sid++) {
+ 		for (idx = 0; idx < dart->hw->ttbr_count; idx++)
+ 			writel(dart->save_ttbr[sid][idx],
+diff --git a/drivers/iommu/iommu.c b/drivers/iommu/iommu.c
+index d8ef3d084a94..95d1f19d6cd8 100644
+--- a/drivers/iommu/iommu.c
++++ b/drivers/iommu/iommu.c
+@@ -885,8 +885,8 @@ static int iommu_insert_resv_region(struct iommu_resv_region *new,
+ 	struct iommu_resv_region *iter, *tmp, *nr, *top;
+ 	LIST_HEAD(stack);
+ 
+-	nr = iommu_alloc_resv_region(new->start, new->length,
+-				     new->prot, new->type, GFP_KERNEL);
++	nr = iommu_alloc_resv_region_tr(new->start, new->dva, new->length,
++					new->prot, new->type, GFP_KERNEL);
+ 	if (!nr)
+ 		return -ENOMEM;
+ 
+@@ -919,7 +919,10 @@ static int iommu_insert_resv_region(struct iommu_resv_region *new,
+ check_overlap:
+ 		top_end = top->start + top->length - 1;
+ 
+-		if (iter->start > top_end + 1) {
++		/* translated regions only merge if they share one offset */
++		if (iter->start > top_end + 1 ||
++		    (iter->type == IOMMU_RESV_TRANSLATED &&
++		     iter->dva - top->dva != iter->start - top->start)) {
+ 			list_move_tail(&iter->list, &stack);
+ 		} else {
+ 			top->length = max(top_end, iter_end) - top->start + 1;
+diff --git a/drivers/iommu/of_iommu.c b/drivers/iommu/of_iommu.c
+index 8501b9ef3d41..f183c5d526a2 100644
+--- a/drivers/iommu/of_iommu.c
++++ b/drivers/iommu/of_iommu.c
+@@ -187,6 +187,13 @@ iommu_resv_region_get_type(struct device *dev,
+ 	if (start == phys->start && end == phys->end)
+ 		return IOMMU_RESV_DIRECT;
+ 
++	/* a translated mapping must not reach past the physical region */
++	if (length > resource_size(phys)) {
++		dev_warn(dev, "treating oversized mapping [%pr] -> [%pap-%pap] as reservation\n",
++			 phys, &start, &end);
++		return IOMMU_RESV_RESERVED;
++	}
++
+ 	return IOMMU_RESV_TRANSLATED;
+ }
+ 
+diff --git a/drivers/mfd/macsmc.c b/drivers/mfd/macsmc.c
+index 514cba7dc897..c772c884f1ab 100644
+--- a/drivers/mfd/macsmc.c
++++ b/drivers/mfd/macsmc.c
+@@ -43,6 +43,7 @@
+ #define SMC_RESULT			SMC_MSG
+ 
+ #define SMC_TIMEOUT_MS		500
++#define SMC_ATOMIC_POLL_US	100
+ 
+ static const struct mfd_cell apple_smc_devs[] = {
+ 	MFD_CELL_NAME("macsmc-input"),
+@@ -246,6 +247,7 @@ EXPORT_SYMBOL(apple_smc_enter_atomic);
+ int apple_smc_write_atomic(struct apple_smc *smc, smc_key key, const void *buf, size_t size)
+ {
+ 	guard(spinlock_irqsave)(&smc->lock);
++	unsigned int polls = SMC_TIMEOUT_MS * 1000 / SMC_ATOMIC_POLL_US;
+ 	u8 result;
+ 	int ret;
+ 	u64 msg;
+@@ -268,17 +270,30 @@ int apple_smc_write_atomic(struct apple_smc *smc, smc_key key, const void *buf,
+ 
+ 	ret = apple_rtkit_send_message(smc->rtk, SMC_ENDPOINT, msg, NULL, true);
+ 	if (ret < 0) {
++		smc->atomic_pending = false;
+ 		dev_err(smc->dev, "Failed to send command (%d)\n", ret);
+ 		return ret;
+ 	}
+ 
++	/*
++	 * This runs with interrupts disabled, typically as the last step of a
++	 * restart or power off after the other CPUs have been stopped. Do not
++	 * spin forever if the SMC never answers: give the caller a chance to
++	 * fall back to another handler (e.g. the watchdog for restart).
++	 */
+ 	while (smc->atomic_pending) {
+ 		ret = apple_rtkit_poll(smc->rtk);
+ 		if (ret < 0) {
++			smc->atomic_pending = false;
+ 			dev_err(smc->dev, "RTKit poll failed (%llx)", msg);
+ 			return ret;
+ 		}
+-		udelay(100);
++		if (smc->atomic_pending && !polls--) {
++			smc->atomic_pending = false;
++			dev_err(smc->dev, "Atomic command timed out (%llx)\n", msg);
++			return -ETIMEDOUT;
++		}
++		udelay(SMC_ATOMIC_POLL_US);
+ 	}
+ 
+ 	if (FIELD_GET(SMC_ID, smc->cmd_ret) != smc->msg_id) {
+diff --git a/drivers/net/wireless/broadcom/brcm80211/brcmfmac/cfg80211.c b/drivers/net/wireless/broadcom/brcm80211/brcmfmac/cfg80211.c
+index e0bf5cea2376..1b7eefe61617 100644
+--- a/drivers/net/wireless/broadcom/brcm80211/brcmfmac/cfg80211.c
++++ b/drivers/net/wireless/broadcom/brcm80211/brcmfmac/cfg80211.c
+@@ -2011,10 +2011,10 @@ brcmf_set_key_mgmt(struct net_device *ndev, struct cfg80211_connect_params *sme)
+ 
+ 	brcmf_fil_bsscfg_int_set(netdev_priv(ndev), "mfp", mfp);
+ 	offset += RSN_CAP_LEN;
+-	if (mfp && (ie_len - offset >= RSN_PMKID_COUNT_LEN)) {
++	if (mfp && (offset + RSN_PMKID_COUNT_LEN <= ie_len)) {
+ 		pmkid_count = ie[offset] + (ie[offset + 1] << 8);
+ 		offset += RSN_PMKID_COUNT_LEN + (pmkid_count * WLAN_PMKID_LEN);
+-		if (ie_len - offset >= WPA_IE_MIN_OUI_LEN) {
++		if (offset + WPA_IE_MIN_OUI_LEN <= ie_len) {
+ 			group_mgmt_cs = &ie[offset];
+ 			if (memcmp(group_mgmt_cs, RSN_OUI, TLV_OUI_LEN) == 0) {
+ 				brcmf_fil_bsscfg_data_set(ifp, "bip",
+@@ -2323,24 +2323,24 @@ brcmf_cfg80211_connect(struct wiphy *wiphy, struct net_device *ndev,
+ 			  params->ssid_len);
+ 	join_params = drvr->join_param_handler.get_struct_for_connect(
+ 		cfg, &join_params_size, params);
++	if (!join_params) {
++		err = -ENOMEM;
++		goto done;
++	}
+ 
+-	if (join_params) {
+-		err = brcmf_fil_bsscfg_data_set(ifp, "join", join_params,
+-						join_params_size);
++	err = brcmf_fil_bsscfg_data_set(ifp, "join", join_params,
++					join_params_size);
+ 
+-		/* We only free the join parameters if we were successful.
+-		 * Otherwise they are used to extract the fallback, below */
+-		if (!err) {
+-			kfree(join_params);
+-			/* This is it. join command worked, we are done */
+-			goto done;
+-		}
+-		/* For versions >= 1, this should have worked, so report the error */
+-		if (drvr->join_param_handler.version >= 1) {
+-			bphy_err(drvr, "Failed to use join iovar to join: %d\n",
+-				 err);
+-		}
++	/* We only free the join parameters if we were successful.
++	 * Otherwise they are used to extract the fallback, below */
++	if (!err) {
++		kfree(join_params);
++		/* This is it. join command worked, we are done */
++		goto done;
+ 	}
++	/* For versions >= 1, this should have worked, so report the error */
++	if (drvr->join_param_handler.version >= 1)
++		bphy_err(drvr, "Failed to use join iovar to join: %d\n", err);
+ 
+ 	/* Fallback to using WLC_SET_SSID approach, which just uses join_params parts of the structure */
+ 	fallback_join_params = drvr->join_param_handler.get_join_from_ext_join(
+@@ -3229,7 +3229,6 @@ static s32 brcmf_inform_single_bss(struct brcmf_cfg80211_info *cfg,
+ 	struct cfg80211_bss *bss;
+ 	enum nl80211_band band;
+ 	struct brcmu_chan ch;
+-	u16 chanspec;
+ 	u16 channel;
+ 	u32 freq;
+ 	u16 notify_capability;
+@@ -3243,17 +3242,16 @@ static s32 brcmf_inform_single_bss(struct brcmf_cfg80211_info *cfg,
+ 		return -EINVAL;
+ 	}
+ 
+-	chanspec = le16_to_cpu(bi->chanspec);
+-	if (!bi->ctl_ch) {
+-		ch.chspec = chanspec;
+-		cfg->d11inf.decchspec(&ch);
++	/* Decode with the firmware's chanspec encoding (D11N or D11AC) */
++	ch.chspec = le16_to_cpu(bi->chanspec);
++	cfg->d11inf.decchspec(&ch);
++	if (!bi->ctl_ch)
+ 		bi->ctl_ch = ch.control_ch_num;
+-	}
+ 	channel = bi->ctl_ch;
+ 
+-	if (CHSPEC_IS6G(chanspec))
++	if (ch.band == BRCMU_CHAN_BAND_6G)
+ 		band = NL80211_BAND_6GHZ;
+-	else if (CHSPEC_IS5G(chanspec))
++	else if (ch.band == BRCMU_CHAN_BAND_5G)
+ 		band = NL80211_BAND_5GHZ;
+ 	else
+ 		band = NL80211_BAND_2GHZ;
+@@ -3812,8 +3810,8 @@ static s32 brcmf_notify_sched_scan_results(struct brcmf_if *ifp,
+ 		u8 ssid[IEEE80211_MAX_SSID_LEN];
+ 		u8 ssid_len;
+ 
+-		drvr->pno_handler.get_result_info(data, i, &ssid, &ssid_len,
+-						 &channel, &band);
++		drvr->pno_handler.get_result_info(&cfg->d11inf, data, i, &ssid,
++						 &ssid_len, &channel, &band);
+ 		brcmf_dbg(SCAN, "SSID:%.32s Channel:%d Band:%d\n", ssid,
+ 			  channel, band);
+ 		bucket_map |= drvr->pno_handler.get_bucket_map(data, i, cfg->pno);
+@@ -3958,8 +3956,8 @@ static s32 brcmf_wowl_nd_results(struct brcmf_if *ifp,
+ 		return -EINVAL;
+ 	}
+ 
+-	drvr->pno_handler.get_result_info(data, 0, &ssid, &ssid_len, &channel,
+-					 &band);
++	drvr->pno_handler.get_result_info(&cfg->d11inf, data, 0, &ssid,
++					 &ssid_len, &channel, &band);
+ 	memcpy(cfg->wowl.nd->ssid.ssid, ssid, ssid_len);
+ 	cfg->wowl.nd->ssid.ssid_len = ssid_len;
+ 	cfg->wowl.nd->n_channels = 1;
+@@ -7542,7 +7540,7 @@ static int brcmf_setup_wiphybands(struct brcmf_cfg80211_info *cfg)
+ 	u32 rxstreams = 0;
+ 	u32 txbf_bfe_cap = 0;
+ 	u32 txbf_bfr_cap = 0;
+-	u8 he_enable;
++	u8 he_enable = 0;
+ 	struct brcmf_he_defcap he_cap;
+ 	u32 ldpc_cap = 0;
+ 	u32 stbc_rx = 0;
+@@ -8680,7 +8678,7 @@ struct brcmf_cfg80211_info *brcmf_cfg80211_attach(struct brcmf_pub *drvr,
+ 	err = brcmf_setup_wiphybands(cfg);
+ 	if (err) {
+ 		bphy_err(drvr, "Setting wiphy bands failed (%d)\n", err);
+-		goto wiphy_unreg_out;
++		goto priv_out;
+ 	}
+ 
+ 	err = wiphy_register(wiphy);
+diff --git a/drivers/net/wireless/broadcom/brcm80211/brcmfmac/cfg80211.h b/drivers/net/wireless/broadcom/brcm80211/brcmfmac/cfg80211.h
+index 075f060919b7..10f03c5860d5 100644
+--- a/drivers/net/wireless/broadcom/brcm80211/brcmfmac/cfg80211.h
++++ b/drivers/net/wireless/broadcom/brcm80211/brcmfmac/cfg80211.h
+@@ -418,22 +418,6 @@ struct brcmf_tlv {
+ 	u8 data[];
+ };
+ 
+-static inline enum nl80211_band fwil_band_to_nl80211(u16 band)
+-{
+-	switch (band) {
+-	case WLC_BAND_2G:
+-		return NL80211_BAND_2GHZ;
+-	case WLC_BAND_5G:
+-		return NL80211_BAND_5GHZ;
+-	case WLC_BAND_6G:
+-		return NL80211_BAND_6GHZ;
+-	default:
+-		WARN_ON(1);
+-		break;
+-	}
+-	return 0;
+-}
+-
+ static inline struct wiphy *cfg_to_wiphy(struct brcmf_cfg80211_info *cfg)
+ {
+ 	return cfg->wiphy;
+diff --git a/drivers/net/wireless/broadcom/brcm80211/brcmfmac/core.h b/drivers/net/wireless/broadcom/brcm80211/brcmfmac/core.h
+index 120de35a2d4b..6581cc91b885 100644
+--- a/drivers/net/wireless/broadcom/brcm80211/brcmfmac/core.h
++++ b/drivers/net/wireless/broadcom/brcm80211/brcmfmac/core.h
+@@ -98,6 +98,7 @@ struct brcmf_rev_info {
+ };
+ 
+ struct brcmf_pno_info;
++struct brcmu_d11inf;
+ enum nl80211_band;
+ /**
+  * struct pno_struct_handler
+@@ -111,7 +112,8 @@ struct pno_struct_handler {
+ 	u32 (*get_result_status)(void *data);
+ 	int (*validate_pfn_results)(void *data, u32 event_datalen);
+ 	u32 (*get_bucket_map)(void *data, int idx, struct brcmf_pno_info *pi);
+-	int (*get_result_info)(void *data, int result_idx,
++	int (*get_result_info)(struct brcmu_d11inf *d11inf, void *data,
++			       int result_idx,
+ 			       u8 (*ssid)[IEEE80211_MAX_SSID_LEN], u8 *ssid_len,
+ 			       u8 *channel, enum nl80211_band *band);
+ };
+diff --git a/drivers/net/wireless/broadcom/brcm80211/brcmfmac/fweh.c b/drivers/net/wireless/broadcom/brcm80211/brcmfmac/fweh.c
+index eec4b10e1f67..71fa0999c37f 100644
+--- a/drivers/net/wireless/broadcom/brcm80211/brcmfmac/fweh.c
++++ b/drivers/net/wireless/broadcom/brcm80211/brcmfmac/fweh.c
+@@ -440,54 +440,64 @@ void brcmf_fweh_unregister(struct brcmf_pub *drvr,
+ int brcmf_fweh_init_events(struct brcmf_if *ifp)
+ {
+ 	struct brcmf_pub *drvr = ifp->drvr;
++	struct brcmf_fweh_info *fweh = drvr->fweh;
+ 	struct brcmf_eventmsgs_ext_le *eventmsgs;
+-	size_t size = sizeof(*eventmsgs) + drvr->fweh->event_mask_len;
++	size_t size = sizeof(*eventmsgs) + fweh->event_mask_len;
+ 	int err;
+ 
++	/*
++	 * BRCMF_E_IF can safely be used to set the appropriate bit
++	 * in the event_mask as the firmware event code is guaranteed
++	 * to match the value of BRCMF_E_IF because it is old cruft
++	 * that all vendors have.
++	 */
++	if (!brcmf_feat_is_enabled(ifp, BRCMF_FEAT_EVENT_MSGS_EXT)) {
++		err = brcmf_fil_iovar_data_get(ifp, "event_msgs",
++					       fweh->event_mask,
++					       fweh->event_mask_len);
++		if (err) {
++			bphy_err(drvr, "Get event_msgs error (%d)\n", err);
++			return err;
++		}
++		brcmf_dbg(EVENT, "enable event IF\n");
++		setbit(fweh->event_mask, BRCMF_E_IF);
++		err = brcmf_fil_iovar_data_set(ifp, "event_msgs",
++					       fweh->event_mask,
++					       fweh->event_mask_len);
++		if (err)
++			bphy_err(drvr, "Set event_msgs error (%d)\n", err);
++		return err;
++	}
++
+ 	eventmsgs = kzalloc(size, GFP_KERNEL);
+-	if(!eventmsgs)
++	if (!eventmsgs)
+ 		return -ENOMEM;
+ 
+ 	eventmsgs->version = EVENTMSGS_VER;
+ 	eventmsgs->command = EVENTMSGS_NONE;
+-	eventmsgs->len = drvr->fweh->event_mask_len;
+-	eventmsgs->maxgetsize = drvr->fweh->event_mask_len;
+-
+-	if (brcmf_feat_is_enabled(ifp, BRCMF_FEAT_EVENT_MSGS_EXT))
+-		err = brcmf_fil_iovar_data_get(ifp, "event_msgs_ext",
+-					       eventmsgs, size);
+-	else
+-		err = brcmf_fil_iovar_data_get(ifp, "event_msgs",
+-					       drvr->fweh->event_mask,
+-					       drvr->fweh->event_mask_len);
++	eventmsgs->len = fweh->event_mask_len;
++	eventmsgs->maxgetsize = fweh->event_mask_len;
+ 
++	err = brcmf_fil_iovar_data_get(ifp, "event_msgs_ext", eventmsgs, size);
+ 	if (err) {
+-		bphy_err(drvr, "Get event_msgs error (%d)\n", err);
++		bphy_err(drvr, "Get event_msgs_ext error (%d)\n", err);
+ 		kfree(eventmsgs);
+ 		return err;
+ 	}
+ 
+ 	brcmf_dbg(EVENT, "Event mask len: driver=%d fw=%d\n",
+-		  drvr->fweh->event_mask_len, eventmsgs->len);
++		  fweh->event_mask_len, eventmsgs->len);
+ 
+-	/* want to handle IF event as well */
+ 	brcmf_dbg(EVENT, "enable event IF\n");
+ 	setbit(eventmsgs->mask, BRCMF_E_IF);
+ 
+ 	eventmsgs->version = EVENTMSGS_VER;
+ 	eventmsgs->command = EVENTMSGS_SET_MASK;
+-	eventmsgs->len = drvr->fweh->event_mask_len;
+-
+-	if (brcmf_feat_is_enabled(ifp, BRCMF_FEAT_EVENT_MSGS_EXT))
+-		err = brcmf_fil_iovar_data_set(ifp, "event_msgs_ext",
+-					       eventmsgs, size);
+-	else
+-		err = brcmf_fil_iovar_data_set(ifp, "event_msgs",
+-					       drvr->fweh->event_mask,
+-					       drvr->fweh->event_mask_len);
++	eventmsgs->len = fweh->event_mask_len;
+ 
++	err = brcmf_fil_iovar_data_set(ifp, "event_msgs_ext", eventmsgs, size);
+ 	if (err)
+-		bphy_err(drvr, "Set event_msgs error (%d)\n", err);
++		bphy_err(drvr, "Set event_msgs_ext error (%d)\n", err);
+ 
+ 	kfree(eventmsgs);
+ 	return err;
+@@ -500,45 +510,53 @@ int brcmf_fweh_init_events(struct brcmf_if *ifp)
+  */
+ int brcmf_fweh_activate_events(struct brcmf_if *ifp)
+ {
+-	struct brcmf_pub *drvr = ifp->drvr;
++	struct brcmf_fweh_info *fweh = ifp->drvr->fweh;
+ 	struct brcmf_eventmsgs_ext_le *eventmsgs;
+-	size_t size = sizeof(*eventmsgs) + drvr->fweh->event_mask_len;
++	enum brcmf_fweh_event_code code;
++	size_t size;
+ 	int i, err;
+ 
+-	eventmsgs = kzalloc(size, GFP_KERNEL);
+-	if(!eventmsgs)
+-		return -ENOMEM;
+-
+-	for (i = 0; i < drvr->fweh->num_event_codes; i++) {
+-		if (drvr->fweh->evt_handler[i]) {
++	memset(fweh->event_mask, 0, fweh->event_mask_len);
++	for (i = 0; i < fweh->num_event_codes; i++) {
++		if (fweh->evt_handler[i]) {
++			brcmf_fweh_map_fwevt_code(fweh, i, &code);
+ 			brcmf_dbg(EVENT, "enable event %s\n",
+-				  brcmf_fweh_event_name(i));
+-			setbit(eventmsgs->mask, i);
++				  brcmf_fweh_event_name(code));
++			setbit(fweh->event_mask, i);
+ 		}
+ 	}
+ 
+ 	/* want to handle IF event as well */
+ 	brcmf_dbg(EVENT, "enable event IF\n");
+-	setbit(eventmsgs->mask, BRCMF_E_IF);
+-
+-	eventmsgs->version = EVENTMSGS_VER;
+-	eventmsgs->command = EVENTMSGS_SET_MASK;
+-	eventmsgs->len = drvr->fweh->event_mask_len;
++	setbit(fweh->event_mask, BRCMF_E_IF);
+ 
+ 	/* allow per-vendor method to activate firmware events */
+ 	if (!brcmf_fwvid_activate_events(ifp))
+ 		return 0;
+ 
+-	if (brcmf_feat_is_enabled(ifp, BRCMF_FEAT_EVENT_MSGS_EXT))
+-		err = brcmf_fil_iovar_data_set(ifp, "event_msgs_ext",
+-					       eventmsgs, size);
+-	else
++	if (!brcmf_feat_is_enabled(ifp, BRCMF_FEAT_EVENT_MSGS_EXT)) {
+ 		err = brcmf_fil_iovar_data_set(ifp, "event_msgs",
+-					       drvr->fweh->event_mask,
+-					       drvr->fweh->event_mask_len);
++					       fweh->event_mask,
++					       fweh->event_mask_len);
++		if (err)
++			bphy_err(fweh->drvr, "Set event_msgs error (%d)\n",
++				 err);
++		return err;
++	}
++
++	size = sizeof(*eventmsgs) + fweh->event_mask_len;
++	eventmsgs = kzalloc(size, GFP_KERNEL);
++	if (!eventmsgs)
++		return -ENOMEM;
++
++	eventmsgs->version = EVENTMSGS_VER;
++	eventmsgs->command = EVENTMSGS_SET_MASK;
++	eventmsgs->len = fweh->event_mask_len;
++	memcpy(eventmsgs->mask, fweh->event_mask, fweh->event_mask_len);
+ 
++	err = brcmf_fil_iovar_data_set(ifp, "event_msgs_ext", eventmsgs, size);
+ 	if (err)
+-		bphy_err(drvr, "Set event_msgs error (%d)\n", err);
++		bphy_err(fweh->drvr, "Set event_msgs_ext error (%d)\n", err);
+ 
+ 	kfree(eventmsgs);
+ 	return err;
+diff --git a/drivers/net/wireless/broadcom/brcm80211/brcmfmac/fwil_types.h b/drivers/net/wireless/broadcom/brcm80211/brcmfmac/fwil_types.h
+index 982e68421f5c..0ac6d77133ee 100644
+--- a/drivers/net/wireless/broadcom/brcm80211/brcmfmac/fwil_types.h
++++ b/drivers/net/wireless/broadcom/brcm80211/brcmfmac/fwil_types.h
+@@ -1365,7 +1365,7 @@ struct brcmf_pno_net_info_le {
+  */
+ struct brcmf_pno_net_info_v3_le {
+ 	u8 bssid[6];
+-	u16 chanspec;
++	__le16 chanspec;
+ 	u8 SSID_len;
+ 	u8 padding;
+ 	u16 flags;
+diff --git a/drivers/net/wireless/broadcom/brcm80211/brcmfmac/interface_create.c b/drivers/net/wireless/broadcom/brcm80211/brcmfmac/interface_create.c
+index 1f40ff8d632c..10b532549e58 100644
+--- a/drivers/net/wireless/broadcom/brcm80211/brcmfmac/interface_create.c
++++ b/drivers/net/wireless/broadcom/brcm80211/brcmfmac/interface_create.c
+@@ -218,13 +218,13 @@ static int brcmf_cfg80211_request_if(struct brcmf_if *ifp,
+ 	}
+ 	/* Either version one or version two */
+ 	err = brcmf_cfg80211_request_if_internal(
+-		ifp, if_type, BRCMF_INTERFACE_CREATE_VER_2, macaddr);
++		ifp, BRCMF_INTERFACE_CREATE_VER_2, if_type, macaddr);
+ 	if (!err) {
+ 		brcmf_info("interface created (version 2)\n");
+ 		return 0;
+ 	}
+ 	err = brcmf_cfg80211_request_if_internal(
+-		ifp, if_type, BRCMF_INTERFACE_CREATE_VER_1, macaddr);
++		ifp, BRCMF_INTERFACE_CREATE_VER_1, if_type, macaddr);
+ 	if (!err) {
+ 		brcmf_info("interface created (version 1)\n");
+ 		return 0;
+diff --git a/drivers/net/wireless/broadcom/brcm80211/brcmfmac/join_param.c b/drivers/net/wireless/broadcom/brcm80211/brcmfmac/join_param.c
+index 4f026571c7e7..49edac52200e 100644
+--- a/drivers/net/wireless/broadcom/brcm80211/brcmfmac/join_param.c
++++ b/drivers/net/wireless/broadcom/brcm80211/brcmfmac/join_param.c
+@@ -246,7 +246,7 @@ static void *brcmf_get_join_from_ext_join_v1(void *ext_join, u32 *struct_size)
+ 	struct brcmf_join_params_v1 *join_params;
+ 	u32 join_params_size =
+ 		struct_size(join_params, params_le.chanspec_list, chanspec_num);
+-	u32 assoc_size = struct_size_t(struct brcmf_assoc_params_le,
++	u32 assoc_size = struct_size_t(struct brcmf_assoc_params_v1_le,
+ 				       chanspec_list, chanspec_num);
+ 
+ 	*struct_size = join_params_size;
+diff --git a/drivers/net/wireless/broadcom/brcm80211/brcmfmac/p2p.c b/drivers/net/wireless/broadcom/brcm80211/brcmfmac/p2p.c
+index db109b96c169..7ba66f52afae 100644
+--- a/drivers/net/wireless/broadcom/brcm80211/brcmfmac/p2p.c
++++ b/drivers/net/wireless/broadcom/brcm80211/brcmfmac/p2p.c
+@@ -975,6 +975,8 @@ brcmf_p2p_discover_listen(struct brcmf_p2p_info *p2p, u16 channel, u32 duration)
+ 	}
+ 
+ 	ch.chnum = channel;
++	ch.band = channel <= CH_MAX_2G_CHANNEL ? BRCMU_CHAN_BAND_2G :
++						 BRCMU_CHAN_BAND_5G;
+ 	ch.bw = BRCMU_CHAN_BW_20;
+ 	p2p->cfg->d11inf.encchspec(&ch);
+ 	err = brcmf_p2p_set_discover_state(vif->ifp, WL_P2P_DISC_ST_LISTEN,
+@@ -1110,11 +1112,14 @@ static s32 brcmf_p2p_act_frm_search(struct brcmf_p2p_info *p2p, u16 channel)
+ 	ch.bw = BRCMU_CHAN_BW_20;
+ 	if (channel) {
+ 		ch.chnum = channel;
++		ch.band = channel <= CH_MAX_2G_CHANNEL ? BRCMU_CHAN_BAND_2G :
++							 BRCMU_CHAN_BAND_5G;
+ 		p2p->cfg->d11inf.encchspec(&ch);
+ 		/* insert same channel to the chan_list */
+ 		for (i = 0; i < channel_cnt; i++)
+ 			default_chan_list[i] = ch.chspec;
+ 	} else {
++		ch.band = BRCMU_CHAN_BAND_2G;
+ 		ch.chnum = SOCIAL_CHAN_1;
+ 		p2p->cfg->d11inf.encchspec(&ch);
+ 		default_chan_list[0] = ch.chspec;
+@@ -2054,6 +2059,7 @@ static void brcmf_p2p_get_current_chanspec(struct brcmf_p2p_info *p2p,
+ 	}
+ 	/* Use default channel for P2P */
+ 	ch.chnum = BRCMF_P2P_TEMP_CHAN;
++	ch.band = BRCMU_CHAN_BAND_2G;
+ 	ch.bw = BRCMU_CHAN_BW_20;
+ 	p2p->cfg->d11inf.encchspec(&ch);
+ 	*chanspec = ch.chspec;
+diff --git a/drivers/net/wireless/broadcom/brcm80211/brcmfmac/pcie.c b/drivers/net/wireless/broadcom/brcm80211/brcmfmac/pcie.c
+index 012c1f44b83a..dbe3d6fda512 100644
+--- a/drivers/net/wireless/broadcom/brcm80211/brcmfmac/pcie.c
++++ b/drivers/net/wireless/broadcom/brcm80211/brcmfmac/pcie.c
+@@ -1046,9 +1046,15 @@ static void brcmf_pcie_bus_console_read(struct brcmf_pciedev_info *devinfo,
+ }
+ 
+ 
+-static void brcmf_pcie_intr_disable(struct brcmf_pciedev_info *devinfo)
++static void brcmf_pcie_intr_mask(struct brcmf_pciedev_info *devinfo)
+ {
+ 	brcmf_pcie_write_pcie32(devinfo, devinfo->reginfo->mailboxmask, 0);
++}
++
++
++static void brcmf_pcie_intr_disable(struct brcmf_pciedev_info *devinfo)
++{
++	brcmf_pcie_intr_mask(devinfo);
+ 
+ 	devinfo->irq_ready = false;
+ }
+@@ -1078,7 +1084,10 @@ static irqreturn_t brcmf_pcie_quick_check_isr(int irq, void *arg)
+ 	struct brcmf_pciedev_info *devinfo = (struct brcmf_pciedev_info *)arg;
+ 
+ 	if (brcmf_pcie_read_pcie32(devinfo, devinfo->reginfo->mailboxint)) {
+-		brcmf_pcie_intr_disable(devinfo);
++		/* Only mask here: irq_ready gates the thread, which must
++		 * still service the doorbell that raised this interrupt.
++		 */
++		brcmf_pcie_intr_mask(devinfo);
+ 		brcmf_dbg(PCIE, "Enter\n");
+ 		return IRQ_WAKE_THREAD;
+ 	}
+@@ -2546,8 +2555,12 @@ static void brcmf_pcie_setup(struct device *dev, int ret,
+ 	 */
+ 	brcmf_pcie_select_core(devinfo, BCMA_CORE_PCIE2);
+ 	ret = brcmf_pcie_request_irq(devinfo);
+-	if (ret)
++	if (ret) {
++		release_firmware(fw);
++		release_firmware(fwsig);
++		brcmf_fw_nvram_free(nvram);
+ 		goto fail;
++	}
+ 
+ 	ret = brcmf_pcie_download_fw_nvram(devinfo, fw, fwsig, nvram, nvram_len);
+ 	if (ret)
+diff --git a/drivers/net/wireless/broadcom/brcm80211/brcmfmac/pno.c b/drivers/net/wireless/broadcom/brcm80211/brcmfmac/pno.c
+index 42323da87548..ea4316194bb8 100644
+--- a/drivers/net/wireless/broadcom/brcm80211/brcmfmac/pno.c
++++ b/drivers/net/wireless/broadcom/brcm80211/brcmfmac/pno.c
+@@ -780,7 +780,8 @@ static int brcmf_pno_validate_pfn_results(void *data, u32 eventlen)
+ 	return 0;
+ }
+ 
+-static int brcmf_pno_get_result_info(void *data, int result_idx,
++static int brcmf_pno_get_result_info(struct brcmu_d11inf *d11inf,
++				     void *data, int result_idx,
+ 				     u8 (*ssid)[IEEE80211_MAX_SSID_LEN],
+ 				     u8 *ssid_len, u8 *channel,
+ 				     enum nl80211_band *band)
+@@ -802,7 +803,8 @@ static int brcmf_pno_get_result_info(void *data, int result_idx,
+ 	return 0;
+ }
+ 
+-static int brcmf_pno_get_result_info_v3(void *data, int result_idx,
++static int brcmf_pno_get_result_info_v3(struct brcmu_d11inf *d11inf,
++					void *data, int result_idx,
+ 					u8 (*ssid)[IEEE80211_MAX_SSID_LEN],
+ 					u8 *ssid_len, u8 *channel,
+ 					enum nl80211_band *band)
+@@ -813,9 +815,21 @@ static int brcmf_pno_get_result_info_v3(void *data, int result_idx,
+ 		brcmf_get_netinfo_v3_array(scanresult);
+ 	struct brcmf_pno_net_info_v3_le *netinfo_v3 =
+ 		&netinfo_v3_start[result_idx];
++	struct brcmu_chan ch = { .chspec = le16_to_cpu(netinfo_v3->chanspec) };
+ 
+-	*channel = CHSPEC_CHANNEL(netinfo_v3->chanspec);
+-	*band = fwil_band_to_nl80211(CHSPEC_BAND(netinfo_v3->chanspec));
++	d11inf->decchspec(&ch);
++	*channel = ch.control_ch_num;
++	switch (ch.band) {
++	case BRCMU_CHAN_BAND_6G:
++		*band = NL80211_BAND_6GHZ;
++		break;
++	case BRCMU_CHAN_BAND_5G:
++		*band = NL80211_BAND_5GHZ;
++		break;
++	default:
++		*band = NL80211_BAND_2GHZ;
++		break;
++	}
+ 	*ssid_len = netinfo_v3->SSID_len;
+ 	if (netinfo_v3->SSID_len > IEEE80211_MAX_SSID_LEN)
+ 		*ssid_len = IEEE80211_MAX_SSID_LEN;
+diff --git a/drivers/net/wireless/broadcom/brcm80211/brcmfmac/scan_param.c b/drivers/net/wireless/broadcom/brcm80211/brcmfmac/scan_param.c
+index 4f634509d252..38aadd63eeb1 100644
+--- a/drivers/net/wireless/broadcom/brcm80211/brcmfmac/scan_param.c
++++ b/drivers/net/wireless/broadcom/brcm80211/brcmfmac/scan_param.c
+@@ -125,6 +125,7 @@ brcmf_scan_param_get_prepped_struct_v1(struct brcmf_cfg80211_info *cfg,
+ 
+ 	/* Scan abort */
+ 	if (!request) {
++		length += sizeof(u16);
+ 		params_le->channel_num = cpu_to_le32(1);
+ 		params_le->channel_list[0] = cpu_to_le16(-1);
+ 		goto done;
+diff --git a/drivers/net/wireless/broadcom/brcm80211/include/brcmu_wifi.h b/drivers/net/wireless/broadcom/brcm80211/include/brcmu_wifi.h
+index a806548ff633..697e87c90cfa 100644
+--- a/drivers/net/wireless/broadcom/brcm80211/include/brcmu_wifi.h
++++ b/drivers/net/wireless/broadcom/brcm80211/include/brcmu_wifi.h
+@@ -49,22 +49,17 @@
+ #define WL_CHANSPEC_CTL_SB_UPPER	0x0200
+ #define WL_CHANSPEC_CTL_SB_NONE		0x0300
+ 
+-#define WL_CHANSPEC_BW_MASK		0x3800
+-#define WL_CHANSPEC_BW_SHIFT	11
++#define WL_CHANSPEC_BW_MASK		0x0C00
++#define WL_CHANSPEC_BW_SHIFT		    10
+ #define WL_CHANSPEC_BW_10		0x0400
+ #define WL_CHANSPEC_BW_20		0x0800
+ #define WL_CHANSPEC_BW_40		0x0C00
+ #define WL_CHANSPEC_BW_80		0x2000
+-#define WL_CHANSPEC_BW_160	0x2800
+-#define WL_CHANSPEC_BW_8080 0x3000
+-#define WL_CHANSPEC_BW_320  0x0000
+-
+-#define WL_CHANSPEC_BAND_MASK		0xc000
+-#define WL_CHANSPEC_BAND_SHIFT		14
+-#define WL_CHANSPEC_BAND_2G		0x0000
+-#define WL_CHANSPEC_BAND_4G		0x8000
+-#define WL_CHANSPEC_BAND_5G		0xc000
+-#define WL_CHANSPEC_BAND_6G		0x4000
++
++#define WL_CHANSPEC_BAND_MASK		0xf000
++#define WL_CHANSPEC_BAND_SHIFT		12
++#define WL_CHANSPEC_BAND_5G		0x1000
++#define WL_CHANSPEC_BAND_2G		0x2000
+ #define INVCHANSPEC			255
+ 
+ #define WL_CHAN_VALID_HW		(1 << 0) /* valid with current HW */
+@@ -121,12 +116,6 @@
+ #define CHSPEC_IS80(chspec) \
+ 	(((chspec) & WL_CHANSPEC_BW_MASK) == WL_CHANSPEC_BW_80)
+ 
+-#define CHSPEC_IS160(chspec) \
+-	(((chspec) & WL_CHANSPEC_BW_MASK) == WL_CHANSPEC_BW_160)
+-
+-#define CHSPEC_IS6G(chspec) \
+-	(((chspec) & WL_CHANSPEC_BAND_MASK) == WL_CHANSPEC_BAND_6G)
+-
+ #define CHSPEC_IS5G(chspec) \
+ 	(((chspec) & WL_CHANSPEC_BAND_MASK) == WL_CHANSPEC_BAND_5G)
+ 
+diff --git a/drivers/nvme/host/apple.c b/drivers/nvme/host/apple.c
+index fd1a5460b192..2a76249db8c8 100644
+--- a/drivers/nvme/host/apple.c
++++ b/drivers/nvme/host/apple.c
+@@ -795,6 +795,9 @@ static bool apple_nvme_delayed_flush(struct apple_nvme *anv, struct nvme_ns *ns,
+ {
+ 	if (!anv->flush_interval || req_op(req) != REQ_OP_FLUSH)
+ 		return false;
++	/* only defer while the controller is live, so teardown flushes reach it */
++	if (nvme_ctrl_state(&anv->ctrl) != NVME_CTRL_LIVE)
++		return false;
+ 	if (delayed_work_pending(&anv->flush_dwork))
+ 		return true;
+ 	if (time_before(jiffies, anv->last_flush + anv->flush_interval)) {
+@@ -1702,6 +1705,7 @@ static void apple_nvme_remove(struct platform_device *pdev)
+ 	struct apple_nvme *anv = platform_get_drvdata(pdev);
+ 
+ 	nvme_change_ctrl_state(&anv->ctrl, NVME_CTRL_DELETING);
++	flush_delayed_work(&anv->flush_dwork);
+ 	flush_work(&anv->ctrl.reset_work);
+ 	nvme_stop_ctrl(&anv->ctrl);
+ 	nvme_remove_namespaces(&anv->ctrl);
+@@ -1751,6 +1755,7 @@ static int apple_nvme_suspend(struct device *dev)
+ 	struct apple_nvme *anv = dev_get_drvdata(dev);
+ 	int ret = 0;
+ 
++	flush_delayed_work(&anv->flush_dwork);
+ 	apple_nvme_disable(anv, true);
+ 
+ 	if (apple_rtkit_is_running(anv->rtk)) {
+diff --git a/drivers/pci/controller/pcie-apple.c b/drivers/pci/controller/pcie-apple.c
+index b972eb05bb85..6ce624fcc355 100644
+--- a/drivers/pci/controller/pcie-apple.c
++++ b/drivers/pci/controller/pcie-apple.c
+@@ -33,8 +33,8 @@
+ 
+ #include "pci-host-common.h"
+ 
+-static int link_up_timeout = 500;
+-module_param(link_up_timeout, int, 0644);
++static unsigned int link_up_timeout = 500;
++module_param(link_up_timeout, uint, 0644);
+ MODULE_PARM_DESC(link_up_timeout, "PCIe link training timeout in milliseconds");
+ 
+ /* T8103 (original M1) and related SoCs */
+@@ -608,8 +608,10 @@ static int apple_pcie_setup_link(struct apple_pcie *pcie,
+ 	for (u32 idx = 0; idx < num_aux_resets; idx++)
+ 		gpiod_set_value_cansleep(aux_reset[idx], 1);
+ 
+-	/* Power on the device if required */
+-	gpiod_set_value_cansleep(pwren, 1);
++	/* Power on the device if required; the line was requested as-is */
++	ret = gpiod_direction_output(pwren, 1);
++	if (ret)
++		return ret;
+ 
+ 	ret = apple_pcie_setup_refclk(pcie, port);
+ 	if (ret < 0)
+@@ -733,19 +735,37 @@ static int apple_pcie_setup_port(struct apple_pcie *pcie,
+ 		/* start link training */
+ 		writel_relaxed(PORT_LTSSMCTL_START, port->base + PORT_LTSSMCTL);
+ 
+-		timeout = link_up_timeout * HZ / 1000;
++		timeout = msecs_to_jiffies(link_up_timeout);
+ 		left = wait_for_completion_timeout(&pcie->event, timeout);
+ 		if (!left)
+ 			dev_warn(pcie->dev, "%pOF link didn't come up\n", np);
+ 		else
+-			dev_info(pcie->dev, "%pOF link up after %ldms\n", np,
+-				 (timeout - left) * 1000 / HZ);
++			dev_info(pcie->dev, "%pOF link up after %ums\n", np,
++				 jiffies_to_msecs(timeout - left));
+ 
+ 	}
+ 
+ 	return 0;
+ }
+ 
++static bool apple_pcie_init_dev_msi_info(struct device *dev,
++					 struct irq_domain *domain,
++					 struct irq_domain *real_parent,
++					 struct msi_domain_info *info)
++{
++	if (!msi_lib_init_dev_msi_info(dev, domain, real_parent, info))
++		return false;
++
++	/*
++	 * MSIs end up as AIC interrupts, which reach the CPUs in s2idle with
++	 * nothing to program, so let them be wakeup sources. Without this,
++	 * enable_irq_wake() fails and the PME service gives up on the root
++	 * port interrupt, so no PCIe device can wake the system.
++	 */
++	info->chip->flags |= IRQCHIP_SKIP_SET_WAKE;
++	return true;
++}
++
+ static const struct msi_parent_ops apple_msi_parent_ops = {
+ 	.supported_flags	= (MSI_GENERIC_FLAGS_MASK	|
+ 				   MSI_FLAG_PCI_MSIX		|
+@@ -755,7 +775,7 @@ static const struct msi_parent_ops apple_msi_parent_ops = {
+ 				   MSI_FLAG_PCI_MSI_MASK_PARENT),
+ 	.chip_flags		= MSI_CHIP_FLAG_SET_EOI,
+ 	.bus_select_token	= DOMAIN_BUS_PCI_MSI,
+-	.init_dev_msi_info	= msi_lib_init_dev_msi_info,
++	.init_dev_msi_info	= apple_pcie_init_dev_msi_info,
+ };
+ 
+ static int apple_msi_init(struct apple_pcie *pcie)
+diff --git a/drivers/pmdomain/apple/pmgr-pwrstate.c b/drivers/pmdomain/apple/pmgr-pwrstate.c
+index a92db8cf88bb..c32902fdad75 100644
+--- a/drivers/pmdomain/apple/pmgr-pwrstate.c
++++ b/drivers/pmdomain/apple/pmgr-pwrstate.c
+@@ -86,7 +86,7 @@ static int apple_pmgr_ps_set(struct generic_pm_domain *genpd, u32 pstate, bool a
+ 
+ 		if (ret < 0)
+ 			dev_err(ps->dev, "PS %s: Failed to set reset/disable bits (now: 0x%x)\n",
+-				genpd->name, reg);
++				genpd->name, cur);
+ 	}
+ 
+ 	reg &= ~(APPLE_PMGR_DEV_DISABLE | APPLE_PMGR_PS_RESET |
+@@ -115,7 +115,7 @@ static int apple_pmgr_ps_set(struct generic_pm_domain *genpd, u32 pstate, bool a
+ 
+ 	if (ret < 0)
+ 		dev_err(ps->dev, "PS %s: Failed to reach power state 0x%x (now: 0x%x)\n",
+-			genpd->name, pstate, reg);
++			genpd->name, pstate, cur);
+ 
+ 	if (auto_enable) {
+ 		/* Not all devices implement this; this is a no-op where not implemented. */
+diff --git a/drivers/pmdomain/apple/pmp-report.c b/drivers/pmdomain/apple/pmp-report.c
+index 39a10a0b6151..707eba6bb457 100644
+--- a/drivers/pmdomain/apple/pmp-report.c
++++ b/drivers/pmdomain/apple/pmp-report.c
+@@ -5,6 +5,7 @@
+  * Copyright The Asahi Linux Contributors
+  */
+ 
++#include <linux/bits.h>
+ #include <linux/iopoll.h>
+ #include <linux/module.h>
+ #include <linux/of.h>
+@@ -119,7 +120,7 @@ static int apple_pmp_report_set_state(struct generic_pm_domain *genpd, bool enab
+ {
+ 	struct apple_pmp_report_entry *ent = genpd_to_apple_pmp_report_entry(genpd);
+ 	struct apple_pmp_report *rep = dev_get_drvdata(ent->dev->parent);
+-	u64 bit_val = 1 << ent->id;
++	u64 bit_val = BIT_ULL(ent->id);
+ 	u64 val;
+ 	unsigned long flags;
+ 
+@@ -169,6 +170,8 @@ static int apple_pmp_report_entry_probe(struct platform_device *pdev)
+ 	ret = of_property_read_u32(node, "reg", &ent->id);
+ 	if (ret)
+ 		return dev_err_probe(dev, ret, "missing reg property\n");
++	if (ent->id >= 64)
++		return dev_err_probe(dev, -EINVAL, "invalid reg %u\n", ent->id);
+ 
+ 	ret = of_property_read_string(node, "label", &name);
+ 	if (ret < 0)
+diff --git a/drivers/tty/hvc/Kconfig b/drivers/tty/hvc/Kconfig
+index 65c0f32b3c6a..957e5ec3a63d 100644
+--- a/drivers/tty/hvc/Kconfig
++++ b/drivers/tty/hvc/Kconfig
+@@ -87,16 +87,6 @@ config HVC_DCC
+ 	  driver. This console is used through a JTAG only on ARM. If you don't have
+ 	  a JTAG then you probably don't want this option.
+ 
+-config HVC_DOCKCHANNEL
+-	bool "Apple dockchannel UART console"
+-	depends on ARCH_APPLE || COMPILE_TEST
+-	depends on ARM64
+-	select HVC_DRIVER
+-	select SERIAL_CORE_CONSOLE
+-	help
+-	  Console on the dockchannel FIFO that Apple Silicon Macs expose to
+-	  another Mac over the debug USB channel of their DFU USB-C port.
+-
+ config HVC_DCC_SERIALIZE_SMP
+ 	bool "Use DCC only on CPU core 0"
+ 	depends on SMP && HVC_DCC
+@@ -116,6 +106,18 @@ config HVC_DCC_SERIALIZE_SMP
+ 	  CPU hotplug to work. For example, during early chipset bringups without
+ 	  debug serial console support. If unsure, say N.
+ 
++config HVC_DOCKCHANNEL
++	bool "Apple dockchannel UART console"
++	depends on ARCH_APPLE || COMPILE_TEST
++	depends on ARM64
++	select HVC_DRIVER
++	select SERIAL_CORE
++	select SERIAL_CORE_CONSOLE
++	select SERIAL_EARLYCON
++	help
++	  Console on the dockchannel FIFO that Apple Silicon Macs expose to
++	  another Mac over the debug USB channel of their DFU USB-C port.
++
+ config HVC_RISCV_SBI
+ 	bool "RISC-V SBI console support"
+ 	depends on RISCV_SBI && NONPORTABLE
+diff --git a/drivers/tty/hvc/hvc_dockchannel.c b/drivers/tty/hvc/hvc_dockchannel.c
+index 289928c6a96c..204f75f9e5ef 100644
+--- a/drivers/tty/hvc/hvc_dockchannel.c
++++ b/drivers/tty/hvc/hvc_dockchannel.c
+@@ -4,9 +4,11 @@
+ #include <linux/delay.h>
+ #include <linux/init.h>
+ #include <linux/io.h>
++#include <linux/minmax.h>
+ #include <linux/mod_devicetable.h>
+ #include <linux/platform_device.h>
+ #include <linux/serial_core.h>
++#include <linux/spinlock.h>
+ 
+ #include <asm/fixmap.h>
+ 
+@@ -22,12 +24,16 @@
+ 
+ static void __iomem *dc_base;
+ static bool dc_stalled;
++/* Serialises the console and tty writers so they cannot overfill the FIFO */
++static DEFINE_SPINLOCK(dc_tx_lock);
+ 
+ static size_t dc_tx(void __iomem *base, const u8 *buf, size_t count)
+ {
+ 	size_t sent = 0;
+ 	unsigned int waited = 0;
++	unsigned long flags;
+ 
++	spin_lock_irqsave(&dc_tx_lock, flags);
+ 	while (sent < count) {
+ 		u32 free = readl_relaxed(base + DATA_TX_FREE);
+ 
+@@ -45,6 +51,7 @@ static size_t dc_tx(void __iomem *base, const u8 *buf, size_t count)
+ 		for (; free && sent < count; free--)
+ 			writel_relaxed(buf[sent++], base + DATA_TX8);
+ 	}
++	spin_unlock_irqrestore(&dc_tx_lock, flags);
+ 
+ 	return sent;
+ }
+@@ -56,15 +63,14 @@ static ssize_t dc_put_chars(u32 vtermno, const u8 *buf, size_t count)
+ 
+ static ssize_t dc_get_chars(u32 vtermno, u8 *buf, size_t count)
+ {
++	size_t avail = readl_relaxed(dc_base + DATA_RX_COUNT);
+ 	size_t i;
+ 
+-	for (i = 0; i < count; i++) {
+-		if (!readl_relaxed(dc_base + DATA_RX_COUNT))
+-			break;
++	count = min(count, avail);
++	for (i = 0; i < count; i++)
+ 		buf[i] = readl_relaxed(dc_base + DATA_RX8) >> 8;
+-	}
+ 
+-	return i;
++	return count;
+ }
+ 
+ static const struct hv_ops dc_ops = {
+@@ -105,16 +111,16 @@ static struct platform_driver dc_driver = {
+ };
+ builtin_platform_driver(dc_driver);
+ 
++static void dc_early_putchar(struct uart_port *port, unsigned char ch)
++{
++	dc_tx(port->membase, &ch, 1);
++}
++
+ static void dc_early_write(struct console *con, const char *s, unsigned int n)
+ {
+ 	struct earlycon_device *dev = con->data;
+-	const u8 cr = '\r';
+ 
+-	for (; n; n--, s++) {
+-		if (*s == '\n')
+-			dc_tx(dev->port.membase, &cr, 1);
+-		dc_tx(dev->port.membase, (const u8 *)s, 1);
+-	}
++	uart_console_write(&dev->port, s, n, dc_early_putchar);
+ }
+ 
+ static int __init dc_early_setup(struct earlycon_device *device, const char *opt)
+diff --git a/drivers/tty/serial/samsung_tty.c b/drivers/tty/serial/samsung_tty.c
+index d33a5d848659..ca9fc52deb52 100644
+--- a/drivers/tty/serial/samsung_tty.c
++++ b/drivers/tty/serial/samsung_tty.c
+@@ -1305,19 +1305,27 @@ static int __maybe_unused s3c24xx_serial_runtime_suspend(struct device *dev)
+ 
+ 	clk_disable_unprepare(ourport->clk);
+ 	return 0;
+-};
++}
+ 
+ static int __maybe_unused s3c24xx_serial_runtime_resume(struct device *dev)
+ {
+ 	struct uart_port *port = dev_get_drvdata(dev);
+ 	struct s3c24xx_uart_port *ourport = to_ourport(port);
++	int ret;
+ 
+-	clk_prepare_enable(ourport->clk);
++	ret = clk_prepare_enable(ourport->clk);
++	if (ret)
++		return ret;
+ 
+-	if (!IS_ERR(ourport->baudclk))
+-		clk_prepare_enable(ourport->baudclk);
++	if (!IS_ERR(ourport->baudclk)) {
++		ret = clk_prepare_enable(ourport->baudclk);
++		if (ret) {
++			clk_disable_unprepare(ourport->clk);
++			return ret;
++		}
++	}
+ 	return 0;
+-};
++}
+ 
+ static void s3c24xx_serial_pm(struct uart_port *port, unsigned int level,
+ 			      unsigned int old)
+@@ -1328,7 +1336,6 @@ static void s3c24xx_serial_pm(struct uart_port *port, unsigned int level,
+ 
+ 	switch (level) {
+ 	case UART_PM_STATE_OFF:
+-		pm_runtime_mark_last_busy(port->dev);
+ 		pm_runtime_put_sync(port->dev);
+ 		break;
+ 
+@@ -2092,11 +2099,22 @@ static int __maybe_unused s3c24xx_serial_suspend(struct device *dev)
+ {
+ 	struct uart_port *port = s3c24xx_dev_to_port(dev);
+ 
++	if (!port)
++		return 0;
++
+ 	if (!console_suspend_enabled && uart_console(port))
+ 		device_set_wakeup_path(dev);
+ 
+-	if (port)
+-		uart_suspend_port(&s3c24xx_uart_drv, port);
++	uart_suspend_port(&s3c24xx_uart_drv, port);
++
++	/*
++	 * The PM core holds a runtime PM reference across system sleep, so
++	 * the pm_runtime_put_sync() in s3c24xx_serial_pm() cannot gate the
++	 * clocks. Do it here unless the port is kept powered (console with
++	 * no_console_suspend, or a wakeup source).
++	 */
++	if (to_ourport(port)->pm_level == UART_PM_STATE_OFF)
++		return pm_runtime_force_suspend(dev);
+ 
+ 	return 0;
+ }
+@@ -2107,6 +2125,13 @@ static int __maybe_unused s3c24xx_serial_resume(struct device *dev)
+ 	struct s3c24xx_uart_port *ourport = to_ourport(port);
+ 
+ 	if (port) {
++		if (ourport->pm_level == UART_PM_STATE_OFF) {
++			int ret = pm_runtime_force_resume(dev);
++
++			if (ret)
++				return ret;
++		}
++
+ 		clk_prepare_enable(ourport->clk);
+ 		if (!IS_ERR(ourport->baudclk))
+ 			clk_prepare_enable(ourport->baudclk);
+diff --git a/drivers/usb/dwc3/core.c b/drivers/usb/dwc3/core.c
+index fd5c2cd36c59..759bbf1b0d07 100644
+--- a/drivers/usb/dwc3/core.c
++++ b/drivers/usb/dwc3/core.c
+@@ -2474,14 +2474,12 @@ static int dwc3_probe(struct platform_device *pdev)
+ 	return dwc3_core_probe(&probe_data);
+ }
+ 
+-void dwc3_core_remove(struct dwc3 *dwc)
++static void __dwc3_core_remove(struct dwc3 *dwc, bool exit_core)
+ {
+-	pm_runtime_get_sync(dwc->dev);
+-
+-	dwc3_core_exit_mode(dwc);
+ 	dwc3_debugfs_exit(dwc);
+ 
+-	dwc3_core_exit(dwc);
++	if (exit_core)
++		dwc3_core_exit(dwc);
+ 	dwc3_ulpi_exit(dwc);
+ 
+ 	pm_runtime_allow(dwc->dev);
+@@ -2505,8 +2503,24 @@ void dwc3_core_remove(struct dwc3 *dwc)
+ 		power_supply_put(dwc->usb_psy);
+ 	}
+ }
++
++void dwc3_core_remove(struct dwc3 *dwc)
++{
++	pm_runtime_get_sync(dwc->dev);
++
++	dwc3_core_exit_mode(dwc);
++	__dwc3_core_remove(dwc, true);
++}
+ EXPORT_SYMBOL_GPL(dwc3_core_remove);
+ 
++void dwc3_core_release(struct dwc3 *dwc)
++{
++	pm_runtime_get_sync(dwc->dev);
++
++	__dwc3_core_remove(dwc, false);
++}
++EXPORT_SYMBOL_GPL(dwc3_core_release);
++
+ static void dwc3_remove(struct platform_device *pdev)
+ {
+ 	dwc3_core_remove(platform_get_drvdata(pdev));
+diff --git a/drivers/usb/dwc3/dwc3-apple.c b/drivers/usb/dwc3/dwc3-apple.c
+index 44bca0e9cc0f..f2b0f791ed45 100644
+--- a/drivers/usb/dwc3/dwc3-apple.c
++++ b/drivers/usb/dwc3/dwc3-apple.c
+@@ -11,6 +11,7 @@
+ #include <linux/of.h>
+ #include <linux/module.h>
+ #include <linux/mutex.h>
++#include <linux/phy/phy.h>
+ #include <linux/platform_device.h>
+ #include <linux/reset.h>
+ 
+@@ -82,6 +83,8 @@ enum dwc3_apple_state {
+  * @mmio_resource: Resource to be passed to dwc3_core_probe
+  * @apple_regs: Apple-specific DWC3 registers
+  * @reset: Reset control
++ * @usb2_phy: USB2 PHY, which must be set to the target mode before dwc3_core_probe() has
++ *	      obtained its own reference
+  * @role_sw: USB role switch
+  * @lock: Mutex for synchronizing access
+  * @state: Current state of the controller, see documentation for the enum for details
+@@ -94,6 +97,7 @@ struct dwc3_apple {
+ 	void __iomem *apple_regs;
+ 
+ 	struct reset_control *reset;
++	struct phy *usb2_phy;
+ 	struct usb_role_switch *role_sw;
+ 
+ 	struct mutex lock;
+@@ -168,9 +172,24 @@ static void dwc3_apple_set_ptrcap(struct dwc3_apple *appledwc, u32 mode)
+ 	dwc3_set_prtcap(&appledwc->dwc, mode, false);
+ }
+ 
++/*
++ * Switching dwc3's PIPE interface to the USB3 PHY can fail, for example if the PHY was not
++ * configured for a USB3 capable mode. dwc3 then keeps working over USB2 only, so carry on but
++ * don't hide it.
++ */
++static void dwc3_apple_set_usb3_phy_mode(struct dwc3_apple *appledwc, enum phy_mode mode)
++{
++	int ret;
++
++	ret = phy_set_mode(appledwc->dwc.usb3_generic_phy[0], mode);
++	if (ret)
++		dev_warn(appledwc->dev, "Failed to set up USB3 PHY, USB2 only: err=%d\n", ret);
++}
++
+ static int dwc3_apple_core_probe(struct dwc3_apple *appledwc)
+ {
+ 	struct dwc3_probe_data probe_data = {};
++	void *group;
+ 	int ret;
+ 
+ 	lockdep_assert_held(&appledwc->lock);
+@@ -183,9 +202,21 @@ static int dwc3_apple_core_probe(struct dwc3_apple *appledwc)
+ 	probe_data.skip_core_init_mode = true;
+ 	probe_data.properties = DWC3_DEFAULT_PROPERTIES;
+ 
++	/*
++	 * dwc3_core_probe() allocates device managed resources (the MMIO region, the PHYs) that
++	 * would otherwise only be released on unbind. Release them if it fails so that the next
++	 * cable connection can try again.
++	 */
++	group = devres_open_group(appledwc->dev, NULL, GFP_KERNEL);
++	if (!group)
++		return -ENOMEM;
++
+ 	ret = dwc3_core_probe(&probe_data);
+-	if (ret)
++	if (ret) {
++		devres_release_group(appledwc->dev, group);
+ 		return ret;
++	}
++	devres_close_group(appledwc->dev, group);
+ 
+ 	appledwc->state = DWC3_APPLE_NO_CABLE;
+ 	return 0;
+@@ -233,15 +264,19 @@ static int dwc3_apple_init(struct dwc3_apple *appledwc, enum dwc3_apple_state st
+ 	 */
+ 	switch (state) {
+ 	case DWC3_APPLE_HOST:
+-		phy_set_mode(appledwc->dwc.usb2_generic_phy[0], PHY_MODE_USB_HOST);
++		ret = phy_set_mode(appledwc->usb2_phy, PHY_MODE_USB_HOST);
+ 		break;
+ 	case DWC3_APPLE_DEVICE:
+-		phy_set_mode(appledwc->dwc.usb2_generic_phy[0], PHY_MODE_USB_DEVICE);
++		ret = phy_set_mode(appledwc->usb2_phy, PHY_MODE_USB_DEVICE);
+ 		break;
+ 	default:
+ 		/* Unreachable unless there's a bug in this driver */
+ 		return -EINVAL;
+ 	}
++	if (ret) {
++		dev_err(appledwc->dev, "Failed to set USB2 PHY mode, err=%d\n", ret);
++		return ret;
++	}
+ 
+ 	ret = reset_control_deassert(appledwc->reset);
+ 	if (ret) {
+@@ -269,7 +304,7 @@ static int dwc3_apple_init(struct dwc3_apple *appledwc, enum dwc3_apple_state st
+ 		 * has already been configured to the correct mode earlier.
+ 		 */
+ 		dwc3_enable_susphy(&appledwc->dwc, true);
+-		phy_set_mode(appledwc->dwc.usb3_generic_phy[0], PHY_MODE_USB_HOST);
++		dwc3_apple_set_usb3_phy_mode(appledwc, PHY_MODE_USB_HOST);
+ 		ret = dwc3_host_init(&appledwc->dwc);
+ 		if (ret) {
+ 			dev_err(appledwc->dev, "Failed to initialize host, ret=%d\n", ret);
+@@ -286,7 +321,7 @@ static int dwc3_apple_init(struct dwc3_apple *appledwc, enum dwc3_apple_state st
+ 		 * has already been configured to the correct mode earlier.
+ 		 */
+ 		dwc3_enable_susphy(&appledwc->dwc, true);
+-		phy_set_mode(appledwc->dwc.usb3_generic_phy[0], PHY_MODE_USB_DEVICE);
++		dwc3_apple_set_usb3_phy_mode(appledwc, PHY_MODE_USB_DEVICE);
+ 		ret = dwc3_gadget_init(&appledwc->dwc);
+ 		if (ret) {
+ 			dev_err(appledwc->dev, "Failed to initialize gadget, ret=%d\n", ret);
+@@ -443,7 +478,9 @@ static int dwc3_apple_probe(struct platform_device *pdev)
+ 		return -ENOMEM;
+ 
+ 	appledwc->dev = &pdev->dev;
+-	mutex_init(&appledwc->lock);
++	ret = devm_mutex_init(dev, &appledwc->lock);
++	if (ret)
++		return ret;
+ 
+ 	appledwc->reset = devm_reset_control_get_exclusive(dev, NULL);
+ 	if (IS_ERR(appledwc->reset))
+@@ -467,6 +504,14 @@ static int dwc3_apple_probe(struct platform_device *pdev)
+ 		return dev_err_probe(dev, PTR_ERR(appledwc->apple_regs),
+ 				     "Failed to map Apple-specific MMIO\n");
+ 
++	/*
++	 * dwc3 only gets its PHY references in dwc3_core_probe(), which runs on the first cable
++	 * connection, after the USB2 PHY mode must already be set. Keep our own reference.
++	 */
++	appledwc->usb2_phy = devm_phy_optional_get(dev, "usb2-phy");
++	if (IS_ERR(appledwc->usb2_phy))
++		return dev_err_probe(dev, PTR_ERR(appledwc->usb2_phy), "Failed to get USB2 PHY\n");
++
+ 	/*
+ 	 * On this platform, DWC3 can only be brought up after parts of the PHY have been
+ 	 * initialized with knowledge of the target mode and cable orientation from typec_set_mux.
+@@ -488,18 +533,24 @@ static void dwc3_apple_remove(struct platform_device *pdev)
+ 	struct dwc3 *dwc = platform_get_drvdata(pdev);
+ 	struct dwc3_apple *appledwc = to_dwc3_apple(dwc);
+ 
+-	guard(mutex)(&appledwc->lock);
+-
++	/*
++	 * Unregister first and without our lock: this waits for a running role switch, which takes
++	 * our lock, and afterwards none can start.
++	 */
+ 	usb_role_switch_unregister(appledwc->role_sw);
+ 
++	guard(mutex)(&appledwc->lock);
++
+ 	/*
+-	 * If we're still in DWC3_APPLE_PROBE_PENDING we never got any cable connected event and
+-	 * dwc3_core_probe was never called and there's hence no need to call dwc3_core_remove.
+-	 * dwc3_apple_exit can be called unconditionally because it checks the state itself.
++	 * dwc3_apple_exit() checks the state itself: it exits host or gadget mode and the core if
++	 * a cable is connected and does nothing otherwise. Either way the core is not initialized
++	 * afterwards, so only release what dwc3_core_probe() set up. dwc3_core_remove() would exit
++	 * the mode (dwc->dr_mode still names the last one) and the core a second time.
++	 * If we're still in DWC3_APPLE_PROBE_PENDING, dwc3_core_probe() was never called.
+ 	 */
+ 	dwc3_apple_exit(appledwc);
+ 	if (appledwc->state != DWC3_APPLE_PROBE_PENDING)
+-		dwc3_core_remove(&appledwc->dwc);
++		dwc3_core_release(&appledwc->dwc);
+ }
+ 
+ static const struct of_device_id dwc3_apple_of_match[] = {
+@@ -508,6 +559,13 @@ static const struct of_device_id dwc3_apple_of_match[] = {
+ };
+ MODULE_DEVICE_TABLE(of, dwc3_apple_of_match);
+ 
++/*
++ * No dev_pm_ops yet: system sleep is not supported. dwc3's own suspend/resume paths assume
++ * that the core stays initialized and that the PHYs can be re-powered by dwc3, neither of which
++ * holds here (see the comment above enum dwc3_apple_state). Supporting it means tearing the
++ * port down to DWC3_APPLE_NO_CABLE on suspend and letting the port controller re-announce the
++ * cable on resume.
++ */
+ static struct platform_driver dwc3_apple_driver = {
+ 	.probe		= dwc3_apple_probe,
+ 	.remove		= dwc3_apple_remove,
+diff --git a/drivers/usb/dwc3/glue.h b/drivers/usb/dwc3/glue.h
+index d738e1739ae0..e655db698fd4 100644
+--- a/drivers/usb/dwc3/glue.h
++++ b/drivers/usb/dwc3/glue.h
+@@ -66,6 +66,19 @@ int dwc3_core_probe(const struct dwc3_probe_data *data);
+  */
+ void dwc3_core_remove(struct dwc3 *dwc);
+ 
++/**
++ * dwc3_core_release - Release the core dwc3 driver after the glue exited it
++ * @dwc: Pointer to DWC3 controller context
++ *
++ * Counterpart of dwc3_core_probe() for glue drivers that use
++ * skip_core_init_mode and manage the target mode and the core themselves.
++ * Unlike dwc3_core_remove() it neither exits the host or gadget mode nor
++ * calls dwc3_core_exit(): the glue must already have done both (or never
++ * re-initialized the core after its last dwc3_core_exit()). It releases
++ * everything else dwc3_core_probe() set up.
++ */
++void dwc3_core_release(struct dwc3 *dwc);
++
+ /*
+  * The following callbacks are provided for glue drivers to call from their
+  * own pm callbacks provided in struct dev_pm_ops. Glue drivers can perform
+diff --git a/drivers/usb/host/xhci-pci-asmedia.c b/drivers/usb/host/xhci-pci-asmedia.c
+index 7506ffd2aedf..e3300aa7ade1 100644
+--- a/drivers/usb/host/xhci-pci-asmedia.c
++++ b/drivers/usb/host/xhci-pci-asmedia.c
+@@ -4,16 +4,14 @@
+  * Copyright (C) The Asahi Linux Contributors
+  */
+ 
+-#include <linux/acpi.h>
+ #include <linux/bitfield.h>
+ #include <linux/firmware.h>
+ #include <linux/pci.h>
+ #include <linux/iopoll.h>
+-#include <linux/slab.h>
++#include <linux/sizes.h>
+ #include <linux/unaligned.h>
+ 
+ #include "xhci.h"
+-#include "xhci-trace.h"
+ #include "xhci-pci.h"
+ 
+ /* Configuration space registers */
+@@ -80,7 +78,7 @@ static int asmedia_mbox_tx(struct pci_dev *pdev, u64 data)
+ 		return ret;
+ 	}
+ 	if (err)
+-		return err;
++		return pcibios_err_to_errno(err);
+ 
+ 	pci_write_config_dword(pdev, ASMT_CFG_DATA_WRITE0, data);
+ 	pci_write_config_dword(pdev, ASMT_CFG_DATA_WRITE1, data >> 32);
+@@ -104,7 +102,7 @@ static int asmedia_mbox_rx(struct pci_dev *pdev, u64 *data)
+ 		return ret;
+ 	}
+ 	if (err)
+-		return err;
++		return pcibios_err_to_errno(err);
+ 
+ 	pci_read_config_dword(pdev, ASMT_CFG_DATA_READ0, &low);
+ 	pci_read_config_dword(pdev, ASMT_CFG_DATA_READ1, &high);
+@@ -141,7 +139,8 @@ static int asmedia_get_fw_version(struct pci_dev *pdev, u64 *version)
+ 	return 0;
+ }
+ 
+-static bool asmedia_check_firmware(struct pci_dev *pdev)
++/* Returns 1 if RAM firmware is running, 0 if only the ROM, or -errno */
++static int asmedia_check_firmware(struct pci_dev *pdev)
+ {
+ 	u64 fwver;
+ 	int ret;
+@@ -189,7 +188,8 @@ static int asmedia_wait_reset(struct pci_dev *pdev)
+ 	return ret;
+ }
+ 
+-static int asmedia_read_reg(struct usb_hcd *hcd, u16 addr, u8 *val) {
++static int asmedia_read_reg(struct usb_hcd *hcd, u16 addr, u8 *val)
++{
+ 	void __iomem *regs = hcd->regs;
+ 	u8 status;
+ 	int ret;
+@@ -220,7 +220,8 @@ static int asmedia_read_reg(struct usb_hcd *hcd, u16 addr, u8 *val) {
+ 	return 0;
+ }
+ 
+-static int asmedia_write_reg(struct usb_hcd *hcd, u16 addr, u8 data, bool wait) {
++static int asmedia_write_reg(struct usb_hcd *hcd, u16 addr, u8 data, bool wait)
++{
+ 	void __iomem *regs = hcd->regs;
+ 	u8 status, val;
+ 	int ret, err;
+@@ -276,7 +277,7 @@ static int asmedia_load_fw(struct pci_dev *pdev, const struct firmware *fw)
+ {
+ 	struct usb_hcd *hcd;
+ 	void __iomem *regs;
+-	const u16 *fw_data = (const u16 *)fw->data;
++	const u8 *fw_data = fw->data;
+ 	u16 raddr;
+ 	u32 data;
+ 	size_t index = 0, addr = 0;
+@@ -286,6 +287,12 @@ static int asmedia_load_fw(struct pci_dev *pdev, const struct firmware *fw)
+ 	hcd = dev_get_drvdata(&pdev->dev);
+ 	regs = hcd->regs;
+ 
++	/* The upload is in whole words and the SRAM address register is 16 bits */
++	if (!fw->size || fw->size % 2 || fw->size > SZ_128K) {
++		dev_err(&pdev->dev, "Invalid firmware size %zu\n", fw->size);
++		return -EINVAL;
++	}
++
+ 	ret = asmedia_write_reg(hcd, ASMT_MMIO_CPU_MODE_NEXT,
+ 				ASMT_MMIO_CPU_MODE_HALFSPEED, false);
+ 	if (ret)
+@@ -318,9 +325,9 @@ static int asmedia_load_fw(struct pci_dev *pdev, const struct firmware *fw)
+ 	/* The firmware upload is interleaved in 0x4000 word blocks */
+ 	addr = index = 0;
+ 	while (index < words) {
+-		data = fw_data[index];
++		data = get_unaligned_le16(&fw_data[index * 2]);
+ 		if ((index | 0x4000) < words)
+-			data |= fw_data[index | 0x4000] << 16;
++			data |= (u32)get_unaligned_le16(&fw_data[(index | 0x4000) * 2]) << 16;
+ 
+ 		pci_write_config_word(pdev, ASMT_CFG_SRAM_ADDR,
+ 				      addr);
+@@ -336,7 +343,7 @@ static int asmedia_load_fw(struct pci_dev *pdev, const struct firmware *fw)
+ 			return ret;
+ 		}
+ 		if (err)
+-			return err;
++			return pcibios_err_to_errno(err);
+ 
+ 		if (++index & 0x4000)
+ 			index += 0x4000;
+@@ -371,8 +378,8 @@ static int asmedia_load_fw(struct pci_dev *pdev, const struct firmware *fw)
+ int asmedia_xhci_check_request_fw(struct pci_dev *pdev,
+ 				  const struct pci_device_id *id)
+ {
+-	struct xhci_driver_data *driver_data =
+-		(struct xhci_driver_data *)id->driver_data;
++	const struct xhci_driver_data *driver_data =
++		(const struct xhci_driver_data *)id->driver_data;
+ 	const char *fw_name = driver_data->firmware;
+ 	const struct firmware *fw;
+ 	int ret;
+@@ -384,9 +391,7 @@ int asmedia_xhci_check_request_fw(struct pci_dev *pdev,
+ 	else if (ret == 1)
+ 		return 0;
+ 
+-	pci_dev_get(pdev);
+ 	ret = request_firmware(&fw, fw_name, &pdev->dev);
+-	pci_dev_put(pdev);
+ 	if (ret) {
+ 		dev_err(&pdev->dev, "Could not load firmware %s: %d\n",
+ 			fw_name, ret);
+diff --git a/drivers/usb/host/xhci-pci-core.c b/drivers/usb/host/xhci-pci-core.c
+index 63cb293c7196..3a21a024c06a 100644
+--- a/drivers/usb/host/xhci-pci-core.c
++++ b/drivers/usb/host/xhci-pci-core.c
+@@ -571,12 +571,12 @@ static int xhci_pci_setup(struct usb_hcd *hcd)
+ 	struct pci_dev		*pdev = to_pci_dev(hcd->self.controller);
+ 	int			retval;
+ 	u8			sbrn;
+-	struct xhci_driver_data *driver_data;
++	const struct xhci_driver_data *driver_data;
+ 	const struct pci_device_id *id;
+ 
+ 	id = pci_match_id(to_pci_driver(pdev->dev.driver)->id_table, pdev);
+ 	if (id && id->driver_data && usb_hcd_is_primary_hcd(hcd)) {
+-		driver_data = (struct xhci_driver_data *)id->driver_data;
++		driver_data = (const struct xhci_driver_data *)id->driver_data;
+ 		if (driver_data->quirks & XHCI_ASMEDIA_FW_QUIRK) {
+ 			retval = asmedia_xhci_check_request_fw(pdev, id);
+ 			if (retval < 0)
+@@ -974,7 +974,7 @@ static const struct xhci_driver_data asmedia_data = {
+ 
+ /* PCI driver selection metadata; PCI hotplugging uses this */
+ static const struct pci_device_id pci_ids[] = {
+-	{ PCI_DEVICE(PCI_VENDOR_ID_ASMEDIA, 0x2142),
++	{ PCI_DEVICE(PCI_VENDOR_ID_ASMEDIA, PCI_DEVICE_ID_ASMEDIA_2142_XHCI),
+ 		.driver_data = (unsigned long)&asmedia_data,
+ 	},
+ 	/* handle any USB 3.0 xHCI controller */
+diff --git a/drivers/usb/roles/class.c b/drivers/usb/roles/class.c
+index edec139b68b5..c8ad32c18c6c 100644
+--- a/drivers/usb/roles/class.c
++++ b/drivers/usb/roles/class.c
+@@ -79,19 +79,17 @@ int usb_role_switch_set_role(struct usb_role_switch *sw, enum usb_role role)
+ 	if (IS_ERR_OR_NULL(sw))
+ 		return 0;
+ 
++	guard(mutex)(&sw->lock);
++
+ 	if (!sw->registered)
+ 		return -EOPNOTSUPP;
+ 
+-	mutex_lock(&sw->lock);
+-
+ 	ret = sw->set(sw, role);
+ 	if (!ret) {
+ 		sw->role = role;
+ 		kobject_uevent(&sw->dev.kobj, KOBJ_CHANGE);
+ 	}
+ 
+-	mutex_unlock(&sw->lock);
+-
+ 	return ret;
+ }
+ EXPORT_SYMBOL_GPL(usb_role_switch_set_role);
+@@ -107,12 +105,14 @@ enum usb_role usb_role_switch_get_role(struct usb_role_switch *sw)
+ {
+ 	enum usb_role role;
+ 
+-	if (IS_ERR_OR_NULL(sw) || !sw->registered)
++	if (IS_ERR_OR_NULL(sw))
+ 		return USB_ROLE_NONE;
+ 
+ 	mutex_lock(&sw->lock);
+ 
+-	if (sw->get)
++	if (!sw->registered)
++		role = USB_ROLE_NONE;
++	else if (sw->get)
+ 		role = sw->get(sw);
+ 	else
+ 		role = sw->role;
+@@ -423,7 +423,15 @@ void usb_role_switch_unregister(struct usb_role_switch *sw)
+ {
+ 	if (IS_ERR_OR_NULL(sw))
+ 		return;
++
++	/*
++	 * Once this returns no ->set() or ->get() call is running and none
++	 * will start, so the caller may free what they use.
++	 */
++	mutex_lock(&sw->lock);
+ 	sw->registered = false;
++	mutex_unlock(&sw->lock);
++
+ 	if (dev_fwnode(&sw->dev))
+ 		component_del(&sw->dev, &connector_ops);
+ 	device_unregister(&sw->dev);
+diff --git a/drivers/usb/typec/tipd/core.c b/drivers/usb/typec/tipd/core.c
+index 483539185177..8e69ba6df1ed 100644
+--- a/drivers/usb/typec/tipd/core.c
++++ b/drivers/usb/typec/tipd/core.c
+@@ -163,6 +163,7 @@ struct tipd_data {
+ 	bool (*read_power_status)(struct tps6598x *tps);
+ 	int (*reset)(struct tps6598x *tps);
+ 	int (*connect)(struct tps6598x *tps, u32 status);
++	const struct typec_operations *typec_ops;
+ };
+ 
+ struct tps6598x {
+@@ -386,6 +387,13 @@ static int tps6598x_connect(struct tps6598x *tps, u32 status)
+ 
+ static void tps6598x_disconnect(struct tps6598x *tps, u32 status)
+ {
++	/*
++	 * Stop the USB controller before the mux goes to safe mode: on some
++	 * platforms (Apple ATC PHY) safe mode powers the PHY off, which must
++	 * not happen under a running host or gadget controller.
++	 */
++	tps6598x_set_data_role(tps, TPS_STATUS_TO_TYPEC_DATAROLE(status), false);
++
+ 	if (!IS_ERR(tps->partner))
+ 		typec_unregister_partner(tps->partner);
+ 	tps->partner = NULL;
+@@ -394,7 +402,6 @@ static void tps6598x_disconnect(struct tps6598x *tps, u32 status)
+ 	typec_set_vconn_role(tps->port, TPS_STATUS_TO_TYPEC_VCONN(status));
+ 	typec_set_orientation(tps->port, TYPEC_ORIENTATION_NONE);
+ 	typec_set_mode(tps->port, TYPEC_STATE_SAFE);
+-	tps6598x_set_data_role(tps, TPS_STATUS_TO_TYPEC_DATAROLE(status), false);
+ 
+ 	power_supply_changed(tps->psy);
+ }
+@@ -473,31 +480,39 @@ static int tps6598x_exec_cmd(struct tps6598x *tps, const char *cmd,
+ 				     out_len, out_data, 1000, 0);
+ }
+ 
+-static int tps6598x_dr_set(struct typec_port *port, enum typec_data_role role)
++static int tps6598x_dr_swap(struct tps6598x *tps, enum typec_data_role role, u32 *status)
+ {
+ 	const char *cmd = (role == TYPEC_DEVICE) ? "SWUF" : "SWDF";
+-	struct tps6598x *tps = typec_get_drvdata(port);
+-	u32 status;
+ 	int ret;
+ 
+-	mutex_lock(&tps->lock);
++	lockdep_assert_held(&tps->lock);
+ 
+ 	ret = tps6598x_exec_cmd(tps, cmd, 0, NULL, 0, NULL);
+ 	if (ret)
+-		goto out_unlock;
++		return ret;
+ 
+-	ret = tps6598x_read32(tps, TPS_REG_STATUS, &status);
++	ret = tps6598x_read32(tps, TPS_REG_STATUS, status);
+ 	if (ret)
+-		goto out_unlock;
++		return ret;
+ 
+-	if (role != TPS_STATUS_TO_TYPEC_DATAROLE(status)) {
+-		ret = -EPROTO;
+-		goto out_unlock;
+-	}
++	if (role != TPS_STATUS_TO_TYPEC_DATAROLE(*status))
++		return -EPROTO;
+ 
+-	tps6598x_set_data_role(tps, role, true);
++	return 0;
++}
++
++static int tps6598x_dr_set(struct typec_port *port, enum typec_data_role role)
++{
++	struct tps6598x *tps = typec_get_drvdata(port);
++	u32 status;
++	int ret;
++
++	mutex_lock(&tps->lock);
++
++	ret = tps6598x_dr_swap(tps, role, &status);
++	if (!ret)
++		tps6598x_set_data_role(tps, role, true);
+ 
+-out_unlock:
+ 	mutex_unlock(&tps->lock);
+ 
+ 	return ret;
+@@ -631,6 +646,20 @@ static bool tps6598x_read_power_status(struct tps6598x *tps)
+ 	return true;
+ }
+ 
++static bool cd321x_read_power_status(struct tps6598x *tps)
++{
++	if (!tps6598x_read_power_status(tps))
++		return false;
++
++	if (TPS_POWER_STATUS_PWROPMODE(tps->pwr_status) == TYPEC_PWR_MODE_PD &&
++	    tps6598x_read_partner_identity(tps)) {
++		dev_err(tps->dev, "failed to read partner identity\n");
++		tps->partner_identity = (struct usb_pd_identity) {0};
++	}
++
++	return true;
++}
++
+ /*
+  * TPS66993 deprecated Power_Status register (0x3F). BC1.2 is not supported
+  * and the remaining bits are redundant with STATUS register (0x1A).
+@@ -672,6 +701,56 @@ static void tps6598x_handle_plug_event(struct tps6598x *tps, u32 status)
+ 	}
+ }
+ 
++static int cd321x_dp_pin_mode(u32 data_status, unsigned long *mode)
++{
++	switch (TPS_DATA_STATUS_DP_SPEC_PIN_ASSIGNMENT(data_status)) {
++	case TPS_DATA_STATUS_DP_SPEC_PIN_ASSIGNMENT_A:
++		*mode = TYPEC_DP_STATE_A;
++		return 0;
++	case TPS_DATA_STATUS_DP_SPEC_PIN_ASSIGNMENT_B:
++		*mode = TYPEC_DP_STATE_B;
++		return 0;
++	case TPS_DATA_STATUS_DP_SPEC_PIN_ASSIGNMENT_C:
++		*mode = TYPEC_DP_STATE_C;
++		return 0;
++	case TPS_DATA_STATUS_DP_SPEC_PIN_ASSIGNMENT_D:
++		*mode = TYPEC_DP_STATE_D;
++		return 0;
++	case TPS_DATA_STATUS_DP_SPEC_PIN_ASSIGNMENT_E:
++		*mode = TYPEC_DP_STATE_E;
++		return 0;
++	case TPS_DATA_STATUS_DP_SPEC_PIN_ASSIGNMENT_F:
++		*mode = TYPEC_DP_STATE_F;
++		return 0;
++	default:
++		return -EINVAL;
++	}
++}
++
++/* Would cd321x_typec_update_mode() change the mux state for @st? */
++static bool cd321x_typec_mode_changed(struct cd321x *cd321x, const struct cd321x_status *st)
++{
++	const struct typec_mux_state *cur = &cd321x->state;
++	unsigned long mode;
++
++	if (!(st->data_status & TPS_DATA_STATUS_DATA_CONNECTION))
++		return cur->mode != TYPEC_STATE_SAFE;
++
++	if (st->data_status & TPS_DATA_STATUS_DP_CONNECTION) {
++		if (cd321x_dp_pin_mode(st->data_status, &mode))
++			return false;
++		return cur->alt != cd321x->port_altmode_dp || cur->mode != mode;
++	}
++
++	if (st->data_status & TPS_DATA_STATUS_TBT_CONNECTION)
++		return cur->alt != cd321x->port_altmode_tbt || cur->mode != TYPEC_TBT_MODE;
++
++	if (st->data_status & CD321X_DATA_STATUS_USB4_CONNECTION)
++		return cur->alt || cur->mode != TYPEC_MODE_USB4;
++
++	return cur->alt || cur->mode != TYPEC_STATE_USB;
++}
++
+ static void cd321x_typec_update_mode(struct tps6598x *tps, struct cd321x_status *st)
+ {
+ 	struct cd321x *cd321x = container_of(tps, struct cd321x, tps);
+@@ -687,26 +766,7 @@ static void cd321x_typec_update_mode(struct tps6598x *tps, struct cd321x_status
+ 		struct typec_displayport_data dp_data;
+ 		unsigned long mode;
+ 
+-		switch (TPS_DATA_STATUS_DP_SPEC_PIN_ASSIGNMENT(st->data_status)) {
+-		case TPS_DATA_STATUS_DP_SPEC_PIN_ASSIGNMENT_A:
+-			mode = TYPEC_DP_STATE_A;
+-			break;
+-		case TPS_DATA_STATUS_DP_SPEC_PIN_ASSIGNMENT_B:
+-			mode = TYPEC_DP_STATE_B;
+-			break;
+-		case TPS_DATA_STATUS_DP_SPEC_PIN_ASSIGNMENT_C:
+-			mode = TYPEC_DP_STATE_C;
+-			break;
+-		case TPS_DATA_STATUS_DP_SPEC_PIN_ASSIGNMENT_D:
+-			mode = TYPEC_DP_STATE_D;
+-			break;
+-		case TPS_DATA_STATUS_DP_SPEC_PIN_ASSIGNMENT_E:
+-			mode = TYPEC_DP_STATE_E;
+-			break;
+-		case TPS_DATA_STATUS_DP_SPEC_PIN_ASSIGNMENT_F:
+-			mode = TYPEC_DP_STATE_F;
+-			break;
+-		default:
++		if (cd321x_dp_pin_mode(st->data_status, &mode)) {
+ 			dev_err(tps->dev, "Invalid DP pin assignment\n");
+ 			return;
+ 		}
+@@ -798,7 +858,7 @@ static void cd321x_update_work(struct work_struct *work)
+ 	enum typec_orientation orientation = TYPEC_ORIENTATION_NONE;
+ 
+ 	if (usb_connection) {
+-		if (tps->data_status & TPS_DATA_STATUS_USB_DATA_ROLE)
++		if (st.data_status & TPS_DATA_STATUS_USB_DATA_ROLE)
+ 			new_role = USB_ROLE_DEVICE;
+ 		else
+ 			new_role = USB_ROLE_HOST;
+@@ -816,8 +876,18 @@ static void cd321x_update_work(struct work_struct *work)
+ 		 (is_pd && memcmp(&st.partner_identity,
+ 				  &cd321x->cur_partner_identity, sizeof(struct usb_pd_identity))));
+ 
+-	/* If we are switching from an active role, transition to USB_ROLE_NONE first */
+-	if (old_role != USB_ROLE_NONE && (new_role != old_role || was_disconnected))
++	/*
++	 * The USB controller must not run while the mux reconfigures the PHY,
++	 * and on some platforms (Apple ATC PHY) stopping the controller also
++	 * powers the PHY off. So stop an active role before any role or mux
++	 * change, and whenever it was stopped take the mux through safe mode
++	 * and set it up again before the new role starts.
++	 */
++	bool stop_role = old_role != USB_ROLE_NONE &&
++		(new_role != old_role || was_disconnected ||
++		 cd321x_typec_mode_changed(cd321x, &st));
++
++	if (stop_role)
+ 		usb_role_switch_set_role(tps->role_sw, USB_ROLE_NONE);
+ 
+ 	/* Process partner disconnection or change */
+@@ -827,8 +897,8 @@ static void cd321x_update_work(struct work_struct *work)
+ 		tps->partner = NULL;
+ 	}
+ 
+-	/* If there was a disconnection, set PHY to off */
+-	if (!new_connected || was_disconnected) {
++	/* If there was a disconnection or the role was stopped, set PHY to off */
++	if (!new_connected || was_disconnected || stop_role) {
+ 		cd321x->state.alt = NULL;
+ 		cd321x->state.mode = TYPEC_STATE_SAFE;
+ 		cd321x->state.data = NULL;
+@@ -854,8 +924,10 @@ static void cd321x_update_work(struct work_struct *work)
+ 		desc.usb_pd = is_pd;
+ 		desc.accessory = TYPEC_ACCESSORY_NONE; /* XXX: handle accessories */
+ 
+-		if (desc.usb_pd)
+-			desc.identity = &st.partner_identity;
++		if (desc.usb_pd) {
++			cd321x->cur_partner_identity = st.partner_identity;
++			desc.identity = &cd321x->cur_partner_identity;
++		}
+ 
+ 		tps->partner = typec_register_partner(tps->port, &desc);
+ 		if (IS_ERR(tps->partner)) {
+@@ -863,10 +935,8 @@ static void cd321x_update_work(struct work_struct *work)
+ 			return;
+ 		}
+ 
+-		if (desc.identity) {
++		if (desc.identity)
+ 			typec_partner_set_identity(tps->partner);
+-			cd321x->cur_partner_identity = st.partner_identity;
+-		}
+ 	}
+ 
+ 	/* Update the TypeC MUX/PHY state */
+@@ -910,6 +980,33 @@ static int cd321x_connect(struct tps6598x *tps, u32 status)
+ 	return 0;
+ }
+ 
++static int cd321x_dr_set(struct typec_port *port, enum typec_data_role role)
++{
++	struct tps6598x *tps = typec_get_drvdata(port);
++	u32 status;
++	int ret;
++
++	guard(mutex)(&tps->lock);
++
++	ret = tps6598x_dr_swap(tps, role, &status);
++	if (ret)
++		return ret;
++
++	if (!tps->data->read_data_status(tps))
++		return -EIO;
++
++	/*
++	 * Don't switch the USB role here: cd321x_update_work() stops the old
++	 * role and sets the mux up again before it starts the new one.
++	 */
++	return cd321x_connect(tps, status);
++}
++
++static const struct typec_operations cd321x_typec_ops = {
++	.dr_set = cd321x_dr_set,
++	.pr_set = tps6598x_pr_set,
++};
++
+ static irqreturn_t cd321x_interrupt(int irq, void *data)
+ {
+ 	struct tps6598x *tps = data;
+@@ -934,16 +1031,9 @@ static irqreturn_t cd321x_interrupt(int irq, void *data)
+ 	if (!tps6598x_read_status(tps, &status))
+ 		goto err_unlock;
+ 
+-	if (event & APPLE_CD_REG_INT_POWER_STATUS_UPDATE) {
++	if (event & APPLE_CD_REG_INT_POWER_STATUS_UPDATE)
+ 		if (!tps->data->read_power_status(tps))
+ 			goto err_unlock;
+-		if (TPS_POWER_STATUS_PWROPMODE(tps->pwr_status) == TYPEC_PWR_MODE_PD) {
+-			if (tps6598x_read_partner_identity(tps)) {
+-				dev_err(tps->dev, "failed to read partner identity\n");
+-				tps->partner_identity = (struct usb_pd_identity) {0};
+-			}
+-		}
+-	}
+ 
+ 	if (event & APPLE_CD_REG_INT_DATA_STATUS_UPDATE)
+ 		if (!tps->data->read_data_status(tps))
+@@ -1247,7 +1337,7 @@ tps6598x_register_port(struct tps6598x *tps, struct fwnode_handle *fwnode)
+ 	typec_cap.pd_revision = 0x200;
+ 	typec_cap.prefer_role = TYPEC_NO_PREFERRED_ROLE;
+ 	typec_cap.driver_data = tps;
+-	typec_cap.ops = &tps6598x_ops;
++	typec_cap.ops = tps->data->typec_ops ?: &tps6598x_ops;
+ 	typec_cap.fwnode = fwnode;
+ 
+ 	switch (TPS_SYSCONF_PORTINFO(conf)) {
+@@ -2033,10 +2123,11 @@ static const struct tipd_data cd321x_data = {
+ 	.trace_status = trace_tps6598x_status,
+ 	.init = cd321x_init,
+ 	.read_data_status = cd321x_read_data_status,
+-	.read_power_status = tps6598x_read_power_status,
++	.read_power_status = cd321x_read_power_status,
+ 	.reset = cd321x_reset,
+ 	.switch_power_state = cd321x_switch_power_state,
+ 	.connect = cd321x_connect,
++	.typec_ops = &cd321x_typec_ops,
+ };
+ 
+ static const struct tipd_data tps6598x_data = {
+diff --git a/include/linux/pm_domain.h b/include/linux/pm_domain.h
+index 04b5e0f7486f..0eac596b3ad4 100644
+--- a/include/linux/pm_domain.h
++++ b/include/linux/pm_domain.h
+@@ -127,7 +127,6 @@ struct dev_pm_domain_list {
+  *				for power domains which are active at boot and
+  *				must not be shut down until all consumers
+  *				complete their probe sequence.
+-
+  */
+ #define GENPD_FLAG_PM_CLK	 (1U << 0)
+ #define GENPD_FLAG_IRQ_SAFE	 (1U << 1)
+diff --git a/rust/helpers/dma-fence.c b/rust/helpers/dma-fence.c
+index 649101626293..74467714c161 100644
+--- a/rust/helpers/dma-fence.c
++++ b/rust/helpers/dma-fence.c
+@@ -5,27 +5,27 @@
+ 
+ #ifdef CONFIG_DMA_SHARED_BUFFER
+ 
+-void rust_helper_dma_fence_get(struct dma_fence *fence)
++__rust_helper void rust_helper_dma_fence_get(struct dma_fence *fence)
+ {
+ 	dma_fence_get(fence);
+ }
+ 
+-void rust_helper_dma_fence_put(struct dma_fence *fence)
++__rust_helper void rust_helper_dma_fence_put(struct dma_fence *fence)
+ {
+ 	dma_fence_put(fence);
+ }
+ 
+-struct dma_fence_chain *rust_helper_dma_fence_chain_alloc(void)
++__rust_helper struct dma_fence_chain *rust_helper_dma_fence_chain_alloc(void)
+ {
+ 	return dma_fence_chain_alloc();
+ }
+ 
+-void rust_helper_dma_fence_chain_free(struct dma_fence_chain *chain)
++__rust_helper void rust_helper_dma_fence_chain_free(struct dma_fence_chain *chain)
+ {
+ 	dma_fence_chain_free(chain);
+ }
+ 
+-void rust_helper_dma_fence_set_error(struct dma_fence *fence, int error)
++__rust_helper void rust_helper_dma_fence_set_error(struct dma_fence *fence, int error)
+ {
+ 	dma_fence_set_error(fence, error);
+ }
+diff --git a/rust/helpers/dma-mapping.c b/rust/helpers/dma-mapping.c
+index 0d795b1b0738..5a9271676652 100644
+--- a/rust/helpers/dma-mapping.c
++++ b/rust/helpers/dma-mapping.c
+@@ -2,7 +2,7 @@
+ 
+ #include <linux/dma-mapping.h>
+ 
+-int rust_helper_dma_mapping_error(struct device *dev, dma_addr_t dma_addr)
++__rust_helper int rust_helper_dma_mapping_error(struct device *dev, dma_addr_t dma_addr)
+ {
+ 	return dma_mapping_error(dev, dma_addr);
+ }
+diff --git a/rust/helpers/drm_syncobj.c b/rust/helpers/drm_syncobj.c
+index 9e14c989edfd..129f81ca2ed7 100644
+--- a/rust/helpers/drm_syncobj.c
++++ b/rust/helpers/drm_syncobj.c
+@@ -4,17 +4,17 @@
+ 
+ #ifdef CONFIG_DRM
+ 
+-void rust_helper_drm_syncobj_get(struct drm_syncobj *obj)
++__rust_helper void rust_helper_drm_syncobj_get(struct drm_syncobj *obj)
+ {
+ 	drm_syncobj_get(obj);
+ }
+ 
+-void rust_helper_drm_syncobj_put(struct drm_syncobj *obj)
++__rust_helper void rust_helper_drm_syncobj_put(struct drm_syncobj *obj)
+ {
+ 	drm_syncobj_put(obj);
+ }
+ 
+-struct dma_fence *rust_helper_drm_syncobj_fence_get(struct drm_syncobj *syncobj)
++__rust_helper struct dma_fence *rust_helper_drm_syncobj_fence_get(struct drm_syncobj *syncobj)
+ {
+ 	return drm_syncobj_fence_get(syncobj);
+ }
+diff --git a/rust/helpers/helpers.c b/rust/helpers/helpers.c
+index 8c1cdf68883c..a936fad4e982 100644
+--- a/rust/helpers/helpers.c
++++ b/rust/helpers/helpers.c
+@@ -58,9 +58,9 @@
+ #include "device.c"
+ #include "dma.c"
+ #include "dma-fence.c"
++#include "dma-mapping.c"
+ #ifdef CONFIG_DMA_SHARED_BUFFER
+ #include "dma-resv.c"
+-#include "dma-mapping.c"
+ #endif
+ #include "drm.c"
+ #include "drm_gpuvm.c"
+diff --git a/rust/helpers/of.c b/rust/helpers/of.c
+index da4ae35163c6..d3182c17ce06 100644
+--- a/rust/helpers/of.c
++++ b/rust/helpers/of.c
+@@ -8,22 +8,23 @@ __rust_helper bool rust_helper_is_of_node(const struct fwnode_handle *fwnode)
+ 	return is_of_node(fwnode);
+ }
+ 
+-const struct of_device_id *rust_helper_of_match_device(
+-		const struct of_device_id *matches, const struct device *dev)
++__rust_helper const struct of_device_id *
++rust_helper_of_match_device(const struct of_device_id *matches,
++			    const struct device *dev)
+ {
+-			return of_match_device(matches, dev);
++	return of_match_device(matches, dev);
+ }
+ 
+ #ifdef CONFIG_OF
+-bool rust_helper_of_node_is_root(const struct device_node *np)
++__rust_helper bool rust_helper_of_node_is_root(const struct device_node *np)
+ {
+ 	return of_node_is_root(np);
+ }
+ #endif
+ 
+-struct device_node *rust_helper_of_parse_phandle(const struct device_node *np,
+-               const char *phandle_name,
+-               int index)
++__rust_helper struct device_node *
++rust_helper_of_parse_phandle(const struct device_node *np,
++			     const char *phandle_name, int index)
+ {
+ 	return of_parse_phandle(np, phandle_name, index);
+ }
+diff --git a/rust/helpers/page.c b/rust/helpers/page.c
+index 7ab81a8cad89..b0b40d724dfd 100644
+--- a/rust/helpers/page.c
++++ b/rust/helpers/page.c
+@@ -28,27 +28,27 @@ __rust_helper int rust_helper_page_to_nid(const struct page *page)
+ }
+ #endif
+ 
+-struct page *rust_helper_phys_to_page(phys_addr_t phys)
++__rust_helper struct page *rust_helper_phys_to_page(phys_addr_t phys)
+ {
+ 	return phys_to_page(phys);
+ }
+ 
+-phys_addr_t rust_helper_page_to_phys(struct page *page)
++__rust_helper phys_addr_t rust_helper_page_to_phys(struct page *page)
+ {
+ 	return page_to_phys(page);
+ }
+ 
+-unsigned long rust_helper_phys_to_pfn(phys_addr_t phys)
++__rust_helper unsigned long rust_helper_phys_to_pfn(phys_addr_t phys)
+ {
+ 	return __phys_to_pfn(phys);
+ }
+ 
+-struct page *rust_helper_pfn_to_page(unsigned long pfn)
++__rust_helper struct page *rust_helper_pfn_to_page(unsigned long pfn)
+ {
+ 	return pfn_to_page(pfn);
+ }
+ 
+-bool rust_helper_pfn_valid(unsigned long pfn)
++__rust_helper bool rust_helper_pfn_valid(unsigned long pfn)
+ {
+ 	return pfn_valid(pfn);
+ }
+diff --git a/rust/kernel/alloc/kvec.rs b/rust/kernel/alloc/kvec.rs
+index 1f616cc9323b..47c086d2d5fd 100644
+--- a/rust/kernel/alloc/kvec.rs
++++ b/rust/kernel/alloc/kvec.rs
+@@ -825,14 +825,18 @@ pub fn retain(&mut self, mut f: impl FnMut(&mut T) -> bool) {
+     /// # Examples
+     ///
+     /// ```
+-    /// let mut v = vec![1, 2, 3];
+-    /// let u: Vec<_> = v.drain(1..).collect();
+-    /// assert_eq!(v, &[1]);
+-    /// assert_eq!(u, &[2, 3]);
++    /// let mut v = kernel::kvec![1, 2, 3]?;
++    /// let mut u = KVec::new();
++    /// for x in v.drain(1..) {
++    ///     u.push(x, GFP_KERNEL)?;
++    /// }
++    /// assert_eq!(v, [1]);
++    /// assert_eq!(u, [2, 3]);
+     ///
+     /// // A full range clears the vector, like `clear()` does
+     /// v.drain(..);
+-    /// assert_eq!(v, &[]);
++    /// assert!(v.is_empty());
++    /// # Ok::<(), Error>(())
+     /// ```
+     pub fn drain<R>(&mut self, range: R) -> Drain<'_, T, A>
+     where
+@@ -1764,25 +1768,30 @@ fn test_kvvec_shrink_to_respects_min_capacity() {
+     /// # Examples
+     ///
+     /// ```
+-    /// assert_eq!(vec![1, 2, 3].try_into(), Ok([1, 2, 3]));
+-    /// assert_eq!(<Vec<i32>>::new().try_into(), Ok([]));
++    /// let a: Result<[i32; 3], _> = kernel::kvec![1, 2, 3]?.try_into();
++    /// assert_eq!(a.ok(), Some([1, 2, 3]));
++    /// let a: Result<[i32; 0], _> = KVec::<i32>::new().try_into();
++    /// assert_eq!(a.ok(), Some([]));
++    /// # Ok::<(), Error>(())
+     /// ```
+     ///
+     /// If the length doesn't match, the input comes back in `Err`:
+     /// ```
+-    /// let r: Result<[i32; 4], _> = (0..10).collect::<Vec<_>>().try_into();
+-    /// assert_eq!(r, Err(vec![0, 1, 2, 3, 4, 5, 6, 7, 8, 9]));
++    /// let r: Result<[i32; 4], _> = kernel::kvec![0, 1, 2, 3, 4, 5]?.try_into();
++    /// assert_eq!(r.err().unwrap(), [0, 1, 2, 3, 4, 5]);
++    /// # Ok::<(), Error>(())
+     /// ```
+     ///
+     /// If you're fine with just getting a prefix of the `Vec<T>`,
+     /// you can call [`.truncate(N)`](Vec::truncate) first.
+     /// ```
+-    /// let mut v = String::from("hello world").into_bytes();
+-    /// v.sort();
++    /// let mut v = KVec::new();
++    /// v.extend_from_slice(b"hello world", GFP_KERNEL)?;
+     /// v.truncate(2);
+-    /// let [a, b]: [_; 2] = v.try_into().unwrap();
+-    /// assert_eq!(a, b' ');
+-    /// assert_eq!(b, b'd');
++    /// let [a, b]: [u8; 2] = v.try_into().ok().unwrap();
++    /// assert_eq!(a, b'h');
++    /// assert_eq!(b, b'e');
++    /// # Ok::<(), Error>(())
+     /// ```
+     fn try_from(mut vec: Vec<T, A>) -> Result<[T; N], Vec<T, A>> {
+         if vec.len() != N {
+diff --git a/rust/kernel/alloc/kvec/drain.rs b/rust/kernel/alloc/kvec/drain.rs
+index 035878fd1128..4c539ea733e0 100644
+--- a/rust/kernel/alloc/kvec/drain.rs
++++ b/rust/kernel/alloc/kvec/drain.rs
+@@ -22,8 +22,10 @@
+ /// # Example
+ ///
+ /// ```
+-/// let mut v = vec![0, 1, 2];
+-/// let iter: std::vec::Drain<'_, _> = v.drain(..);
++/// let mut v = kernel::kvec![0, 1, 2]?;
++/// let iter = v.drain(..);
++/// assert_eq!(iter.as_slice(), &[0, 1, 2]);
++/// # Ok::<(), Error>(())
+ /// ```
+ // #[stable(feature = "drain", since = "1.6.0")]
+ pub struct Drain<
+@@ -54,11 +56,12 @@ impl<'a, T, A: Allocator> Drain<'a, T, A> {
+     /// # Examples
+     ///
+     /// ```
+-    /// let mut vec = vec!['a', 'b', 'c'];
++    /// let mut vec = kernel::kvec!['a', 'b', 'c']?;
+     /// let mut drain = vec.drain(..);
+     /// assert_eq!(drain.as_slice(), &['a', 'b', 'c']);
+     /// let _ = drain.next().unwrap();
+     /// assert_eq!(drain.as_slice(), &['b', 'c']);
++    /// # Ok::<(), Error>(())
+     /// ```
+     #[must_use]
+     // #[stable(feature = "vec_drain_as_slice", since = "1.46.0")]
+diff --git a/rust/kernel/dma_fence.rs b/rust/kernel/dma_fence.rs
+index 3aa90c1568d5..262f1404adc1 100644
+--- a/rust/kernel/dma_fence.rs
++++ b/rust/kernel/dma_fence.rs
+@@ -173,7 +173,7 @@ fn signaled(self: &FenceObject<Self>) -> bool {
+     let p = unsafe { crate::container_of!(fence, FenceObject<T>, fence) as *mut FenceObject<T> };
+ 
+     // SAFETY: The caller is responsible for passing a valid dma_fence subtype
+-    T::get_driver_name(unsafe { &mut *p }).as_char_ptr()
++    T::get_driver_name(unsafe { &*p }).as_char_ptr()
+ }
+ 
+ unsafe extern "C" fn get_timeline_name_cb<T: FenceOps>(
+@@ -183,7 +183,7 @@ fn signaled(self: &FenceObject<Self>) -> bool {
+     let p = unsafe { crate::container_of!(fence, FenceObject<T>, fence) as *mut FenceObject<T> };
+ 
+     // SAFETY: The caller is responsible for passing a valid dma_fence subtype
+-    T::get_timeline_name(unsafe { &mut *p }).as_char_ptr()
++    T::get_timeline_name(unsafe { &*p }).as_char_ptr()
+ }
+ 
+ unsafe extern "C" fn enable_signaling_cb<T: FenceOps>(fence: *mut bindings::dma_fence) -> bool {
+@@ -191,7 +191,7 @@ fn signaled(self: &FenceObject<Self>) -> bool {
+     let p = unsafe { crate::container_of!(fence, FenceObject<T>, fence) as *mut FenceObject<T> };
+ 
+     // SAFETY: The caller is responsible for passing a valid dma_fence subtype
+-    T::enable_signaling(unsafe { &mut *p })
++    T::enable_signaling(unsafe { &*p })
+ }
+ 
+ unsafe extern "C" fn signaled_cb<T: FenceOps>(fence: *mut bindings::dma_fence) -> bool {
+@@ -199,7 +199,7 @@ fn signaled(self: &FenceObject<Self>) -> bool {
+     let p = unsafe { crate::container_of!(fence, FenceObject<T>, fence) as *mut FenceObject<T> };
+ 
+     // SAFETY: The caller is responsible for passing a valid dma_fence subtype
+-    T::signaled(unsafe { &mut *p })
++    T::signaled(unsafe { &*p })
+ }
+ 
+ unsafe extern "C" fn release_cb<T: FenceOps>(fence: *mut bindings::dma_fence) {
+@@ -397,7 +397,7 @@ pub fn new(
+ 
+     /// Create a new fence in a given context index.
+     pub fn new_fence<T: FenceOps>(&self, context: u32, inner: T) -> Result<UniqueFence<T>> {
+-        if context > self.count {
++        if context >= self.count {
+             return Err(EINVAL);
+         }
+ 
+@@ -406,7 +406,7 @@ pub fn new_fence<T: FenceOps>(&self, context: u32, inner: T) -> Result<UniqueFen
+             bindings::krealloc_node_align(
+                 core::ptr::null_mut(),
+                 FenceObject::<T>::SIZE,
+-                1,
++                core::mem::align_of::<FenceObject<T>>(),
+                 bindings::GFP_KERNEL | bindings::__GFP_ZERO,
+                 bindings::NUMA_NO_NODE,
+             ) as *mut FenceObject<T>
+diff --git a/rust/kernel/drm/gem/mod.rs b/rust/kernel/drm/gem/mod.rs
+index caf79d86baf2..b12ea3588be5 100644
+--- a/rust/kernel/drm/gem/mod.rs
++++ b/rust/kernel/drm/gem/mod.rs
+@@ -481,8 +481,8 @@ fn drop(&mut self) {
+         // SAFETY:
+         // - `dma_buf::DmaBuf` is guaranteed to have an identical layout to `struct dma_buf`
+         //   by its type invariants.
+-        // - We hold the last reference to this `DmaBuf`, making it safe to destroy.
+-        unsafe { bindings::drm_gem_dmabuf_release(self.0.cast().as_ptr()) }
++        // - We own the file reference `drm_gem_prime_export()` returned.
++        unsafe { bindings::dma_buf_put(self.0.cast().as_ptr()) }
+     }
+ }
+ 
+diff --git a/rust/kernel/drm/mm.rs b/rust/kernel/drm/mm.rs
+index 7b13cfd7d530..55c107844fdb 100644
+--- a/rust/kernel/drm/mm.rs
++++ b/rust/kernel/drm/mm.rs
+@@ -38,6 +38,19 @@ impl<T> AllocInner<T> for () {}
+ /// The `drm_mm` struct is valid and initialized.
+ struct MmInner<A: AllocInner<T>, T>(Opaque<bindings::drm_mm>, A, PhantomData<T>);
+ 
++impl<A: AllocInner<T>, T> MmInner<A, T> {
++    /// Returns a mutable reference to the user allocator state.
++    ///
++    /// `MmInner` is `!Unpin` because the `drm_mm` it wraps is referenced by its nodes, but the
++    /// user state is not structurally pinned.
++    fn alloc_inner(self: Pin<&mut Self>) -> &mut A {
++        // SAFETY: Only the `drm_mm` field is structurally pinned. The user state `A` is never
++        // pinned, nothing relies on its address, and the returned reference cannot be used to
++        // move the `drm_mm`.
++        unsafe { &mut self.get_unchecked_mut().1 }
++    }
++}
++
+ /// Represents a single allocated node in the MM allocator
+ pub struct NodeData<A: AllocInner<T>, T> {
+     node: bindings::drm_mm_node,
+@@ -93,7 +106,7 @@ impl<A: AllocInner<T>, T> InnerRef<A, T> {
+     /// Operate on the user `AllocInner<T>` implementation, taking the lock.
+     pub fn with<RetVal>(&self, cb: impl FnOnce(&mut A) -> RetVal) -> RetVal {
+         let mut l = self.0.lock();
+-        cb(&mut l.1)
++        cb(l.as_mut().alloc_inner())
+     }
+ }
+ 
+@@ -116,7 +129,7 @@ pub fn size(&self) -> u64 {
+     /// Operate on the user `AllocInner<T>` implementation associated with this node's allocator.
+     pub fn with_inner<RetVal>(&self, cb: impl FnOnce(&mut A) -> RetVal) -> RetVal {
+         let mut l = self.mm.lock();
+-        cb(&mut l.1)
++        cb(l.as_mut().alloc_inner())
+     }
+ 
+     /// Return a clonable, detached reference to the allocator inner data.
+@@ -145,9 +158,12 @@ fn drop(&mut self) {
+             let mut guard = self.mm.lock();
+ 
+             // Inform the user allocator that a node is being dropped.
+-            guard
+-                .1
+-                .drop_object(self.start(), self.size(), self.color(), &mut self.inner);
++            guard.as_mut().alloc_inner().drop_object(
++                self.start(),
++                self.size(),
++                self.color(),
++                &mut self.inner,
++            );
+             // SAFETY: The MM lock is still taken, so we can safely remove the node.
+             unsafe { bindings::drm_mm_remove_node(&mut self.node) };
+         }
+@@ -292,7 +308,7 @@ pub fn reserve_node(
+     /// Operate on the inner user type `A`, taking the allocator lock
+     pub fn with_inner<RetVal>(&self, cb: impl FnOnce(&mut A) -> RetVal) -> RetVal {
+         let mut guard = self.mm.lock();
+-        cb(&mut guard.1)
++        cb(guard.as_mut().alloc_inner())
+     }
+ }
+ 
+diff --git a/rust/kernel/drm/sched.rs b/rust/kernel/drm/sched.rs
+index ac8f18282ef1..be56756f4aaf 100644
+--- a/rust/kernel/drm/sched.rs
++++ b/rust/kernel/drm/sched.rs
+@@ -267,7 +267,7 @@ pub fn new(sched: &Scheduler<T>, priority: Priority) -> Result<Self> {
+         let mut sched_ptr = &sched.0.sched as *const _ as *mut _;
+ 
+         // SAFETY: The Box is allocated above and valid.
+-        unsafe {
++        to_result(unsafe {
+             bindings::drm_sched_entity_init(
+                 addr_of_mut!((*entity.as_mut_ptr()).entity),
+                 priority as _,
+@@ -275,7 +275,7 @@ pub fn new(sched: &Scheduler<T>, priority: Priority) -> Result<Self> {
+                 1,
+                 addr_of_mut!((*entity.as_mut_ptr()).guilty),
+             )
+-        };
++        })?;
+ 
+         // SAFETY: The Box is allocated above and valid.
+         unsafe { addr_of_mut!((*entity.as_mut_ptr()).sched).write(sched.0.clone()) };
+diff --git a/rust/kernel/soc/apple/rtkit.rs b/rust/kernel/soc/apple/rtkit.rs
+index 226c2700830d..c60e3e0e1207 100644
+--- a/rust/kernel/soc/apple/rtkit.rs
++++ b/rust/kernel/soc/apple/rtkit.rs
+@@ -24,6 +24,10 @@
+ 
+ use core::marker::PhantomPinned;
+ use core::ptr;
++use core::sync::atomic::{
++    AtomicPtr,
++    Ordering, //
++};
+ use macros::vtable;
+ 
+ register! {
+@@ -101,11 +105,14 @@ fn shmem_map(
+ ///
+ /// # Invariants
+ ///
+-/// The rtk pointer is valid.
+-/// The data pointer is a valid pointer from T::Data::into_foreign().
++/// Once [`RtKit::new`] has completed, `rtk` is a valid client pointer that does not change
++/// until the client is freed on drop. While [`RtKit::new`] runs, callbacks may already see
++/// `rtk` as null.
+ #[pin_data(PinnedDrop)]
+ pub struct RtKit<T: Operations> {
+-    rtk: *mut bindings::apple_rtkit,
++    // `apple_rtkit_init()` starts the mailbox before it returns, so callbacks can run before the
++    // client pointer is known. It is published once `apple_rtkit_init()` succeeds.
++    rtk: AtomicPtr<bindings::apple_rtkit>,
+     #[pin]
+     data: T::Data,
+     #[pin]
+@@ -233,13 +240,15 @@ pub fn new<'a>(
+         T: 'a,
+     {
+         try_pin_init!(&this in Self {
++            rtk: AtomicPtr::new(ptr::null_mut()),
+             data <- data,
+-            _pin: PhantomPinned,
+-            rtk: {
++            _pin: {
+                 let mbox_idx = mbox_idx.try_into()?;
+                 // SAFETY: `dev` is valid. The cookie is the pinned address of `Self`, which
+                 // outlives the C client: `PinnedDrop` frees the client before `data` is dropped.
+-                unsafe {
++                // All fields with storage (`rtk` and `data`) are initialized, so callbacks can
++                // reference `Self` as soon as the mailbox starts.
++                let client = unsafe {
+                     from_err_ptr(bindings::apple_rtkit_init(
+                         dev.as_raw(),
+                         this.as_ptr().cast(),
+@@ -250,7 +259,11 @@ pub fn new<'a>(
+                         mbox_idx,
+                         &Self::VTABLE,
+                     ))
+-                }?
++                }?;
++                // SAFETY: The `rtk` field was initialized above and `this` is valid for the
++                // duration of the initializer.
++                unsafe { (*this.as_ptr()).rtk.store(client, Ordering::Release) };
++                PhantomPinned
+             },
+         }? Error)
+     }
+@@ -260,29 +273,43 @@ pub fn data(&self) -> &T::Data {
+         &self.data
+     }
+ 
++    /// Returns the C client, or `EBUSY` if a callback runs before [`RtKit::new`] has completed.
++    fn raw(&self) -> Result<*mut bindings::apple_rtkit> {
++        let rtk = self.rtk.load(Ordering::Acquire);
++        if rtk.is_null() {
++            Err(EBUSY)
++        } else {
++            Ok(rtk)
++        }
++    }
++
+     /// Boots (wakes up) the RTKit coprocessor.
+     pub fn wake(&self) -> Result {
+-        // SAFETY: `rtk` is valid per the type invariant.
+-        to_result(unsafe { bindings::apple_rtkit_wake(self.rtk) })
++        let rtk = self.raw()?;
++        // SAFETY: `rtk` is non-null, so valid per the type invariant.
++        to_result(unsafe { bindings::apple_rtkit_wake(rtk) })
+     }
+ 
+     /// Waits for the RTKit coprocessor to finish booting.
+     pub fn boot(&self) -> Result {
+-        // SAFETY: `rtk` is valid per the type invariant.
+-        to_result(unsafe { bindings::apple_rtkit_boot(self.rtk) })
++        let rtk = self.raw()?;
++        // SAFETY: `rtk` is non-null, so valid per the type invariant.
++        to_result(unsafe { bindings::apple_rtkit_boot(rtk) })
+     }
+ 
+     /// Starts a non-system endpoint.
+     pub fn start_endpoint(&self, endpoint: u8) -> Result {
+-        // SAFETY: `rtk` is valid per the type invariant.
+-        to_result(unsafe { bindings::apple_rtkit_start_ep(self.rtk, endpoint) })
++        let rtk = self.raw()?;
++        // SAFETY: `rtk` is non-null, so valid per the type invariant.
++        to_result(unsafe { bindings::apple_rtkit_start_ep(rtk, endpoint) })
+     }
+ 
+     /// Sends a message to a given endpoint.
+     pub fn send_message(&self, endpoint: u8, message: u64) -> Result {
+-        // SAFETY: `rtk` is valid per the type invariant.
++        let rtk = self.raw()?;
++        // SAFETY: `rtk` is non-null, so valid per the type invariant.
+         to_result(unsafe {
+-            bindings::apple_rtkit_send_message(self.rtk, endpoint, message, ptr::null_mut(), false)
++            bindings::apple_rtkit_send_message(rtk, endpoint, message, ptr::null_mut(), false)
+         })
+     }
+ }
+@@ -296,8 +323,8 @@ unsafe impl<T: Operations> Send for RtKit<T> {}
+ #[pinned_drop]
+ impl<T: Operations> PinnedDrop for RtKit<T> {
+     fn drop(self: Pin<&mut Self>) {
+-        // SAFETY: The pointer is valid by the type invariant. After this returns no callback
+-        // runs, so `data` can be dropped.
+-        unsafe { bindings::apple_rtkit_free(self.rtk) };
++        // SAFETY: `new` has completed, so the pointer is valid by the type invariant. After this
++        // returns no callback runs, so `data` can be dropped.
++        unsafe { bindings::apple_rtkit_free(self.rtk.load(Ordering::Acquire)) };
+     }
+ }
+diff --git a/rust/kernel/soc/mod.rs b/rust/kernel/soc/mod.rs
+index 117e533612f5..3a0a335f55f0 100644
+--- a/rust/kernel/soc/mod.rs
++++ b/rust/kernel/soc/mod.rs
+@@ -5,3 +5,9 @@
+ pub mod apple;
+ #[cfg(CONFIG_SOC_BUS)]
+ pub mod bus;
++
++#[cfg(CONFIG_SOC_BUS)]
++pub use bus::{
++    Attributes,
++    Registration, //
++};
+diff --git a/rust/kernel/sync/lock.rs b/rust/kernel/sync/lock.rs
+index 7e983cbca411..07eef650b603 100644
+--- a/rust/kernel/sync/lock.rs
++++ b/rust/kernel/sync/lock.rs
+@@ -312,8 +312,8 @@ fn deref(&self) -> &Self::Target {
+ }
+ 
+ impl<T: ?Sized, B: Backend> core::ops::DerefMut for Guard<'_, T, B>
+-// where
+-//     T: Unpin,
++where
++    T: Unpin,
+ {
+     #[inline]
+     fn deref_mut(&mut self) -> &mut Self::Target {
+diff --git a/rust/kernel/xarray.rs b/rust/kernel/xarray.rs
+index 2e6e3aee5f04..77cd5d2dddef 100644
+--- a/rust/kernel/xarray.rs
++++ b/rust/kernel/xarray.rs
+@@ -424,16 +424,17 @@ unsafe fn alloc(
+         ptr: *mut c_void,
+         gfp: alloc::Flags,
+     ) -> Result<usize> {
+-        // NB: `xa_limit::{max,min}` are inclusive.
++        // NB: `xa_limit::{max,min}` are inclusive. An exclusive bound at the edge of the `u32`
++        // range leaves no index to allocate, which is reported like a full range.
+         let limit = bindings::xa_limit {
+             max: match limit.end_bound() {
+                 ops::Bound::Included(&end) => end,
+-                ops::Bound::Excluded(&end) => end - 1,
++                ops::Bound::Excluded(&end) => end.checked_sub(1).ok_or(EBUSY)?,
+                 ops::Bound::Unbounded => u32::MAX,
+             },
+             min: match limit.start_bound() {
+                 ops::Bound::Included(&start) => start,
+-                ops::Bound::Excluded(&start) => start + 1,
++                ops::Bound::Excluded(&start) => start.checked_add(1).ok_or(EBUSY)?,
+                 ops::Bound::Unbounded => 0,
+             },
+         };
+diff --git a/rust/macros/versions.rs b/rust/macros/versions.rs
+index b13a5d55c0e1..93a9f5b02f5c 100644
+--- a/rust/macros/versions.rs
++++ b/rust/macros/versions.rs
+@@ -14,7 +14,7 @@ fn expect_punct(it: &mut impl Iterator<Item = TokenTree>) -> String {
+     if let Some(TokenTree::Punct(punct)) = it.next() {
+         punct.to_string()
+     } else {
+-        panic!("Expected Group")
++        panic!("Expected Punct")
+     }
+ }
+ 
+@@ -104,13 +104,14 @@ struct VersionConfig {
+     ],
+ };
+ 
+-fn check_version(
++/// Evaluates one comparison (`G >= G14`) or one parenthesized expression.
++fn check_term(
+     config: &VersionConfig,
+     ver: &[usize],
+     it: &mut impl Iterator<Item = TokenTree>,
+ ) -> bool {
+     let first = it.next().unwrap();
+-    let val: bool = match &first {
++    match &first {
+         TokenTree::Group(group) => check_version(config, ver, &mut group.stream().into_iter()),
+         TokenTree::Ident(ident) => {
+             let key = config
+@@ -127,7 +128,7 @@ fn check_version(
+             let rhs_name = if let TokenTree::Ident(ident) = &rhs_token {
+                 ident.to_string()
+             } else {
+-                panic!("Unexpected token {}", ident)
++                panic!("Unexpected token {}", rhs_token)
+             };
+ 
+             let rhs = config.enums[key]
+@@ -149,23 +150,41 @@ fn check_version(
+         _ => {
+             panic!("Unknown token {}", first)
+         }
+-    };
++    }
++}
+ 
+-    let boolop = it.next();
+-    match boolop {
+-        Some(TokenTree::Punct(punct)) => {
+-            let right = expect_punct(it);
+-            if right != punct.to_string() {
+-                panic!("Unexpected op {}{}", punct, right);
+-            }
+-            match punct.as_char() {
+-                '&' => val && check_version(config, ver, it),
+-                '|' => val || check_version(config, ver, it),
+-                _ => panic!("Unexpected op {}{}", right, right),
++/// Evaluates a `&&`/`||` expression of terms, with `&&` binding tighter than `||` as in Rust.
++fn check_version(
++    config: &VersionConfig,
++    ver: &[usize],
++    it: &mut impl Iterator<Item = TokenTree>,
++) -> bool {
++    // `any` holds the `||` of the finished `&&` chains, `all` the chain being built.
++    let mut any = false;
++    let mut all = check_term(config, ver, it);
++
++    loop {
++        match it.next() {
++            Some(TokenTree::Punct(punct)) => {
++                let right = expect_punct(it);
++                if right != punct.to_string() {
++                    panic!("Unexpected op {}{}", punct, right);
++                }
++                match punct.as_char() {
++                    '&' => {
++                        let term = check_term(config, ver, it);
++                        all = all && term;
++                    }
++                    '|' => {
++                        any = any || all;
++                        all = check_term(config, ver, it);
++                    }
++                    _ => panic!("Unexpected op {}{}", punct, right),
++                }
+             }
++            Some(a) => panic!("Unexpected op {}", a),
++            None => return any || all,
+         }
+-        Some(a) => panic!("Unexpected op {}", a),
+-        None => val,
+     }
+ }
+ 
+diff --git a/rust/pin-init/src/lib.rs b/rust/pin-init/src/lib.rs
+index dc2d848db125..1653f99efeda 100644
+--- a/rust/pin-init/src/lib.rs
++++ b/rust/pin-init/src/lib.rs
+@@ -1528,7 +1528,8 @@ pub fn default<T: Default>() -> impl Init<T> {
+     // we can just move the data into the slot.
+     unsafe {
+         init_from_closure(|slot: *mut T| {
+-            *slot = Default::default();
++            // `slot` is uninitialized: write without dropping the old contents.
++            slot.write(Default::default());
+             Ok(())
+         })
+     }
+diff --git a/scripts/dtc/dtc-parser.y b/scripts/dtc/dtc-parser.y
+index 225a6b41b14f..6e5227b9b7ec 100644
+--- a/scripts/dtc/dtc-parser.y
++++ b/scripts/dtc/dtc-parser.y
+@@ -7,6 +7,7 @@
+ %{
+ #include <stdio.h>
+ #include <inttypes.h>
++#include <float.h>
+ 
+ #include "dtc.h"
+ #include "srcpos.h"
+@@ -403,9 +404,16 @@ arrayprefix:
+ 			if ($1.bits < 32) {
+ 				ERROR(&@2, "Floating-point values must be"
+ 				      " 32-bit or 64-bit");
++				$$.data = $1.data;
++			} else if ($1.bits == 32 &&
++				   ($2 > FLT_MAX || $2 < -FLT_MAX)) {
++				ERROR(&@2, "Floating-point value out of"
++				      " range for 32-bit");
++				$$.data = $1.data;
++			} else {
++				$$.data = data_append_float($1.data, $2,
++							    $1.bits);
+ 			}
+-
+-			$$.data = data_append_float($1.data, $2, $1.bits);
+ 		}
+ 	| arrayprefix integer_prim
+ 		{
+diff --git a/sound/core/pcm_lib.c b/sound/core/pcm_lib.c
+index f538bb9cd3ca..9fc73ad2ef89 100644
+--- a/sound/core/pcm_lib.c
++++ b/sound/core/pcm_lib.c
+@@ -1162,27 +1162,11 @@ static int snd_interval_step(struct snd_interval *i, unsigned int step)
+  */
+ int snd_interval_rate_bits(struct snd_interval *i, unsigned int mask)
+ {
+-	unsigned int k;
+-	struct snd_interval mask_range;
+-
+ 	if (!mask)
+ 		return -EINVAL;
+ 
+-	snd_interval_any(&mask_range);
+-	mask_range.min = UINT_MAX;
+-	mask_range.max = 0;
+-	for (k = 0; k < snd_pcm_known_rates.count; k++) {
+-		unsigned int rate = snd_pcm_known_rates.list[k];
+-		if (!(mask & (1 << k)))
+-			continue;
+-
+-		if (rate > mask_range.max)
+-			mask_range.max = rate;
+-
+-		if (rate < mask_range.min)
+-			mask_range.min = rate;
+-	}
+-	return snd_interval_refine(i, &mask_range);
++	return snd_interval_list(i, snd_pcm_known_rates.count,
++				 snd_pcm_known_rates.list, mask);
+ }
+ EXPORT_SYMBOL(snd_interval_rate_bits);
+ 
+diff --git a/sound/soc/apple/macaudio.c b/sound/soc/apple/macaudio.c
+index fde8427650b8..3574ffda913e 100644
+--- a/sound/soc/apple/macaudio.c
++++ b/sound/soc/apple/macaudio.c
+@@ -1091,6 +1091,9 @@ static int macaudio_be_assign_tdm(struct snd_soc_pcm_runtime *rtd)
+ 		if (props->codecs[i].idle_mode) {
+ 			ret = snd_soc_dai_set_tdm_idle(dai, props->codecs[i].idle_mask,
+ 						       0, props->codecs[i].idle_mode, 0);
++			if (ret)
++				dev_warn(card->dev, "%s: failed to set TDM idle mode: %d\n",
++					 dai->name, ret);
+ 		}
+ 	}
+ 
+@@ -1314,17 +1317,20 @@ static int macaudio_late_probe(struct snd_soc_card *card)
+ 	return 0;
+ }
+ 
+-#define CHECK(call, pattern, value, min)                                       \
++/*
++ * The snd_soc_* helpers used here fail with -EINVAL when no control
++ * matches the pattern, so a non-negative return means at least one hit.
++ */
++#define CHECK(call, pattern, value)                                            \
+ 	{                                                                      \
+ 		int ret = call(card, pattern, value);                          \
+-		int err = (ret >= 0 && ret < min) ? -ERANGE : ret;             \
+-		if (err < 0) {                                                 \
++		if (ret < 0) {                                                 \
+ 			dev_err(card->dev, "%s on '%s': %d\n", #call, pattern, \
+ 				ret);                                          \
+ 			if (please_blow_up_my_speakers < 2)                    \
+-				return err;                                    \
++				return ret;                                    \
+ 		} else {                                                       \
+-			dev_dbg(card->dev, "%s on '%s': %d hits\n", #call,     \
++			dev_dbg(card->dev, "%s on '%s': %d\n", #call,          \
+ 				pattern, ret);                                 \
+ 		}                                                              \
+ 	}
+@@ -1332,7 +1338,7 @@ static int macaudio_late_probe(struct snd_soc_card *card)
+ #define CHECK_CONCAT(call, suffix, value) \
+ 	{ \
+ 		snprintf(buf, sizeof(buf), "%s%s", prefix, suffix); \
+-		CHECK(call, buf, value, 1); \
++		CHECK(call, buf, value); \
+ 	}
+ 
+ static int macaudio_lock_kctl(struct snd_soc_card *card, const char *name, int active)
+@@ -1432,23 +1438,23 @@ static int macaudio_fixup_controls(struct snd_soc_card *card)
+ 	case SPKR_1W:
+ 		/* only 1W stereo system (J313) is uses cs42l83 */
+ 		if (ma->cfg->stereo) {
+-			CHECK(macaudio_set_speaker, "* ", false, 0);
++			CHECK(macaudio_set_speaker, "* ", false);
+ 		} else {
+-			CHECK(macaudio_set_speaker, "", false, 0);
++			CHECK(macaudio_set_speaker, "", false);
+ 		}
+ 		break;
+ 	case SPKR_2W:
+-		CHECK(macaudio_set_speaker, "* Front ", false, 0);
+-		CHECK(macaudio_set_speaker, "* Rear ", false, 0);
++		CHECK(macaudio_set_speaker, "* Front ", false);
++		CHECK(macaudio_set_speaker, "* Rear ", false);
+ 		break;
+ 	case SPKR_1W1T:
+-		CHECK(macaudio_set_speaker, "* Tweeter ", true, 0);
+-		CHECK(macaudio_set_speaker, "* Woofer ", false, 0);
++		CHECK(macaudio_set_speaker, "* Tweeter ", true);
++		CHECK(macaudio_set_speaker, "* Woofer ", false);
+ 		break;
+ 	case SPKR_2W1T:
+-		CHECK(macaudio_set_speaker, "* Tweeter ", true, 0);
+-		CHECK(macaudio_set_speaker, "* Woofer 1 ", false, 0);
+-		CHECK(macaudio_set_speaker, "* Woofer 2 ", false, 0);
++		CHECK(macaudio_set_speaker, "* Tweeter ", true);
++		CHECK(macaudio_set_speaker, "* Woofer 1 ", false);
++		CHECK(macaudio_set_speaker, "* Woofer 2 ", false);
+ 		break;
+ 	}
+ 
+diff --git a/sound/soc/apple/mca.c b/sound/soc/apple/mca.c
+index 1e17062f7f84..228a152078cc 100644
+--- a/sound/soc/apple/mca.c
++++ b/sound/soc/apple/mca.c
+@@ -880,7 +880,7 @@ static void mca_be_shutdown(struct snd_pcm_substream *substream,
+ 
+ 	if (cl->clocks_in_use[substream->stream] &&
+ 		!WARN_ON(cl->port_clk_driver < 0)) {
+-		struct mca_cluster *fe_cl = &mca->clusters[cl->port_clk_driver];
++		struct mca_cluster *clk_cl = &mca->clusters[cl->port_clk_driver];
+ 
+ 		/*
+ 		 * Typically the CODECs we are paired with will require clocks
+@@ -894,8 +894,8 @@ static void mca_be_shutdown(struct snd_pcm_substream *substream,
+ 		 */
+ 		cl->clocks_in_use[substream->stream] = false;
+ 
+-		if (!mca_fe_clocks_in_use(fe_cl))
+-			mca_fe_disable_clocks(fe_cl);
++		if (!mca_fe_clocks_in_use(clk_cl))
++			mca_fe_disable_clocks(clk_cl);
+ 	}
+ 
+ 	if (!fe)
+diff --git a/sound/soc/codecs/tas2764.c b/sound/soc/codecs/tas2764.c
+index ec3dd171d0c7..7fbece7b363d 100644
+--- a/sound/soc/codecs/tas2764.c
++++ b/sound/soc/codecs/tas2764.c
+@@ -788,23 +788,23 @@ static int tas2764_codec_probe(struct snd_soc_component *component)
+ 	if (tas2764->irq) {
+ 		ret = snd_soc_component_write(tas2764->component, TAS2764_INT_MASK0, 0x00);
+ 		if (ret < 0)
+-			return ret;
++			goto err_disable_reg;
+ 
+ 		ret = snd_soc_component_write(tas2764->component, TAS2764_INT_MASK1, 0xff);
+ 		if (ret < 0)
+-			return ret;
++			goto err_disable_reg;
+ 
+ 		ret = snd_soc_component_write(tas2764->component, TAS2764_INT_MASK2, 0xff);
+ 		if (ret < 0)
+-			return ret;
++			goto err_disable_reg;
+ 
+ 		ret = snd_soc_component_write(tas2764->component, TAS2764_INT_MASK3, 0xff);
+ 		if (ret < 0)
+-			return ret;
++			goto err_disable_reg;
+ 
+ 		ret = snd_soc_component_write(tas2764->component, TAS2764_INT_MASK4, 0xff);
+ 		if (ret < 0)
+-			return ret;
++			goto err_disable_reg;
+ 
+ 		ret = devm_request_threaded_irq(tas2764->dev, tas2764->irq, NULL, tas2764_irq,
+ 						IRQF_ONESHOT | IRQF_SHARED | IRQF_TRIGGER_LOW,
+@@ -818,7 +818,7 @@ static int tas2764_codec_probe(struct snd_soc_component *component)
+ 						   tas2764->v_sense_slot);
+ 
+ 		if (ret < 0)
+-			return ret;
++			goto err_disable_reg;
+ 	}
+ 
+ 	switch (tas2764->devid) {
+@@ -827,7 +827,7 @@ static int tas2764_codec_probe(struct snd_soc_component *component)
+ 					TAS2764_PWR_CTRL_BOP_SRC,
+ 					TAS2764_PWR_CTRL_BOP_SRC);
+ 		if (ret < 0)
+-			return ret;
++			goto err_disable_reg;
+ 
+ 		for (i = 0; i < ARRAY_SIZE(sn012776_bop_presets); i++) {
+ 			ret = snd_soc_component_write(component,
+@@ -835,14 +835,14 @@ static int tas2764_codec_probe(struct snd_soc_component *component)
+ 						sn012776_bop_presets[i]);
+ 
+ 			if (ret < 0)
+-				return ret;
++				goto err_disable_reg;
+ 		}
+ 
+ 		/* Apply all enabled Apple quirks */
+ 		ret = tas2764_apply_init_quirks(tas2764);
+ 
+ 		if (ret < 0)
+-			return ret;
++			goto err_disable_reg;
+ 
+ 		break;
+ 	default:
+@@ -850,6 +850,13 @@ static int tas2764_codec_probe(struct snd_soc_component *component)
+ 	}
+ 
+ 	return 0;
++
++err_disable_reg:
++	if (tas2764->sdz_gpio)
++		gpiod_set_value_cansleep(tas2764->sdz_gpio, 0);
++
++	regulator_disable(tas2764->sdz_reg);
++	return ret;
+ }
+ 
+ static void tas2764_codec_remove(struct snd_soc_component *component)
+diff --git a/sound/soc/codecs/tas2770.c b/sound/soc/codecs/tas2770.c
+index a69aba06a4b1..a53ce373029c 100644
+--- a/sound/soc/codecs/tas2770.c
++++ b/sound/soc/codecs/tas2770.c
+@@ -745,17 +745,24 @@ static int tas2770_codec_probe(struct snd_soc_component *component)
+ 						   tas2770->v_sense_slot);
+ 
+ 		if (ret < 0)
+-			return ret;
++			goto err_disable_reg;
+ 	}
+ 
+ 	if (tas2770->pdm_slot != -1) {
+ 		ret = tas2770_set_pdm_transmit(tas2770, tas2770->pdm_slot);
+ 
+ 		if (ret < 0)
+-			return ret;
++			goto err_disable_reg;
+ 	}
+ 
+ 	return 0;
++
++err_disable_reg:
++	if (tas2770->sdz_gpio)
++		gpiod_set_value_cansleep(tas2770->sdz_gpio, 0);
++
++	regulator_disable(tas2770->sdz_reg);
++	return ret;
+ }
+ 
+ static void tas2770_codec_remove(struct snd_soc_component *component)
+diff --git a/sound/soc/soc-ops.c b/sound/soc/soc-ops.c
+index 74b99bf15973..17c4f1f8df0f 100644
+--- a/sound/soc/soc-ops.c
++++ b/sound/soc/soc-ops.c
+@@ -458,10 +458,24 @@ static int snd_soc_clip_to_platform_max(struct snd_kcontrol *kctl)
+ 	return ret;
+ }
+ 
++/*
++ * A wildcard pattern can match controls of any type; only volsw controls
++ * carry a struct soc_mixer_control in private_value.
++ */
++static bool soc_is_volsw(struct snd_kcontrol *kctl)
++{
++	return kctl->info == snd_soc_info_volsw ||
++	       kctl->info == snd_soc_info_volsw_sx;
++}
++
+ static int soc_limit_volume(struct snd_kcontrol *kctl, int max)
+ {
+-	struct soc_mixer_control *mc = (struct soc_mixer_control *)kctl->private_value;
++	struct soc_mixer_control *mc;
++
++	if (!soc_is_volsw(kctl))
++		return -EINVAL;
+ 
++	mc = (struct soc_mixer_control *)kctl->private_value;
+ 	if (max <= 0 || max > mc->max - mc->min)
+ 		return -EINVAL;
+ 	mc->platform_max = max;
+@@ -479,8 +493,8 @@ static int soc_limit_volume(struct snd_kcontrol *kctl, int max)
+  * verbatim, or a pattern starting with the wildcard '*') and sets
+  * a platform volume limit on them.
+  *
+- * Return number of matching controls on success, else error. At least
+- * one control needs to match the pattern.
++ * Return 0 on success, else error. At least one control needs to match
++ * the pattern.
+  */
+ int snd_soc_limit_volume(struct snd_soc_card *card, const char *name, int max)
+ {
+@@ -504,7 +518,7 @@ int snd_soc_limit_volume(struct snd_soc_card *card, const char *name, int max)
+ 	}
+ 
+ 	list_for_each_entry(kctl, &card->snd_card->controls, list) {
+-		if (!snd_soc_control_matches(kctl, name))
++		if (!snd_soc_control_matches(kctl, name) || !soc_is_volsw(kctl))
+ 			continue;
+ 
+ 		ret = snd_soc_clip_to_platform_max(kctl);
+@@ -522,7 +536,7 @@ int snd_soc_limit_volume(struct snd_soc_card *card, const char *name, int max)
+ 		return -EINVAL;
+ 	}
+ 
+-	return hits;
++	return 0;
+ }
+ EXPORT_SYMBOL_GPL(snd_soc_limit_volume);
+ 
+@@ -533,8 +547,8 @@ EXPORT_SYMBOL_GPL(snd_soc_limit_volume);
+  * @name: name pattern
+  * @active: non-zero to activate, zero to deactivate
+  *
+- * Return number of matching controls on success, else error.
+- * No controls need to match.
++ * Return number of matching controls on success, else error. At least
++ * one control needs to match the pattern.
+  */
+ int snd_soc_deactivate_kctl(struct snd_soc_card *card,
+ 	const char *name, int active)
+@@ -604,7 +618,7 @@ static int soc_set_enum_kctl(struct snd_kcontrol *kctl, const char *strval)
+  * @value: string value to set the controls to
+  *
+  * Return number of matching and set controls on success, else error.
+- * No controls need to match.
++ * At least one control needs to match the pattern.
+  */
+ int snd_soc_set_enum_kctl(struct snd_soc_card *card,
+ 	const char *name, const char *value)
