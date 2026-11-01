@@ -73,3 +73,6 @@ A full build needs about 20 GB of disk.
 
 MIT OR Apache-2.0 for this repository's own files; the patches carry the licence of the kernel
 files they change (GPL-2.0).
+
+Patches taken from Asahi Linux keep their original author, `Signed-off-by` and copyright lines.
+Restore any that were lost in a rebase or squash before publishing or sending a patch upstream.
