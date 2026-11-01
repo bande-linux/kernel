@@ -92,10 +92,6 @@ git diff patches/                   # only the patches you meant to change
 - Then build it locally (below) before committing: a commit here changes the version, and the
   hourly `follow-debian.yml` may build and publish it.
 
-The patches for 7.3 were last exported from `bande-linux/linux` (`prep/hw-test6`, 2f4f980145b0,
-whose CI-only and config-fragment changes Debian's build replaces). Since 2026-11-01 they are
-changed only here.
-
 A dispatch of `follow-debian.yml` with `debian_version` test-builds any Debian version without
 publishing it; `scripts/local-build.sh` is the same locally.
 
@@ -121,10 +117,10 @@ the mini's own. Clean up after a build.
 
 ### Until Debian testing has 7.3
 
-Our patches are for 7.3; testing has 7.2 and experimental 7.3~rc7, so CI builds nothing. The
-mini runs a local build of experimental's 7.3~rc7 with our 7.3 series, built as above and
-installed by hand (never published). Once testing reaches 7.3, `follow-debian.yml` builds and
-publishes it by itself, and the mini follows the archive.
+Our patches are for 7.3; testing has 7.2 and experimental 7.3~rc7, so CI builds nothing.
+Until then, test kernels for the mini are local builds of experimental's 7.3~rc7 with our 7.3
+series, built as above and installed by hand (never published). Once testing reaches 7.3,
+`follow-debian.yml` builds and publishes it by itself, and the mini follows the archive.
 
 ## Licence
 
