@@ -1,4 +1,4 @@
-From 543ed390190483c7cdfed858c2d224ec1bf0aff9 Mon Sep 17 00:00:00 2001
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
 From: Sven Peter <sven@kernel.org>
 Date: Sun, 30 Aug 2026 16:22:08 +0200
 Subject: [PATCH] arm64: dts: apple: t6030: Fix cpus node indentation
@@ -15,7 +15,7 @@ Signed-off-by: Sven Peter <sven@kernel.org>
  1 file changed, 1 insertion(+), 1 deletion(-)
 
 diff --git a/arch/arm64/boot/dts/apple/t6030.dtsi b/arch/arm64/boot/dts/apple/t6030.dtsi
-index dda9568af11f..5ff12edfc553 100644
+index dda9568..5ff12ed 100644
 --- a/arch/arm64/boot/dts/apple/t6030.dtsi
 +++ b/arch/arm64/boot/dts/apple/t6030.dtsi
 @@ -208,7 +208,7 @@ l2_cache_1: l2-cache-1 {
@@ -27,6 +27,3 @@ index dda9568af11f..5ff12edfc553 100644
  
  	timer {
  		compatible = "arm,armv8-timer";
--- 
-2.47.3
-

@@ -1,4 +1,4 @@
-From 937d4acdaf4042cef4f7125529ee84b016596414 Mon Sep 17 00:00:00 2001
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
 From: Sasha Finkelstein <k@chaosmail.tech>
 Date: Thu, 9 Jul 2026 22:58:25 +0200
 Subject: [PATCH] arm64: dts: apple: t8122: Add aop/admac nodes
@@ -13,7 +13,7 @@ Signed-off-by: Sasha Finkelstein <k@chaosmail.tech>
  4 files changed, 126 insertions(+), 1 deletion(-)
 
 diff --git a/arch/arm64/boot/dts/apple/t8122-j504.dts b/arch/arm64/boot/dts/apple/t8122-j504.dts
-index f45c19883be5..e1babb6b45e1 100644
+index f45c198..e1babb6 100644
 --- a/arch/arm64/boot/dts/apple/t8122-j504.dts
 +++ b/arch/arm64/boot/dts/apple/t8122-j504.dts
 @@ -101,6 +101,27 @@ tp_accel {
@@ -45,7 +45,7 @@ index f45c19883be5..e1babb6b45e1 100644
  	status = "okay";
  
 diff --git a/arch/arm64/boot/dts/apple/t8122-j613.dts b/arch/arm64/boot/dts/apple/t8122-j613.dts
-index eabffb366c34..4d860ac590ed 100644
+index eabffb3..4d860ac 100644
 --- a/arch/arm64/boot/dts/apple/t8122-j613.dts
 +++ b/arch/arm64/boot/dts/apple/t8122-j613.dts
 @@ -38,6 +38,27 @@ &bluetooth0 {
@@ -77,7 +77,7 @@ index eabffb366c34..4d860ac590ed 100644
  	speaker_left_woof: codec@38 {
  		compatible = "ti,sn012776", "ti,tas2764";
 diff --git a/arch/arm64/boot/dts/apple/t8122-j615.dts b/arch/arm64/boot/dts/apple/t8122-j615.dts
-index ffa5c6e5d4d3..9f795673a1df 100644
+index ffa5c6e..9f79567 100644
 --- a/arch/arm64/boot/dts/apple/t8122-j615.dts
 +++ b/arch/arm64/boot/dts/apple/t8122-j615.dts
 @@ -30,6 +30,27 @@ led-0 {
@@ -109,7 +109,7 @@ index ffa5c6e5d4d3..9f795673a1df 100644
  	brcm,board-type = "apple,tuzla";
  };
 diff --git a/arch/arm64/boot/dts/apple/t8122.dtsi b/arch/arm64/boot/dts/apple/t8122.dtsi
-index 2386339077d8..2d4f69d943c3 100644
+index 2386339..2d4f69d 100644
 --- a/arch/arm64/boot/dts/apple/t8122.dtsi
 +++ b/arch/arm64/boot/dts/apple/t8122.dtsi
 @@ -529,7 +529,7 @@ serial0: serial@2a1200000 {
@@ -190,6 +190,3 @@ index 2386339077d8..2d4f69d943c3 100644
  		pinctrl_aop: pinctrl@2f4824000 {
  			compatible = "apple,t8122-pinctrl", "apple,t8103-pinctrl";
  			reg = <0x2 0xf4824000 0x0 0x4000>;
--- 
-2.47.3
-

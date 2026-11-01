@@ -1,4 +1,4 @@
-From 872c603a265a96242662e9da4aa52ed7c5bf35ea Mon Sep 17 00:00:00 2001
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
 From: Janne Grunau <j@jannau.net>
 Date: Thu, 13 Feb 2025 22:44:11 +0100
 Subject: [PATCH] soc: apple: rtkit: Use scope-based cleanup in
@@ -15,7 +15,7 @@ Signed-off-by: Janne Grunau <j@jannau.net>
  1 file changed, 1 insertion(+), 3 deletions(-)
 
 diff --git a/drivers/soc/apple/rtkit.c b/drivers/soc/apple/rtkit.c
-index 6b0ffb1201d6..a8a915439c7d 100644
+index 6b0ffb1..a8a9154 100644
 --- a/drivers/soc/apple/rtkit.c
 +++ b/drivers/soc/apple/rtkit.c
 @@ -361,7 +361,7 @@ static void apple_rtkit_memcpy(struct apple_rtkit *rtk, void *dst,
@@ -36,6 +36,3 @@ index 6b0ffb1201d6..a8a915439c7d 100644
  }
  
  static void apple_rtkit_ioreport_rx(struct apple_rtkit *rtk, u64 msg)
--- 
-2.47.3
-

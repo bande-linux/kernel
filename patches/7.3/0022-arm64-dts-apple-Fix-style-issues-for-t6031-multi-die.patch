@@ -1,4 +1,4 @@
-From d01337fd2af713862efbe63cfa5e65b8781d2924 Mon Sep 17 00:00:00 2001
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
 From: Janne Grunau <j@jannau.net>
 Date: Tue, 1 Sep 2026 14:56:44 +0200
 Subject: [PATCH] arm64: dts: apple: Fix style issues for t6031 multi die .dtsi
@@ -20,7 +20,7 @@ Signed-off-by: Janne Grunau <j@jannau.net>
  4 files changed, 15 insertions(+), 14 deletions(-)
 
 diff --git a/arch/arm64/boot/dts/apple/t6031-die0.dtsi b/arch/arm64/boot/dts/apple/t6031-die0.dtsi
-index 47d08672a047..cffab6b51d12 100644
+index 47d0867..cffab6b 100644
 --- a/arch/arm64/boot/dts/apple/t6031-die0.dtsi
 +++ b/arch/arm64/boot/dts/apple/t6031-die0.dtsi
 @@ -6,6 +6,7 @@
@@ -37,7 +37,7 @@ index 47d08672a047..cffab6b51d12 100644
  	};
 +};
 diff --git a/arch/arm64/boot/dts/apple/t6031-dieX.dtsi b/arch/arm64/boot/dts/apple/t6031-dieX.dtsi
-index 2e9d3d2e6dea..524a72f5483e 100644
+index 2e9d3d2..524a72f 100644
 --- a/arch/arm64/boot/dts/apple/t6031-dieX.dtsi
 +++ b/arch/arm64/boot/dts/apple/t6031-dieX.dtsi
 @@ -6,6 +6,7 @@
@@ -54,7 +54,7 @@ index 2e9d3d2e6dea..524a72f5483e 100644
  	};
 +};
 diff --git a/arch/arm64/boot/dts/apple/t6031.dtsi b/arch/arm64/boot/dts/apple/t6031.dtsi
-index 0059afe9a844..2ba0768c33bc 100644
+index 0059afe..2ba0768 100644
 --- a/arch/arm64/boot/dts/apple/t6031.dtsi
 +++ b/arch/arm64/boot/dts/apple/t6031.dtsi
 @@ -35,14 +35,13 @@ soc: soc {
@@ -77,7 +77,7 @@ index 0059afe9a844..2ba0768c33bc 100644
  #undef DIE_NO
 +#undef SOC_NODE
 diff --git a/arch/arm64/boot/dts/apple/t6032.dtsi b/arch/arm64/boot/dts/apple/t6032.dtsi
-index 61d044f3a734..0a966370cc82 100644
+index 61d044f..0a96637 100644
 --- a/arch/arm64/boot/dts/apple/t6032.dtsi
 +++ b/arch/arm64/boot/dts/apple/t6032.dtsi
 @@ -317,31 +317,29 @@ die1: soc@2200000000 {
@@ -119,6 +119,3 @@ index 61d044f3a734..0a966370cc82 100644
  
  /* delete non-present DISP power-states */
  /delete-node/ &ps_disp_cpu;
--- 
-2.47.3
-

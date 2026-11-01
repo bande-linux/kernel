@@ -1,4 +1,4 @@
-From cbb8c06e436b1ef87bb6d62c9fe1751201f9cbc0 Mon Sep 17 00:00:00 2001
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
 From: Sasha Finkelstein <k@chaosmail.tech>
 Date: Fri, 17 Jul 2026 12:40:39 +0200
 Subject: [PATCH] arm64: dts: apple: t6030: Add isp nodes
@@ -13,7 +13,7 @@ Signed-off-by: Sasha Finkelstein <k@chaosmail.tech>
  4 files changed, 56 insertions(+), 4 deletions(-)
 
 diff --git a/arch/arm64/boot/dts/apple/t6030-j514s.dts b/arch/arm64/boot/dts/apple/t6030-j514s.dts
-index 754638f93f23..aa5db1e84483 100644
+index 754638f..aa5db1e 100644
 --- a/arch/arm64/boot/dts/apple/t6030-j514s.dts
 +++ b/arch/arm64/boot/dts/apple/t6030-j514s.dts
 @@ -77,3 +77,7 @@ &sound {
@@ -25,7 +25,7 @@ index 754638f93f23..aa5db1e84483 100644
 +	apple,platform-id = <16>;
 +};
 diff --git a/arch/arm64/boot/dts/apple/t6030-j516s.dts b/arch/arm64/boot/dts/apple/t6030-j516s.dts
-index bd955406ac68..5532faac8ed8 100644
+index bd95540..5532faa 100644
 --- a/arch/arm64/boot/dts/apple/t6030-j516s.dts
 +++ b/arch/arm64/boot/dts/apple/t6030-j516s.dts
 @@ -77,3 +77,7 @@ &sound {
@@ -37,7 +37,7 @@ index bd955406ac68..5532faac8ed8 100644
 +	apple,platform-id = <16>;
 +};
 diff --git a/arch/arm64/boot/dts/apple/t6030.dtsi b/arch/arm64/boot/dts/apple/t6030.dtsi
-index 563ae349ae4b..7fc525d5f90a 100644
+index 563ae34..7fc525d 100644
 --- a/arch/arm64/boot/dts/apple/t6030.dtsi
 +++ b/arch/arm64/boot/dts/apple/t6030.dtsi
 @@ -13,8 +13,6 @@
@@ -105,7 +105,7 @@ index 563ae349ae4b..7fc525d5f90a 100644
  			compatible = "apple,t6030-avd", "apple,t8122-avd";
  			interrupt-parent = <&aic>;
 diff --git a/arch/arm64/boot/dts/apple/t603x-j514-j516.dtsi b/arch/arm64/boot/dts/apple/t603x-j514-j516.dtsi
-index ddb130730fbd..f79ad9407de8 100644
+index ddb1307..f79ad94 100644
 --- a/arch/arm64/boot/dts/apple/t603x-j514-j516.dtsi
 +++ b/arch/arm64/boot/dts/apple/t603x-j514-j516.dtsi
 @@ -294,13 +294,11 @@ codec {
@@ -122,6 +122,3 @@ index ddb130730fbd..f79ad9407de8 100644
  
  #include "spi1-nvram.dtsi"
  #include "hwmon-common.dtsi"
--- 
-2.47.3
-

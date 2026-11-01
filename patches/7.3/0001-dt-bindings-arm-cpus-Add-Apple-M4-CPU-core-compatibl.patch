@@ -1,4 +1,4 @@
-From 5aefa2e15b9e9fc1d27936748fc6f76ced37d786 Mon Sep 17 00:00:00 2001
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
 From: Yureka Lilian <yureka@cyberchaos.dev>
 Date: Sun, 5 Jul 2026 15:17:20 +0200
 Subject: [PATCH] dt-bindings: arm: cpus: Add Apple M4 CPU core compatibles
@@ -19,7 +19,7 @@ Acked-by: Krzysztof Kozlowski <krzysztof.kozlowski@oss.qualcomm.com>
  1 file changed, 2 insertions(+)
 
 diff --git a/Documentation/devicetree/bindings/arm/cpus.yaml b/Documentation/devicetree/bindings/arm/cpus.yaml
-index 5be89c584026..c328e9fb9843 100644
+index 5be89c5..c328e9f 100644
 --- a/Documentation/devicetree/bindings/arm/cpus.yaml
 +++ b/Documentation/devicetree/bindings/arm/cpus.yaml
 @@ -86,6 +86,8 @@ properties:
@@ -31,6 +31,3 @@ index 5be89c584026..c328e9fb9843 100644
            - apple,everest
            - apple,firestorm
            - apple,hurricane-zephyr
--- 
-2.47.3
-

@@ -1,4 +1,4 @@
-From 1bf227a18cd32260554e6a3f6baf7617057215a4 Mon Sep 17 00:00:00 2001
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
 From: James Calligeros <jcalligeros99@gmail.com>
 Date: Fri, 19 Jun 2026 20:33:31 +1000
 Subject: [PATCH] arm64: dts: apple: t8112: Add apple,iomfb-surfaces to DCP
@@ -13,7 +13,7 @@ Signed-off-by: James Calligeros <jcalligeros99@gmail.com>
  1 file changed, 2 insertions(+)
 
 diff --git a/arch/arm64/boot/dts/apple/t8112.dtsi b/arch/arm64/boot/dts/apple/t8112.dtsi
-index 334005bf1daa..dc2d4a29823b 100644
+index 334005b..dc2d4a2 100644
 --- a/arch/arm64/boot/dts/apple/t8112.dtsi
 +++ b/arch/arm64/boot/dts/apple/t8112.dtsi
 @@ -746,6 +746,7 @@ dcp: dcp@231c00000 {
@@ -32,6 +32,3 @@ index 334005bf1daa..dc2d4a29823b 100644
  			#ifdef APPLE_USE_PMP
  			power-domains = <&pmp_report_dispext>;
  			#else
--- 
-2.47.3
-

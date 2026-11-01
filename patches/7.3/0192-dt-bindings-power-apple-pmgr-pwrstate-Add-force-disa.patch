@@ -1,4 +1,4 @@
-From fc361890029f380ef142ac95205206c305537598 Mon Sep 17 00:00:00 2001
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
 From: Asahi Lina <lina@asahilina.net>
 Date: Fri, 29 Sep 2023 22:11:47 +0900
 Subject: [PATCH] dt-bindings: power: apple,pmgr-pwrstate: Add
@@ -14,7 +14,7 @@ Signed-off-by: Asahi Lina <lina@asahilina.net>
  1 file changed, 12 insertions(+)
 
 diff --git a/Documentation/devicetree/bindings/power/apple,pmgr-pwrstate.yaml b/Documentation/devicetree/bindings/power/apple,pmgr-pwrstate.yaml
-index b24ea8e54e11..7161f30314ab 100644
+index b24ea8e..7161f30 100644
 --- a/Documentation/devicetree/bindings/power/apple,pmgr-pwrstate.yaml
 +++ b/Documentation/devicetree/bindings/power/apple,pmgr-pwrstate.yaml
 @@ -85,6 +85,18 @@ properties:
@@ -36,6 +36,3 @@ index b24ea8e54e11..7161f30314ab 100644
  required:
    - compatible
    - reg
--- 
-2.47.3
-

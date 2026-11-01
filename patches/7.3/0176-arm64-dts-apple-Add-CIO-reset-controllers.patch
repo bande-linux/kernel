@@ -1,4 +1,4 @@
-From 5d8000f95ee8957dcaa8ea8dffd3c50f8aeab89c Mon Sep 17 00:00:00 2001
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
 From: Sven Peter <sven@kernel.org>
 Date: Thu, 20 Aug 2026 20:37:25 +0200
 Subject: [PATCH] arm64: dts: apple: Add CIO reset controllers
@@ -19,7 +19,7 @@ Signed-off-by: Sven Peter <sven@kernel.org>
  4 files changed, 26 insertions(+), 2 deletions(-)
 
 diff --git a/arch/arm64/boot/dts/apple/t600x-dieX.dtsi b/arch/arm64/boot/dts/apple/t600x-dieX.dtsi
-index 943f2294eede..745b90d8f43a 100644
+index 943f229..745b90d 100644
 --- a/arch/arm64/boot/dts/apple/t600x-dieX.dtsi
 +++ b/arch/arm64/boot/dts/apple/t600x-dieX.dtsi
 @@ -217,7 +217,13 @@ DIE_NODE(pmgr): power-management@28e080000 {
@@ -38,7 +38,7 @@ index 943f2294eede..745b90d8f43a 100644
  
  	DIE_NODE(pmgr_east): power-management@28e580000 {
 diff --git a/arch/arm64/boot/dts/apple/t602x-dieX.dtsi b/arch/arm64/boot/dts/apple/t602x-dieX.dtsi
-index 2bae07db21c2..335e2fdefe62 100644
+index 2bae07d..335e2fd 100644
 --- a/arch/arm64/boot/dts/apple/t602x-dieX.dtsi
 +++ b/arch/arm64/boot/dts/apple/t602x-dieX.dtsi
 @@ -136,7 +136,13 @@ DIE_NODE(pmgr): power-management@28e080000 {
@@ -57,7 +57,7 @@ index 2bae07db21c2..335e2fdefe62 100644
  
  	DIE_NODE(pmgr_south): power-management@28e680000 {
 diff --git a/arch/arm64/boot/dts/apple/t8103.dtsi b/arch/arm64/boot/dts/apple/t8103.dtsi
-index fdb41edc5a71..174fd47af215 100644
+index fdb41ed..174fd47 100644
 --- a/arch/arm64/boot/dts/apple/t8103.dtsi
 +++ b/arch/arm64/boot/dts/apple/t8103.dtsi
 @@ -1059,6 +1059,12 @@ pmgr_dcp: power-management@23b738000 {
@@ -74,7 +74,7 @@ index fdb41edc5a71..174fd47af215 100644
  			compatible = "apple,t8103-pinctrl", "apple,pinctrl";
  			reg = <0x2 0x3c100000 0x0 0x100000>;
 diff --git a/arch/arm64/boot/dts/apple/t8112.dtsi b/arch/arm64/boot/dts/apple/t8112.dtsi
-index dc2d4a29823b..a660f4d612dc 100644
+index dc2d4a2..a660f4d 100644
 --- a/arch/arm64/boot/dts/apple/t8112.dtsi
 +++ b/arch/arm64/boot/dts/apple/t8112.dtsi
 @@ -1222,6 +1222,12 @@ pmgr: power-management@23b700000 {
@@ -90,6 +90,3 @@ index dc2d4a29823b..a660f4d612dc 100644
  		pmp_mbox: mbox@23bc08000 {
  			compatible = "apple,t8112-asc-mailbox", "apple,asc-mailbox-v4";
  			reg = <0x2 0x3bc08000 0x0 0x4000>;
--- 
-2.47.3
-

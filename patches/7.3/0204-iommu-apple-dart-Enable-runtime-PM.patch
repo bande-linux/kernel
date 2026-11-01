@@ -1,4 +1,4 @@
-From 436a77b71511d55ad9809ea1901218a4ef2cefd3 Mon Sep 17 00:00:00 2001
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
 From: Hector Martin <marcan@marcan.st>
 Date: Mon, 12 Dec 2022 23:53:23 +0900
 Subject: [PATCH] iommu: apple-dart: Enable runtime PM
@@ -10,7 +10,7 @@ Signed-off-by: Hector Martin <marcan@marcan.st>
  1 file changed, 38 insertions(+), 5 deletions(-)
 
 diff --git a/drivers/iommu/apple-dart.c b/drivers/iommu/apple-dart.c
-index cf7cab4e2b99..be31f5bf2c04 100644
+index cf7cab4..be31f5b 100644
 --- a/drivers/iommu/apple-dart.c
 +++ b/drivers/iommu/apple-dart.c
 @@ -28,6 +28,7 @@
@@ -139,6 +139,3 @@ index cf7cab4e2b99..be31f5bf2c04 100644
  	},
  	.probe	= apple_dart_probe,
  	.remove = apple_dart_remove,
--- 
-2.47.3
-

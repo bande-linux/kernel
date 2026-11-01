@@ -1,4 +1,4 @@
-From 6a2fe3aa1d726253d188bdf80fb8bf8f1d6e0694 Mon Sep 17 00:00:00 2001
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
 From: =?UTF-8?q?Martin=20Povi=C5=A1er?= <povik+lin@cutebit.org>
 Date: Sun, 12 Feb 2023 15:26:30 +0100
 Subject: [PATCH] arm64: apple: t8103-pmgr: SIO: Add audio, spi and uart
@@ -23,7 +23,7 @@ Signed-off-by: Martin Povišer <povik+lin@cutebit.org>
  1 file changed, 1 insertion(+), 1 deletion(-)
 
 diff --git a/arch/arm64/boot/dts/apple/t8103-pmgr.dtsi b/arch/arm64/boot/dts/apple/t8103-pmgr.dtsi
-index 10facd0c01e4..5d3846d44e35 100644
+index 10facd0..5d3846d 100644
 --- a/arch/arm64/boot/dts/apple/t8103-pmgr.dtsi
 +++ b/arch/arm64/boot/dts/apple/t8103-pmgr.dtsi
 @@ -234,7 +234,7 @@ ps_sio_cpu: power-controller@1d0 {
@@ -35,6 +35,3 @@ index 10facd0c01e4..5d3846d44e35 100644
  	};
  
  	ps_fpwm0: power-controller@1d8 {
--- 
-2.47.3
-

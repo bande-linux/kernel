@@ -1,4 +1,4 @@
-From 0edbae4c28dc7a811441e49fc56ea3e416771b47 Mon Sep 17 00:00:00 2001
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
 From: Hector Martin <marcan@marcan.st>
 Date: Thu, 23 Nov 2023 18:08:50 +0900
 Subject: [PATCH] iommu: apple-dart: Check for fwspec in the device probe path
@@ -17,7 +17,7 @@ iommu: apple-dart:
  1 file changed, 1 insertion(+), 1 deletion(-)
 
 diff --git a/drivers/iommu/apple-dart.c b/drivers/iommu/apple-dart.c
-index 4c0aed085168..9391efc8f7dd 100644
+index 4c0aed0..9391efc 100644
 --- a/drivers/iommu/apple-dart.c
 +++ b/drivers/iommu/apple-dart.c
 @@ -782,7 +782,7 @@ static struct iommu_device *apple_dart_probe_device(struct device *dev)
@@ -29,6 +29,3 @@ index 4c0aed085168..9391efc8f7dd 100644
  		return ERR_PTR(-ENODEV);
  
  	for_each_stream_map(i, cfg, stream_map)
--- 
-2.47.3
-

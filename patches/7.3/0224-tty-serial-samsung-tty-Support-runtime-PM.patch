@@ -1,4 +1,4 @@
-From 845ac2f120de947f0ecc97da952d7b9105daadfb Mon Sep 17 00:00:00 2001
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
 From: Hector Martin <marcan@marcan.st>
 Date: Mon, 20 Sep 2021 02:23:11 +0900
 Subject: [PATCH] tty: serial: samsung_tty: Support runtime PM
@@ -13,7 +13,7 @@ Signed-off-by: Hector Martin <marcan@marcan.st>
  1 file changed, 58 insertions(+), 34 deletions(-)
 
 diff --git a/drivers/tty/serial/samsung_tty.c b/drivers/tty/serial/samsung_tty.c
-index 63d0232dffc2..a9e3ffb732be 100644
+index 63d0232..a9e3ffb 100644
 --- a/drivers/tty/serial/samsung_tty.c
 +++ b/drivers/tty/serial/samsung_tty.c
 @@ -34,6 +34,7 @@
@@ -186,6 +186,3 @@ index 63d0232dffc2..a9e3ffb732be 100644
  		.of_match_table	= of_match_ptr(s3c24xx_uart_dt_match),
  	},
  };
--- 
-2.47.3
-

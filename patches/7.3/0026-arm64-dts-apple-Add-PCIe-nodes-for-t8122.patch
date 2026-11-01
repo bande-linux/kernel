@@ -1,4 +1,4 @@
-From ee4729f017a5189a85329d0be104ea4e67440f06 Mon Sep 17 00:00:00 2001
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
 From: Alyssa Milburn <amilburn@zall.org>
 Date: Sat, 31 Jan 2026 12:27:37 +1100
 Subject: [PATCH] arm64: dts: apple: Add PCIe nodes for t8122
@@ -25,7 +25,7 @@ Signed-off-by: Michael Reeves <michael.reeves077@gmail.com>
  7 files changed, 295 insertions(+)
 
 diff --git a/arch/arm64/boot/dts/apple/t8122-j433.dts b/arch/arm64/boot/dts/apple/t8122-j433.dts
-index 34205d173a9b..937f159741b7 100644
+index 34205d1..937f159 100644
 --- a/arch/arm64/boot/dts/apple/t8122-j433.dts
 +++ b/arch/arm64/boot/dts/apple/t8122-j433.dts
 @@ -16,4 +16,30 @@
@@ -60,7 +60,7 @@ index 34205d173a9b..937f159741b7 100644
 +	status = "okay";
  };
 diff --git a/arch/arm64/boot/dts/apple/t8122-j434.dts b/arch/arm64/boot/dts/apple/t8122-j434.dts
-index ead5afd77efb..f9635b6eb7ff 100644
+index ead5afd..f9635b6 100644
 --- a/arch/arm64/boot/dts/apple/t8122-j434.dts
 +++ b/arch/arm64/boot/dts/apple/t8122-j434.dts
 @@ -17,3 +17,34 @@ / {
@@ -99,7 +99,7 @@ index ead5afd77efb..f9635b6eb7ff 100644
 +	status = "okay";
 +};
 diff --git a/arch/arm64/boot/dts/apple/t8122-j504.dts b/arch/arm64/boot/dts/apple/t8122-j504.dts
-index 464491b55b01..5f19711a489b 100644
+index 464491b..5f19711 100644
 --- a/arch/arm64/boot/dts/apple/t8122-j504.dts
 +++ b/arch/arm64/boot/dts/apple/t8122-j504.dts
 @@ -31,6 +31,32 @@ led-0 {
@@ -136,7 +136,7 @@ index 464491b55b01..5f19711a489b 100644
  	status = "okay";
  };
 diff --git a/arch/arm64/boot/dts/apple/t8122-j613.dts b/arch/arm64/boot/dts/apple/t8122-j613.dts
-index 51894ea705e7..3e4e87cab2bf 100644
+index 51894ea..3e4e87c 100644
 --- a/arch/arm64/boot/dts/apple/t8122-j613.dts
 +++ b/arch/arm64/boot/dts/apple/t8122-j613.dts
 @@ -30,6 +30,14 @@ led-0 {
@@ -155,7 +155,7 @@ index 51894ea705e7..3e4e87cab2bf 100644
  	status = "okay";
  };
 diff --git a/arch/arm64/boot/dts/apple/t8122-j615.dts b/arch/arm64/boot/dts/apple/t8122-j615.dts
-index 2a1970c1bc90..56ad290655dc 100644
+index 2a1970c..56ad290 100644
 --- a/arch/arm64/boot/dts/apple/t8122-j615.dts
 +++ b/arch/arm64/boot/dts/apple/t8122-j615.dts
 @@ -30,6 +30,14 @@ led-0 {
@@ -174,7 +174,7 @@ index 2a1970c1bc90..56ad290655dc 100644
  	status = "okay";
  };
 diff --git a/arch/arm64/boot/dts/apple/t8122-jxxx.dtsi b/arch/arm64/boot/dts/apple/t8122-jxxx.dtsi
-index dd85f0c9fb1e..2d36782c920d 100644
+index dd85f0c..2d36782 100644
 --- a/arch/arm64/boot/dts/apple/t8122-jxxx.dtsi
 +++ b/arch/arm64/boot/dts/apple/t8122-jxxx.dtsi
 @@ -11,7 +11,9 @@
@@ -216,7 +216,7 @@ index dd85f0c9fb1e..2d36782c920d 100644
 +	};
 +};
 diff --git a/arch/arm64/boot/dts/apple/t8122.dtsi b/arch/arm64/boot/dts/apple/t8122.dtsi
-index 9d029b0c167e..ed95da1d5ed7 100644
+index 9d029b0..ed95da1 100644
 --- a/arch/arm64/boot/dts/apple/t8122.dtsi
 +++ b/arch/arm64/boot/dts/apple/t8122.dtsi
 @@ -357,6 +357,13 @@ i2c4_pins: i2c4-pins {
@@ -403,6 +403,3 @@ index 9d029b0c167e..ed95da1d5ed7 100644
  	};
  };
  
--- 
-2.47.3
-

@@ -1,4 +1,4 @@
-From 784af10593bff6be19697c70f401e31ba7024a88 Mon Sep 17 00:00:00 2001
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
 From: Yureka Lilian <yureka@cyberchaos.dev>
 Date: Fri, 4 Sep 2026 11:13:31 +0200
 Subject: [PATCH] arm64: dts: apple: t603[124]: PMP support
@@ -17,7 +17,7 @@ Signed-off-by: Yureka Lilian <yureka@cyberchaos.dev>
  6 files changed, 244 insertions(+), 1 deletion(-)
 
 diff --git a/arch/arm64/boot/dts/apple/t6031-base.dtsi b/arch/arm64/boot/dts/apple/t6031-base.dtsi
-index 4bf7ce8535ca..61d584387f46 100644
+index 4bf7ce8..61d5843 100644
 --- a/arch/arm64/boot/dts/apple/t6031-base.dtsi
 +++ b/arch/arm64/boot/dts/apple/t6031-base.dtsi
 @@ -11,6 +11,12 @@ / {
@@ -34,7 +34,7 @@ index 4bf7ce8535ca..61d584387f46 100644
  		#address-cells = <2>;
  		#size-cells = <0>;
 diff --git a/arch/arm64/boot/dts/apple/t6031-die0.dtsi b/arch/arm64/boot/dts/apple/t6031-die0.dtsi
-index 7ca801e7c2f6..47d868a323e8 100644
+index 7ca801e..47d868a 100644
 --- a/arch/arm64/boot/dts/apple/t6031-die0.dtsi
 +++ b/arch/arm64/boot/dts/apple/t6031-die0.dtsi
 @@ -25,6 +25,207 @@ aic: interrupt-controller@292400000 {
@@ -246,7 +246,7 @@ index 7ca801e7c2f6..47d868a323e8 100644
  		compatible = "apple,t6031-wdt", "apple,t8103-wdt";
  		reg = <0x2 0xa02d4000 0x0 0x4000>;
 diff --git a/arch/arm64/boot/dts/apple/t6031-dieX.dtsi b/arch/arm64/boot/dts/apple/t6031-dieX.dtsi
-index f5ab9bb5f1dc..37fc4d2001d6 100644
+index f5ab9bb..37fc4d2 100644
 --- a/arch/arm64/boot/dts/apple/t6031-dieX.dtsi
 +++ b/arch/arm64/boot/dts/apple/t6031-dieX.dtsi
 @@ -122,7 +122,11 @@ DIE_NODE(avd): avd@2cc000000 {
@@ -263,7 +263,7 @@ index f5ab9bb5f1dc..37fc4d2001d6 100644
  		reg = <0x2 0xcd080000 0x0 0x12000>,
  			<0x2 0xcd092000 0x0 0x12000>,
 diff --git a/arch/arm64/boot/dts/apple/t6031-nvme.dtsi b/arch/arm64/boot/dts/apple/t6031-nvme.dtsi
-index bb6d6785b7ae..44b0b8960be8 100644
+index bb6d678..44b0b89 100644
 --- a/arch/arm64/boot/dts/apple/t6031-nvme.dtsi
 +++ b/arch/arm64/boot/dts/apple/t6031-nvme.dtsi
 @@ -16,14 +16,22 @@ DIE_NODE(ans_mbox): mbox@349408000 {
@@ -302,7 +302,7 @@ index bb6d6785b7ae..44b0b8960be8 100644
  				<&DIE_NODE(ps_apcie_sys_st1)>;
  		power-domain-names = "ans", "apcie0", "apcie1";
 diff --git a/arch/arm64/boot/dts/apple/t6031-pmgr.dtsi b/arch/arm64/boot/dts/apple/t6031-pmgr.dtsi
-index 02e62cda7852..f22448e2f13a 100644
+index 02e62cd..f22448e 100644
 --- a/arch/arm64/boot/dts/apple/t6031-pmgr.dtsi
 +++ b/arch/arm64/boot/dts/apple/t6031-pmgr.dtsi
 @@ -1900,6 +1900,7 @@ DIE_NODE(ps_pmp): power-controller@550 {
@@ -322,7 +322,7 @@ index 02e62cda7852..f22448e2f13a 100644
  
  	DIE_NODE(ps_atc0_cio_pcie): power-controller@598 {
 diff --git a/arch/arm64/boot/dts/apple/t6032.dtsi b/arch/arm64/boot/dts/apple/t6032.dtsi
-index 93f08643dba1..1b15114f1389 100644
+index 93f0864..1b15114 100644
 --- a/arch/arm64/boot/dts/apple/t6032.dtsi
 +++ b/arch/arm64/boot/dts/apple/t6032.dtsi
 @@ -350,6 +350,8 @@ die1: soc@2200000000 {
@@ -357,6 +357,3 @@ index 93f08643dba1..1b15114f1389 100644
  &ps_afi_d2d_0 {
  	status = "okay";
  };
--- 
-2.47.3
-

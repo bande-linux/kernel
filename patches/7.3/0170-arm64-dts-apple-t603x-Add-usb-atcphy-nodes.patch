@@ -1,4 +1,4 @@
-From 49b663e03cea2ee3c45f5ceb424da18613768c2e Mon Sep 17 00:00:00 2001
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
 From: Sasha Finkelstein <k@chaosmail.tech>
 Date: Sat, 25 Jul 2026 00:39:32 +0200
 Subject: [PATCH] arm64: dts: apple: t603x: Add usb/atcphy nodes
@@ -13,7 +13,7 @@ Signed-off-by: Sasha Finkelstein <k@chaosmail.tech>
  4 files changed, 519 insertions(+)
 
 diff --git a/arch/arm64/boot/dts/apple/t6030.dtsi b/arch/arm64/boot/dts/apple/t6030.dtsi
-index 2ceb60aafebd..a1fc24574811 100644
+index 2ceb60a..a1fc245 100644
 --- a/arch/arm64/boot/dts/apple/t6030.dtsi
 +++ b/arch/arm64/boot/dts/apple/t6030.dtsi
 @@ -11,6 +11,7 @@
@@ -192,7 +192,7 @@ index 2ceb60aafebd..a1fc24574811 100644
  };
  
 diff --git a/arch/arm64/boot/dts/apple/t6031-dieX.dtsi b/arch/arm64/boot/dts/apple/t6031-dieX.dtsi
-index cf8076eab1fd..e4344da6ec93 100644
+index cf8076e..e4344da 100644
 --- a/arch/arm64/boot/dts/apple/t6031-dieX.dtsi
 +++ b/arch/arm64/boot/dts/apple/t6031-dieX.dtsi
 @@ -157,4 +157,163 @@ DIE_NODE(pmgr_gfx): power-management@408e80000 {
@@ -360,7 +360,7 @@ index cf8076eab1fd..e4344da6ec93 100644
 +	};
  };
 diff --git a/arch/arm64/boot/dts/apple/t6031.dtsi b/arch/arm64/boot/dts/apple/t6031.dtsi
-index 34725483c630..88e815b33881 100644
+index 3472548..88e815b 100644
 --- a/arch/arm64/boot/dts/apple/t6031.dtsi
 +++ b/arch/arm64/boot/dts/apple/t6031.dtsi
 @@ -9,6 +9,7 @@
@@ -372,7 +372,7 @@ index 34725483c630..88e815b33881 100644
  
  #include "multi-die-cpp.h"
 diff --git a/arch/arm64/boot/dts/apple/t603x-j514-j516.dtsi b/arch/arm64/boot/dts/apple/t603x-j514-j516.dtsi
-index 47504ae1d608..a1cfcdbfe89a 100644
+index 47504ae..a1cfcdb 100644
 --- a/arch/arm64/boot/dts/apple/t603x-j514-j516.dtsi
 +++ b/arch/arm64/boot/dts/apple/t603x-j514-j516.dtsi
 @@ -21,6 +21,9 @@ / {
@@ -601,6 +601,3 @@ index 47504ae1d608..a1cfcdbfe89a 100644
  	};
  };
  
--- 
-2.47.3
-

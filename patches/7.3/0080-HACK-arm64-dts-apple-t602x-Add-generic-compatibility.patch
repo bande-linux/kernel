@@ -1,4 +1,4 @@
-From 89ff950a32f5f5a7a785023ec9aad58bee969be7 Mon Sep 17 00:00:00 2001
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
 From: Janne Grunau <j@jannau.net>
 Date: Sun, 16 Nov 2025 13:06:48 +0100
 Subject: [PATCH] HACK: arm64: dts: apple: t602x: Add generic compatibility
@@ -20,7 +20,7 @@ Signed-off-by: Janne Grunau <j@jannau.net>
  4 files changed, 268 insertions(+), 268 deletions(-)
 
 diff --git a/arch/arm64/boot/dts/apple/t602x-die0.dtsi b/arch/arm64/boot/dts/apple/t602x-die0.dtsi
-index 63767e465aaf..e91769f19793 100644
+index 63767e4..e91769f 100644
 --- a/arch/arm64/boot/dts/apple/t602x-die0.dtsi
 +++ b/arch/arm64/boot/dts/apple/t602x-die0.dtsi
 @@ -8,7 +8,7 @@
@@ -195,7 +195,7 @@ index 63767e465aaf..e91769f19793 100644
  		      <0x3 0x9b500000 0x0 0x20000>;
  		clocks = <&nco 0>, <&nco 1>, <&nco 2>, <&nco 3>;
 diff --git a/arch/arm64/boot/dts/apple/t602x-dieX.dtsi b/arch/arm64/boot/dts/apple/t602x-dieX.dtsi
-index 4044c4f21795..b4a45f9a5daf 100644
+index 4044c4f..b4a45f9 100644
 --- a/arch/arm64/boot/dts/apple/t602x-dieX.dtsi
 +++ b/arch/arm64/boot/dts/apple/t602x-dieX.dtsi
 @@ -46,7 +46,7 @@ DIE_NODE(pmgr_east): power-management@290280000 {
@@ -226,7 +226,7 @@ index 4044c4f21795..b4a45f9a5daf 100644
  
  		interrupt-parent = <&aic>;
 diff --git a/arch/arm64/boot/dts/apple/t602x-nvme.dtsi b/arch/arm64/boot/dts/apple/t602x-nvme.dtsi
-index d1f4267a6cd2..3ca48ed07047 100644
+index d1f4267..3ca48ed 100644
 --- a/arch/arm64/boot/dts/apple/t602x-nvme.dtsi
 +++ b/arch/arm64/boot/dts/apple/t602x-nvme.dtsi
 @@ -27,7 +27,7 @@ DIE_NODE(sart): sart@34bc50000 {
@@ -239,7 +239,7 @@ index d1f4267a6cd2..3ca48ed07047 100644
  		reg-names = "nvme", "ans";
  		interrupt-parent = <&aic>;
 diff --git a/arch/arm64/boot/dts/apple/t602x-pmgr.dtsi b/arch/arm64/boot/dts/apple/t602x-pmgr.dtsi
-index 5fa2a93ad9ec..f5ebd5bc19b3 100644
+index 5fa2a93..f5ebd5b 100644
 --- a/arch/arm64/boot/dts/apple/t602x-pmgr.dtsi
 +++ b/arch/arm64/boot/dts/apple/t602x-pmgr.dtsi
 @@ -7,7 +7,7 @@
@@ -2447,6 +2447,3 @@ index 5fa2a93ad9ec..f5ebd5bc19b3 100644
  		reg = <0x108 4>;
  		#power-domain-cells = <0>;
  		#reset-cells = <0>;
--- 
-2.47.3
-

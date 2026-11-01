@@ -1,4 +1,4 @@
-From 43b13a60614ea5bd30cef3ab3bd0bbdc14a2a16d Mon Sep 17 00:00:00 2001
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
 From: Janne Grunau <j@jannau.net>
 Date: Sat, 22 Oct 2022 12:00:21 +0200
 Subject: [PATCH] iommu: Add IOMMU_RESV_TRANSLATED for non 1:1 mapped reserved
@@ -15,7 +15,7 @@ Signed-off-by: Janne Grunau <j@jannau.net>
  2 files changed, 30 insertions(+), 4 deletions(-)
 
 diff --git a/drivers/iommu/iommu.c b/drivers/iommu/iommu.c
-index cd1bca7ede9a..dd6b0213445b 100644
+index cd1bca7..dd6b021 100644
 --- a/drivers/iommu/iommu.c
 +++ b/drivers/iommu/iommu.c
 @@ -117,6 +117,7 @@ static const char * const iommu_group_resv_type_string[] = {
@@ -69,7 +69,7 @@ index cd1bca7ede9a..dd6b0213445b 100644
  
  void iommu_set_default_passthrough(bool cmd_line)
 diff --git a/include/linux/iommu.h b/include/linux/iommu.h
-index ac43b8b93f14..dc4549caba67 100644
+index ac43b8b..dc4549c 100644
 --- a/include/linux/iommu.h
 +++ b/include/linux/iommu.h
 @@ -292,12 +292,18 @@ enum iommu_resv_type {
@@ -109,6 +109,3 @@ index ac43b8b93f14..dc4549caba67 100644
  extern int iommu_get_group_resv_regions(struct iommu_group *group,
  					struct list_head *head);
  
--- 
-2.47.3
-

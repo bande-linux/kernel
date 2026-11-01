@@ -1,4 +1,4 @@
-From a1a6063ac4e5e965dcd4b9b3f61f102d2b95bf2e Mon Sep 17 00:00:00 2001
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
 From: Janne Grunau <j@jannau.net>
 Date: Sun, 24 Apr 2022 11:20:31 +0200
 Subject: [PATCH] arm64: apple: t600x: Mark PCIe node as "dma-coherent"
@@ -10,7 +10,7 @@ Signed-off-by: Janne Grunau <j@jannau.net>
  1 file changed, 2 insertions(+)
 
 diff --git a/arch/arm64/boot/dts/apple/t600x-die0.dtsi b/arch/arm64/boot/dts/apple/t600x-die0.dtsi
-index 3badada545e6..5569a490a866 100644
+index 3badada..5569a49 100644
 --- a/arch/arm64/boot/dts/apple/t600x-die0.dtsi
 +++ b/arch/arm64/boot/dts/apple/t600x-die0.dtsi
 @@ -459,6 +459,8 @@ pcie0: pcie@590000000 {
@@ -22,6 +22,3 @@ index 3badada545e6..5569a490a866 100644
  		port00: pci@0,0 {
  			device_type = "pci";
  			reg = <0x0 0x0 0x0 0x0 0x0>;
--- 
-2.47.3
-

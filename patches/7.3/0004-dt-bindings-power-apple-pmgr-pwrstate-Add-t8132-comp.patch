@@ -1,4 +1,4 @@
-From 1a059be49db0308e256dfbc4b6ed706f610d0bf4 Mon Sep 17 00:00:00 2001
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
 From: Yureka Lilian <yureka@cyberchaos.dev>
 Date: Sun, 5 Jul 2026 15:17:24 +0200
 Subject: [PATCH] dt-bindings: power: apple,pmgr-pwrstate: Add t8132 compatible
@@ -16,7 +16,7 @@ Acked-by: Krzysztof Kozlowski <krzysztof.kozlowski@oss.qualcomm.com>
  1 file changed, 1 insertion(+)
 
 diff --git a/Documentation/devicetree/bindings/power/apple,pmgr-pwrstate.yaml b/Documentation/devicetree/bindings/power/apple,pmgr-pwrstate.yaml
-index e269f433524e..b24ea8e54e11 100644
+index e269f43..b24ea8e 100644
 --- a/Documentation/devicetree/bindings/power/apple,pmgr-pwrstate.yaml
 +++ b/Documentation/devicetree/bindings/power/apple,pmgr-pwrstate.yaml
 @@ -48,6 +48,7 @@ properties:
@@ -27,6 +27,3 @@ index e269f433524e..b24ea8e54e11 100644
            - const: apple,t8103-pmgr-pwrstate
  
    reg:
--- 
-2.47.3
-

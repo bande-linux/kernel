@@ -1,4 +1,4 @@
-From 507377f6f1774e9cc068926d47bc64c2a0223e48 Mon Sep 17 00:00:00 2001
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
 From: Sasha Finkelstein <k@chaosmail.tech>
 Date: Tue, 2 Jun 2026 23:16:51 +0200
 Subject: [PATCH] dts: apple: Add SPI and NVRAM nodes
@@ -17,7 +17,7 @@ Signed-off-by: Sasha Finkelstein <k@chaosmail.tech>
  8 files changed, 90 insertions(+)
 
 diff --git a/arch/arm64/boot/dts/apple/t6030.dtsi b/arch/arm64/boot/dts/apple/t6030.dtsi
-index cbf63918c46b..a97b0bd91edb 100644
+index cbf6391..a97b0bd 100644
 --- a/arch/arm64/boot/dts/apple/t6030.dtsi
 +++ b/arch/arm64/boot/dts/apple/t6030.dtsi
 @@ -405,6 +405,13 @@ clkref: clock-ref {
@@ -70,7 +70,7 @@ index cbf63918c46b..a97b0bd91edb 100644
  				// clkreq pins
  				pinmux = <APPLE_PINMUX(163, 1)>,
 diff --git a/arch/arm64/boot/dts/apple/t6031-base.dtsi b/arch/arm64/boot/dts/apple/t6031-base.dtsi
-index 060bd7ad766a..87b579410762 100644
+index 060bd7a..87b5794 100644
 --- a/arch/arm64/boot/dts/apple/t6031-base.dtsi
 +++ b/arch/arm64/boot/dts/apple/t6031-base.dtsi
 @@ -464,6 +464,13 @@ clkref: clock-ref {
@@ -88,7 +88,7 @@ index 060bd7ad766a..87b579410762 100644
  		#address-cells = <2>;
  		#size-cells = <2>;
 diff --git a/arch/arm64/boot/dts/apple/t6031-die0.dtsi b/arch/arm64/boot/dts/apple/t6031-die0.dtsi
-index 4524419dae62..90d0f83c81b4 100644
+index 4524419..90d0f83 100644
 --- a/arch/arm64/boot/dts/apple/t6031-die0.dtsi
 +++ b/arch/arm64/boot/dts/apple/t6031-die0.dtsi
 @@ -285,6 +285,20 @@ fpwm0: pwm@391040000 {
@@ -113,7 +113,7 @@ index 4524419dae62..90d0f83c81b4 100644
  		compatible = "apple,s5l-uart";
  		reg = <0x3 0x91200000 0x0 0x4000>;
 diff --git a/arch/arm64/boot/dts/apple/t6031-gpio-pins.dtsi b/arch/arm64/boot/dts/apple/t6031-gpio-pins.dtsi
-index 863f64d8fc3f..b07aa5bc0dd0 100644
+index 863f64d..b07aa5b 100644
 --- a/arch/arm64/boot/dts/apple/t6031-gpio-pins.dtsi
 +++ b/arch/arm64/boot/dts/apple/t6031-gpio-pins.dtsi
 @@ -51,6 +51,13 @@ i2c8_pins: i2c8-pins {
@@ -131,7 +131,7 @@ index 863f64d8fc3f..b07aa5bc0dd0 100644
  		pinmux = <APPLE_PINMUX(0, 1)>,
  			<APPLE_PINMUX(1, 1)>,
 diff --git a/arch/arm64/boot/dts/apple/t6032-j575d.dts b/arch/arm64/boot/dts/apple/t6032-j575d.dts
-index 56edfb1139fb..028507bd5594 100644
+index 56edfb1..028507b 100644
 --- a/arch/arm64/boot/dts/apple/t6032-j575d.dts
 +++ b/arch/arm64/boot/dts/apple/t6032-j575d.dts
 @@ -44,3 +44,5 @@ memory@10000000000 {
@@ -141,7 +141,7 @@ index 56edfb1139fb..028507bd5594 100644
 +
 +#include "spi1-nvram.dtsi"
 diff --git a/arch/arm64/boot/dts/apple/t603x-j514-j516.dtsi b/arch/arm64/boot/dts/apple/t603x-j514-j516.dtsi
-index 21ac19450024..f31615604750 100644
+index 21ac194..f316156 100644
 --- a/arch/arm64/boot/dts/apple/t603x-j514-j516.dtsi
 +++ b/arch/arm64/boot/dts/apple/t603x-j514-j516.dtsi
 @@ -108,3 +108,5 @@ sdhci0: mmc@0,0 {
@@ -151,7 +151,7 @@ index 21ac19450024..f31615604750 100644
 +
 +#include "spi1-nvram.dtsi"
 diff --git a/arch/arm64/boot/dts/apple/t8122-jxxx.dtsi b/arch/arm64/boot/dts/apple/t8122-jxxx.dtsi
-index 2d36782c920d..38952bc4fb98 100644
+index 2d36782..38952bc 100644
 --- a/arch/arm64/boot/dts/apple/t8122-jxxx.dtsi
 +++ b/arch/arm64/boot/dts/apple/t8122-jxxx.dtsi
 @@ -72,3 +72,5 @@ bluetooth0: bluetooth@0,1 {
@@ -161,7 +161,7 @@ index 2d36782c920d..38952bc4fb98 100644
 +
 +#include "spi1-nvram.dtsi"
 diff --git a/arch/arm64/boot/dts/apple/t8122.dtsi b/arch/arm64/boot/dts/apple/t8122.dtsi
-index 747939cb6a34..a7f55c5294ac 100644
+index 747939c..a7f55c5 100644
 --- a/arch/arm64/boot/dts/apple/t8122.dtsi
 +++ b/arch/arm64/boot/dts/apple/t8122.dtsi
 @@ -176,6 +176,13 @@ clkref: clock-ref {
@@ -213,6 +213,3 @@ index 747939cb6a34..a7f55c5294ac 100644
  			pcie_pins: pcie-pins {
  				// clkreq pins
  				pinmux = <APPLE_PINMUX(183, 1)>,
--- 
-2.47.3
-

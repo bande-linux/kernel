@@ -1,4 +1,4 @@
-From 5ae58d53b3a35f1ea7a525b0b86a0b8b0887428f Mon Sep 17 00:00:00 2001
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
 From: Hector Martin <marcan@marcan.st>
 Date: Tue, 25 Apr 2023 01:46:23 +0900
 Subject: [PATCH] tty: serial: samsung_tty: Mark as wakeup_path on
@@ -18,7 +18,7 @@ Signed-off-by: Hector Martin <marcan@marcan.st>
  1 file changed, 3 insertions(+)
 
 diff --git a/drivers/tty/serial/samsung_tty.c b/drivers/tty/serial/samsung_tty.c
-index a9e3ffb732be..d33a5d848659 100644
+index a9e3ffb..d33a5d8 100644
 --- a/drivers/tty/serial/samsung_tty.c
 +++ b/drivers/tty/serial/samsung_tty.c
 @@ -2092,6 +2092,9 @@ static int __maybe_unused s3c24xx_serial_suspend(struct device *dev)
@@ -31,6 +31,3 @@ index a9e3ffb732be..d33a5d848659 100644
  	if (port)
  		uart_suspend_port(&s3c24xx_uart_drv, port);
  
--- 
-2.47.3
-

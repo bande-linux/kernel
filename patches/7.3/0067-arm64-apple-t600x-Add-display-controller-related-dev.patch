@@ -1,4 +1,4 @@
-From fabf3dcf8fe710f69a6a599ca4bc3ad94ea09b4e Mon Sep 17 00:00:00 2001
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
 From: Janne Grunau <j@jannau.net>
 Date: Fri, 11 Mar 2022 22:14:52 +0100
 Subject: [PATCH] arm64: apple: t600x: Add display controller related device
@@ -40,7 +40,7 @@ Signed-off-by: Janne Grunau <j@jannau.net>
  9 files changed, 129 insertions(+), 2 deletions(-)
 
 diff --git a/arch/arm64/boot/dts/apple/t6000-j314s.dts b/arch/arm64/boot/dts/apple/t6000-j314s.dts
-index dab8e99fa324..ae79e3236614 100644
+index dab8e99..ae79e32 100644
 --- a/arch/arm64/boot/dts/apple/t6000-j314s.dts
 +++ b/arch/arm64/boot/dts/apple/t6000-j314s.dts
 @@ -25,6 +25,13 @@ &bluetooth0 {
@@ -58,7 +58,7 @@ index dab8e99fa324..ae79e3236614 100644
  	compatible = "apple,j314-macaudio", "apple,macaudio";
  	model = "MacBook Pro J314";
 diff --git a/arch/arm64/boot/dts/apple/t6000-j316s.dts b/arch/arm64/boot/dts/apple/t6000-j316s.dts
-index 2cdfac3c40c8..272fa1c17124 100644
+index 2cdfac3..272fa1c 100644
 --- a/arch/arm64/boot/dts/apple/t6000-j316s.dts
 +++ b/arch/arm64/boot/dts/apple/t6000-j316s.dts
 @@ -25,6 +25,13 @@ &bluetooth0 {
@@ -76,7 +76,7 @@ index 2cdfac3c40c8..272fa1c17124 100644
  	compatible = "apple,j316-macaudio", "apple,macaudio";
  	model = "MacBook Pro J316";
 diff --git a/arch/arm64/boot/dts/apple/t6001-j314c.dts b/arch/arm64/boot/dts/apple/t6001-j314c.dts
-index 7495698beb02..81d34507ed81 100644
+index 7495698..81d3450 100644
 --- a/arch/arm64/boot/dts/apple/t6001-j314c.dts
 +++ b/arch/arm64/boot/dts/apple/t6001-j314c.dts
 @@ -25,6 +25,13 @@ &bluetooth0 {
@@ -94,7 +94,7 @@ index 7495698beb02..81d34507ed81 100644
  	compatible = "apple,j314-macaudio", "apple,macaudio";
  	model = "MacBook Pro J314";
 diff --git a/arch/arm64/boot/dts/apple/t6001-j316c.dts b/arch/arm64/boot/dts/apple/t6001-j316c.dts
-index 6622b6e225a6..564d927f2fec 100644
+index 6622b6e..564d927 100644
 --- a/arch/arm64/boot/dts/apple/t6001-j316c.dts
 +++ b/arch/arm64/boot/dts/apple/t6001-j316c.dts
 @@ -25,6 +25,13 @@ &bluetooth0 {
@@ -112,7 +112,7 @@ index 6622b6e225a6..564d927f2fec 100644
  	compatible = "apple,j316-macaudio", "apple,macaudio";
  	model = "MacBook Pro J316";
 diff --git a/arch/arm64/boot/dts/apple/t600x-common.dtsi b/arch/arm64/boot/dts/apple/t600x-common.dtsi
-index e20234ef2135..186f0459d6b7 100644
+index e20234e..186f045 100644
 --- a/arch/arm64/boot/dts/apple/t600x-common.dtsi
 +++ b/arch/arm64/boot/dts/apple/t600x-common.dtsi
 @@ -373,6 +373,12 @@ clk_200m: clock-200m {
@@ -129,7 +129,7 @@ index e20234ef2135..186f0459d6b7 100644
  	 * This is a fabulated representation of the input clock
  	 * to NCO since we don't know the true clock tree.
 diff --git a/arch/arm64/boot/dts/apple/t600x-die0.dtsi b/arch/arm64/boot/dts/apple/t600x-die0.dtsi
-index 5569a490a866..74bf652068d3 100644
+index 5569a49..74bf652 100644
 --- a/arch/arm64/boot/dts/apple/t600x-die0.dtsi
 +++ b/arch/arm64/boot/dts/apple/t600x-die0.dtsi
 @@ -31,6 +31,12 @@ pmgr_misc: power-management@28e20c000 {
@@ -220,7 +220,7 @@ index 5569a490a866..74bf652068d3 100644
  		compatible = "apple,t6000-dart";
  		reg = <0x3 0x9b004000 0x0 0x4000>;
 diff --git a/arch/arm64/boot/dts/apple/t600x-j314-j316.dtsi b/arch/arm64/boot/dts/apple/t600x-j314-j316.dtsi
-index 790f4269eccd..8756ad40bc64 100644
+index 790f426..8756ad4 100644
 --- a/arch/arm64/boot/dts/apple/t600x-j314-j316.dtsi
 +++ b/arch/arm64/boot/dts/apple/t600x-j314-j316.dtsi
 @@ -20,6 +20,10 @@ aliases {
@@ -258,7 +258,7 @@ index 790f4269eccd..8756ad40bc64 100644
  &i2c0 {
  	hpm0: usb-pd@38 {
 diff --git a/arch/arm64/boot/dts/apple/t600x-j375.dtsi b/arch/arm64/boot/dts/apple/t600x-j375.dtsi
-index 65b2abd521b1..3fe684d0bbb0 100644
+index 65b2abd..3fe684d 100644
 --- a/arch/arm64/boot/dts/apple/t600x-j375.dtsi
 +++ b/arch/arm64/boot/dts/apple/t600x-j375.dtsi
 @@ -18,6 +18,10 @@ aliases {
@@ -292,7 +292,7 @@ index 65b2abd521b1..3fe684d0bbb0 100644
  &i2c0 {
  	hpm0: usb-pd@38 {
 diff --git a/arch/arm64/boot/dts/apple/t600x-pmgr.dtsi b/arch/arm64/boot/dts/apple/t600x-pmgr.dtsi
-index cc2627eafc89..3f507cbc65f0 100644
+index cc2627e..3f507cb 100644
 --- a/arch/arm64/boot/dts/apple/t600x-pmgr.dtsi
 +++ b/arch/arm64/boot/dts/apple/t600x-pmgr.dtsi
 @@ -1297,7 +1297,6 @@ DIE_NODE(ps_disp0_fe): power-controller@328 {
@@ -311,6 +311,3 @@ index cc2627eafc89..3f507cbc65f0 100644
  		apple,min-state = <4>;
  	};
  
--- 
-2.47.3
-

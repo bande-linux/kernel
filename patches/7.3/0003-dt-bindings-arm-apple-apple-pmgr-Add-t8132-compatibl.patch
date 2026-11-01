@@ -1,4 +1,4 @@
-From 2a6e533dbc1fe94d198e4c4786e6b3e7cdd70d07 Mon Sep 17 00:00:00 2001
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
 From: Yureka Lilian <yureka@cyberchaos.dev>
 Date: Sun, 5 Jul 2026 15:17:23 +0200
 Subject: [PATCH] dt-bindings: arm: apple: apple,pmgr: Add t8132 compatible
@@ -14,7 +14,7 @@ Acked-by: Krzysztof Kozlowski <krzysztof.kozlowski@oss.qualcomm.com>
  1 file changed, 1 insertion(+)
 
 diff --git a/Documentation/devicetree/bindings/arm/apple/apple,pmgr.yaml b/Documentation/devicetree/bindings/arm/apple/apple,pmgr.yaml
-index 1d2001836eb4..da660fa13f77 100644
+index 1d20018..da660fa 100644
 --- a/Documentation/devicetree/bindings/arm/apple/apple,pmgr.yaml
 +++ b/Documentation/devicetree/bindings/arm/apple/apple,pmgr.yaml
 @@ -41,6 +41,7 @@ properties:
@@ -25,6 +25,3 @@ index 1d2001836eb4..da660fa13f77 100644
            - const: apple,t8103-pmgr
            - const: syscon
            - const: simple-mfd
--- 
-2.47.3
-

@@ -1,4 +1,4 @@
-From 8484ec9de1714d3c0405d4c96d9dcb647391f6fc Mon Sep 17 00:00:00 2001
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
 From: Janne Grunau <j@jannau.net>
 Date: Sat, 27 Apr 2024 12:57:52 +0200
 Subject: [PATCH] arm64: apple: t8103-j274: Enable sio explicitly
@@ -12,7 +12,7 @@ Signed-off-by: Janne Grunau <j@jannau.net>
  1 file changed, 5 insertions(+)
 
 diff --git a/arch/arm64/boot/dts/apple/t8103-j274.dts b/arch/arm64/boot/dts/apple/t8103-j274.dts
-index a5039e9325a7..2d491408f32c 100644
+index a5039e9..2d49140 100644
 --- a/arch/arm64/boot/dts/apple/t8103-j274.dts
 +++ b/arch/arm64/boot/dts/apple/t8103-j274.dts
 @@ -27,6 +27,11 @@ &dcp {
@@ -27,6 +27,3 @@ index a5039e9325a7..2d491408f32c 100644
  &dpaudio0 {
  	status = "okay";
  };
--- 
-2.47.3
-

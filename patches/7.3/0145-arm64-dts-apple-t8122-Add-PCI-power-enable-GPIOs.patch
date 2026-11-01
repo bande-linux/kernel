@@ -1,4 +1,4 @@
-From ba7ae66cda0cdb27bf1f82141310a5d09af8f4af Mon Sep 17 00:00:00 2001
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
 From: Janne Grunau <j@jannau.net>
 Date: Fri, 3 Apr 2026 12:36:06 +0200
 Subject: [PATCH] arm64: dts: apple: t8122: Add PCI power enable GPIOs
@@ -16,7 +16,7 @@ Signed-off-by: Janne Grunau <j@jannau.net>
  3 files changed, 3 insertions(+)
 
 diff --git a/arch/arm64/boot/dts/apple/t8122-j434.dts b/arch/arm64/boot/dts/apple/t8122-j434.dts
-index ecfd9e9b9ccf..32a9d7c3df8c 100644
+index ecfd9e9..32a9d7c 100644
 --- a/arch/arm64/boot/dts/apple/t8122-j434.dts
 +++ b/arch/arm64/boot/dts/apple/t8122-j434.dts
 @@ -38,6 +38,7 @@ ethernet0: ethernet@0,0 {
@@ -28,7 +28,7 @@ index ecfd9e9b9ccf..32a9d7c3df8c 100644
  };
  
 diff --git a/arch/arm64/boot/dts/apple/t8122-j504.dts b/arch/arm64/boot/dts/apple/t8122-j504.dts
-index d83b7e5b32e6..d285ae37f30a 100644
+index d83b7e5..d285ae3 100644
 --- a/arch/arm64/boot/dts/apple/t8122-j504.dts
 +++ b/arch/arm64/boot/dts/apple/t8122-j504.dts
 @@ -42,6 +42,7 @@ &bluetooth0 {
@@ -40,7 +40,7 @@ index d83b7e5b32e6..d285ae37f30a 100644
  
  	sdhci0: mmc@0,0 {
 diff --git a/arch/arm64/boot/dts/apple/t8122-jxxx.dtsi b/arch/arm64/boot/dts/apple/t8122-jxxx.dtsi
-index 786adeeb7620..064b72f2075e 100644
+index 786adee..064b72f 100644
 --- a/arch/arm64/boot/dts/apple/t8122-jxxx.dtsi
 +++ b/arch/arm64/boot/dts/apple/t8122-jxxx.dtsi
 @@ -56,6 +56,7 @@ &serial0 {
@@ -51,6 +51,3 @@ index 786adeeb7620..064b72f2075e 100644
  
  	wifi0: wifi@0,0 {
  		compatible = "pci14e4,4434";
--- 
-2.47.3
-

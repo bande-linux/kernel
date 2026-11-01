@@ -1,4 +1,4 @@
-From 70e865bb427b04edcbcef1ca8bfc401ea630ffb8 Mon Sep 17 00:00:00 2001
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
 From: Janne Grunau <j@jannau.net>
 Date: Mon, 30 Dec 2024 15:12:15 +0100
 Subject: [PATCH] arm64: dts: apple: t8112-j493: Enable AOP
@@ -10,7 +10,7 @@ Signed-off-by: Janne Grunau <j@jannau.net>
  1 file changed, 16 insertions(+)
 
 diff --git a/arch/arm64/boot/dts/apple/t8112-j493.dts b/arch/arm64/boot/dts/apple/t8112-j493.dts
-index 6a193433d9a2..7481f82c027e 100644
+index 6a19343..7481f82 100644
 --- a/arch/arm64/boot/dts/apple/t8112-j493.dts
 +++ b/arch/arm64/boot/dts/apple/t8112-j493.dts
 @@ -222,6 +222,22 @@ touchbar0: touchbar@0 {
@@ -36,6 +36,3 @@ index 6a193433d9a2..7481f82c027e 100644
  &aop_audio {
  	apple,chassis-name = "J493";
  	apple,machine-kind = "MacBook Pro";
--- 
-2.47.3
-

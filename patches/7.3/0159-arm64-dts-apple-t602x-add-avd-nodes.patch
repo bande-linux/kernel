@@ -1,4 +1,4 @@
-From 04ef1bd2cec672b8c4b99951d9ff714368e7bbb7 Mon Sep 17 00:00:00 2001
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
 From: sofus <sofus.c@icloud.com>
 Date: Tue, 30 Jun 2026 13:27:11 +0200
 Subject: [PATCH] arm64: dts: apple: t602x: add avd nodes
@@ -11,7 +11,7 @@ Signed-off-by: sofus <sofus.c@icloud.com>
  2 files changed, 28 insertions(+), 1 deletion(-)
 
 diff --git a/arch/arm64/boot/dts/apple/t602x-die0.dtsi b/arch/arm64/boot/dts/apple/t602x-die0.dtsi
-index 350f91d1209f..cd6ed1106e82 100644
+index 350f91d..cd6ed11 100644
 --- a/arch/arm64/boot/dts/apple/t602x-die0.dtsi
 +++ b/arch/arm64/boot/dts/apple/t602x-die0.dtsi
 @@ -114,7 +114,6 @@ pmp_report_avd_sys: report@11 {
@@ -23,7 +23,7 @@ index 350f91d1209f..cd6ed1106e82 100644
  
  		pmp_report_msr0: report@12 {
 diff --git a/arch/arm64/boot/dts/apple/t602x-dieX.dtsi b/arch/arm64/boot/dts/apple/t602x-dieX.dtsi
-index ab0b3cec00c4..b04a39cb6560 100644
+index ab0b3ce..b04a39c 100644
 --- a/arch/arm64/boot/dts/apple/t602x-dieX.dtsi
 +++ b/arch/arm64/boot/dts/apple/t602x-dieX.dtsi
 @@ -24,6 +24,34 @@ DIE_NODE(cpufreq_p1): cpufreq@212e20000 {
@@ -61,6 +61,3 @@ index ab0b3cec00c4..b04a39cb6560 100644
  	DIE_NODE(dispext0_dart): iommu@289304000 {
  		compatible = "apple,t6020-dart", "apple,t8110-dart";
  		reg = <0x2 0x89304000 0x0 0x4000>;
--- 
-2.47.3
-

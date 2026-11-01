@@ -1,4 +1,4 @@
-From db74b61fbf88ca8a3d71a065fa609d1171b1dbdd Mon Sep 17 00:00:00 2001
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
 From: Hector Martin <marcan@marcan.st>
 Date: Thu, 12 Oct 2023 23:20:56 +0900
 Subject: [PATCH] arm64: dts: apple: t8112: Mark MCA power states as
@@ -11,7 +11,7 @@ Signed-off-by: Hector Martin <marcan@marcan.st>
  1 file changed, 6 insertions(+)
 
 diff --git a/arch/arm64/boot/dts/apple/t8112-pmgr.dtsi b/arch/arm64/boot/dts/apple/t8112-pmgr.dtsi
-index 118694dd9b5f..8b3297d75992 100644
+index 118694d..8b3297d 100644
 --- a/arch/arm64/boot/dts/apple/t8112-pmgr.dtsi
 +++ b/arch/arm64/boot/dts/apple/t8112-pmgr.dtsi
 @@ -465,6 +465,7 @@ ps_mca0: power-controller@2c0 {
@@ -62,6 +62,3 @@ index 118694dd9b5f..8b3297d75992 100644
  	};
  
  	ps_mcc: power-controller@2f0 {
--- 
-2.47.3
-

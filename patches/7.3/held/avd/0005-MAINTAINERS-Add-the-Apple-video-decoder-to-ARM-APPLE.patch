@@ -1,0 +1,33 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: Mikael Hug <mikaelhug@gmail.com>
+Date: Sat, 31 Oct 2026 00:47:21 +0000
+Subject: [PATCH] MAINTAINERS: Add the Apple video decoder to ARM/APPLE MACHINE
+ SUPPORT
+
+Assisted-by: Claude:claude-opus-5-5
+Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>
+Claude-Session: https://claude.ai/code/session_01UqitcmCNS6G33aQUShi39x
+---
+ MAINTAINERS | 2 ++
+ 1 file changed, 2 insertions(+)
+
+diff --git a/MAINTAINERS b/MAINTAINERS
+index f4cbb624f..a64192767 100644
+--- a/MAINTAINERS
++++ b/MAINTAINERS
+@@ -2652,6 +2652,7 @@ F:	Documentation/devicetree/bindings/iommu/apple,dart.yaml
+ F:	Documentation/devicetree/bindings/iommu/apple,sart.yaml
+ F:	Documentation/devicetree/bindings/leds/backlight/apple,dwi-bl.yaml
+ F:	Documentation/devicetree/bindings/mailbox/apple,mailbox.yaml
++F:	Documentation/devicetree/bindings/media/apple,avd.yaml
+ F:	Documentation/devicetree/bindings/mfd/apple,smc.yaml
+ F:	Documentation/devicetree/bindings/net/bluetooth/brcm,bcm4377-bluetooth.yaml
+ F:	Documentation/devicetree/bindings/nvme/apple,nvme-ans.yaml
+@@ -2685,6 +2686,7 @@ F:	drivers/input/touchscreen/apple_z2.c
+ F:	drivers/iommu/apple-dart.c
+ F:	drivers/iommu/io-pgtable-dart.c
+ F:	drivers/irqchip/irq-apple-aic.c
++F:	drivers/media/platform/apple/
+ F:	drivers/mfd/macsmc.c
+ F:	drivers/nvme/host/apple.c
+ F:	drivers/nvmem/apple-efuses.c

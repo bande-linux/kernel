@@ -1,4 +1,4 @@
-From 63a8164a93eb28d0b7d8651d90797483b0d1f9b1 Mon Sep 17 00:00:00 2001
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
 From: Yureka <yuka@yuka.dev>
 Date: Sat, 30 May 2026 14:29:06 +0200
 Subject: [PATCH] arm64: dts: t603x-j514-j516: add PCIe WiFi & SD reader nodes
@@ -16,7 +16,7 @@ Signed-off-by: Yureka <yuka@yuka.dev>
  7 files changed, 92 insertions(+)
 
 diff --git a/arch/arm64/boot/dts/apple/t6030-j514s.dts b/arch/arm64/boot/dts/apple/t6030-j514s.dts
-index 3ba2c9ca4347..f7c1307e76bd 100644
+index 3ba2c9c..f7c1307 100644
 --- a/arch/arm64/boot/dts/apple/t6030-j514s.dts
 +++ b/arch/arm64/boot/dts/apple/t6030-j514s.dts
 @@ -20,3 +20,11 @@ / {
@@ -32,7 +32,7 @@ index 3ba2c9ca4347..f7c1307e76bd 100644
 +	brcm,board-type = "apple,texa";
 +};
 diff --git a/arch/arm64/boot/dts/apple/t6030-j516s.dts b/arch/arm64/boot/dts/apple/t6030-j516s.dts
-index ab07bf7939ab..9f9609575ed0 100644
+index ab07bf7..9f96095 100644
 --- a/arch/arm64/boot/dts/apple/t6030-j516s.dts
 +++ b/arch/arm64/boot/dts/apple/t6030-j516s.dts
 @@ -20,3 +20,11 @@ / {
@@ -48,7 +48,7 @@ index ab07bf7939ab..9f9609575ed0 100644
 +	brcm,board-type = "apple,jura";
 +};
 diff --git a/arch/arm64/boot/dts/apple/t6031-j514c.dts b/arch/arm64/boot/dts/apple/t6031-j514c.dts
-index c1507158325e..8cc2224ee0fd 100644
+index c150715..8cc2224 100644
 --- a/arch/arm64/boot/dts/apple/t6031-j514c.dts
 +++ b/arch/arm64/boot/dts/apple/t6031-j514c.dts
 @@ -16,3 +16,11 @@ / {
@@ -64,7 +64,7 @@ index c1507158325e..8cc2224ee0fd 100644
 +	brcm,board-type = "apple,texa";
 +};
 diff --git a/arch/arm64/boot/dts/apple/t6031-j516c.dts b/arch/arm64/boot/dts/apple/t6031-j516c.dts
-index 841b2bb10b06..5dfe886d47a9 100644
+index 841b2bb..5dfe886 100644
 --- a/arch/arm64/boot/dts/apple/t6031-j516c.dts
 +++ b/arch/arm64/boot/dts/apple/t6031-j516c.dts
 @@ -16,3 +16,11 @@ / {
@@ -80,7 +80,7 @@ index 841b2bb10b06..5dfe886d47a9 100644
 +	brcm,board-type = "apple,jura";
 +};
 diff --git a/arch/arm64/boot/dts/apple/t6034-j514m.dts b/arch/arm64/boot/dts/apple/t6034-j514m.dts
-index e31bd0bc0592..dfae771ec626 100644
+index e31bd0b..dfae771 100644
 --- a/arch/arm64/boot/dts/apple/t6034-j514m.dts
 +++ b/arch/arm64/boot/dts/apple/t6034-j514m.dts
 @@ -16,3 +16,11 @@ / {
@@ -96,7 +96,7 @@ index e31bd0bc0592..dfae771ec626 100644
 +	brcm,board-type = "apple,texa";
 +};
 diff --git a/arch/arm64/boot/dts/apple/t6034-j516m.dts b/arch/arm64/boot/dts/apple/t6034-j516m.dts
-index 4d6513558597..dc5c202a787b 100644
+index 4d65135..dc5c202 100644
 --- a/arch/arm64/boot/dts/apple/t6034-j516m.dts
 +++ b/arch/arm64/boot/dts/apple/t6034-j516m.dts
 @@ -16,3 +16,11 @@ / {
@@ -112,7 +112,7 @@ index 4d6513558597..dc5c202a787b 100644
 +	brcm,board-type = "apple,jura";
 +};
 diff --git a/arch/arm64/boot/dts/apple/t603x-j514-j516.dtsi b/arch/arm64/boot/dts/apple/t603x-j514-j516.dtsi
-index 517b84c183ca..21ac19450024 100644
+index 517b84c..21ac194 100644
 --- a/arch/arm64/boot/dts/apple/t603x-j514-j516.dtsi
 +++ b/arch/arm64/boot/dts/apple/t603x-j514-j516.dtsi
 @@ -21,7 +21,9 @@ / {
@@ -171,6 +171,3 @@ index 517b84c183ca..21ac19450024 100644
 +&pcie0_dart_1 {
 +	status = "okay";
 +};
--- 
-2.47.3
-

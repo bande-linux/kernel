@@ -1,4 +1,4 @@
-From e510b810d15bb97c1a5da2807eb4d060a2040fb1 Mon Sep 17 00:00:00 2001
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
 From: Yureka Lilian <yureka@cyberchaos.dev>
 Date: Sun, 5 Jul 2026 15:17:27 +0200
 Subject: [PATCH] dt-bindings: pwm: apple,s5l-fpwm: Add t8132 compatible
@@ -14,7 +14,7 @@ Signed-off-by: Yureka Lilian <yureka@cyberchaos.dev>
  1 file changed, 1 insertion(+)
 
 diff --git a/Documentation/devicetree/bindings/pwm/apple,s5l-fpwm.yaml b/Documentation/devicetree/bindings/pwm/apple,s5l-fpwm.yaml
-index dd95037ea5ee..ae8baa5f7bcd 100644
+index dd95037..ae8baa5 100644
 --- a/Documentation/devicetree/bindings/pwm/apple,s5l-fpwm.yaml
 +++ b/Documentation/devicetree/bindings/pwm/apple,s5l-fpwm.yaml
 @@ -19,6 +19,7 @@ properties:
@@ -25,6 +25,3 @@ index dd95037ea5ee..ae8baa5f7bcd 100644
            - apple,t6000-fpwm
            - apple,t6020-fpwm
            - apple,t6030-fpwm
--- 
-2.47.3
-

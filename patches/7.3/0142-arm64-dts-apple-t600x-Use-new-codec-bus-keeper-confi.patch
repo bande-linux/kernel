@@ -1,4 +1,4 @@
-From 9fe41f71a6f8f53f8c6afd4cf37ebfc32b3d8b4b Mon Sep 17 00:00:00 2001
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
 From: James Calligeros <jcalligeros99@gmail.com>
 Date: Sun, 21 Jun 2026 21:02:05 +1000
 Subject: [PATCH] arm64: dts: apple: t600x: Use new codec bus keeper
@@ -11,7 +11,7 @@ Signed-off-by: James Calligeros <jcalligeros99@gmail.com>
  1 file changed, 4 insertions(+), 2 deletions(-)
 
 diff --git a/arch/arm64/boot/dts/apple/t600x-j314-j316.dtsi b/arch/arm64/boot/dts/apple/t600x-j314-j316.dtsi
-index 391bcdaedd66..567ddaf6213e 100644
+index 391bcda..567ddaf 100644
 --- a/arch/arm64/boot/dts/apple/t600x-j314-j316.dtsi
 +++ b/arch/arm64/boot/dts/apple/t600x-j314-j316.dtsi
 @@ -272,7 +272,6 @@ speaker_left_woof1: codec@38 {
@@ -41,6 +41,3 @@ index 391bcdaedd66..567ddaf6213e 100644
  
  			cpu {
  				sound-dai = <&mca 0>, <&mca 1>;
--- 
-2.47.3
-

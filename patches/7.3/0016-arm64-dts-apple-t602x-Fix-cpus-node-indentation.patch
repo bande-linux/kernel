@@ -1,4 +1,4 @@
-From 4b8d76b294ed1ca91b008035731d98728ac2e70a Mon Sep 17 00:00:00 2001
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
 From: Sven Peter <sven@kernel.org>
 Date: Sun, 30 Aug 2026 16:22:07 +0200
 Subject: [PATCH] arm64: dts: apple: t602x: Fix cpus node indentation
@@ -15,7 +15,7 @@ Signed-off-by: Sven Peter <sven@kernel.org>
  1 file changed, 1 insertion(+), 1 deletion(-)
 
 diff --git a/arch/arm64/boot/dts/apple/t602x-common.dtsi b/arch/arm64/boot/dts/apple/t602x-common.dtsi
-index 9c800a391e7e..66b6f8347d19 100644
+index 9c800a3..66b6f83 100644
 --- a/arch/arm64/boot/dts/apple/t602x-common.dtsi
 +++ b/arch/arm64/boot/dts/apple/t602x-common.dtsi
 @@ -254,7 +254,7 @@ l2_cache_2: l2-cache-2 {
@@ -27,6 +27,3 @@ index 9c800a391e7e..66b6f8347d19 100644
  
  	blizzard_opp: opp-table-0 {
  		compatible = "operating-points-v2";
--- 
-2.47.3
-

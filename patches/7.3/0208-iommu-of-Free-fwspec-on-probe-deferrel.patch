@@ -1,4 +1,4 @@
-From ccc2d81cc230a535059431ba7278e7b82e790451 Mon Sep 17 00:00:00 2001
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
 From: Janne Grunau <j@jannau.net>
 Date: Sun, 24 Mar 2024 18:06:46 +0100
 Subject: [PATCH] iommu/of: Free fwspec on probe deferrel
@@ -16,7 +16,7 @@ Signed-off-by: Janne Grunau <j@jannau.net>
  1 file changed, 2 insertions(+)
 
 diff --git a/drivers/iommu/of_iommu.c b/drivers/iommu/of_iommu.c
-index a18bb60f6f3d..926c4de0c72f 100644
+index a18bb60..926c4de 100644
 --- a/drivers/iommu/of_iommu.c
 +++ b/drivers/iommu/of_iommu.c
 @@ -145,6 +145,8 @@ int of_iommu_configure(struct device *dev, struct device_node *master_np,
@@ -28,6 +28,3 @@ index a18bb60f6f3d..926c4de0c72f 100644
  	}
  
  	if (err && dev_iommu_present)
--- 
-2.47.3
-

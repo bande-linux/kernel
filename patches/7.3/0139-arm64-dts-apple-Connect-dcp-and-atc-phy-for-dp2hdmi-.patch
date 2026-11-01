@@ -1,4 +1,4 @@
-From b01a07dd44fcd70155ad1921116c991f70b74ab6 Mon Sep 17 00:00:00 2001
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
 From: Janne Grunau <j@jannau.net>
 Date: Sun, 21 Dec 2025 20:25:56 +0100
 Subject: [PATCH] arm64: dts: apple: Connect dcp and atc-phy for dp2hdmi on
@@ -14,7 +14,7 @@ Signed-off-by: Janne Grunau <j@jannau.net>
  1 file changed, 24 insertions(+), 1 deletion(-)
 
 diff --git a/arch/arm64/boot/dts/apple/t600x-j314-j316.dtsi b/arch/arm64/boot/dts/apple/t600x-j314-j316.dtsi
-index 6b7de4ef31e1..8693ca9b2437 100644
+index 6b7de4e..8693ca9 100644
 --- a/arch/arm64/boot/dts/apple/t600x-j314-j316.dtsi
 +++ b/arch/arm64/boot/dts/apple/t600x-j314-j316.dtsi
 @@ -109,6 +109,19 @@ &dcpext0 {
@@ -56,6 +56,3 @@ index 6b7de4ef31e1..8693ca9b2437 100644
  };
  
  &aop_mbox {
--- 
-2.47.3
-

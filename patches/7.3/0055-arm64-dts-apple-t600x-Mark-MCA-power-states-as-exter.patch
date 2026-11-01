@@ -1,4 +1,4 @@
-From 9b3253da858dad202d3fa41bc2e06214f79375f9 Mon Sep 17 00:00:00 2001
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
 From: Hector Martin <marcan@marcan.st>
 Date: Thu, 12 Oct 2023 23:20:26 +0900
 Subject: [PATCH] arm64: dts: apple: t600x: Mark MCA power states as
@@ -11,7 +11,7 @@ Signed-off-by: Hector Martin <marcan@marcan.st>
  1 file changed, 4 insertions(+)
 
 diff --git a/arch/arm64/boot/dts/apple/t600x-pmgr.dtsi b/arch/arm64/boot/dts/apple/t600x-pmgr.dtsi
-index 0bd44753b76a..cc2627eafc89 100644
+index 0bd4475..cc2627e 100644
 --- a/arch/arm64/boot/dts/apple/t600x-pmgr.dtsi
 +++ b/arch/arm64/boot/dts/apple/t600x-pmgr.dtsi
 @@ -1113,6 +1113,7 @@ DIE_NODE(ps_mca0): power-controller@288 {
@@ -46,6 +46,3 @@ index 0bd44753b76a..cc2627eafc89 100644
  	};
  
  	DIE_NODE(ps_dpa0): power-controller@2a8 {
--- 
-2.47.3
-

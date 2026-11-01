@@ -1,4 +1,4 @@
-From 0ecc9e515a911fd6fc17f94aa25cffbae1ea5eaa Mon Sep 17 00:00:00 2001
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
 From: Janne Grunau <j@jannau.net>
 Date: Tue, 1 Sep 2026 14:56:44 +0200
 Subject: [PATCH] arm64: dts: apple: Fix style issues for t602x multi die .dtsi
@@ -21,7 +21,7 @@ Signed-off-by: Janne Grunau <j@jannau.net>
  5 files changed, 18 insertions(+), 16 deletions(-)
 
 diff --git a/arch/arm64/boot/dts/apple/t6021.dtsi b/arch/arm64/boot/dts/apple/t6021.dtsi
-index 5175797baf62..3cddc1697e14 100644
+index 5175797..3cddc16 100644
 --- a/arch/arm64/boot/dts/apple/t6021.dtsi
 +++ b/arch/arm64/boot/dts/apple/t6021.dtsi
 @@ -35,13 +35,11 @@ soc {
@@ -43,7 +43,7 @@ index 5175797baf62..3cddc1697e14 100644
  #include "t602x-pmgr.dtsi"
  
 diff --git a/arch/arm64/boot/dts/apple/t6022.dtsi b/arch/arm64/boot/dts/apple/t6022.dtsi
-index 7585fd609d34..0feda70568ee 100644
+index 7585fd6..0feda70 100644
 --- a/arch/arm64/boot/dts/apple/t6022.dtsi
 +++ b/arch/arm64/boot/dts/apple/t6022.dtsi
 @@ -294,32 +294,30 @@ die1: soc@2200000000 {
@@ -88,7 +88,7 @@ index 7585fd609d34..0feda70568ee 100644
  &aic {
  	affinities {
 diff --git a/arch/arm64/boot/dts/apple/t602x-die0.dtsi b/arch/arm64/boot/dts/apple/t602x-die0.dtsi
-index c33623f0e27a..05819755a18f 100644
+index c33623f..0581975 100644
 --- a/arch/arm64/boot/dts/apple/t602x-die0.dtsi
 +++ b/arch/arm64/boot/dts/apple/t602x-die0.dtsi
 @@ -6,6 +6,7 @@
@@ -105,7 +105,7 @@ index c33623f0e27a..05819755a18f 100644
  	};
 +};
 diff --git a/arch/arm64/boot/dts/apple/t602x-dieX.dtsi b/arch/arm64/boot/dts/apple/t602x-dieX.dtsi
-index ae3d535c5acb..4044c4f21795 100644
+index ae3d535..4044c4f 100644
 --- a/arch/arm64/boot/dts/apple/t602x-dieX.dtsi
 +++ b/arch/arm64/boot/dts/apple/t602x-dieX.dtsi
 @@ -5,6 +5,7 @@
@@ -122,7 +122,7 @@ index ae3d535c5acb..4044c4f21795 100644
  	};
 +};
 diff --git a/arch/arm64/boot/dts/apple/t602x-nvme.dtsi b/arch/arm64/boot/dts/apple/t602x-nvme.dtsi
-index 590cec8ac804..d1f4267a6cd2 100644
+index 590cec8..d1f4267 100644
 --- a/arch/arm64/boot/dts/apple/t602x-nvme.dtsi
 +++ b/arch/arm64/boot/dts/apple/t602x-nvme.dtsi
 @@ -5,6 +5,7 @@
@@ -138,6 +138,3 @@ index 590cec8ac804..d1f4267a6cd2 100644
  		resets = <&DIE_NODE(ps_ans2)>;
  	};
 +};
--- 
-2.47.3
-

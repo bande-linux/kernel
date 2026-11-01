@@ -1,4 +1,4 @@
-From 5560fedb09f8aedd4d67f7c27e10bca751d8f501 Mon Sep 17 00:00:00 2001
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
 From: Sven Peter <sven@kernel.org>
 Date: Thu, 20 Aug 2026 20:37:25 +0200
 Subject: [PATCH] arm64: dts: apple: t60xx: Add USB4 ACIO and NHI
@@ -22,7 +22,7 @@ Signed-off-by: Sven Peter <sven@kernel.org>
  8 files changed, 1351 insertions(+), 1 deletion(-)
 
 diff --git a/arch/arm64/boot/dts/apple/t6002-j375d.dts b/arch/arm64/boot/dts/apple/t6002-j375d.dts
-index d04e6ff01b35..a7354189c960 100644
+index d04e6ff..a735418 100644
 --- a/arch/arm64/boot/dts/apple/t6002-j375d.dts
 +++ b/arch/arm64/boot/dts/apple/t6002-j375d.dts
 @@ -18,6 +18,10 @@ / {
@@ -130,7 +130,7 @@ index d04e6ff01b35..a7354189c960 100644
 +
 +#include "hwmon-fan-dual.dtsi"
 diff --git a/arch/arm64/boot/dts/apple/t600x-dieX.dtsi b/arch/arm64/boot/dts/apple/t600x-dieX.dtsi
-index 745b90d8f43a..9f9ca9d46344 100644
+index 745b90d..9f9ca9d 100644
 --- a/arch/arm64/boot/dts/apple/t600x-dieX.dtsi
 +++ b/arch/arm64/boot/dts/apple/t600x-dieX.dtsi
 @@ -288,6 +288,22 @@ DIE_NODE(pinctrl_aop): pinctrl@293820000 {
@@ -553,7 +553,7 @@ index 745b90d8f43a..9f9ca9d46344 100644
  		compatible = "apple,t6000-dwc3", "apple,t8103-dwc3";
  		reg = <0x13 0x02280000 0x0 0xcd00>, <0x13 0x0228cd00 0x0 0x3200>;
 diff --git a/arch/arm64/boot/dts/apple/t600x-j314-j316.dtsi b/arch/arm64/boot/dts/apple/t600x-j314-j316.dtsi
-index 3335835646e8..47fabac2ce5a 100644
+index 3335835..47fabac 100644
 --- a/arch/arm64/boot/dts/apple/t600x-j314-j316.dtsi
 +++ b/arch/arm64/boot/dts/apple/t600x-j314-j316.dtsi
 @@ -27,6 +27,12 @@ aliases {
@@ -678,7 +678,7 @@ index 3335835646e8..47fabac2ce5a 100644
  #include "hwmon-laptop.dtsi"
  #include "hwmon-fan-dual.dtsi"
 diff --git a/arch/arm64/boot/dts/apple/t600x-j375.dtsi b/arch/arm64/boot/dts/apple/t600x-j375.dtsi
-index c684657e0e19..3910e2e48468 100644
+index c684657..3910e2e 100644
 --- a/arch/arm64/boot/dts/apple/t600x-j375.dtsi
 +++ b/arch/arm64/boot/dts/apple/t600x-j375.dtsi
 @@ -27,6 +27,14 @@ aliases {
@@ -831,7 +831,7 @@ index c684657e0e19..3910e2e48468 100644
 +
  #include "spi1-nvram.dtsi"
 diff --git a/arch/arm64/boot/dts/apple/t6022-j180d.dts b/arch/arm64/boot/dts/apple/t6022-j180d.dts
-index 2c0640fa9d38..9843bf9b8ece 100644
+index 2c0640f..9843bf9 100644
 --- a/arch/arm64/boot/dts/apple/t6022-j180d.dts
 +++ b/arch/arm64/boot/dts/apple/t6022-j180d.dts
 @@ -31,7 +31,24 @@ aliases {
@@ -1065,7 +1065,7 @@ index 2c0640fa9d38..9843bf9b8ece 100644
 +
  #include "spi1-nvram.dtsi"
 diff --git a/arch/arm64/boot/dts/apple/t6022-j475d.dts b/arch/arm64/boot/dts/apple/t6022-j475d.dts
-index bb7fafc8b644..2d1848791080 100644
+index bb7fafc..2d18487 100644
 --- a/arch/arm64/boot/dts/apple/t6022-j475d.dts
 +++ b/arch/arm64/boot/dts/apple/t6022-j475d.dts
 @@ -22,6 +22,11 @@ / {
@@ -1094,7 +1094,7 @@ index bb7fafc8b644..2d1848791080 100644
  /delete-node/ &ps_atc2_usb_aon_die1;
  /delete-node/ &ps_atc2_usb_die1;
 diff --git a/arch/arm64/boot/dts/apple/t6022-jxxxd.dtsi b/arch/arm64/boot/dts/apple/t6022-jxxxd.dtsi
-index 4264fdf766e8..18683e8b62a4 100644
+index 4264fdf..18683e8 100644
 --- a/arch/arm64/boot/dts/apple/t6022-jxxxd.dtsi
 +++ b/arch/arm64/boot/dts/apple/t6022-jxxxd.dtsi
 @@ -103,6 +103,13 @@ typec4_connector_ss: endpoint {
@@ -1173,7 +1173,7 @@ index 4264fdf766e8..18683e8b62a4 100644
 +	};
 +};
 diff --git a/arch/arm64/boot/dts/apple/t602x-dieX.dtsi b/arch/arm64/boot/dts/apple/t602x-dieX.dtsi
-index 335e2fdefe62..8c2b00a04885 100644
+index 335e2fd..8c2b00a 100644
 --- a/arch/arm64/boot/dts/apple/t602x-dieX.dtsi
 +++ b/arch/arm64/boot/dts/apple/t602x-dieX.dtsi
 @@ -207,6 +207,22 @@ DIE_NODE(pinctrl_aop): pinctrl@2a6820000 {
@@ -1595,6 +1595,3 @@ index 335e2fdefe62..8c2b00a04885 100644
  	DIE_NODE(dwc3_3): usb@1302280000 {
  		compatible = "apple,t6020-dwc3", "apple,t8103-dwc3";
  		reg = <0x13 0x02280000 0x0 0xcd00>, <0x13 0x0228cd00 0x0 0x3200>;
--- 
-2.47.3
-

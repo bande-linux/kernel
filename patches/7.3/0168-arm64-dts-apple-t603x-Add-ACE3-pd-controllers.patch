@@ -1,4 +1,4 @@
-From c5efd3a71d943cb27c92f1844d969bff5df4a532 Mon Sep 17 00:00:00 2001
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
 From: Sasha Finkelstein <k@chaosmail.tech>
 Date: Wed, 22 Jul 2026 20:31:45 +0200
 Subject: [PATCH] arm64: dts: apple: t603x: Add ACE3 pd controllers
@@ -10,7 +10,7 @@ Signed-off-by: Sasha Finkelstein <k@chaosmail.tech>
  1 file changed, 44 insertions(+)
 
 diff --git a/arch/arm64/boot/dts/apple/t603x-j514-j516.dtsi b/arch/arm64/boot/dts/apple/t603x-j514-j516.dtsi
-index f79ad9407de8..47504ae1d608 100644
+index f79ad94..47504ae 100644
 --- a/arch/arm64/boot/dts/apple/t603x-j514-j516.dtsi
 +++ b/arch/arm64/boot/dts/apple/t603x-j514-j516.dtsi
 @@ -294,6 +294,50 @@ codec {
@@ -64,6 +64,3 @@ index f79ad9407de8..47504ae1d608 100644
  &isp {
  	apple,platform-id = <9>;
  };
--- 
-2.47.3
-

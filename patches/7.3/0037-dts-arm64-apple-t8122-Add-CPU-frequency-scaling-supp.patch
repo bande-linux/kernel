@@ -1,4 +1,4 @@
-From 0c510447a9da556ea4e90f8299d0cea63847083b Mon Sep 17 00:00:00 2001
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
 From: Janne Grunau <j@jannau.net>
 Date: Thu, 4 Jun 2026 08:55:55 +0200
 Subject: [PATCH] dts: arm64: apple: t8122: Add CPU frequency scaling support
@@ -14,7 +14,7 @@ Signed-off-by: Janne Grunau <j@jannau.net>
  1 file changed, 175 insertions(+)
 
 diff --git a/arch/arm64/boot/dts/apple/t8122.dtsi b/arch/arm64/boot/dts/apple/t8122.dtsi
-index a7f55c5294ac..2c2e1594071c 100644
+index a7f55c5..2c2e159 100644
 --- a/arch/arm64/boot/dts/apple/t8122.dtsi
 +++ b/arch/arm64/boot/dts/apple/t8122.dtsi
 @@ -65,6 +65,8 @@ cpu_e0: cpu@0 {
@@ -262,6 +262,3 @@ index a7f55c5294ac..2c2e1594071c 100644
  		i2c0: i2c@2a1010000 {
  			compatible = "apple,t8122-i2c", "apple,t8103-i2c";
  			reg = <0x2 0xa1010000 0x0 0x4000>;
--- 
-2.47.3
-

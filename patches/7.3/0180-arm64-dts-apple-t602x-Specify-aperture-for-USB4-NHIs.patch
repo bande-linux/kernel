@@ -1,4 +1,4 @@
-From cbea3bf92687fe115fb8cc9a1aa4b6acafaf27ac Mon Sep 17 00:00:00 2001
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
 From: Janne Grunau <j@jannau.net>
 Date: Thu, 20 Aug 2026 20:37:25 +0200
 Subject: [PATCH] arm64: dts: apple: t602x: Specify aperture for USB4 NHIs
@@ -13,7 +13,7 @@ Signed-off-by: Janne Grunau <j@jannau.net>
  1 file changed, 12 insertions(+), 12 deletions(-)
 
 diff --git a/arch/arm64/boot/dts/apple/t602x-dieX.dtsi b/arch/arm64/boot/dts/apple/t602x-dieX.dtsi
-index 8c2b00a04885..00f3d7800e14 100644
+index 8c2b00a..00f3d78 100644
 --- a/arch/arm64/boot/dts/apple/t602x-dieX.dtsi
 +++ b/arch/arm64/boot/dts/apple/t602x-dieX.dtsi
 @@ -514,7 +514,7 @@ DIE_NODE(usb4_0_dart): iommu@a80000 {
@@ -96,6 +96,3 @@ index 8c2b00a04885..00f3d7800e14 100644
  			/* To be filled by the loader */
  			apple,thunderbolt-drom = [00];
  		};
--- 
-2.47.3
-

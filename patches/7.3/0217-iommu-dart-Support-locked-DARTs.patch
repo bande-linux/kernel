@@ -1,4 +1,4 @@
-From e7e5b67c5596102823fed1f7f53f0f03d0ac5c8b Mon Sep 17 00:00:00 2001
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
 From: Alyssa Rosenzweig <alyssa@rosenzweig.io>
 Date: Mon, 10 Feb 2025 14:39:54 -0500
 Subject: [PATCH] iommu/dart: Support locked DARTs
@@ -17,7 +17,7 @@ Signed-off-by: Janne Grunau <j@jannau.net>
  1 file changed, 16 insertions(+), 12 deletions(-)
 
 diff --git a/drivers/iommu/apple-dart.c b/drivers/iommu/apple-dart.c
-index e70cc33103ef..22a2aef905e6 100644
+index e70cc33..22a2aef 100644
 --- a/drivers/iommu/apple-dart.c
 +++ b/drivers/iommu/apple-dart.c
 @@ -557,17 +557,9 @@ apple_dart_t8110_hw_invalidate_tlb(struct apple_dart_stream_map *stream_map)
@@ -86,6 +86,3 @@ index e70cc33103ef..22a2aef905e6 100644
  	ret = apple_dart_hw_reset(dart);
  	if (ret) {
  		dev_err(dev, "Failed to reset DART on resume\n");
--- 
-2.47.3
-

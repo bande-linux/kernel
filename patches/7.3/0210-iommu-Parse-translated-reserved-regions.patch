@@ -1,4 +1,4 @@
-From e81575a07d7ecb551bf376a8222819d0ca39f7e0 Mon Sep 17 00:00:00 2001
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
 From: Janne Grunau <j@jannau.net>
 Date: Sat, 22 Oct 2022 12:24:54 +0200
 Subject: [PATCH] iommu: Parse translated reserved regions
@@ -14,7 +14,7 @@ Signed-off-by: Janne Grunau <j@jannau.net>
  2 files changed, 14 insertions(+), 6 deletions(-)
 
 diff --git a/drivers/iommu/dma-iommu.c b/drivers/iommu/dma-iommu.c
-index 68ee57800fef..82eccd24f0a2 100644
+index 68ee578..82eccd2 100644
 --- a/drivers/iommu/dma-iommu.c
 +++ b/drivers/iommu/dma-iommu.c
 @@ -573,8 +573,13 @@ static int iova_reserve_iommu_regions(struct device *dev,
@@ -34,7 +34,7 @@ index 68ee57800fef..82eccd24f0a2 100644
  
  		if (region->type == IOMMU_RESV_MSI)
 diff --git a/drivers/iommu/of_iommu.c b/drivers/iommu/of_iommu.c
-index 926c4de0c72f..8501b9ef3d41 100644
+index 926c4de..8501b9e 100644
 --- a/drivers/iommu/of_iommu.c
 +++ b/drivers/iommu/of_iommu.c
 @@ -187,9 +187,7 @@ iommu_resv_region_get_type(struct device *dev,
@@ -63,6 +63,3 @@ index 926c4de0c72f..8501b9ef3d41 100644
  				if (region)
  					list_add_tail(&region->list, list);
  			}
--- 
-2.47.3
-

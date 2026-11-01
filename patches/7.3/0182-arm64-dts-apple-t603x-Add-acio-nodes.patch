@@ -1,4 +1,4 @@
-From a6abb3e8f3652fbbe87354ce7d08cc6914179496 Mon Sep 17 00:00:00 2001
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
 From: Sasha Finkelstein <k@chaosmail.tech>
 Date: Sat, 22 Aug 2026 21:23:25 +0200
 Subject: [PATCH] arm64: dts: apple: t603x: Add acio nodes
@@ -12,7 +12,7 @@ Signed-off-by: Sasha Finkelstein <k@chaosmail.tech>
  3 files changed, 823 insertions(+)
 
 diff --git a/arch/arm64/boot/dts/apple/t6030.dtsi b/arch/arm64/boot/dts/apple/t6030.dtsi
-index a1fc24574811..2c11f814bbae 100644
+index a1fc245..2c11f81 100644
 --- a/arch/arm64/boot/dts/apple/t6030.dtsi
 +++ b/arch/arm64/boot/dts/apple/t6030.dtsi
 @@ -810,6 +810,20 @@ aic: interrupt-controller@351000000 {
@@ -419,7 +419,7 @@ index a1fc24574811..2c11f814bbae 100644
  			compatible = "apple,t6030-dwc3", "apple,t8103-dwc3";
  			reg = <0xf 0x02280000 0x0 0xcd00>, <0xf 0x0228cd00 0x0 0x3200>;
 diff --git a/arch/arm64/boot/dts/apple/t6031-dieX.dtsi b/arch/arm64/boot/dts/apple/t6031-dieX.dtsi
-index e4344da6ec93..f5ab9bb5f1dc 100644
+index e4344da..f5ab9bb 100644
 --- a/arch/arm64/boot/dts/apple/t6031-dieX.dtsi
 +++ b/arch/arm64/boot/dts/apple/t6031-dieX.dtsi
 @@ -41,6 +41,20 @@ DIE_NODE(pmgr1): power-management@292800000 {
@@ -825,7 +825,7 @@ index e4344da6ec93..f5ab9bb5f1dc 100644
  		compatible = "apple,t6031-dwc3", "apple,t8103-dwc3";
  		reg = <0xf 0x02280000 0x0 0xcd00>, <0xf 0x0228cd00 0x0 0x3200>;
 diff --git a/arch/arm64/boot/dts/apple/t603x-j514-j516.dtsi b/arch/arm64/boot/dts/apple/t603x-j514-j516.dtsi
-index a1cfcdbfe89a..b47e3327680b 100644
+index a1cfcdb..b47e332 100644
 --- a/arch/arm64/boot/dts/apple/t603x-j514-j516.dtsi
 +++ b/arch/arm64/boot/dts/apple/t603x-j514-j516.dtsi
 @@ -27,6 +27,13 @@ aliases {
@@ -946,6 +946,3 @@ index a1cfcdbfe89a..b47e3327680b 100644
  	};
  };
  
--- 
-2.47.3
-

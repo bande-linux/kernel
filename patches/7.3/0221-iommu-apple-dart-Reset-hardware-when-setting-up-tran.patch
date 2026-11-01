@@ -1,4 +1,4 @@
-From b61a761e4a389e68a882d86584bec026f9c9eaf2 Mon Sep 17 00:00:00 2001
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
 From: sofus <sofus.c@icloud.com>
 Date: Tue, 30 Jun 2026 17:22:17 +0200
 Subject: [PATCH] iommu: apple-dart: Reset hardware when setting up
@@ -13,7 +13,7 @@ Signed-off-by: sofus <sofus.c@icloud.com>
  1 file changed, 5 insertions(+)
 
 diff --git a/drivers/iommu/apple-dart.c b/drivers/iommu/apple-dart.c
-index cd87184d95f4..1ab66842d381 100644
+index cd87184..1ab6684 100644
 --- a/drivers/iommu/apple-dart.c
 +++ b/drivers/iommu/apple-dart.c
 @@ -666,9 +666,14 @@ apple_dart_setup_translation(struct apple_dart_domain *domain,
@@ -31,6 +31,3 @@ index cd87184d95f4..1ab66842d381 100644
  	for (i = 0; i < pgtbl_cfg->apple_dart_cfg.n_ttbrs; ++i) {
  		u64 ttbr = virt_to_phys(pgtbl_cfg->apple_dart_cfg.ttbr[i]);
  		apple_dart_hw_set_ttbr(stream_map, i, ttbr);
--- 
-2.47.3
-

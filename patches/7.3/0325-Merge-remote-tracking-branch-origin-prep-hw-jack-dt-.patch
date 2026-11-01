@@ -1,0 +1,76 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: Mikael Hug <mikaelhug@gmail.com>
+Date: Sat, 31 Oct 2026 00:47:13 +0000
+Subject: [PATCH] Merge remote-tracking branch 'origin/prep/hw-jack-dt-3' into
+ prep/hw-test5
+
+---
+ .../devicetree/bindings/sound/cirrus,cs42l84.yaml         | 8 ++++++--
+ arch/arm64/boot/dts/apple/t8112-j473.dts                  | 1 -
+ arch/arm64/boot/dts/apple/t8122-j433.dts                  | 1 -
+ arch/arm64/boot/dts/apple/t8122-j434.dts                  | 1 -
+ 4 files changed, 6 insertions(+), 5 deletions(-)
+
+diff --git a/Documentation/devicetree/bindings/sound/cirrus,cs42l84.yaml b/Documentation/devicetree/bindings/sound/cirrus,cs42l84.yaml
+index 7f8338e..9695a80 100644
+--- a/Documentation/devicetree/bindings/sound/cirrus,cs42l84.yaml
++++ b/Documentation/devicetree/bindings/sound/cirrus,cs42l84.yaml
+@@ -36,7 +36,10 @@ required:
+   - compatible
+   - reg
+ 
+-additionalProperties: false
++allOf:
++  - $ref: dai-common.yaml#
++
++unevaluatedProperties: false
+ 
+ examples:
+   - |
+@@ -49,8 +52,9 @@ examples:
+       jack_codec: codec@4b {
+           compatible = "cirrus,cs42l84";
+           reg = <0x4b>;
+-          reset-gpios = <&pinctrl_nub 4 GPIO_ACTIVE_LOW>;
++          reset-gpios = <&pinctrl_nub 4 GPIO_ACTIVE_HIGH>;
+           interrupts-extended = <&pinctrl_ap 180 IRQ_TYPE_LEVEL_LOW>;
+           #sound-dai-cells = <0>;
++          sound-name-prefix = "Jack";
+       };
+     };
+diff --git a/arch/arm64/boot/dts/apple/t8112-j473.dts b/arch/arm64/boot/dts/apple/t8112-j473.dts
+index 6cbafeb..a3f1b9b 100644
+--- a/arch/arm64/boot/dts/apple/t8112-j473.dts
++++ b/arch/arm64/boot/dts/apple/t8112-j473.dts
+@@ -225,7 +225,6 @@ jack_codec: codec@4b {
+ 		interrupt-parent = <&pinctrl_ap>;
+ 		interrupts = <149 IRQ_TYPE_LEVEL_LOW>;
+ 		#sound-dai-cells = <0>;
+-		cirrus,ts-inv = <1>;
+ 		sound-name-prefix = "Jack";
+ 	};
+ };
+diff --git a/arch/arm64/boot/dts/apple/t8122-j433.dts b/arch/arm64/boot/dts/apple/t8122-j433.dts
+index abe405c..5d7dc82 100644
+--- a/arch/arm64/boot/dts/apple/t8122-j433.dts
++++ b/arch/arm64/boot/dts/apple/t8122-j433.dts
+@@ -52,7 +52,6 @@ jack_codec: codec@4b {
+ 		interrupt-parent = <&pinctrl_ap>;
+ 		interrupts = <173 IRQ_TYPE_LEVEL_LOW>;
+ 		#sound-dai-cells = <0>;
+-		cirrus,ts-inv = <1>;
+ 		sound-name-prefix = "Jack";
+ 	};
+ };
+diff --git a/arch/arm64/boot/dts/apple/t8122-j434.dts b/arch/arm64/boot/dts/apple/t8122-j434.dts
+index 1761932..642a977 100644
+--- a/arch/arm64/boot/dts/apple/t8122-j434.dts
++++ b/arch/arm64/boot/dts/apple/t8122-j434.dts
+@@ -58,7 +58,6 @@ jack_codec: codec@4b {
+ 		interrupt-parent = <&pinctrl_ap>;
+ 		interrupts = <173 IRQ_TYPE_LEVEL_LOW>;
+ 		#sound-dai-cells = <0>;
+-		cirrus,ts-inv = <1>;
+ 		sound-name-prefix = "Jack";
+ 	};
+ };

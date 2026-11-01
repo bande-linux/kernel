@@ -1,4 +1,4 @@
-From a89a116228090b466caef26158f0725f219dabfd Mon Sep 17 00:00:00 2001
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
 From: Janne Grunau <j@jannau.net>
 Date: Mon, 30 Dec 2024 15:08:45 +0100
 Subject: [PATCH] arm64: dts: apple: t8103-j293: Enable AOP
@@ -10,7 +10,7 @@ Signed-off-by: Janne Grunau <j@jannau.net>
  1 file changed, 21 insertions(+)
 
 diff --git a/arch/arm64/boot/dts/apple/t8103-j293.dts b/arch/arm64/boot/dts/apple/t8103-j293.dts
-index fb2299799388..1211fb8e4d8a 100644
+index fb22997..1211fb8 100644
 --- a/arch/arm64/boot/dts/apple/t8103-j293.dts
 +++ b/arch/arm64/boot/dts/apple/t8103-j293.dts
 @@ -24,6 +24,7 @@ / {
@@ -48,6 +48,3 @@ index fb2299799388..1211fb8e4d8a 100644
  &aop_audio {
  	apple,chassis-name = "J293";
  	apple,machine-kind = "MacBook Pro";
--- 
-2.47.3
-

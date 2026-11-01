@@ -1,4 +1,4 @@
-From 9eca8d5e3725f142f6091e2505fa29fa98ea1712 Mon Sep 17 00:00:00 2001
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
 From: Janne Grunau <j@jannau.net>
 Date: Sun, 21 Apr 2024 18:01:37 +0200
 Subject: [PATCH] arm64: apple: t600x: pmgr: SIO: Add audio, spi and uart
@@ -19,7 +19,7 @@ Signed-off-by: Janne Grunau <j@jannau.net>
  1 file changed, 1 insertion(+), 1 deletion(-)
 
 diff --git a/arch/arm64/boot/dts/apple/t600x-pmgr.dtsi b/arch/arm64/boot/dts/apple/t600x-pmgr.dtsi
-index a8f85e41baa4..1429554ed545 100644
+index a8f85e4..1429554 100644
 --- a/arch/arm64/boot/dts/apple/t600x-pmgr.dtsi
 +++ b/arch/arm64/boot/dts/apple/t600x-pmgr.dtsi
 @@ -826,7 +826,7 @@ DIE_NODE(ps_sio_cpu): power-controller@188 {
@@ -31,6 +31,3 @@ index a8f85e41baa4..1429554ed545 100644
  	};
  
  	DIE_NODE(ps_fpwm0): power-controller@190 {
--- 
-2.47.3
-

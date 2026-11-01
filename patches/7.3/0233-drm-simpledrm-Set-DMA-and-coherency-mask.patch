@@ -1,4 +1,4 @@
-From 737efc41de115f3ebde614be2591875c45f3a7a5 Mon Sep 17 00:00:00 2001
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
 From: Janne Grunau <j@jannau.net>
 Date: Sun, 15 Oct 2023 17:41:32 +0200
 Subject: [PATCH] drm/simpledrm: Set DMA and coherency mask
@@ -42,7 +42,7 @@ Signed-off-by: Janne Grunau <j@jannau.net>
  1 file changed, 6 insertions(+)
 
 diff --git a/drivers/gpu/drm/sysfb/simpledrm.c b/drivers/gpu/drm/sysfb/simpledrm.c
-index 21ddf4502ecc..404758261a49 100644
+index 21ddf45..4047582 100644
 --- a/drivers/gpu/drm/sysfb/simpledrm.c
 +++ b/drivers/gpu/drm/sysfb/simpledrm.c
 @@ -927,6 +927,12 @@ static int simpledrm_probe(struct platform_device *pdev)
@@ -58,6 +58,3 @@ index 21ddf4502ecc..404758261a49 100644
  	sdev = simpledrm_device_create(&simpledrm_driver, pdev);
  	if (IS_ERR(sdev))
  		return PTR_ERR(sdev);
--- 
-2.47.3
-

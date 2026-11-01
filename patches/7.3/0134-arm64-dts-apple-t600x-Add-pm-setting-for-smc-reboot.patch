@@ -1,4 +1,4 @@
-From 1de493c51e7c1376eacc7f040a0433e112e7017b Mon Sep 17 00:00:00 2001
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
 From: Janne Grunau <j@jannau.net>
 Date: Sat, 6 Sep 2025 11:23:03 +0200
 Subject: [PATCH] arm64: dts: apple: t600x: Add "pm_setting" for smc_reboot
@@ -12,7 +12,7 @@ Signed-off-by: Janne Grunau <j@jannau.net>
  1 file changed, 2 insertions(+), 2 deletions(-)
 
 diff --git a/arch/arm64/boot/dts/apple/t600x-die0.dtsi b/arch/arm64/boot/dts/apple/t600x-die0.dtsi
-index 654574c90309..4b197c95c2c3 100644
+index 654574c..4b197c9 100644
 --- a/arch/arm64/boot/dts/apple/t600x-die0.dtsi
 +++ b/arch/arm64/boot/dts/apple/t600x-die0.dtsi
 @@ -53,9 +53,9 @@ smc_gpio: gpio {
@@ -27,6 +27,3 @@ index 654574c90309..4b197c95c2c3 100644
  		};
  
  		smc_hwmon: hwmon {
--- 
-2.47.3
-

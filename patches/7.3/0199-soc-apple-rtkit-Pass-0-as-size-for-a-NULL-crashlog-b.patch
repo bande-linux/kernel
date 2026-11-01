@@ -1,4 +1,4 @@
-From a09262262d2807497a104740d97e0d699dace807 Mon Sep 17 00:00:00 2001
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
 From: Janne Grunau <j@jannau.net>
 Date: Thu, 13 Feb 2025 22:46:51 +0100
 Subject: [PATCH] soc: apple: rtkit: Pass 0 as size for a NULL crashlog buffer
@@ -14,7 +14,7 @@ Signed-off-by: Janne Grunau <j@jannau.net>
  1 file changed, 1 insertion(+), 1 deletion(-)
 
 diff --git a/drivers/soc/apple/rtkit.c b/drivers/soc/apple/rtkit.c
-index a8a915439c7d..512cb9940dfe 100644
+index a8a9154..512cb99 100644
 --- a/drivers/soc/apple/rtkit.c
 +++ b/drivers/soc/apple/rtkit.c
 @@ -394,7 +394,7 @@ static void apple_rtkit_crashlog_rx(struct apple_rtkit *rtk, u64 msg)
@@ -26,6 +26,3 @@ index a8a915439c7d..512cb9940dfe 100644
  }
  
  static void apple_rtkit_ioreport_rx(struct apple_rtkit *rtk, u64 msg)
--- 
-2.47.3
-

@@ -1,4 +1,4 @@
-From 06d1392cb5c3664d1347256f201c82aa2d593206 Mon Sep 17 00:00:00 2001
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
 From: Yureka Lilian <yureka@cyberchaos.dev>
 Date: Sun, 5 Jul 2026 15:17:28 +0200
 Subject: [PATCH] dt-bindings: arm: apple: Add M4 based devices
@@ -16,7 +16,7 @@ Signed-off-by: Yureka Lilian <yureka@cyberchaos.dev>
  1 file changed, 12 insertions(+)
 
 diff --git a/Documentation/devicetree/bindings/arm/apple.yaml b/Documentation/devicetree/bindings/arm/apple.yaml
-index fb277c96f341..c967cfcecdbe 100644
+index fb277c9..c967cfc 100644
 --- a/Documentation/devicetree/bindings/arm/apple.yaml
 +++ b/Documentation/devicetree/bindings/arm/apple.yaml
 @@ -323,6 +323,18 @@ properties:
@@ -38,6 +38,3 @@ index fb277c96f341..c967cfcecdbe 100644
        - description: Apple M1 Pro SoC based platforms
          items:
            - enum:
--- 
-2.47.3
-

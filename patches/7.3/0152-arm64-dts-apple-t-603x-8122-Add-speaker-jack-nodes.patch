@@ -1,4 +1,4 @@
-From 85aa8bc64470688e64e803f65a694296bdd49b60 Mon Sep 17 00:00:00 2001
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
 From: Sasha Finkelstein <k@chaosmail.tech>
 Date: Thu, 4 Jun 2026 15:08:51 +0200
 Subject: [PATCH] arm64: dts: apple: t[603x,8122]: Add speaker/jack nodes
@@ -23,7 +23,7 @@ Signed-off-by: Sasha Finkelstein <k@chaosmail.tech>
  14 files changed, 654 insertions(+), 4 deletions(-)
 
 diff --git a/arch/arm64/boot/dts/apple/t6030-j514s.dts b/arch/arm64/boot/dts/apple/t6030-j514s.dts
-index a53624afae2e..67da7fc9edc3 100644
+index a53624a..67da7fc 100644
 --- a/arch/arm64/boot/dts/apple/t6030-j514s.dts
 +++ b/arch/arm64/boot/dts/apple/t6030-j514s.dts
 @@ -32,3 +32,43 @@ &wifi0 {
@@ -71,7 +71,7 @@ index a53624afae2e..67da7fc9edc3 100644
 +	model = "MacBook Pro J514";
 +};
 diff --git a/arch/arm64/boot/dts/apple/t6030-j516s.dts b/arch/arm64/boot/dts/apple/t6030-j516s.dts
-index 8837d7175277..91b932c935d7 100644
+index 8837d71..91b932c 100644
 --- a/arch/arm64/boot/dts/apple/t6030-j516s.dts
 +++ b/arch/arm64/boot/dts/apple/t6030-j516s.dts
 @@ -32,3 +32,43 @@ &wifi0 {
@@ -119,7 +119,7 @@ index 8837d7175277..91b932c935d7 100644
 +	model = "MacBook Pro J516";
 +};
 diff --git a/arch/arm64/boot/dts/apple/t6031-j514c.dts b/arch/arm64/boot/dts/apple/t6031-j514c.dts
-index ad9250eac9ad..1bfb9f2c6392 100644
+index ad9250e..1bfb9f2 100644
 --- a/arch/arm64/boot/dts/apple/t6031-j514c.dts
 +++ b/arch/arm64/boot/dts/apple/t6031-j514c.dts
 @@ -28,3 +28,8 @@ &wifi0 {
@@ -132,7 +132,7 @@ index ad9250eac9ad..1bfb9f2c6392 100644
 +	model = "MacBook Pro J514";
 +};
 diff --git a/arch/arm64/boot/dts/apple/t6031-j516c.dts b/arch/arm64/boot/dts/apple/t6031-j516c.dts
-index 23d928a61f34..a199b0b11814 100644
+index 23d928a..a199b0b 100644
 --- a/arch/arm64/boot/dts/apple/t6031-j516c.dts
 +++ b/arch/arm64/boot/dts/apple/t6031-j516c.dts
 @@ -28,3 +28,8 @@ &wifi0 {
@@ -145,7 +145,7 @@ index 23d928a61f34..a199b0b11814 100644
 +	model = "MacBook Pro J516";
 +};
 diff --git a/arch/arm64/boot/dts/apple/t6032-j575d.dts b/arch/arm64/boot/dts/apple/t6032-j575d.dts
-index 9448c7a84b6a..1bf14006807e 100644
+index 9448c7a..1bf1400 100644
 --- a/arch/arm64/boot/dts/apple/t6032-j575d.dts
 +++ b/arch/arm64/boot/dts/apple/t6032-j575d.dts
 @@ -45,11 +45,67 @@ &serial0 {
@@ -217,7 +217,7 @@ index 9448c7a84b6a..1bf14006807e 100644
  #include "hwmon-common.dtsi"
  #include "hwmon-fan-dual.dtsi"
 diff --git a/arch/arm64/boot/dts/apple/t6034-j514m.dts b/arch/arm64/boot/dts/apple/t6034-j514m.dts
-index 679f82a0e7da..7ef946c9ea27 100644
+index 679f82a..7ef946c 100644
 --- a/arch/arm64/boot/dts/apple/t6034-j514m.dts
 +++ b/arch/arm64/boot/dts/apple/t6034-j514m.dts
 @@ -28,3 +28,8 @@ &wifi0 {
@@ -230,7 +230,7 @@ index 679f82a0e7da..7ef946c9ea27 100644
 +	model = "MacBook Pro J514";
 +};
 diff --git a/arch/arm64/boot/dts/apple/t6034-j516m.dts b/arch/arm64/boot/dts/apple/t6034-j516m.dts
-index bc337313b2f0..a2b5abed0747 100644
+index bc33731..a2b5abe 100644
 --- a/arch/arm64/boot/dts/apple/t6034-j516m.dts
 +++ b/arch/arm64/boot/dts/apple/t6034-j516m.dts
 @@ -28,3 +28,8 @@ &wifi0 {
@@ -243,7 +243,7 @@ index bc337313b2f0..a2b5abed0747 100644
 +	model = "MacBook Pro J516";
 +};
 diff --git a/arch/arm64/boot/dts/apple/t603x-j514-j516.dtsi b/arch/arm64/boot/dts/apple/t603x-j514-j516.dtsi
-index a580287e70bb..592db69e1720 100644
+index a580287..592db69 100644
 --- a/arch/arm64/boot/dts/apple/t603x-j514-j516.dtsi
 +++ b/arch/arm64/boot/dts/apple/t603x-j514-j516.dtsi
 @@ -67,10 +67,6 @@ &fpwm0 {
@@ -399,7 +399,7 @@ index a580287e70bb..592db69e1720 100644
  #include "hwmon-common.dtsi"
  #include "hwmon-fan-dual.dtsi"
 diff --git a/arch/arm64/boot/dts/apple/t8122-j433.dts b/arch/arm64/boot/dts/apple/t8122-j433.dts
-index 3cd4a899856d..e8d5f0964564 100644
+index 3cd4a89..e8d5f09 100644
 --- a/arch/arm64/boot/dts/apple/t8122-j433.dts
 +++ b/arch/arm64/boot/dts/apple/t8122-j433.dts
 @@ -44,4 +44,35 @@ &pcie1_dart {
@@ -439,7 +439,7 @@ index 3cd4a899856d..e8d5f0964564 100644
 +
  #include "hwmon-fan-dual.dtsi"
 diff --git a/arch/arm64/boot/dts/apple/t8122-j434.dts b/arch/arm64/boot/dts/apple/t8122-j434.dts
-index 32a9d7c3df8c..a374c16f794e 100644
+index 32a9d7c..a374c16 100644
 --- a/arch/arm64/boot/dts/apple/t8122-j434.dts
 +++ b/arch/arm64/boot/dts/apple/t8122-j434.dts
 @@ -50,4 +50,35 @@ &pcie2_dart {
@@ -479,7 +479,7 @@ index 32a9d7c3df8c..a374c16f794e 100644
 +
  #include "hwmon-fan-dual.dtsi"
 diff --git a/arch/arm64/boot/dts/apple/t8122-j504.dts b/arch/arm64/boot/dts/apple/t8122-j504.dts
-index 54950a66f89e..47441684f77a 100644
+index 54950a6..4744168 100644
 --- a/arch/arm64/boot/dts/apple/t8122-j504.dts
 +++ b/arch/arm64/boot/dts/apple/t8122-j504.dts
 @@ -101,5 +101,124 @@ tp_accel {
@@ -608,7 +608,7 @@ index 54950a66f89e..47441684f77a 100644
  #include "hwmon-fan-dual.dtsi"
  #include "hwmon-laptop.dtsi"
 diff --git a/arch/arm64/boot/dts/apple/t8122-j613.dts b/arch/arm64/boot/dts/apple/t8122-j613.dts
-index 7f5e0be62da2..40596f31a3b1 100644
+index 7f5e0be..40596f3 100644
 --- a/arch/arm64/boot/dts/apple/t8122-j613.dts
 +++ b/arch/arm64/boot/dts/apple/t8122-j613.dts
 @@ -38,6 +38,95 @@ &bluetooth0 {
@@ -708,7 +708,7 @@ index 7f5e0be62da2..40596f31a3b1 100644
  	status = "okay";
  };
 diff --git a/arch/arm64/boot/dts/apple/t8122-j615.dts b/arch/arm64/boot/dts/apple/t8122-j615.dts
-index 13e1a3158c2c..df3e10c197e0 100644
+index 13e1a31..df3e10c 100644
 --- a/arch/arm64/boot/dts/apple/t8122-j615.dts
 +++ b/arch/arm64/boot/dts/apple/t8122-j615.dts
 @@ -38,6 +38,95 @@ &bluetooth0 {
@@ -808,7 +808,7 @@ index 13e1a3158c2c..df3e10c197e0 100644
  	status = "okay";
  };
 diff --git a/arch/arm64/boot/dts/apple/t8122-jxxx.dtsi b/arch/arm64/boot/dts/apple/t8122-jxxx.dtsi
-index 064b72f2075e..e5de3e680523 100644
+index 064b72f..e5de3e6 100644
 --- a/arch/arm64/boot/dts/apple/t8122-jxxx.dtsi
 +++ b/arch/arm64/boot/dts/apple/t8122-jxxx.dtsi
 @@ -74,6 +74,18 @@ bluetooth0: bluetooth@0,1 {
@@ -830,6 +830,3 @@ index 064b72f2075e..e5de3e680523 100644
  &nco_clkref {
  	clock-frequency = <900000000>;
  };
--- 
-2.47.3
-

@@ -1,4 +1,4 @@
-From 5e4d87315fa0688af75dc73e1483e8272bb9f729 Mon Sep 17 00:00:00 2001
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
 From: Hector Martin <marcan@marcan.st>
 Date: Wed, 26 Apr 2023 02:17:26 +0900
 Subject: [PATCH] arm64: dts: apple: Make ps_msg always-on
@@ -14,7 +14,7 @@ Signed-off-by: Hector Martin <marcan@marcan.st>
  3 files changed, 3 insertions(+)
 
 diff --git a/arch/arm64/boot/dts/apple/t600x-pmgr.dtsi b/arch/arm64/boot/dts/apple/t600x-pmgr.dtsi
-index 3315b392b21d..84d5e126e232 100644
+index 3315b39..84d5e12 100644
 --- a/arch/arm64/boot/dts/apple/t600x-pmgr.dtsi
 +++ b/arch/arm64/boot/dts/apple/t600x-pmgr.dtsi
 @@ -1877,6 +1877,7 @@ DIE_NODE(ps_msg): power-controller@78 {
@@ -26,7 +26,7 @@ index 3315b392b21d..84d5e126e232 100644
  
  	DIE_NODE(ps_nub_gpio): power-controller@80 {
 diff --git a/arch/arm64/boot/dts/apple/t8103-pmgr.dtsi b/arch/arm64/boot/dts/apple/t8103-pmgr.dtsi
-index f0ae11bf6ce6..a97d64b66573 100644
+index f0ae11b..a97d64b 100644
 --- a/arch/arm64/boot/dts/apple/t8103-pmgr.dtsi
 +++ b/arch/arm64/boot/dts/apple/t8103-pmgr.dtsi
 @@ -1101,6 +1101,7 @@ ps_msg: power-controller@78 {
@@ -38,7 +38,7 @@ index f0ae11bf6ce6..a97d64b66573 100644
  
  	ps_atc0_usb_aon: power-controller@88 {
 diff --git a/arch/arm64/boot/dts/apple/t8112-pmgr.dtsi b/arch/arm64/boot/dts/apple/t8112-pmgr.dtsi
-index 276f1ab35f06..7ff5052d1cdc 100644
+index 276f1ab..7ff5052 100644
 --- a/arch/arm64/boot/dts/apple/t8112-pmgr.dtsi
 +++ b/arch/arm64/boot/dts/apple/t8112-pmgr.dtsi
 @@ -1067,6 +1067,7 @@ ps_msg: power-controller@78 {
@@ -49,6 +49,3 @@ index 276f1ab35f06..7ff5052d1cdc 100644
  	};
  
  	ps_nub_gpio: power-controller@80 {
--- 
-2.47.3
-

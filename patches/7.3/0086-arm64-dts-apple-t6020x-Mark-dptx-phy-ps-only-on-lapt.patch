@@ -1,4 +1,4 @@
-From c181c05b7f21401cecc15c456ca61c8175002a77 Mon Sep 17 00:00:00 2001
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
 From: Janne Grunau <j@jannau.net>
 Date: Mon, 25 Sep 2023 19:55:58 +0200
 Subject: [PATCH] arm64: dts: apple: t6020x: Mark dptx_phy_ps only on laptops
@@ -20,7 +20,7 @@ Signed-off-by: Janne Grunau <j@jannau.net>
  2 files changed, 12 insertions(+), 1 deletion(-)
 
 diff --git a/arch/arm64/boot/dts/apple/t602x-j414-j416.dtsi b/arch/arm64/boot/dts/apple/t602x-j414-j416.dtsi
-index 5df64390ef68..67c2f117a060 100644
+index 5df6439..67c2f11 100644
 --- a/arch/arm64/boot/dts/apple/t602x-j414-j416.dtsi
 +++ b/arch/arm64/boot/dts/apple/t602x-j414-j416.dtsi
 @@ -27,6 +27,18 @@ &framebuffer0 {
@@ -43,7 +43,7 @@ index 5df64390ef68..67c2f117a060 100644
  	interrupts = <44 IRQ_TYPE_LEVEL_LOW>;
  };
 diff --git a/arch/arm64/boot/dts/apple/t602x-pmgr.dtsi b/arch/arm64/boot/dts/apple/t602x-pmgr.dtsi
-index 8633a939592a..7d70e8bb0818 100644
+index 8633a93..7d70e8b 100644
 --- a/arch/arm64/boot/dts/apple/t602x-pmgr.dtsi
 +++ b/arch/arm64/boot/dts/apple/t602x-pmgr.dtsi
 @@ -1450,7 +1450,6 @@ DIE_NODE(ps_dptx_phy_ps): power-controller@288 {
@@ -54,6 +54,3 @@ index 8633a939592a..7d70e8bb0818 100644
  		power-domains = <&DIE_NODE(ps_sio)>;
  	};
  
--- 
-2.47.3
-

@@ -1,4 +1,4 @@
-From 56fc3e61949bb5bfcd592838849f2e2ebdc8a23f Mon Sep 17 00:00:00 2001
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
 From: Sasha Finkelstein <fnkl.kernel@gmail.com>
 Date: Sat, 9 Nov 2024 18:44:45 +0100
 Subject: [PATCH] arm64: dts: apple: Add AOP audio identifiers
@@ -24,7 +24,7 @@ Signed-off-by: Sasha Finkelstein <fnkl.kernel@gmail.com>
  15 files changed, 75 insertions(+)
 
 diff --git a/arch/arm64/boot/dts/apple/t6000-j314s.dts b/arch/arm64/boot/dts/apple/t6000-j314s.dts
-index ae79e3236614..afa86668440f 100644
+index ae79e32..afa8666 100644
 --- a/arch/arm64/boot/dts/apple/t6000-j314s.dts
 +++ b/arch/arm64/boot/dts/apple/t6000-j314s.dts
 @@ -32,6 +32,11 @@ &panel {
@@ -40,7 +40,7 @@ index ae79e3236614..afa86668440f 100644
  	compatible = "apple,j314-macaudio", "apple,macaudio";
  	model = "MacBook Pro J314";
 diff --git a/arch/arm64/boot/dts/apple/t6000-j316s.dts b/arch/arm64/boot/dts/apple/t6000-j316s.dts
-index 272fa1c17124..ddfc3c530923 100644
+index 272fa1c..ddfc3c5 100644
 --- a/arch/arm64/boot/dts/apple/t6000-j316s.dts
 +++ b/arch/arm64/boot/dts/apple/t6000-j316s.dts
 @@ -32,6 +32,11 @@ &panel {
@@ -56,7 +56,7 @@ index 272fa1c17124..ddfc3c530923 100644
  	compatible = "apple,j316-macaudio", "apple,macaudio";
  	model = "MacBook Pro J316";
 diff --git a/arch/arm64/boot/dts/apple/t6001-j314c.dts b/arch/arm64/boot/dts/apple/t6001-j314c.dts
-index 81d34507ed81..245df6d03ee4 100644
+index 81d3450..245df6d 100644
 --- a/arch/arm64/boot/dts/apple/t6001-j314c.dts
 +++ b/arch/arm64/boot/dts/apple/t6001-j314c.dts
 @@ -32,6 +32,11 @@ &panel {
@@ -72,7 +72,7 @@ index 81d34507ed81..245df6d03ee4 100644
  	compatible = "apple,j314-macaudio", "apple,macaudio";
  	model = "MacBook Pro J314";
 diff --git a/arch/arm64/boot/dts/apple/t6001-j316c.dts b/arch/arm64/boot/dts/apple/t6001-j316c.dts
-index 564d927f2fec..a000d497b705 100644
+index 564d927..a000d49 100644
 --- a/arch/arm64/boot/dts/apple/t6001-j316c.dts
 +++ b/arch/arm64/boot/dts/apple/t6001-j316c.dts
 @@ -32,6 +32,11 @@ &panel {
@@ -88,7 +88,7 @@ index 564d927f2fec..a000d497b705 100644
  	compatible = "apple,j316-macaudio", "apple,macaudio";
  	model = "MacBook Pro J316";
 diff --git a/arch/arm64/boot/dts/apple/t6020-j414s.dts b/arch/arm64/boot/dts/apple/t6020-j414s.dts
-index 5dd97df71efc..a227069727dd 100644
+index 5dd97df..a227069 100644
 --- a/arch/arm64/boot/dts/apple/t6020-j414s.dts
 +++ b/arch/arm64/boot/dts/apple/t6020-j414s.dts
 @@ -32,6 +32,11 @@ &panel {
@@ -104,7 +104,7 @@ index 5dd97df71efc..a227069727dd 100644
  	compatible = "apple,j414-macaudio", "apple,j314-macaudio", "apple,macaudio";
  	model = "MacBook Pro J414";
 diff --git a/arch/arm64/boot/dts/apple/t6020-j416s.dts b/arch/arm64/boot/dts/apple/t6020-j416s.dts
-index 56ddf7c61de6..3ea2b1d52593 100644
+index 56ddf7c..3ea2b1d 100644
 --- a/arch/arm64/boot/dts/apple/t6020-j416s.dts
 +++ b/arch/arm64/boot/dts/apple/t6020-j416s.dts
 @@ -32,6 +32,11 @@ &panel {
@@ -120,7 +120,7 @@ index 56ddf7c61de6..3ea2b1d52593 100644
  	compatible = "apple,j416-macaudio", "apple,j316-macaudio", "apple,macaudio";
  	model = "MacBook Pro J416";
 diff --git a/arch/arm64/boot/dts/apple/t6021-j414c.dts b/arch/arm64/boot/dts/apple/t6021-j414c.dts
-index 6905c7d39db0..fab3b03ff3c4 100644
+index 6905c7d..fab3b03 100644
 --- a/arch/arm64/boot/dts/apple/t6021-j414c.dts
 +++ b/arch/arm64/boot/dts/apple/t6021-j414c.dts
 @@ -32,6 +32,11 @@ &panel {
@@ -136,7 +136,7 @@ index 6905c7d39db0..fab3b03ff3c4 100644
  	compatible = "apple,j414-macaudio", "apple,j314-macaudio", "apple,macaudio";
  	model = "MacBook Pro J414";
 diff --git a/arch/arm64/boot/dts/apple/t6021-j416c.dts b/arch/arm64/boot/dts/apple/t6021-j416c.dts
-index 786ac2393d75..b476e235639f 100644
+index 786ac23..b476e23 100644
 --- a/arch/arm64/boot/dts/apple/t6021-j416c.dts
 +++ b/arch/arm64/boot/dts/apple/t6021-j416c.dts
 @@ -52,6 +52,11 @@ &panel {
@@ -152,7 +152,7 @@ index 786ac2393d75..b476e235639f 100644
  	compatible = "apple,j416-macaudio", "apple,j316-macaudio", "apple,macaudio";
  	model = "MacBook Pro J416";
 diff --git a/arch/arm64/boot/dts/apple/t8103-j293.dts b/arch/arm64/boot/dts/apple/t8103-j293.dts
-index eea8505c6729..fb2299799388 100644
+index eea8505..fb22997 100644
 --- a/arch/arm64/boot/dts/apple/t8103-j293.dts
 +++ b/arch/arm64/boot/dts/apple/t8103-j293.dts
 @@ -233,6 +233,11 @@ &displaydfr_dart {
@@ -168,7 +168,7 @@ index eea8505c6729..fb2299799388 100644
  	sound {
  		compatible = "apple,j293-macaudio", "apple,macaudio";
 diff --git a/arch/arm64/boot/dts/apple/t8103-j313.dts b/arch/arm64/boot/dts/apple/t8103-j313.dts
-index 95e631c92798..7cc6b174ec6c 100644
+index 95e631c..7cc6b17 100644
 --- a/arch/arm64/boot/dts/apple/t8103-j313.dts
 +++ b/arch/arm64/boot/dts/apple/t8103-j313.dts
 @@ -129,6 +129,11 @@ jack_codec: codec@48 {
@@ -184,7 +184,7 @@ index 95e631c92798..7cc6b174ec6c 100644
  	sound {
  		compatible = "apple,j313-macaudio", "apple,macaudio";
 diff --git a/arch/arm64/boot/dts/apple/t8103-j456.dts b/arch/arm64/boot/dts/apple/t8103-j456.dts
-index a3638871f366..bca316baac70 100644
+index a363887..bca316b 100644
 --- a/arch/arm64/boot/dts/apple/t8103-j456.dts
 +++ b/arch/arm64/boot/dts/apple/t8103-j456.dts
 @@ -116,6 +116,11 @@ jack_codec: codec@48 {
@@ -200,7 +200,7 @@ index a3638871f366..bca316baac70 100644
  	sound {
  		compatible = "apple,j456-macaudio", "apple,macaudio";
 diff --git a/arch/arm64/boot/dts/apple/t8103-j457.dts b/arch/arm64/boot/dts/apple/t8103-j457.dts
-index 4c1adb310ba9..e48a49fb7cac 100644
+index 4c1adb3..e48a49f 100644
 --- a/arch/arm64/boot/dts/apple/t8103-j457.dts
 +++ b/arch/arm64/boot/dts/apple/t8103-j457.dts
 @@ -97,6 +97,11 @@ jack_codec: codec@48 {
@@ -216,7 +216,7 @@ index 4c1adb310ba9..e48a49fb7cac 100644
  	sound {
  		compatible = "apple,j457-macaudio", "apple,macaudio";
 diff --git a/arch/arm64/boot/dts/apple/t8112-j413.dts b/arch/arm64/boot/dts/apple/t8112-j413.dts
-index 030235a5ffab..415ccfc79f92 100644
+index 030235a..415ccfc 100644
 --- a/arch/arm64/boot/dts/apple/t8112-j413.dts
 +++ b/arch/arm64/boot/dts/apple/t8112-j413.dts
 @@ -168,6 +168,11 @@ &fpwm1 {
@@ -232,7 +232,7 @@ index 030235a5ffab..415ccfc79f92 100644
  	sound {
  		compatible = "apple,j413-macaudio", "apple,macaudio";
 diff --git a/arch/arm64/boot/dts/apple/t8112-j415.dts b/arch/arm64/boot/dts/apple/t8112-j415.dts
-index 2a70d6b719aa..531da85a51cb 100644
+index 2a70d6b..531da85 100644
 --- a/arch/arm64/boot/dts/apple/t8112-j415.dts
 +++ b/arch/arm64/boot/dts/apple/t8112-j415.dts
 @@ -190,6 +190,11 @@ &fpwm1 {
@@ -248,7 +248,7 @@ index 2a70d6b719aa..531da85a51cb 100644
  	sound {
  		compatible = "apple,j415-macaudio", "apple,macaudio";
 diff --git a/arch/arm64/boot/dts/apple/t8112-j493.dts b/arch/arm64/boot/dts/apple/t8112-j493.dts
-index b0ce038866ac..6a193433d9a2 100644
+index b0ce038..6a19343 100644
 --- a/arch/arm64/boot/dts/apple/t8112-j493.dts
 +++ b/arch/arm64/boot/dts/apple/t8112-j493.dts
 @@ -222,6 +222,11 @@ touchbar0: touchbar@0 {
@@ -263,6 +263,3 @@ index b0ce038866ac..6a193433d9a2 100644
  / {
  	sound {
  		compatible = "apple,j493-macaudio", "apple,macaudio";
--- 
-2.47.3
-

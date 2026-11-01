@@ -1,4 +1,4 @@
-From 63d4753ebbe93c3b865adfcd442ec4b2368eb5eb Mon Sep 17 00:00:00 2001
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
 From: =?UTF-8?q?Martin=20Povi=C5=A1er?= <povik+lin@cutebit.org>
 Date: Sat, 19 Feb 2022 09:49:59 +0100
 Subject: [PATCH] arm64: dts: apple: t8112: Put in audio nodes
@@ -26,7 +26,7 @@ Signed-off-by: Martin Povišer <povik+lin@cutebit.org>
  4 files changed, 347 insertions(+)
 
 diff --git a/arch/arm64/boot/dts/apple/t8112-j413.dts b/arch/arm64/boot/dts/apple/t8112-j413.dts
-index e9ef413a535a..72a16161c13f 100644
+index e9ef413..72a1616 100644
 --- a/arch/arm64/boot/dts/apple/t8112-j413.dts
 +++ b/arch/arm64/boot/dts/apple/t8112-j413.dts
 @@ -86,6 +86,65 @@ hpm5: usb-pd@3a {
@@ -133,7 +133,7 @@ index e9ef413a535a..72a16161c13f 100644
  	status = "okay";
  };
 diff --git a/arch/arm64/boot/dts/apple/t8112-j415.dts b/arch/arm64/boot/dts/apple/t8112-j415.dts
-index 8c09e67ba1b7..383f6587fe3e 100644
+index 8c09e67..383f658 100644
 --- a/arch/arm64/boot/dts/apple/t8112-j415.dts
 +++ b/arch/arm64/boot/dts/apple/t8112-j415.dts
 @@ -86,6 +86,87 @@ hpm5: usb-pd@3a {
@@ -266,7 +266,7 @@ index 8c09e67ba1b7..383f6587fe3e 100644
  	status = "okay";
  };
 diff --git a/arch/arm64/boot/dts/apple/t8112-j473.dts b/arch/arm64/boot/dts/apple/t8112-j473.dts
-index 7011db8cc0c5..76df7091dbeb 100644
+index 7011db8..76df709 100644
 --- a/arch/arm64/boot/dts/apple/t8112-j473.dts
 +++ b/arch/arm64/boot/dts/apple/t8112-j473.dts
 @@ -105,4 +105,58 @@ &typec1 {
@@ -329,7 +329,7 @@ index 7011db8cc0c5..76df7091dbeb 100644
 +
  #include "hwmon-mini.dtsi"
 diff --git a/arch/arm64/boot/dts/apple/t8112-j493.dts b/arch/arm64/boot/dts/apple/t8112-j493.dts
-index e8659fe3f28a..8bd3650188cc 100644
+index e8659fe..8bd3650 100644
 --- a/arch/arm64/boot/dts/apple/t8112-j493.dts
 +++ b/arch/arm64/boot/dts/apple/t8112-j493.dts
 @@ -123,6 +123,65 @@ &typec1 {
@@ -435,6 +435,3 @@ index e8659fe3f28a..8bd3650188cc 100644
  &mtp {
  	status = "okay";
  };
--- 
-2.47.3
-

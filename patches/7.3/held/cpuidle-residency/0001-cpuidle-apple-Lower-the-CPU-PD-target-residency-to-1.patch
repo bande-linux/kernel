@@ -1,0 +1,51 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: Mikael Hug <mikaelhug@gmail.com>
+Date: Sat, 31 Oct 2026 00:54:51 +0000
+Subject: [PATCH] cpuidle: apple: Lower the CPU PD target residency to 1 ms
+
+The "CPU PD" state has a 10 us exit latency but a 10 ms target
+residency, so the menu governor keeps every idle period it expects to be
+shorter than 10 ms in WFI.
+
+On a Mac mini (M2, t8112) with light background load, a 10 s
+power:cpu_idle trace across all CPUs showed that about 40% of idle time
+was in periods between 1 ms and 10 ms. Most of that time stays in WFI
+with the current value.
+
+Disabling WFI with sysfs, so that every idle period enters CPU PD,
+lowered the SMC DC-in power (PDTR) by 0.55 W +/- 0.27 W. That was
+measured over 156 paired 4 s windows in random order, with the load
+regressed out. Even unconditional entry costs less than it saves at this
+load, so the break-even residency is well below the periods that the
+10 ms value excludes.
+
+The entry and exit energy has not been measured directly. The software
+path is cpu_pm_enter()/cpu_pm_exit() plus saving and restoring the
+callee-saved registers, a few microseconds on a running core. With a
+retention saving of tens of mW per core, that puts the break-even point
+in the low hundreds of microseconds. 1 ms keeps a margin above that
+estimate and above the 10 us exit latency, and it still covers the
+1-10 ms periods.
+
+Apple CPUs have no PSCI, so the idle states can't come from DT
+idle-states (min-residency-us). They stay in the driver.
+
+Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>
+Claude-Session: https://claude.ai/code/session_01UqitcmCNS6G33aQUShi39x
+---
+ drivers/cpuidle/cpuidle-apple.c | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/drivers/cpuidle/cpuidle-apple.c b/drivers/cpuidle/cpuidle-apple.c
+index 3d2b804df..741f7866f 100644
+--- a/drivers/cpuidle/cpuidle-apple.c
++++ b/drivers/cpuidle/cpuidle-apple.c
+@@ -111,7 +111,7 @@ static struct cpuidle_driver apple_idle_driver = {
+ 			.enter			= apple_enter_idle,
+ 			.enter_s2idle		= apple_enter_idle,
+ 			.exit_latency		= 10,
+-			.target_residency	= 10000,
++			.target_residency	= 1000,
+ 			.power_usage            = 0,
+ 			.name			= "CPU PD",
+ 			.desc			= "CPU/cluster powered down",

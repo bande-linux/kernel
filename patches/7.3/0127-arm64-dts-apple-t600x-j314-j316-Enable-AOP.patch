@@ -1,4 +1,4 @@
-From 6f8d0d8428d966a29840fe17bbe969d281fc008e Mon Sep 17 00:00:00 2001
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
 From: Janne Grunau <j@jannau.net>
 Date: Mon, 30 Dec 2024 14:55:05 +0100
 Subject: [PATCH] arm64: dts: apple: t600x-j314-j316: Enable AOP
@@ -10,7 +10,7 @@ Signed-off-by: Janne Grunau <j@jannau.net>
  1 file changed, 16 insertions(+)
 
 diff --git a/arch/arm64/boot/dts/apple/t600x-j314-j316.dtsi b/arch/arm64/boot/dts/apple/t600x-j314-j316.dtsi
-index fb956fa1c241..6b7de4ef31e1 100644
+index fb956fa..6b7de4e 100644
 --- a/arch/arm64/boot/dts/apple/t600x-j314-j316.dtsi
 +++ b/arch/arm64/boot/dts/apple/t600x-j314-j316.dtsi
 @@ -549,6 +549,22 @@ &atcphy3 {
@@ -36,6 +36,3 @@ index fb956fa1c241..6b7de4ef31e1 100644
  / {
  	sound: sound {
  		/* compatible is set per machine */
--- 
-2.47.3
-

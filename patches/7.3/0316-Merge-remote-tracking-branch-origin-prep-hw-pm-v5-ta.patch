@@ -1,0 +1,295 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: Mikael Hug <mikaelhug@gmail.com>
+Date: Sat, 31 Oct 2026 00:43:31 +0000
+Subject: [PATCH] Merge remote-tracking branch
+ 'origin/prep/hw-pm-v5-tablemax-v2' into prep/hw-test5
+
+---
+ drivers/cpufreq/freq_table.c                  |  7 +++---
+ drivers/i2c/busses/i2c-pasemi-core.c          | 11 +++++---
+ drivers/i2c/busses/i2c-pasemi-core.h          |  1 +
+ drivers/i2c/busses/i2c-pasemi-platform.c      | 25 +++++++++++++++++++
+ drivers/irqchip/irq-apple-aic.c               |  2 ++
+ drivers/irqchip/irq-msi-lib.c                 |  2 ++
+ .../broadcom/brcm80211/brcmfmac/bus.h         |  9 +++++++
+ .../broadcom/brcm80211/brcmfmac/cfg80211.c    |  8 ++++++
+ .../broadcom/brcm80211/brcmfmac/pcie.c        | 14 +++--------
+ drivers/pci/controller/pcie-apple.c           |  3 ++-
+ include/linux/msi.h                           |  1 +
+ 11 files changed, 65 insertions(+), 18 deletions(-)
+
+diff --git a/drivers/cpufreq/freq_table.c b/drivers/cpufreq/freq_table.c
+index ea99464..f17401c 100644
+--- a/drivers/cpufreq/freq_table.c
++++ b/drivers/cpufreq/freq_table.c
+@@ -51,10 +51,11 @@ int cpufreq_frequency_table_cpuinfo(struct cpufreq_policy *policy)
+ 
+ 	policy->cpuinfo.min_freq = min_freq;
+ 	/*
+-	 * If the driver has set its own cpuinfo.max_freq above max_freq, leave
+-	 * it as is.
++	 * Keep a cpuinfo.max_freq set by the driver above the table maximum
++	 * (acpi-cpufreq does that), unless the table has boost frequencies, in
++	 * which case cpuinfo.max_freq follows the boost state.
+ 	 */
+-	if (policy->cpuinfo.max_freq < max_freq)
++	if (policy->cpuinfo.max_freq < max_freq || policy_has_boost_freq(policy))
+ 		policy->cpuinfo.max_freq = max_freq;
+ 
+ 	if (min_freq == ~0)
+diff --git a/drivers/i2c/busses/i2c-pasemi-core.c b/drivers/i2c/busses/i2c-pasemi-core.c
+index c5f7a17..be682c3 100644
+--- a/drivers/i2c/busses/i2c-pasemi-core.c
++++ b/drivers/i2c/busses/i2c-pasemi-core.c
+@@ -435,6 +435,13 @@ static const struct i2c_algorithm smbus_algorithm = {
+ 	.functionality = pasemi_smb_func,
+ };
+ 
++void pasemi_i2c_hw_init(struct pasemi_smbus *smbus)
++{
++	reg_write(smbus, REG_IMASK, 0);
++	pasemi_reset(smbus);
++}
++EXPORT_SYMBOL_GPL(pasemi_i2c_hw_init);
++
+ int pasemi_i2c_common_probe(struct pasemi_smbus *smbus)
+ {
+ 	int error;
+@@ -454,9 +461,7 @@ int pasemi_i2c_common_probe(struct pasemi_smbus *smbus)
+ 	if (smbus->hw_rev != PASEMI_HW_REV_PCI)
+ 		smbus->hw_rev = reg_read(smbus, REG_REV);
+ 
+-	reg_write(smbus, REG_IMASK, 0);
+-
+-	pasemi_reset(smbus);
++	pasemi_i2c_hw_init(smbus);
+ 
+ 	error = devm_i2c_add_adapter(smbus->dev, &smbus->adapter);
+ 	if (error)
+diff --git a/drivers/i2c/busses/i2c-pasemi-core.h b/drivers/i2c/busses/i2c-pasemi-core.h
+index 88821f4..2f55520 100644
+--- a/drivers/i2c/busses/i2c-pasemi-core.h
++++ b/drivers/i2c/busses/i2c-pasemi-core.h
+@@ -22,5 +22,6 @@ struct pasemi_smbus {
+ };
+ 
+ int pasemi_i2c_common_probe(struct pasemi_smbus *smbus);
++void pasemi_i2c_hw_init(struct pasemi_smbus *smbus);
+ 
+ irqreturn_t pasemi_irq_handler(int irq, void *dev_id);
+diff --git a/drivers/i2c/busses/i2c-pasemi-platform.c b/drivers/i2c/busses/i2c-pasemi-platform.c
+index a486a37..fa9eeca 100644
+--- a/drivers/i2c/busses/i2c-pasemi-platform.c
++++ b/drivers/i2c/busses/i2c-pasemi-platform.c
+@@ -91,6 +91,30 @@ static int pasemi_platform_i2c_probe(struct platform_device *pdev)
+ 
+ static void pasemi_platform_i2c_remove(struct platform_device *pdev) { }
+ 
++static int pasemi_platform_i2c_suspend_noirq(struct device *dev)
++{
++	struct pasemi_platform_i2c_data *data = dev_get_drvdata(dev);
++
++	i2c_mark_adapter_suspended(&data->smbus.adapter);
++
++	return 0;
++}
++
++static int pasemi_platform_i2c_resume_noirq(struct device *dev)
++{
++	struct pasemi_platform_i2c_data *data = dev_get_drvdata(dev);
++
++	pasemi_i2c_hw_init(&data->smbus);
++	i2c_mark_adapter_resumed(&data->smbus.adapter);
++
++	return 0;
++}
++
++static const struct dev_pm_ops pasemi_platform_i2c_pm_ops = {
++	NOIRQ_SYSTEM_SLEEP_PM_OPS(pasemi_platform_i2c_suspend_noirq,
++				  pasemi_platform_i2c_resume_noirq)
++};
++
+ static const struct of_device_id pasemi_platform_i2c_of_match[] = {
+ 	{ .compatible = "apple,t8103-i2c" },
+ 	{ .compatible = "apple,i2c" },
+@@ -102,6 +126,7 @@ static struct platform_driver pasemi_platform_i2c_driver = {
+ 	.driver	= {
+ 		.name			= "i2c-apple",
+ 		.of_match_table		= pasemi_platform_i2c_of_match,
++		.pm			= pm_sleep_ptr(&pasemi_platform_i2c_pm_ops),
+ 	},
+ 	.probe	= pasemi_platform_i2c_probe,
+ 	.remove = pasemi_platform_i2c_remove,
+diff --git a/drivers/irqchip/irq-apple-aic.c b/drivers/irqchip/irq-apple-aic.c
+index 4a3141d..16da4ff 100644
+--- a/drivers/irqchip/irq-apple-aic.c
++++ b/drivers/irqchip/irq-apple-aic.c
+@@ -478,6 +478,7 @@ static struct irq_chip aic_chip = {
+ 	.irq_eoi = aic_irq_eoi,
+ 	.irq_set_affinity = aic_irq_set_affinity,
+ 	.irq_set_type = aic_irq_set_type,
++	.flags = IRQCHIP_SKIP_SET_WAKE,
+ };
+ 
+ static struct irq_chip aic2_chip = {
+@@ -486,6 +487,7 @@ static struct irq_chip aic2_chip = {
+ 	.irq_unmask = aic_irq_unmask,
+ 	.irq_eoi = aic_irq_eoi,
+ 	.irq_set_type = aic_irq_set_type,
++	.flags = IRQCHIP_SKIP_SET_WAKE,
+ };
+ 
+ /*
+diff --git a/drivers/irqchip/irq-msi-lib.c b/drivers/irqchip/irq-msi-lib.c
+index 45e0ed3..924099a 100644
+--- a/drivers/irqchip/irq-msi-lib.c
++++ b/drivers/irqchip/irq-msi-lib.c
+@@ -100,6 +100,8 @@ bool msi_lib_init_dev_msi_info(struct device *dev, struct irq_domain *domain,
+ 		chip->irq_eoi = irq_chip_eoi_parent;
+ 	if (!chip->irq_ack && (pops->chip_flags & MSI_CHIP_FLAG_SET_ACK))
+ 		chip->irq_ack = irq_chip_ack_parent;
++	if (!chip->irq_set_wake && (pops->chip_flags & MSI_CHIP_FLAG_SET_WAKE))
++		chip->irq_set_wake = irq_chip_set_wake_parent;
+ 
+ 	/*
+ 	 * The device MSI domain can never have a set affinity callback. It
+diff --git a/drivers/net/wireless/broadcom/brcm80211/brcmfmac/bus.h b/drivers/net/wireless/broadcom/brcm80211/brcmfmac/bus.h
+index bd0bd41..1e1467f 100644
+--- a/drivers/net/wireless/broadcom/brcm80211/brcmfmac/bus.h
++++ b/drivers/net/wireless/broadcom/brcm80211/brcmfmac/bus.h
+@@ -83,6 +83,7 @@ struct brcmf_bus_dcmd {
+  * @rxctl: receive a control response message from dongle.
+  * @gettxq: obtain a reference of bus transmit queue (optional).
+  * @wowl_config: specify if dongle is configured for wowl when going to suspend
++ * @set_wakeup: enable or disable wakeup of the system by the bus device.
+  * @get_ramsize: obtain size of device memory.
+  * @get_memdump: obtain device memory dump in provided buffer.
+  * @get_blob: obtain a firmware blob.
+@@ -101,6 +102,7 @@ struct brcmf_bus_ops {
+ 	int (*rxctl)(struct device *dev, unsigned char *msg, uint len);
+ 	struct pktq * (*gettxq)(struct device *dev);
+ 	void (*wowl_config)(struct device *dev, bool enabled);
++	void (*set_wakeup)(struct device *dev, bool enabled);
+ 	size_t (*get_ramsize)(struct device *dev);
+ 	int (*get_memdump)(struct device *dev, void *data, size_t len);
+ 	int (*get_blob)(struct device *dev, const struct firmware **fw,
+@@ -241,6 +243,13 @@ void brcmf_bus_wowl_config(struct brcmf_bus *bus, bool enabled)
+ 		bus->ops->wowl_config(bus->dev, enabled);
+ }
+ 
++static inline
++void brcmf_bus_set_wakeup(struct brcmf_bus *bus, bool enabled)
++{
++	if (bus->ops->set_wakeup)
++		bus->ops->set_wakeup(bus->dev, enabled);
++}
++
+ static inline size_t brcmf_bus_get_ramsize(struct brcmf_bus *bus)
+ {
+ 	if (!bus->ops->get_ramsize)
+diff --git a/drivers/net/wireless/broadcom/brcm80211/brcmfmac/cfg80211.c b/drivers/net/wireless/broadcom/brcm80211/brcmfmac/cfg80211.c
+index 1b7eefe..e4c6605 100644
+--- a/drivers/net/wireless/broadcom/brcm80211/brcmfmac/cfg80211.c
++++ b/drivers/net/wireless/broadcom/brcm80211/brcmfmac/cfg80211.c
+@@ -4154,6 +4154,13 @@ static int brcmf_keepalive_start(struct brcmf_if *ifp, unsigned int interval)
+ 	return ret;
+ }
+ 
++static void brcmf_cfg80211_set_wakeup(struct wiphy *wiphy, bool enabled)
++{
++	struct brcmf_cfg80211_info *cfg = wiphy_to_cfg(wiphy);
++
++	brcmf_bus_set_wakeup(cfg->pub->bus_if, enabled);
++}
++
+ static s32 brcmf_cfg80211_suspend(struct wiphy *wiphy,
+ 				  struct cfg80211_wowlan *wowl)
+ {
+@@ -5944,6 +5951,7 @@ static struct cfg80211_ops brcmf_cfg80211_ops = {
+ 	.disconnect = brcmf_cfg80211_disconnect,
+ 	.suspend = brcmf_cfg80211_suspend,
+ 	.resume = brcmf_cfg80211_resume,
++	.set_wakeup = brcmf_cfg80211_set_wakeup,
+ 	.set_pmksa = brcmf_cfg80211_set_pmksa,
+ 	.del_pmksa = brcmf_cfg80211_del_pmksa,
+ 	.flush_pmksa = brcmf_cfg80211_flush_pmksa,
+diff --git a/drivers/net/wireless/broadcom/brcm80211/brcmfmac/pcie.c b/drivers/net/wireless/broadcom/brcm80211/brcmfmac/pcie.c
+index dbe3d6f..af7d085 100644
+--- a/drivers/net/wireless/broadcom/brcm80211/brcmfmac/pcie.c
++++ b/drivers/net/wireless/broadcom/brcm80211/brcmfmac/pcie.c
+@@ -417,7 +417,6 @@ struct brcmf_pciedev_info {
+ 	bool irq_allocated;
+ 	bool irq_ready;
+ 	bool have_msi;
+-	bool wowl_enabled;
+ 	u8 dma_idx_sz;
+ 	void *idxbuf;
+ 	u32 idxbuf_sz;
+@@ -820,8 +819,6 @@ static void brcmf_pcie_attach(struct brcmf_pciedev_info *devinfo)
+ 	brcmf_pcie_write_pcie32(devinfo, BRCMF_PCIE_PCIE2REG_CONFIGADDR, 0x4e0);
+ 	config = brcmf_pcie_read_pcie32(devinfo, BRCMF_PCIE_PCIE2REG_CONFIGDATA);
+ 	brcmf_pcie_write_pcie32(devinfo, BRCMF_PCIE_PCIE2REG_CONFIGDATA, config);
+-
+-	device_wakeup_enable(&devinfo->pdev->dev);
+ }
+ 
+ 
+@@ -1657,14 +1654,9 @@ static int brcmf_pcie_rx_ctlpkt(struct device *dev, unsigned char *msg,
+ }
+ 
+ 
+-static void brcmf_pcie_wowl_config(struct device *dev, bool enabled)
++static void brcmf_pcie_set_wakeup(struct device *dev, bool enabled)
+ {
+-	struct brcmf_bus *bus_if = dev_get_drvdata(dev);
+-	struct brcmf_pciedev *buspub = bus_if->bus_priv.pcie;
+-	struct brcmf_pciedev_info *devinfo = buspub->devinfo;
+-
+-	brcmf_dbg(PCIE, "Configuring WOWL, enabled=%d\n", enabled);
+-	devinfo->wowl_enabled = enabled;
++	device_set_wakeup_enable(dev, enabled);
+ }
+ 
+ 
+@@ -1755,7 +1747,7 @@ static const struct brcmf_bus_ops brcmf_pcie_bus_ops = {
+ 	.stop = brcmf_pcie_down,
+ 	.txctl = brcmf_pcie_tx_ctlpkt,
+ 	.rxctl = brcmf_pcie_rx_ctlpkt,
+-	.wowl_config = brcmf_pcie_wowl_config,
++	.set_wakeup = brcmf_pcie_set_wakeup,
+ 	.get_ramsize = brcmf_pcie_get_ramsize,
+ 	.get_memdump = brcmf_pcie_get_memdump,
+ 	.get_blob = brcmf_pcie_get_blob,
+diff --git a/drivers/pci/controller/pcie-apple.c b/drivers/pci/controller/pcie-apple.c
+index d58d5da..bc581ce 100644
+--- a/drivers/pci/controller/pcie-apple.c
++++ b/drivers/pci/controller/pcie-apple.c
+@@ -233,6 +233,7 @@ static struct irq_chip apple_msi_bottom_chip = {
+ 	.irq_eoi		= irq_chip_eoi_parent,
+ 	.irq_set_affinity	= irq_chip_set_affinity_parent,
+ 	.irq_set_type		= irq_chip_set_type_parent,
++	.irq_set_wake		= irq_chip_set_wake_parent,
+ 	.irq_compose_msi_msg	= apple_msi_compose_msg,
+ };
+ 
+@@ -755,7 +756,7 @@ static const struct msi_parent_ops apple_msi_parent_ops = {
+ 	.required_flags		= (MSI_FLAG_USE_DEF_DOM_OPS	|
+ 				   MSI_FLAG_USE_DEF_CHIP_OPS	|
+ 				   MSI_FLAG_PCI_MSI_MASK_PARENT),
+-	.chip_flags		= MSI_CHIP_FLAG_SET_EOI,
++	.chip_flags		= MSI_CHIP_FLAG_SET_EOI | MSI_CHIP_FLAG_SET_WAKE,
+ 	.bus_select_token	= DOMAIN_BUS_PCI_MSI,
+ 	.init_dev_msi_info	= msi_lib_init_dev_msi_info,
+ };
+diff --git a/include/linux/msi.h b/include/linux/msi.h
+index a4613de..f5b406b 100644
+--- a/include/linux/msi.h
++++ b/include/linux/msi.h
+@@ -596,6 +596,7 @@ enum {
+ enum {
+ 	MSI_CHIP_FLAG_SET_EOI		= (1 << 0),
+ 	MSI_CHIP_FLAG_SET_ACK		= (1 << 1),
++	MSI_CHIP_FLAG_SET_WAKE		= (1 << 2),
+ };
+ 
+ /**

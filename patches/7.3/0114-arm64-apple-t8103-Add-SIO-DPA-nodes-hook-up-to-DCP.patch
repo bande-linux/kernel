@@ -1,4 +1,4 @@
-From 691d616f332ac0eb13e8506dfe50515746f1e669 Mon Sep 17 00:00:00 2001
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
 From: =?UTF-8?q?Martin=20Povi=C5=A1er?= <povik+lin@cutebit.org>
 Date: Mon, 28 Nov 2022 17:10:01 +0100
 Subject: [PATCH] arm64: apple: t8103: Add SIO, DPA nodes; hook up to DCP
@@ -14,7 +14,7 @@ Signed-off-by: Martin Povišer <povik+lin@cutebit.org>
  2 files changed, 95 insertions(+)
 
 diff --git a/arch/arm64/boot/dts/apple/t8103-j274.dts b/arch/arm64/boot/dts/apple/t8103-j274.dts
-index 29e326ae4000..a5039e9325a7 100644
+index 29e326a..a5039e9 100644
 --- a/arch/arm64/boot/dts/apple/t8103-j274.dts
 +++ b/arch/arm64/boot/dts/apple/t8103-j274.dts
 @@ -19,6 +19,7 @@ / {
@@ -37,7 +37,7 @@ index 29e326ae4000..a5039e9325a7 100644
  	brcm,board-type = "apple,atlantisb";
  };
 diff --git a/arch/arm64/boot/dts/apple/t8103.dtsi b/arch/arm64/boot/dts/apple/t8103.dtsi
-index 3b08b9cd2dc6..b547a62e6102 100644
+index 3b08b9c..b547a62 100644
 --- a/arch/arm64/boot/dts/apple/t8103.dtsi
 +++ b/arch/arm64/boot/dts/apple/t8103.dtsi
 @@ -669,6 +669,17 @@ disp0_piodma: piodma {
@@ -158,6 +158,3 @@ index 3b08b9cd2dc6..b547a62e6102 100644
  		};
  
  		ans_mbox: mbox@277408000 {
--- 
-2.47.3
-

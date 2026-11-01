@@ -1,4 +1,4 @@
-From f4f5092e3e29dfe2551337473b2848bdd9136dd4 Mon Sep 17 00:00:00 2001
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
 From: Hector Martin <marcan@marcan.st>
 Date: Fri, 13 Oct 2023 01:37:23 +0900
 Subject: [PATCH] arm64: dts: apple: t602x-j180d: Add I/VMON slots to amps
@@ -10,7 +10,7 @@ Signed-off-by: Hector Martin <marcan@marcan.st>
  1 file changed, 4 insertions(+)
 
 diff --git a/arch/arm64/boot/dts/apple/t6022-j180d.dts b/arch/arm64/boot/dts/apple/t6022-j180d.dts
-index 59e5825a0368..c0674aad5c49 100644
+index 59e5825..c0674aa 100644
 --- a/arch/arm64/boot/dts/apple/t6022-j180d.dts
 +++ b/arch/arm64/boot/dts/apple/t6022-j180d.dts
 @@ -542,6 +542,8 @@ speaker_tweeter: codec@38 {
@@ -31,6 +31,3 @@ index 59e5825a0368..c0674aad5c49 100644
  	};
  };
  
--- 
-2.47.3
-

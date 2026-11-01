@@ -1,4 +1,4 @@
-From ddb95f01c0862af05e1f78d25883fd06af391b37 Mon Sep 17 00:00:00 2001
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
 From: Asahi Lina <lina@asahilina.net>
 Date: Fri, 25 Nov 2022 23:06:59 +0900
 Subject: [PATCH] arm64: dts: apple: t8112: Add downstream gpu properties
@@ -13,7 +13,7 @@ Signed-off-by: Asahi Lina <lina@asahilina.net>
  2 files changed, 96 insertions(+), 7 deletions(-)
 
 diff --git a/arch/arm64/boot/dts/apple/t8112-j473.dts b/arch/arm64/boot/dts/apple/t8112-j473.dts
-index 1c32f1554fe3..886325ebe24b 100644
+index 1c32f15..886325e 100644
 --- a/arch/arm64/boot/dts/apple/t8112-j473.dts
 +++ b/arch/arm64/boot/dts/apple/t8112-j473.dts
 @@ -168,4 +168,8 @@ codec {
@@ -26,7 +26,7 @@ index 1c32f1554fe3..886325ebe24b 100644
 +
  #include "hwmon-mini.dtsi"
 diff --git a/arch/arm64/boot/dts/apple/t8112.dtsi b/arch/arm64/boot/dts/apple/t8112.dtsi
-index 9b719807222d..26993dcfa21b 100644
+index 9b71980..26993dc 100644
 --- a/arch/arm64/boot/dts/apple/t8112.dtsi
 +++ b/arch/arm64/boot/dts/apple/t8112.dtsi
 @@ -325,6 +325,60 @@ opp17 {
@@ -160,6 +160,3 @@ index 9b719807222d..26993dcfa21b 100644
  		};
  
  		agx_mbox: mbox@206408000 {
--- 
-2.47.3
-

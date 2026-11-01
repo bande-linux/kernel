@@ -1,0 +1,583 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: Mikael Hug <mikaelhug@gmail.com>
+Date: Sat, 31 Oct 2026 00:46:12 +0000
+Subject: [PATCH] Merge remote-tracking branch 'origin/prep/dt-macaudio-2' into
+ prep/hw-test5
+
+---
+ .../bindings/sound/apple,macaudio.yaml        | 90 +++++++++++++++++--
+ .../arm64/boot/dts/apple/t600x-j314-j316.dtsi |  4 +
+ arch/arm64/boot/dts/apple/t600x-j375.dtsi     |  4 +
+ arch/arm64/boot/dts/apple/t6022-j180d.dts     |  4 +
+ arch/arm64/boot/dts/apple/t6032-j575d.dts     |  4 +
+ .../arm64/boot/dts/apple/t603x-j514-j516.dtsi |  4 +
+ arch/arm64/boot/dts/apple/t8103-j274.dts      |  4 +
+ arch/arm64/boot/dts/apple/t8103-j293.dts      |  4 +
+ arch/arm64/boot/dts/apple/t8103-j313.dts      |  4 +
+ arch/arm64/boot/dts/apple/t8103-j456.dts      |  3 +
+ arch/arm64/boot/dts/apple/t8103-j457.dts      |  3 +
+ arch/arm64/boot/dts/apple/t8112-j413.dts      |  4 +
+ arch/arm64/boot/dts/apple/t8112-j415.dts      |  4 +
+ arch/arm64/boot/dts/apple/t8112-j473.dts      |  6 ++
+ arch/arm64/boot/dts/apple/t8112-j493.dts      |  8 +-
+ arch/arm64/boot/dts/apple/t8122-j433.dts      |  3 +
+ arch/arm64/boot/dts/apple/t8122-j434.dts      |  3 +
+ arch/arm64/boot/dts/apple/t8122-j504.dts      |  4 +
+ arch/arm64/boot/dts/apple/t8122-j613.dts      |  4 +
+ arch/arm64/boot/dts/apple/t8122-j615.dts      |  4 +
+ 20 files changed, 159 insertions(+), 9 deletions(-)
+
+diff --git a/Documentation/devicetree/bindings/sound/apple,macaudio.yaml b/Documentation/devicetree/bindings/sound/apple,macaudio.yaml
+index 8fe22de..c86b837 100644
+--- a/Documentation/devicetree/bindings/sound/apple,macaudio.yaml
++++ b/Documentation/devicetree/bindings/sound/apple,macaudio.yaml
+@@ -15,12 +15,56 @@ maintainers:
+ 
+ properties:
+   compatible:
+-    items:
+-      - enum:
+-          - apple,j274-macaudio
+-          - apple,j293-macaudio
+-          - apple,j314-macaudio
+-      - const: apple,macaudio
++    oneOf:
++      - items:
++          - enum:
++              - apple,j180-macaudio
++              - apple,j274-macaudio
++              - apple,j293-macaudio
++              - apple,j313-macaudio
++              - apple,j314-macaudio
++              - apple,j316-macaudio
++              - apple,j375-macaudio
++              - apple,j413-macaudio
++              - apple,j415-macaudio
++              - apple,j433-macaudio
++              - apple,j434-macaudio
++              - apple,j456-macaudio
++              - apple,j457-macaudio
++              - apple,j473-macaudio
++              - apple,j493-macaudio
++          - const: apple,macaudio
++      - items:
++          - enum:
++              - apple,j414-macaudio
++              - apple,j504-macaudio
++              - apple,j514-macaudio
++          - const: apple,j314-macaudio
++          - const: apple,macaudio
++      - items:
++          - enum:
++              - apple,j416-macaudio
++              - apple,j516-macaudio
++          - const: apple,j316-macaudio
++          - const: apple,macaudio
++      - items:
++          - enum:
++              - apple,j475-macaudio
++              - apple,j575-macaudio
++          - const: apple,j375-macaudio
++          - const: apple,macaudio
++      - items:
++          - const: apple,j613-macaudio
++          - const: apple,j413-macaudio
++          - const: apple,macaudio
++      - items:
++          - const: apple,j615-macaudio
++          - const: apple,j415-macaudio
++          - const: apple,macaudio
++      - items:
++          - const: apple,j474-macaudio
++          - const: apple,j473-macaudio
++          - const: apple,macaudio
+ 
+   "#address-cells":
+     const: 1
+@@ -34,7 +78,7 @@ properties:
+     $ref: /schemas/types.yaml#/definitions/string
+ 
+ patternProperties:
+-  "^dai-link(@[0-9a-f]+)?$":
++  "^dai-link@[0-9a-f]+$":
+     description: |
+       Node for each sound peripheral such as the speaker array, headphones jack,
+       or microphone.
+@@ -42,6 +86,36 @@ patternProperties:
+ 
+     additionalProperties: false
+ 
++    patternProperties:
++      "^dai-tdm-idle-mode-[0-7]$":
++        description: |
++          How CODEC N of this link drives the TX slots in its
++          dai-tdm-slot-tx-idle-mask-N, slots of the shared data line in which
++          it does not transmit, so that they do not float. CODECs are numbered
++          across the link in codec sound-dai order.
++            zero: drive the slots low.
++            pulldown: weakly pull the slots low.
++        $ref: /schemas/types.yaml#/definitions/string
++        enum:
++          - zero
++          - pulldown
++
++      "^dai-tdm-slot-tx-idle-mask-[0-7]$":
++        description:
++          Bit mask of the TX slots on the data line that CODEC N drives as
++          dai-tdm-idle-mode-N says, bit 0 being slot 0.
++        $ref: /schemas/types.yaml#/definitions/uint32
++
++    dependentRequired:
++      dai-tdm-slot-tx-idle-mask-0: [ dai-tdm-idle-mode-0 ]
++      dai-tdm-slot-tx-idle-mask-1: [ dai-tdm-idle-mode-1 ]
++      dai-tdm-slot-tx-idle-mask-2: [ dai-tdm-idle-mode-2 ]
++      dai-tdm-slot-tx-idle-mask-3: [ dai-tdm-idle-mode-3 ]
++      dai-tdm-slot-tx-idle-mask-4: [ dai-tdm-idle-mode-4 ]
++      dai-tdm-slot-tx-idle-mask-5: [ dai-tdm-idle-mode-5 ]
++      dai-tdm-slot-tx-idle-mask-6: [ dai-tdm-idle-mode-6 ]
++      dai-tdm-slot-tx-idle-mask-7: [ dai-tdm-idle-mode-7 ]
++
+     properties:
+       reg:
+         maxItems: 1
+@@ -99,6 +173,8 @@ patternProperties:
+ required:
+   - compatible
+   - model
++  - "#address-cells"
++  - "#size-cells"
+ 
+ additionalProperties: false
+ 
+diff --git a/arch/arm64/boot/dts/apple/t600x-j314-j316.dtsi b/arch/arm64/boot/dts/apple/t600x-j314-j316.dtsi
+index 028f446..1d6e9af 100644
+--- a/arch/arm64/boot/dts/apple/t600x-j314-j316.dtsi
++++ b/arch/arm64/boot/dts/apple/t600x-j314-j316.dtsi
+@@ -606,8 +606,11 @@ &aop {
+ / {
+ 	sound: sound {
+ 		/* compatible is set per machine */
++		#address-cells = <1>;
++		#size-cells = <0>;
+ 
+ 		dai-link@0 {
++			reg = <0>;
+ 			link-name = "Speakers";
+ 			dai-tdm-idle-mode-0 = "zero";
+ 			dai-tdm-idle-mode-3 = "zero";
+@@ -628,6 +631,7 @@ codec {
+ 		};
+ 
+ 		dai-link@1 {
++			reg = <1>;
+ 			link-name = "Headphone Jack";
+ 
+ 			cpu {
+diff --git a/arch/arm64/boot/dts/apple/t600x-j375.dtsi b/arch/arm64/boot/dts/apple/t600x-j375.dtsi
+index 2cdd2e2..af23714 100644
+--- a/arch/arm64/boot/dts/apple/t600x-j375.dtsi
++++ b/arch/arm64/boot/dts/apple/t600x-j375.dtsi
+@@ -418,8 +418,11 @@ &nco_clkref {
+ / {
+ 	sound: sound {
+ 		/* compatible is set per machine */
++		#address-cells = <1>;
++		#size-cells = <0>;
+ 
+ 		dai-link@0 {
++			reg = <0>;
+ 			link-name = "Speaker";
+ 
+ 			cpu {
+@@ -431,6 +434,7 @@ codec {
+ 		};
+ 
+ 		dai-link@1 {
++			reg = <1>;
+ 			link-name = "Headphone Jack";
+ 
+ 			cpu {
+diff --git a/arch/arm64/boot/dts/apple/t6022-j180d.dts b/arch/arm64/boot/dts/apple/t6022-j180d.dts
+index 15fffd0..5360f1d 100644
+--- a/arch/arm64/boot/dts/apple/t6022-j180d.dts
++++ b/arch/arm64/boot/dts/apple/t6022-j180d.dts
+@@ -670,8 +670,11 @@ / {
+ 	sound: sound {
+ 		compatible = "apple,j180-macaudio", "apple,macaudio";
+ 		model = "Mac Pro J180";
++		#address-cells = <1>;
++		#size-cells = <0>;
+ 
+ 		dai-link@0 {
++			reg = <0>;
+ 			link-name = "Speakers";
+ 			/*
+ 			* DANGER ZONE: You can blow your speakers!
+@@ -690,6 +693,7 @@ codec {
+ 		};
+ 
+ 		dai-link@1 {
++			reg = <1>;
+ 			link-name = "Headphone Jack";
+ 
+ 			cpu {
+diff --git a/arch/arm64/boot/dts/apple/t6032-j575d.dts b/arch/arm64/boot/dts/apple/t6032-j575d.dts
+index 1bf1400..de16d3e 100644
+--- a/arch/arm64/boot/dts/apple/t6032-j575d.dts
++++ b/arch/arm64/boot/dts/apple/t6032-j575d.dts
+@@ -81,8 +81,11 @@ / {
+ 	sound: sound {
+ 		compatible = "apple,j575-macaudio", "apple,j375-macaudio", "apple,macaudio";
+ 		model = "Mac Studio J575";
++		#address-cells = <1>;
++		#size-cells = <0>;
+ 
+ 		dai-link@0 {
++			reg = <0>;
+ 			link-name = "Speaker";
+ 
+ 			cpu {
+@@ -94,6 +97,7 @@ codec {
+ 		};
+ 
+ 		dai-link@1 {
++			reg = <1>;
+ 			link-name = "Headphone Jack";
+ 
+ 			cpu {
+diff --git a/arch/arm64/boot/dts/apple/t603x-j514-j516.dtsi b/arch/arm64/boot/dts/apple/t603x-j514-j516.dtsi
+index 74fd80b..a8f5afd 100644
+--- a/arch/arm64/boot/dts/apple/t603x-j514-j516.dtsi
++++ b/arch/arm64/boot/dts/apple/t603x-j514-j516.dtsi
+@@ -277,8 +277,11 @@ &aop {
+ / {
+ 	sound: sound {
+ 		/* compatible is set per machine */
++		#address-cells = <1>;
++		#size-cells = <0>;
+ 
+ 		dai-link@0 {
++			reg = <0>;
+ 			link-name = "Speakers";
+ 			dai-tdm-idle-mode-0 = "zero";
+ 			dai-tdm-idle-mode-3 = "zero";
+@@ -299,6 +302,7 @@ codec {
+ 		};
+ 
+ 		dai-link@1 {
++			reg = <1>;
+ 			link-name = "Headphone Jack";
+ 
+ 			cpu {
+diff --git a/arch/arm64/boot/dts/apple/t8103-j274.dts b/arch/arm64/boot/dts/apple/t8103-j274.dts
+index 2d49140..3086efa 100644
+--- a/arch/arm64/boot/dts/apple/t8103-j274.dts
++++ b/arch/arm64/boot/dts/apple/t8103-j274.dts
+@@ -116,8 +116,11 @@ / {
+ 	sound {
+ 		compatible = "apple,j274-macaudio", "apple,macaudio";
+ 		model = "Mac mini J274";
++		#address-cells = <1>;
++		#size-cells = <0>;
+ 
+ 		dai-link@0 {
++			reg = <0>;
+ 			link-name = "Speaker";
+ 
+ 			cpu {
+@@ -129,6 +132,7 @@ codec {
+ 		};
+ 
+ 		dai-link@1 {
++			reg = <1>;
+ 			link-name = "Headphone Jack";
+ 
+ 			cpu {
+diff --git a/arch/arm64/boot/dts/apple/t8103-j293.dts b/arch/arm64/boot/dts/apple/t8103-j293.dts
+index 2c63d05..3a2a52e 100644
+--- a/arch/arm64/boot/dts/apple/t8103-j293.dts
++++ b/arch/arm64/boot/dts/apple/t8103-j293.dts
+@@ -261,8 +261,11 @@ / {
+ 	sound {
+ 		compatible = "apple,j293-macaudio", "apple,macaudio";
+ 		model = "MacBook Pro J293";
++		#address-cells = <1>;
++		#size-cells = <0>;
+ 
+ 		dai-link@0 {
++			reg = <0>;
+ 			link-name = "Speakers";
+ 			dai-tdm-idle-mode-0 = "pulldown";
+ 			dai-tdm-idle-mode-2 = "pulldown";
+@@ -277,6 +280,7 @@ codec {
+ 		};
+ 
+ 		dai-link@1 {
++			reg = <1>;
+ 			link-name = "Headphone Jack";
+ 
+ 			cpu {
+diff --git a/arch/arm64/boot/dts/apple/t8103-j313.dts b/arch/arm64/boot/dts/apple/t8103-j313.dts
+index 5e658fd..5b58161 100644
+--- a/arch/arm64/boot/dts/apple/t8103-j313.dts
++++ b/arch/arm64/boot/dts/apple/t8103-j313.dts
+@@ -160,8 +160,11 @@ / {
+ 	sound {
+ 		compatible = "apple,j313-macaudio", "apple,macaudio";
+ 		model = "MacBook Air J313";
++		#address-cells = <1>;
++		#size-cells = <0>;
+ 
+ 		dai-link@0 {
++			reg = <0>;
+ 			link-name = "Speakers";
+ 			dai-tdm-idle-mode-0 = "zero";
+ 			dai-tdm-idle-mode-1 = "zero";
+@@ -175,6 +178,7 @@ codec {
+ 		};
+ 
+ 		dai-link@1 {
++			reg = <1>;
+ 			link-name = "Headphone Jack";
+ 
+ 			cpu {
+diff --git a/arch/arm64/boot/dts/apple/t8103-j456.dts b/arch/arm64/boot/dts/apple/t8103-j456.dts
+index 740d678..1c09dcd 100644
+--- a/arch/arm64/boot/dts/apple/t8103-j456.dts
++++ b/arch/arm64/boot/dts/apple/t8103-j456.dts
+@@ -146,8 +146,11 @@ / {
+ 	sound {
+ 		compatible = "apple,j456-macaudio", "apple,macaudio";
+ 		model = "iMac J456";
++		#address-cells = <1>;
++		#size-cells = <0>;
+ 
+ 		dai-link@1 {
++			reg = <1>;
+ 			link-name = "Headphone Jack";
+ 
+ 			cpu {
+diff --git a/arch/arm64/boot/dts/apple/t8103-j457.dts b/arch/arm64/boot/dts/apple/t8103-j457.dts
+index 5b0505e..48a6e4f 100644
+--- a/arch/arm64/boot/dts/apple/t8103-j457.dts
++++ b/arch/arm64/boot/dts/apple/t8103-j457.dts
+@@ -127,8 +127,11 @@ / {
+ 	sound {
+ 		compatible = "apple,j457-macaudio", "apple,macaudio";
+ 		model = "iMac J457";
++		#address-cells = <1>;
++		#size-cells = <0>;
+ 
+ 		dai-link@1 {
++			reg = <1>;
+ 			link-name = "Headphone Jack";
+ 
+ 			cpu {
+diff --git a/arch/arm64/boot/dts/apple/t8112-j413.dts b/arch/arm64/boot/dts/apple/t8112-j413.dts
+index 6a49b67..cbd0d3a 100644
+--- a/arch/arm64/boot/dts/apple/t8112-j413.dts
++++ b/arch/arm64/boot/dts/apple/t8112-j413.dts
+@@ -191,8 +191,11 @@ / {
+ 	sound {
+ 		compatible = "apple,j413-macaudio", "apple,macaudio";
+ 		model = "MacBook Air J413";
++		#address-cells = <1>;
++		#size-cells = <0>;
+ 
+ 		dai-link@0 {
++			reg = <0>;
+ 			link-name = "Speakers";
+ 			dai-tdm-idle-mode-0 = "zero";
+ 			dai-tdm-idle-mode-2 = "zero";
+@@ -209,6 +212,7 @@ codec {
+ 		};
+ 
+ 		dai-link@1 {
++			reg = <1>;
+ 			link-name = "Headphone Jack";
+ 
+ 			cpu {
+diff --git a/arch/arm64/boot/dts/apple/t8112-j415.dts b/arch/arm64/boot/dts/apple/t8112-j415.dts
+index 7dfd891..2d9d30e 100644
+--- a/arch/arm64/boot/dts/apple/t8112-j415.dts
++++ b/arch/arm64/boot/dts/apple/t8112-j415.dts
+@@ -213,8 +213,11 @@ / {
+ 	sound {
+ 		compatible = "apple,j415-macaudio", "apple,macaudio";
+ 		model = "MacBook Air J415";
++		#address-cells = <1>;
++		#size-cells = <0>;
+ 
+ 		dai-link@0 {
++			reg = <0>;
+ 			link-name = "Speakers";
+ 			dai-tdm-idle-mode-0 = "zero";
+ 			dai-tdm-idle-mode-3 = "zero";
+@@ -235,6 +238,7 @@ codec {
+ 		};
+ 
+ 		dai-link@1 {
++			reg = <1>;
+ 			link-name = "Headphone Jack";
+ 
+ 			cpu {
+diff --git a/arch/arm64/boot/dts/apple/t8112-j473.dts b/arch/arm64/boot/dts/apple/t8112-j473.dts
+index f146094..c8b4d3b 100644
+--- a/arch/arm64/boot/dts/apple/t8112-j473.dts
++++ b/arch/arm64/boot/dts/apple/t8112-j473.dts
+@@ -184,9 +184,14 @@ / {
+ 	sound {
+ 		compatible = "apple,j473-macaudio", "apple,macaudio";
+ 		model = "Mac mini J473";
++		#address-cells = <1>;
++		#size-cells = <0>;
+ 
+ 		dai-link@0 {
++			reg = <0>;
+ 			link-name = "Speaker";
++			dai-tdm-idle-mode-0 = "zero";
++			dai-tdm-slot-tx-idle-mask-0 = <0xfffffff0>;
+ 
+ 			cpu {
+ 				sound-dai = <&mca 0>;
+@@ -197,6 +202,7 @@ codec {
+ 		};
+ 
+ 		dai-link@1 {
++			reg = <1>;
+ 			link-name = "Headphone Jack";
+ 
+ 			cpu {
+diff --git a/arch/arm64/boot/dts/apple/t8112-j493.dts b/arch/arm64/boot/dts/apple/t8112-j493.dts
+index 49d3c85..eb5ce65 100644
+--- a/arch/arm64/boot/dts/apple/t8112-j493.dts
++++ b/arch/arm64/boot/dts/apple/t8112-j493.dts
+@@ -245,11 +245,14 @@ / {
+ 	sound {
+ 		compatible = "apple,j493-macaudio", "apple,macaudio";
+ 		model = "MacBook Pro J493";
++		#address-cells = <1>;
++		#size-cells = <0>;
+ 
+ 		dai-link@0 {
++			reg = <0>;
+ 			link-name = "Speakers";
+-			dai-tdm-slot-tx-idle-mode-0 = "zero";
+-			dai-tdm-slot-tx-idle-mode-2 = "zero";
++			dai-tdm-idle-mode-0 = "zero";
++			dai-tdm-idle-mode-2 = "zero";
+ 			dai-tdm-slot-tx-idle-mask-0 = <0xf0f0>;
+ 			dai-tdm-slot-tx-idle-mask-2 = <0x0f0f>;
+ 
+@@ -263,6 +266,7 @@ codec {
+ 		};
+ 
+ 		dai-link@1 {
++			reg = <1>;
+ 			link-name = "Headphone Jack";
+ 
+ 			cpu {
+diff --git a/arch/arm64/boot/dts/apple/t8122-j433.dts b/arch/arm64/boot/dts/apple/t8122-j433.dts
+index 9ceb6a6..abe405c 100644
+--- a/arch/arm64/boot/dts/apple/t8122-j433.dts
++++ b/arch/arm64/boot/dts/apple/t8122-j433.dts
+@@ -61,8 +61,11 @@ / {
+ 	sound {
+ 		compatible = "apple,j433-macaudio", "apple,macaudio";
+ 		model = "iMac J433";
++		#address-cells = <1>;
++		#size-cells = <0>;
+ 
+ 		dai-link@1 {
++			reg = <1>;
+ 			link-name = "Headphone Jack";
+ 
+ 			cpu {
+diff --git a/arch/arm64/boot/dts/apple/t8122-j434.dts b/arch/arm64/boot/dts/apple/t8122-j434.dts
+index 1e5d75a..1761932 100644
+--- a/arch/arm64/boot/dts/apple/t8122-j434.dts
++++ b/arch/arm64/boot/dts/apple/t8122-j434.dts
+@@ -67,8 +67,11 @@ / {
+ 	sound {
+ 		compatible = "apple,j434-macaudio", "apple,macaudio";
+ 		model = "iMac J434";
++		#address-cells = <1>;
++		#size-cells = <0>;
+ 
+ 		dai-link@1 {
++			reg = <1>;
+ 			link-name = "Headphone Jack";
+ 
+ 			cpu {
+diff --git a/arch/arm64/boot/dts/apple/t8122-j504.dts b/arch/arm64/boot/dts/apple/t8122-j504.dts
+index 91a52c2..4edf0d8 100644
+--- a/arch/arm64/boot/dts/apple/t8122-j504.dts
++++ b/arch/arm64/boot/dts/apple/t8122-j504.dts
+@@ -219,8 +219,11 @@ / {
+ 	sound: sound {
+ 		compatible = "apple,j504-macaudio", "apple,j314-macaudio", "apple,macaudio";
+ 		model = "MacBook Pro J504";
++		#address-cells = <1>;
++		#size-cells = <0>;
+ 
+ 		dai-link@0 {
++			reg = <0>;
+ 			link-name = "Speakers";
+ 			dai-tdm-idle-mode-0 = "zero";
+ 			dai-tdm-idle-mode-3 = "zero";
+@@ -241,6 +244,7 @@ codec {
+ 		};
+ 
+ 		dai-link@1 {
++			reg = <1>;
+ 			link-name = "Headphone Jack";
+ 
+ 			cpu {
+diff --git a/arch/arm64/boot/dts/apple/t8122-j613.dts b/arch/arm64/boot/dts/apple/t8122-j613.dts
+index aa9e49d..f1c0b9a 100644
+--- a/arch/arm64/boot/dts/apple/t8122-j613.dts
++++ b/arch/arm64/boot/dts/apple/t8122-j613.dts
+@@ -121,8 +121,11 @@ / {
+ 	sound {
+ 		compatible = "apple,j613-macaudio", "apple,j413-macaudio", "apple,macaudio";
+ 		model = "MacBook Air J613";
++		#address-cells = <1>;
++		#size-cells = <0>;
+ 
+ 		dai-link@0 {
++			reg = <0>;
+ 			link-name = "Speakers";
+ 			dai-tdm-idle-mode-0 = "zero";
+ 			dai-tdm-idle-mode-2 = "zero";
+@@ -139,6 +142,7 @@ codec {
+ 		};
+ 
+ 		dai-link@1 {
++			reg = <1>;
+ 			link-name = "Headphone Jack";
+ 
+ 			cpu {
+diff --git a/arch/arm64/boot/dts/apple/t8122-j615.dts b/arch/arm64/boot/dts/apple/t8122-j615.dts
+index d5e2938..94b804c 100644
+--- a/arch/arm64/boot/dts/apple/t8122-j615.dts
++++ b/arch/arm64/boot/dts/apple/t8122-j615.dts
+@@ -143,8 +143,11 @@ / {
+ 	sound {
+ 		compatible = "apple,j615-macaudio", "apple,j415-macaudio", "apple,macaudio";
+ 		model = "MacBook Air J615";
++		#address-cells = <1>;
++		#size-cells = <0>;
+ 
+ 		dai-link@0 {
++			reg = <0>;
+ 			link-name = "Speakers";
+ 			dai-tdm-idle-mode-0 = "zero";
+ 			dai-tdm-idle-mode-3 = "zero";
+@@ -161,6 +164,7 @@ codec {
+ 		};
+ 
+ 		dai-link@1 {
++			reg = <1>;
+ 			link-name = "Headphone Jack";
+ 
+ 			cpu {

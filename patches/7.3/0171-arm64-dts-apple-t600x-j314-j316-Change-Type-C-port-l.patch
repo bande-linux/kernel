@@ -1,4 +1,4 @@
-From 69610e30950437e682cc2f84d4f83f235f936cd7 Mon Sep 17 00:00:00 2001
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
 From: Janne Grunau <j@jannau.net>
 Date: Sun, 2 Aug 2026 21:34:49 +0200
 Subject: [PATCH] arm64: dts: apple: t600x-j314-j316: Change Type-C port label
@@ -13,7 +13,7 @@ Signed-off-by: Janne Grunau <j@jannau.net>
  1 file changed, 1 insertion(+), 1 deletion(-)
 
 diff --git a/arch/arm64/boot/dts/apple/t600x-j314-j316.dtsi b/arch/arm64/boot/dts/apple/t600x-j314-j316.dtsi
-index 567ddaf6213e..3335835646e8 100644
+index 567ddaf..3335835 100644
 --- a/arch/arm64/boot/dts/apple/t600x-j314-j316.dtsi
 +++ b/arch/arm64/boot/dts/apple/t600x-j314-j316.dtsi
 @@ -152,7 +152,7 @@ hpm0: usb-pd@38 {
@@ -25,6 +25,3 @@ index 567ddaf6213e..3335835646e8 100644
  			power-role = "dual";
  			data-role = "dual";
  
--- 
-2.47.3
-

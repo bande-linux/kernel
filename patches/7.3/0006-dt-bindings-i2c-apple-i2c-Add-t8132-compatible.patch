@@ -1,4 +1,4 @@
-From 71942418badab69696d9f3db1a0b448bcf98011c Mon Sep 17 00:00:00 2001
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
 From: Yureka Lilian <yureka@cyberchaos.dev>
 Date: Sun, 5 Jul 2026 15:17:26 +0200
 Subject: [PATCH] dt-bindings: i2c: apple,i2c: Add t8132 compatible
@@ -14,7 +14,7 @@ Signed-off-by: Yureka Lilian <yureka@cyberchaos.dev>
  1 file changed, 1 insertion(+)
 
 diff --git a/Documentation/devicetree/bindings/i2c/apple,i2c.yaml b/Documentation/devicetree/bindings/i2c/apple,i2c.yaml
-index d39f5e3f1df4..641f24b0ef4b 100644
+index d39f5e3..641f24b 100644
 --- a/Documentation/devicetree/bindings/i2c/apple,i2c.yaml
 +++ b/Documentation/devicetree/bindings/i2c/apple,i2c.yaml
 @@ -27,6 +27,7 @@ properties:
@@ -25,6 +25,3 @@ index d39f5e3f1df4..641f24b0ef4b 100644
            - const: apple,t8103-i2c
        - items:
            - enum:
--- 
-2.47.3
-

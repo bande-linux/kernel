@@ -1,4 +1,4 @@
-From 23f0bdffe3fcd8d16af2554a25b3b012b17837a5 Mon Sep 17 00:00:00 2001
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
 From: Hector Martin <marcan@marcan.st>
 Date: Mon, 17 Apr 2023 20:41:13 +0900
 Subject: [PATCH] cpuidle: apple: Add Apple SoC cpuidle driver
@@ -15,7 +15,7 @@ Signed-off-by: Hector Martin <marcan@marcan.st>
  3 files changed, 166 insertions(+)
 
 diff --git a/drivers/cpuidle/Kconfig.arm b/drivers/cpuidle/Kconfig.arm
-index b88b01aa5829..e6be22ad6c18 100644
+index b88b01a..e6be22a 100644
 --- a/drivers/cpuidle/Kconfig.arm
 +++ b/drivers/cpuidle/Kconfig.arm
 @@ -130,3 +130,11 @@ config ARM_QCOM_SPM_CPUIDLE
@@ -31,7 +31,7 @@ index b88b01aa5829..e6be22ad6c18 100644
 +	help
 +	  Select this to enable cpuidle on Apple SoCs.
 diff --git a/drivers/cpuidle/Makefile b/drivers/cpuidle/Makefile
-index 88cbc2a7aea8..55025d66edbb 100644
+index 88cbc2a..55025d6 100644
 --- a/drivers/cpuidle/Makefile
 +++ b/drivers/cpuidle/Makefile
 @@ -29,6 +29,7 @@ obj-$(CONFIG_ARM_PSCI_CPUIDLE)		+= cpuidle-psci.o
@@ -44,7 +44,7 @@ index 88cbc2a7aea8..55025d66edbb 100644
  # MIPS drivers
 diff --git a/drivers/cpuidle/cpuidle-apple.c b/drivers/cpuidle/cpuidle-apple.c
 new file mode 100644
-index 000000000000..1dfb10cdb5e4
+index 0000000..1dfb10c
 --- /dev/null
 +++ b/drivers/cpuidle/cpuidle-apple.c
 @@ -0,0 +1,157 @@
@@ -205,6 +205,3 @@ index 000000000000..1dfb10cdb5e4
 +	return 0;
 +}
 +device_initcall(apple_cpuidle_init);
--- 
-2.47.3
-

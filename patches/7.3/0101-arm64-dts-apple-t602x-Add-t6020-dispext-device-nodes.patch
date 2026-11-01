@@ -1,4 +1,4 @@
-From 103c564f8dc03c6a3b1e25da66dd2a414e46587d Mon Sep 17 00:00:00 2001
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
 From: Janne Grunau <j@jannau.net>
 Date: Thu, 17 Aug 2023 19:45:46 +0200
 Subject: [PATCH] arm64: dts: apple: t602x: Add t6020 dispext device nodes
@@ -18,7 +18,7 @@ Signed-off-by: Janne Grunau <j@jannau.net>
  3 files changed, 164 insertions(+)
 
 diff --git a/arch/arm64/boot/dts/apple/t6022.dtsi b/arch/arm64/boot/dts/apple/t6022.dtsi
-index 26850a1441c4..a14cdc6c45db 100644
+index 26850a1..a14cdc6 100644
 --- a/arch/arm64/boot/dts/apple/t6022.dtsi
 +++ b/arch/arm64/boot/dts/apple/t6022.dtsi
 @@ -344,6 +344,14 @@ &cpu_p20 &cpu_p21 &cpu_p22 &cpu_p23
@@ -37,7 +37,7 @@ index 26850a1441c4..a14cdc6c45db 100644
  	// On t6022, the die0 GPU power domain needs both AFR power domains
  	power-domains = <&ps_afr>, <&ps_afr_die1>;
 diff --git a/arch/arm64/boot/dts/apple/t602x-common.dtsi b/arch/arm64/boot/dts/apple/t602x-common.dtsi
-index 617ff2415345..a7cad364e895 100644
+index 617ff24..a7cad36 100644
 --- a/arch/arm64/boot/dts/apple/t602x-common.dtsi
 +++ b/arch/arm64/boot/dts/apple/t602x-common.dtsi
 @@ -558,6 +558,34 @@ clk_disp0: clock-disp0 {
@@ -76,7 +76,7 @@ index 617ff2415345..a7cad364e895 100644
  	 * This is a fabulated representation of the input clock
  	 * to NCO since we don't know the true clock tree.
 diff --git a/arch/arm64/boot/dts/apple/t602x-dieX.dtsi b/arch/arm64/boot/dts/apple/t602x-dieX.dtsi
-index b4a45f9a5daf..abcd2dc861f1 100644
+index b4a45f9..abcd2dc 100644
 --- a/arch/arm64/boot/dts/apple/t602x-dieX.dtsi
 +++ b/arch/arm64/boot/dts/apple/t602x-dieX.dtsi
 @@ -24,6 +24,70 @@ DIE_NODE(cpufreq_p1): cpufreq@212e20000 {
@@ -221,6 +221,3 @@ index b4a45f9a5daf..abcd2dc861f1 100644
  	DIE_NODE(pinctrl_ap): pinctrl@39b028000 {
  		compatible = "apple,t6020-pinctrl", "apple,t8103-pinctrl", "apple,pinctrl";
  		reg = <0x3 0x9b028000 0x0 0x4000>;
--- 
-2.47.3
-

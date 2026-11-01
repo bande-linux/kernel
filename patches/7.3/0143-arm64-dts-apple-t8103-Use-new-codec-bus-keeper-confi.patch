@@ -1,4 +1,4 @@
-From 14c33e62037f7e0e063e9d159616a5127136a3a4 Mon Sep 17 00:00:00 2001
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
 From: James Calligeros <jcalligeros99@gmail.com>
 Date: Sun, 21 Jun 2026 21:07:32 +1000
 Subject: [PATCH] arm64: dts: apple: t8103: Use new codec bus keeper config
@@ -11,7 +11,7 @@ Signed-off-by: James Calligeros <jcalligeros99@gmail.com>
  2 files changed, 4 insertions(+), 4 deletions(-)
 
 diff --git a/arch/arm64/boot/dts/apple/t8103-j293.dts b/arch/arm64/boot/dts/apple/t8103-j293.dts
-index 1211fb8e4d8a..2c63d056522c 100644
+index 1211fb8..2c63d05 100644
 --- a/arch/arm64/boot/dts/apple/t8103-j293.dts
 +++ b/arch/arm64/boot/dts/apple/t8103-j293.dts
 @@ -118,7 +118,6 @@ speaker_left_front: codec@32 {
@@ -40,7 +40,7 @@ index 1211fb8e4d8a..2c63d056522c 100644
  			cpu {
  				sound-dai = <&mca 0>, <&mca 1>;
 diff --git a/arch/arm64/boot/dts/apple/t8103-j313.dts b/arch/arm64/boot/dts/apple/t8103-j313.dts
-index 1ec8bc9e40a9..5e658fd35c19 100644
+index 1ec8bc9..5e658fd 100644
 --- a/arch/arm64/boot/dts/apple/t8103-j313.dts
 +++ b/arch/arm64/boot/dts/apple/t8103-j313.dts
 @@ -104,7 +104,6 @@ speaker_left: codec@31 {
@@ -68,6 +68,3 @@ index 1ec8bc9e40a9..5e658fd35c19 100644
  
  			cpu {
  				sound-dai = <&mca 0>, <&mca 1>;
--- 
-2.47.3
-

@@ -2,14 +2,21 @@
 
 Debian testing's kernel with the Bande patches for the Mac mini M2.
 
-This repository holds no kernel tree. It holds what we add to Debian's: our patches, the few
-config options the Mac needs and a Debian flavour, `apple-arm64-16k`. Whenever Debian testing
-gets a new `linux` package, `follow-debian.yml` builds that same source with Debian's own build
-system, and the Bande archive publishes it to the `apple` component.
+This repository builds only the kernel for Apple machines: Debian's `linux` source with our Mac
+patches. Everyone else runs Debian's own kernel, so we never build or publish Debian's kernel
+without our patches. This repository holds no kernel tree. It holds what we add to Debian's: our
+patches, the few config options the Mac needs and a Debian flavour, `apple-arm64-16k`. Whenever
+Debian testing gets a new `linux` package of a series we have patches for, `follow-debian.yml`
+builds that same source with Debian's own build system, and the Bande archive publishes it to
+the `apple` component.
+
+All kernel development for the Mac happens here, as changes to `patches/`. The former kernel
+tree, `bande-linux/linux`, is legacy: kept for its history, not developed any more.
 
 | Path | What it is |
 |---|---|
 | `patches/<series>/` | our patches for one upstream series (`7.3`) with their `series`, applied after Debian's own, and `apple.config`, the options that need them |
+| `patches/<series>/held/<topic>/` | finished patches not in the build yet, each topic with its own `series` (and `apple.config`), applying on top of the series |
 | `config/apple.config` | the options added to Debian's `arm64-16k` config on every series |
 | `debian/bande-os-apple/` | the `bande-os-apple` metapackage: `bande-desktop`, the Apple kernel, and an apt pin that keeps Debian's own kernels off the Mac |
 | `scripts/` | the build, run the same way by CI and on the mini |
@@ -31,43 +38,93 @@ have no UEFI Secure Boot). Headers are built but not published yet.
 
 `follow-debian.yml` runs hourly and on dispatch:
 
-1. `scripts/debian-version.sh` reads testing's `linux` version, `scripts/version.sh` our version
-   of it, and `scripts/published.sh` the version the archive serves. Equal: nothing to do.
+1. `scripts/debian-version.sh` reads testing's `linux` version and `scripts/series.sh` our patch
+   series for it. When testing is on an older series than our newest patches (now: testing has
+   7.2, our patches are for 7.3), the run stops there with "no build: our patches are for a
+   newer series": no build, nothing published. It resumes by itself in the first hourly run
+   after testing reaches the series. Otherwise `scripts/version.sh` gives our version of it and
+   `scripts/published.sh` the version the archive serves. Equal: nothing to do.
 2. `scripts/build.sh fetch` gets Debian's source through apt, which checks it against testing's
    signed Release.
 3. `scripts/prepare.sh` adds the flavour, the `bande` release and our patches for Debian's
-   series (`scripts/series.sh`). A series older than our newest builds without patches (Debian
-   testing lagging behind); a newer one, or a patch that no longer applies, stops it with exit 3; the workflow then runs Claude Code to refresh our
-   patches against the new source, prepares again and commits the refreshed patches to `main`.
+   series, and fails rather than leave any of them out. For a newer series than ours it first
+   starts `patches/<series>/` as a copy of our newest. A patch that doesn't apply stops it with
+   exit 3. The workflow then runs Claude Code (secret `CLAUDE_CODE_OAUTH_TOKEN`) to refresh our
+   patches against the new source (`scripts/refresh-prompt.md`), and prepares again from a
+   fresh source. If that still fails, the run fails and nothing is published or committed. If
+   it passes, the refreshed series is pushed to a `refresh/linux-<version>` branch, so the work
+   survives a run that hits the time limit.
 4. `scripts/build.sh compile` builds the flavour and `bande-os-apple`.
 5. Checks: `scripts/config-diff.sh` generates Debian's own `arm64-16k` config from the same source
    and proves ours is that plus the listed options and nothing else, and `scripts/qemu-boot.sh` boots the kernel to userspace in QEMU (16k pages, UEFI).
-6. It uploads `bande-debs-arm64` and `bande-version-<version>`, which the archive's scheduled
-   publish picks up.
+6. Only after the checks, a refreshed or newly started series is committed to `main` (and its
+   `refresh/` branch deleted). It uploads `bande-debs-arm64` and `bande-version-<version>`,
+   which the archive's scheduled publish picks up.
 
-## Updating the patches
+## Changing a patch
 
-The patches come from the kernel branch we develop on (`bande-hw/integration` in
-`bande-linux/linux`), one per step of its first-parent history:
+Patches are changed in a git tree made from Debian's source with our series applied as
+commits, then exported back. On the mini (any Debian machine works; no root needed):
 
 ```
-scripts/export-patches.sh ../linux v7.3 origin/bande-hw/integration 7.3
+# Debian's source, from a build directory (see Building on the mini) or apt-get source:
+scripts/local-build.sh 7.3~rc7-1~exp1 /var/tmp/bande-kernel chroot fetch
+scripts/dev-tree.sh /var/tmp/bande-kernel/work/linux-7.3~rc7 ~/src/kernel-7.3
+cd ~/src/kernel-7.3
+# change a commit (git rebase -i, git commit --fixup + autosquash, git am a new patch, ...)
+cd -
+scripts/export-tree.sh ~/src/kernel-7.3
+git diff patches/                   # only the patches you meant to change
 ```
 
-A dispatch with `debian_version` (for example `7.3~rc7-1~exp1` from experimental) test-builds any
-Debian version without publishing it.
+- `dev-tree.sh` copies the source with Debian's own patches applied (before `prepare.sh`)
+  and commits it as `debian-base`. It then runs `git am` with each patch of the series, one
+  commit per patch. If a patch doesn't apply, it stops there: fix it, run `git am --continue`,
+  then run `dev-tree.sh` again to apply the rest.
+- `export-tree.sh` rewrites `patches/<series>/` from `debian-base..HEAD` with
+  `scripts/export-patches.sh`, one patch per commit. The patches carry no commit hashes, so
+  only the commits you changed come out different; the numbering follows the commit order.
+  Config options a new driver needs go into `patches/<series>/apple.config` by hand.
+  `config/apple.config` is for options that need no patch.
+- Held topics (`patches/<series>/held/<topic>/`) go on top: `git am
+  patches/7.3/held/dp-altmode/*.patch` in the tree. To move one into the build, apply it, export
+  the tree, add its `apple.config` lines and remove the held directory.
+- Then build it locally (below) before committing: a commit here changes the version, and the
+  hourly `follow-debian.yml` may build and publish it.
+
+The patches for 7.3 were last exported from `bande-linux/linux` (`prep/hw-test6`, 2f4f980145b0,
+whose CI-only and config-fragment changes Debian's build replaces). Since 2026-11-01 they are
+changed only here.
+
+A dispatch of `follow-debian.yml` with `debian_version` test-builds any Debian version without
+publishing it; `scripts/local-build.sh` is the same locally.
 
 ## Building on the mini
 
+`scripts/local-build.sh <debian version> <dir> [step...]` runs CI's steps in a Debian testing
+chroot. It needs no root and no containers: `mmdebstrap --mode=unshare` and a user namespace.
+On the mini, take the shared build lock and the memory cap:
+
 ```
-sudo mmdebstrap --variant=buildd testing chroot
-# inside the chroot, with this repository at /repo:
-/repo/scripts/build.sh fetch <debian-version> /work
-/repo/scripts/prepare.sh /work/linux-<upstream> <version>
-/repo/scripts/build.sh compile <version> /work /out
+cd ~/bande-linux/repos/kernel
+flock ~/bande-linux/kbuild.lock ~/bande-linux/bin/gentle \
+    scripts/local-build.sh 7.3~rc7-1~exp1 /var/tmp/bande-kernel
+ls /var/tmp/bande-kernel/out        # the debs
+scripts/local-build.sh 7.3~rc7-1~exp1 /var/tmp/bande-kernel clean
 ```
 
-A full build needs about 20 GB of disk.
+The directory must be outside your home (`/var/tmp`), because the chroot belongs to your
+subordinate uids. A build needs about 35 GB: the chroot with its build dependencies, Debian's
+source and the build tree with debug info (32 GB). It takes about 2.5 h on the mini under `gentle`. The
+compiler is the one Debian's source names (`gcc-16` for 7.3), installed in the chroot, not
+the mini's own. Clean up after a build.
+
+### Until Debian testing has 7.3
+
+Our patches are for 7.3; testing has 7.2 and experimental 7.3~rc7, so CI builds nothing. The
+mini runs a local build of experimental's 7.3~rc7 with our 7.3 series, built as above and
+installed by hand (never published). Once testing reaches 7.3, `follow-debian.yml` builds and
+publishes it by itself, and the mini follows the archive.
 
 ## Licence
 

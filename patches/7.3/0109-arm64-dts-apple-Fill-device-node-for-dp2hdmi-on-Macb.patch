@@ -1,4 +1,4 @@
-From ede91c703a252e0542c69cf39d36a68386e64b7b Mon Sep 17 00:00:00 2001
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
 From: Janne Grunau <j@jannau.net>
 Date: Mon, 6 Nov 2023 20:39:42 +0100
 Subject: [PATCH] arm64: dts: apple: Fill device node for dp2hdmi on Macbook
@@ -17,7 +17,7 @@ Signed-off-by: Janne Grunau <j@jannau.net>
  2 files changed, 45 insertions(+)
 
 diff --git a/arch/arm64/boot/dts/apple/t600x-j314-j316.dtsi b/arch/arm64/boot/dts/apple/t600x-j314-j316.dtsi
-index 9483e74ac650..5a95785c61c1 100644
+index 9483e74..5a95785 100644
 --- a/arch/arm64/boot/dts/apple/t600x-j314-j316.dtsi
 +++ b/arch/arm64/boot/dts/apple/t600x-j314-j316.dtsi
 @@ -21,6 +21,7 @@ aliases {
@@ -75,7 +75,7 @@ index 9483e74ac650..5a95785c61c1 100644
  &i2c0 {
  	hpm0: usb-pd@38 {
 diff --git a/arch/arm64/boot/dts/apple/t602x-j414-j416.dtsi b/arch/arm64/boot/dts/apple/t602x-j414-j416.dtsi
-index 89d842d69938..428e8d009bac 100644
+index 89d842d..428e8d0 100644
 --- a/arch/arm64/boot/dts/apple/t602x-j414-j416.dtsi
 +++ b/arch/arm64/boot/dts/apple/t602x-j414-j416.dtsi
 @@ -39,6 +39,11 @@ &ps_dptx_phy_ps {
@@ -90,6 +90,3 @@ index 89d842d69938..428e8d009bac 100644
  &hpm0 {
  	interrupts = <44 IRQ_TYPE_LEVEL_LOW>;
  };
--- 
-2.47.3
-

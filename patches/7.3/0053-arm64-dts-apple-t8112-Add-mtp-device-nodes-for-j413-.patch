@@ -1,4 +1,4 @@
-From 8abcb38e2d6cb88c870c8c4acbf7b452c6814691 Mon Sep 17 00:00:00 2001
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
 From: Janne Grunau <j@jannau.net>
 Date: Thu, 2 Feb 2023 11:15:35 +0100
 Subject: [PATCH] arm64: dts: apple: t8112: Add mtp device nodes for j413/j493
@@ -17,7 +17,7 @@ Signed-off-by: Janne Grunau <j@jannau.net>
  4 files changed, 181 insertions(+)
 
 diff --git a/arch/arm64/boot/dts/apple/t8112-j413.dts b/arch/arm64/boot/dts/apple/t8112-j413.dts
-index c6da0ff92097..e9ef413a535a 100644
+index c6da0ff..e9ef413 100644
 --- a/arch/arm64/boot/dts/apple/t8112-j413.dts
 +++ b/arch/arm64/boot/dts/apple/t8112-j413.dts
 @@ -20,6 +20,7 @@ / {
@@ -69,7 +69,7 @@ index c6da0ff92097..e9ef413a535a 100644
 +
  #include "hwmon-laptop.dtsi"
 diff --git a/arch/arm64/boot/dts/apple/t8112-j415.dts b/arch/arm64/boot/dts/apple/t8112-j415.dts
-index 676eca181905..8c09e67ba1b7 100644
+index 676eca1..8c09e67 100644
 --- a/arch/arm64/boot/dts/apple/t8112-j415.dts
 +++ b/arch/arm64/boot/dts/apple/t8112-j415.dts
 @@ -20,6 +20,7 @@ / {
@@ -121,7 +121,7 @@ index 676eca181905..8c09e67ba1b7 100644
 +
  #include "hwmon-laptop.dtsi"
 diff --git a/arch/arm64/boot/dts/apple/t8112-j493.dts b/arch/arm64/boot/dts/apple/t8112-j493.dts
-index 51af35e02a14..e8659fe3f28a 100644
+index 51af35e..e8659fe 100644
 --- a/arch/arm64/boot/dts/apple/t8112-j493.dts
 +++ b/arch/arm64/boot/dts/apple/t8112-j493.dts
 @@ -24,6 +24,7 @@ / {
@@ -174,7 +174,7 @@ index 51af35e02a14..e8659fe3f28a 100644
  #include "hwmon-laptop.dtsi"
  #include "hwmon-fan.dtsi"
 diff --git a/arch/arm64/boot/dts/apple/t8112.dtsi b/arch/arm64/boot/dts/apple/t8112.dtsi
-index ec248ca052cb..a928d4d07365 100644
+index ec248ca..a928d4d 100644
 --- a/arch/arm64/boot/dts/apple/t8112.dtsi
 +++ b/arch/arm64/boot/dts/apple/t8112.dtsi
 @@ -987,6 +987,79 @@ pinctrl_aop: pinctrl@24a820000 {
@@ -257,6 +257,3 @@ index ec248ca052cb..a928d4d07365 100644
  		ans_mbox: mbox@277408000 {
  			compatible = "apple,t8112-asc-mailbox", "apple,asc-mailbox-v4";
  			reg = <0x2 0x77408000 0x0 0x4000>;
--- 
-2.47.3
-

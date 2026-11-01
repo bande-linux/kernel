@@ -1,4 +1,4 @@
-From c09af02b68717948501ded8762fb612512febb08 Mon Sep 17 00:00:00 2001
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
 From: Hector Martin <marcan@marcan.st>
 Date: Thu, 5 May 2022 01:40:31 +0900
 Subject: [PATCH] mmc: sdhci-pci: Support external CD GPIO on all OF systems
@@ -13,7 +13,7 @@ Signed-off-by: Hector Martin <marcan@marcan.st>
  1 file changed, 10 insertions(+)
 
 diff --git a/drivers/mmc/host/sdhci-pci-core.c b/drivers/mmc/host/sdhci-pci-core.c
-index b121d896a804..434ffdb49540 100644
+index b121d89..434ffdb 100644
 --- a/drivers/mmc/host/sdhci-pci-core.c
 +++ b/drivers/mmc/host/sdhci-pci-core.c
 @@ -26,6 +26,7 @@
@@ -40,6 +40,3 @@ index b121d896a804..434ffdb49540 100644
  	}
  
  	if (chip->fixes && chip->fixes->add_host)
--- 
-2.47.3
-

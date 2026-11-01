@@ -1,0 +1,450 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: Mikael Hug <mikaelhug@gmail.com>
+Date: Fri, 30 Oct 2026 21:11:46 +0000
+Subject: [PATCH] Merge prep/hw-wifi-5: brcmfmac review fixes and
+ firmware-stall robustness
+
+Upstream port_authorized fix instead of the fork's, mbss capability
+count, join_pref restore and length fix, escan completion races, and
+fail-fast plus suspend handling when the firmware stops. Verified on
+test kernel 3 (00861-gfe05e161c02d): join, iperf3 270/299 Mbit/s,
+module reload.
+---
+ .../broadcom/brcm80211/brcmfmac/cfg80211.c    | 68 ++++++++++++++-----
+ .../broadcom/brcm80211/brcmfmac/cfg80211.h    |  1 +
+ .../broadcom/brcm80211/brcmfmac/common.c      | 16 ++++-
+ .../broadcom/brcm80211/brcmfmac/core.c        |  2 +
+ .../broadcom/brcm80211/brcmfmac/core.h        |  5 ++
+ .../broadcom/brcm80211/brcmfmac/feature.c     | 64 +++++++++++++++--
+ .../broadcom/brcm80211/brcmfmac/feature.h     |  4 +-
+ .../broadcom/brcm80211/brcmfmac/msgbuf.c      | 10 +++
+ .../broadcom/brcm80211/brcmfmac/pcie.c        | 28 +++++++-
+ 9 files changed, 168 insertions(+), 30 deletions(-)
+
+diff --git a/drivers/net/wireless/broadcom/brcm80211/brcmfmac/cfg80211.c b/drivers/net/wireless/broadcom/brcm80211/brcmfmac/cfg80211.c
+index dd56afc..e0bf5ce 100644
+--- a/drivers/net/wireless/broadcom/brcm80211/brcmfmac/cfg80211.c
++++ b/drivers/net/wireless/broadcom/brcm80211/brcmfmac/cfg80211.c
+@@ -858,26 +858,30 @@ s32 brcmf_notify_escan_complete(struct brcmf_cfg80211_info *cfg,
+ 
+ 	brcmf_dbg(SCAN, "Enter\n");
+ 
+-	/* clear scan request, because the FW abort can cause a second call */
+-	/* to this functon and might cause a double cfg80211_scan_done      */
+-	scan_request = cfg->scan_request;
+-	cfg->scan_request = NULL;
++	/*
++	 * Take the scan request atomically: the FW abort can cause a second
++	 * call, and the event worker, the timeout worker and an interface
++	 * going down can all get here at the same time. Only one of them
++	 * may report it to cfg80211.
++	 */
++	scan_request = xchg(&cfg->scan_request, NULL);
+ 
+ 	timer_delete_sync(&cfg->escan_timeout);
+ 
+ 	if (fw_abort) {
+ 		u32 len;
+ 		void *data = drvr->scan_param_handler.get_struct_for_request(cfg, &len, NULL);
+-		if (!data){
+-			bphy_err(drvr, "Scan abort failed to prepare abort struct\n");
+-			return 0;
+-		}
++
+ 		/* Do a scan abort to stop the driver's scan engine */
+ 		brcmf_dbg(SCAN, "ABORT scan in firmware\n");
+-		err = brcmf_fil_cmd_data_set(ifp, BRCMF_C_SCAN, data, len);
++		if (data)
++			err = brcmf_fil_cmd_data_set(ifp, BRCMF_C_SCAN, data,
++						     len);
++		else
++			err = -ENOMEM;
+ 		kfree(data);
+ 		if (err)
+-			bphy_err(drvr, "Scan abort failed\n");
++			bphy_err(drvr, "Scan abort failed (%d)\n", err);
+ 	}
+ 
+ 	brcmf_scan_config_mpc(ifp, 1);
+@@ -2154,7 +2158,7 @@ static void brcmf_set_join_pref(struct brcmf_if *ifp,
+ 	join_pref_params[i].rssi_gain = 0;
+ 	join_pref_params[i].band = 0;
+ 	err = brcmf_fil_iovar_data_set(ifp, "join_pref", join_pref_params,
+-				       sizeof(join_pref_params));
++				       (i + 1) * sizeof(join_pref_params[0]));
+ 	if (err)
+ 		bphy_err(drvr, "Set join_pref error (%d)\n", err);
+ }
+@@ -3468,6 +3472,20 @@ void brcmf_abort_scanning(struct brcmf_cfg80211_info *cfg)
+ 	clear_bit(BRCMF_SCAN_STATUS_ABORT, &cfg->scan_status);
+ }
+ 
++/*
++ * Stop the scan timeout before the interfaces are removed: its worker uses
++ * escan_info.ifp. Called with the bus down, so no new scan can be started
++ * and arm the timer; the wiphy lock waits for a scan request that is still
++ * between starting the scan and arming it.
++ */
++void brcmf_cfg80211_cancel_escan_timeout(struct brcmf_cfg80211_info *cfg)
++{
++	wiphy_lock(cfg->wiphy);
++	timer_delete_sync(&cfg->escan_timeout);
++	wiphy_unlock(cfg->wiphy);
++	cancel_work_sync(&cfg->escan_timeout_work);
++}
++
+ static void brcmf_cfg80211_escan_timeout_worker(struct work_struct *work)
+ {
+ 	struct brcmf_cfg80211_info *cfg =
+@@ -6453,6 +6471,21 @@ brcmf_bss_roaming_done(struct brcmf_cfg80211_info *cfg,
+ 	return err;
+ }
+ 
++static bool
++brcmf_fwsup_is_authorized(struct brcmf_cfg80211_profile *profile,
++			  struct cfg80211_connect_resp_params *conn_params)
++{
++	if ((profile->use_fwsup == BRCMF_PROFILE_FWSUP_1X ||
++	     profile->use_fwsup == BRCMF_PROFILE_FWSUP_ROAM) &&
++	    brcmf_has_pmkid(conn_params->req_ie, conn_params->req_ie_len))
++		return true;
++	if (profile->use_fwsup == BRCMF_PROFILE_FWSUP_SAE ||
++	    profile->use_fwsup == BRCMF_PROFILE_FWSUP_PSK)
++		return true;
++
++	return false;
++}
++
+ static s32
+ brcmf_bss_connect_done(struct brcmf_cfg80211_info *cfg,
+ 		       struct net_device *ndev, const struct brcmf_event_msg *e,
+@@ -6488,14 +6521,11 @@ brcmf_bss_connect_done(struct brcmf_cfg80211_info *cfg,
+ 		conn_params.resp_ie = conn_info->resp_ie;
+ 		conn_params.resp_ie_len = conn_info->resp_ie_len;
+ 		authorized = completed &&
+-			     ((profile->use_fwsup == BRCMF_PROFILE_FWSUP_SAE) ||
+-			      (profile->use_fwsup == BRCMF_PROFILE_FWSUP_PSK));
++			     brcmf_fwsup_is_authorized(profile, &conn_params);
+ 		cfg80211_connect_done(ndev, &conn_params, GFP_KERNEL);
+-		if (authorized) {
++		if (authorized)
+ 			cfg80211_port_authorized(ndev, profile->bssid, NULL, 0,
+ 						 GFP_KERNEL);
+-			brcmf_dbg(CONN, "Report port authorized\n");
+-		}
+ 		brcmf_dbg(CONN, "Report connect result - connection %s\n",
+ 			  completed ? "succeeded" : "failed");
+ 	}
+@@ -7894,8 +7924,10 @@ static int brcmf_setup_wiphy(struct wiphy *wiphy, struct brcmf_if *ifp)
+ 	if (!brcmf_feat_is_enabled(ifp, BRCMF_FEAT_MFP))
+ 		wiphy->n_cipher_suites--;
+ 	wiphy->bss_select_support = BIT(NL80211_BSS_SELECT_ATTR_RSSI) |
+-				    BIT(NL80211_BSS_SELECT_ATTR_BAND_PREF) |
+-				    BIT(NL80211_BSS_SELECT_ATTR_RSSI_ADJUST);
++				    BIT(NL80211_BSS_SELECT_ATTR_BAND_PREF);
++	if (brcmf_feat_is_enabled(ifp, BRCMF_FEAT_JOIN_PREF_RSSI_DELTA))
++		wiphy->bss_select_support |=
++			BIT(NL80211_BSS_SELECT_ATTR_RSSI_ADJUST);
+ 
+ 	wiphy->bss_param_support = WIPHY_BSS_PARAM_AP_ISOLATE;
+ 
+diff --git a/drivers/net/wireless/broadcom/brcm80211/brcmfmac/cfg80211.h b/drivers/net/wireless/broadcom/brcm80211/brcmfmac/cfg80211.h
+index 0dac9a4..075f060 100644
+--- a/drivers/net/wireless/broadcom/brcm80211/brcmfmac/cfg80211.h
++++ b/drivers/net/wireless/broadcom/brcm80211/brcmfmac/cfg80211.h
+@@ -516,6 +516,7 @@ s32 brcmf_notify_escan_complete(struct brcmf_cfg80211_info *cfg,
+ void brcmf_set_mpc(struct brcmf_if *ndev, int mpc);
+ bool brcmf_is_apmode_operating(struct wiphy *wiphy);
+ void brcmf_abort_scanning(struct brcmf_cfg80211_info *cfg);
++void brcmf_cfg80211_cancel_escan_timeout(struct brcmf_cfg80211_info *cfg);
+ void brcmf_cfg80211_free_vif(struct net_device *ndev);
+ 
+ int brcmf_set_wsec(struct brcmf_if *ifp, const u8 *key, u16 key_len, u16 flags);
+diff --git a/drivers/net/wireless/broadcom/brcm80211/brcmfmac/common.c b/drivers/net/wireless/broadcom/brcm80211/brcmfmac/common.c
+index 0b59a85..fac74e0 100644
+--- a/drivers/net/wireless/broadcom/brcm80211/brcmfmac/common.c
++++ b/drivers/net/wireless/broadcom/brcm80211/brcmfmac/common.c
+@@ -97,14 +97,24 @@ int brcmf_c_set_joinpref(struct brcmf_if *ifp)
+ 					sizeof(join_pref_params));
+ }
+ 
++/*
++ * Set the driver's default join preference. Firmware that refuses it keeps
++ * the preference it started with, which is set again here in case a connect
++ * with a BSS selection behaviour has replaced it.
++ */
+ void brcmf_c_set_joinpref_default(struct brcmf_if *ifp)
+ {
++	struct brcmf_pub *drvr = ifp->drvr;
+ 	int err;
+ 
+-	if (!brcmf_feat_is_enabled(ifp, BRCMF_FEAT_JOIN_PREF))
++	if (brcmf_feat_is_enabled(ifp, BRCMF_FEAT_JOIN_PREF_RSSI_DELTA))
++		err = brcmf_c_set_joinpref(ifp);
++	else if (drvr->fw_join_pref_len)
++		err = brcmf_fil_iovar_data_set(ifp, "join_pref",
++					       drvr->fw_join_pref,
++					       drvr->fw_join_pref_len);
++	else
+ 		return;
+-
+-	err = brcmf_c_set_joinpref(ifp);
+ 	if (err)
+ 		bphy_err(ifp->drvr, "Set join_pref error (%d)\n", err);
+ }
+diff --git a/drivers/net/wireless/broadcom/brcm80211/brcmfmac/core.c b/drivers/net/wireless/broadcom/brcm80211/brcmfmac/core.c
+index f6b0c1b..db8e841 100644
+--- a/drivers/net/wireless/broadcom/brcm80211/brcmfmac/core.c
++++ b/drivers/net/wireless/broadcom/brcm80211/brcmfmac/core.c
+@@ -1496,6 +1496,8 @@ void brcmf_detach(struct device *dev)
+ #endif
+ 
+ 	brcmf_bus_change_state(bus_if, BRCMF_BUS_DOWN);
++	if (drvr->config)
++		brcmf_cfg80211_cancel_escan_timeout(drvr->config);
+ 	/* make sure primary interface removed last */
+ 	for (i = BRCMF_MAX_IFS - 1; i > -1; i--) {
+ 		struct brcmf_if *ifp = drvr->iflist[i];
+diff --git a/drivers/net/wireless/broadcom/brcm80211/brcmfmac/core.h b/drivers/net/wireless/broadcom/brcm80211/brcmfmac/core.h
+index 4b52a3a..120de35 100644
+--- a/drivers/net/wireless/broadcom/brcm80211/brcmfmac/core.h
++++ b/drivers/net/wireless/broadcom/brcm80211/brcmfmac/core.h
+@@ -192,6 +192,11 @@ struct brcmf_pub {
+ 	u32 feat_flags;
+ 	u32 chip_quirks;
+ 
++	/* join preference the firmware started with, restored when needed */
++#define BRCMF_JOIN_PREF_MAX_LEN		32
++	u8 fw_join_pref[BRCMF_JOIN_PREF_MAX_LEN];
++	u8 fw_join_pref_len;
++
+ 	struct brcmf_rev_info revinfo;
+ #ifdef DEBUG
+ 	struct dentry *dbgfs_dir;
+diff --git a/drivers/net/wireless/broadcom/brcm80211/brcmfmac/feature.c b/drivers/net/wireless/broadcom/brcm80211/brcmfmac/feature.c
+index eca7cd3..998bbc4 100644
+--- a/drivers/net/wireless/broadcom/brcm80211/brcmfmac/feature.c
++++ b/drivers/net/wireless/broadcom/brcm80211/brcmfmac/feature.c
+@@ -3,7 +3,9 @@
+  * Copyright (c) 2014 Broadcom Corporation
+  */
+ 
++#include <linux/ctype.h>
+ #include <linux/netdevice.h>
++#include <linux/unaligned.h>
+ #include <linux/module.h>
+ 
+ #include <brcm_hw_ids.h>
+@@ -44,13 +46,21 @@ static const char *brcmf_feat_names[] = {
+ };
+ #undef BRCMF_FEAT_DEF
+ 
++/**
++ * struct brcmf_feat_fwcap - firmware capability to feature mapping.
++ *
++ * @feature: feature that the capability enables.
++ * @fwcap_id: capability name in the "cap" iovar.
++ * @count_suffix: the name may be followed by a decimal count, as in "mbss4".
++ */
+ struct brcmf_feat_fwcap {
+ 	enum brcmf_feat_id feature;
+ 	const char * const fwcap_id;
++	bool count_suffix;
+ };
+ 
+ static const struct brcmf_feat_fwcap brcmf_fwcap_map[] = {
+-	{ BRCMF_FEAT_MBSS, "mbss" },
++	{ BRCMF_FEAT_MBSS, "mbss", true },
+ 	{ BRCMF_FEAT_MCHAN, "mchan" },
+ 	{ BRCMF_FEAT_P2P, "p2p" },
+ 	{ BRCMF_FEAT_MONITOR, "monitor" },
+@@ -240,6 +250,49 @@ static void brcmf_feat_iovar_data_set(struct brcmf_if *ifp,
+ 	ifp->fwil_fwerr = false;
+ }
+ 
++static bool brcmf_feat_fwcap_match(const struct brcmf_feat_fwcap *fwcap,
++				   const char *cap)
++{
++	size_t len = strlen(fwcap->fwcap_id);
++	const char *p;
++
++	if (strncmp(cap, fwcap->fwcap_id, len))
++		return false;
++	if (!cap[len])
++		return true;
++	if (!fwcap->count_suffix)
++		return false;
++	for (p = &cap[len]; *p; p++)
++		if (!isdigit(*p))
++			return false;
++	return true;
++}
++
++/*
++ * Keep the firmware's own join preference, so that it can be put back after
++ * a connect with a BSS selection behaviour replaced it. The iovar returns
++ * a __le32 length followed by the preference elements.
++ */
++static void brcmf_feat_save_join_pref(struct brcmf_if *ifp)
++{
++	struct brcmf_pub *drvr = ifp->drvr;
++	u8 buf[sizeof(__le32) + BRCMF_JOIN_PREF_MAX_LEN] = { };
++	u32 len;
++	int err;
++
++	err = brcmf_fil_iovar_data_get(ifp, "join_pref", buf, sizeof(buf));
++	if (err)
++		return;
++
++	len = get_unaligned_le32(buf);
++	if (!len || len > BRCMF_JOIN_PREF_MAX_LEN) {
++		brcmf_dbg(INFO, "join_pref length %u not kept\n", len);
++		return;
++	}
++	memcpy(drvr->fw_join_pref, &buf[sizeof(__le32)], len);
++	drvr->fw_join_pref_len = len;
++}
++
+ #define MAX_CAPS_BUFFER_SIZE	768
+ static void brcmf_feat_firmware_capabilities(struct brcmf_if *ifp)
+ {
+@@ -257,9 +310,11 @@ static void brcmf_feat_firmware_capabilities(struct brcmf_if *ifp)
+ 
+ 	brcmf_dbg(INFO, "[ %s]\n", caps);
+ 
+-	while ((cap = strsep(&cur, " "))) {
++	while ((cap = strsep(&cur, " \t\n"))) {
++		if (!*cap)
++			continue;
+ 		for (i = 0; i < ARRAY_SIZE(brcmf_fwcap_map); i++) {
+-			if (strcmp(cap, brcmf_fwcap_map[i].fwcap_id))
++			if (!brcmf_feat_fwcap_match(&brcmf_fwcap_map[i], cap))
+ 				continue;
+ 			id = brcmf_fwcap_map[i].feature;
+ 			brcmf_dbg(INFO, "enabling feature: %s\n",
+@@ -363,8 +418,9 @@ int brcmf_feat_attach(struct brcmf_pub *drvr)
+ 
+ 	brcmf_feat_iovar_int_get(ifp, BRCMF_FEAT_FWSUP, "sup_wpa");
+ 
++	brcmf_feat_save_join_pref(ifp);
+ 	if (!brcmf_c_set_joinpref(ifp))
+-		ifp->drvr->feat_flags |= BIT(BRCMF_FEAT_JOIN_PREF);
++		ifp->drvr->feat_flags |= BIT(BRCMF_FEAT_JOIN_PREF_RSSI_DELTA);
+ 
+ 	err = brcmf_fil_iovar_data_get(ifp, "join_ver", &join_ver, sizeof(join_ver));
+ 	if (!err) {
+diff --git a/drivers/net/wireless/broadcom/brcm80211/brcmfmac/feature.h b/drivers/net/wireless/broadcom/brcm80211/brcmfmac/feature.h
+index 3abe109..f11271a 100644
+--- a/drivers/net/wireless/broadcom/brcm80211/brcmfmac/feature.h
++++ b/drivers/net/wireless/broadcom/brcm80211/brcmfmac/feature.h
+@@ -36,7 +36,7 @@
+  * EVENT_MSGS_EXT: Event messages extension
+  * JOIN_V1: Version 1 join struct
+  * GCMP: GCMP Cipher suite support
+- * JOIN_PREF: firmware accepts the default RSSI and 5GHz RSSI delta join preference
++ * JOIN_PREF_RSSI_DELTA: firmware accepts a join preference with an RSSI delta
+  */
+ #define BRCMF_FEAT_LIST \
+ 	BRCMF_FEAT_DEF(MBSS) \
+@@ -66,7 +66,7 @@
+ 	BRCMF_FEAT_DEF(SAE_EXT) \
+ 	BRCMF_FEAT_DEF(EVENT_MSGS_EXT) \
+ 	BRCMF_FEAT_DEF(GCMP) \
+-	BRCMF_FEAT_DEF(JOIN_PREF)
++	BRCMF_FEAT_DEF(JOIN_PREF_RSSI_DELTA)
+ 
+ /*
+  * Quirks:
+diff --git a/drivers/net/wireless/broadcom/brcm80211/brcmfmac/msgbuf.c b/drivers/net/wireless/broadcom/brcm80211/brcmfmac/msgbuf.c
+index 5c114f1..c76378a 100644
+--- a/drivers/net/wireless/broadcom/brcm80211/brcmfmac/msgbuf.c
++++ b/drivers/net/wireless/broadcom/brcm80211/brcmfmac/msgbuf.c
+@@ -547,6 +547,16 @@ static int brcmf_msgbuf_query_dcmd(struct brcmf_pub *drvr, int ifidx,
+ 	timeout = brcmf_msgbuf_ioctl_resp_wait(msgbuf);
+ 	if (!timeout) {
+ 		bphy_err(drvr, "Timeout on response for query command\n");
++		/*
++		 * The firmware answers every control message, so it has
++		 * stopped. Fail the commands that follow at once instead of
++		 * waiting for each of them, and reload the firmware. While
++		 * the device is removed, its interrupts are already off, so
++		 * no answer can arrive and nothing needs reloading.
++		 */
++		brcmf_bus_change_state(drvr->bus_if, BRCMF_BUS_DOWN);
++		if (!READ_ONCE(drvr->bus_if->removing))
++			brcmf_fw_crashed(drvr->bus_if->dev);
+ 		return -EIO;
+ 	}
+ 
+diff --git a/drivers/net/wireless/broadcom/brcm80211/brcmfmac/pcie.c b/drivers/net/wireless/broadcom/brcm80211/brcmfmac/pcie.c
+index d8a379c..012c1f4 100644
+--- a/drivers/net/wireless/broadcom/brcm80211/brcmfmac/pcie.c
++++ b/drivers/net/wireless/broadcom/brcm80211/brcmfmac/pcie.c
+@@ -395,6 +395,7 @@ struct brcmf_otp_params {
+ struct brcmf_pciedev_info {
+ 	enum brcmf_pcie_state state;
+ 	bool in_irq;
++	bool reload_on_resume;
+ 	struct pci_dev *pdev;
+ 	char fw_name[BRCMF_FW_NAME_LEN];
+ 	char sig_name[BRCMF_FW_NAME_LEN];
+@@ -3013,6 +3014,17 @@ static int brcmf_pcie_pm_enter_D3(struct device *dev)
+ 	devinfo = bus->bus_priv.pcie->devinfo;
+ 
+ 	brcmf_pcie_fwcon_timer(devinfo, false);
++	/* A firmware reset must not run while the device is suspended. */
++	brcmf_bus_cancel_reset_work(bus);
++
++	/*
++	 * Firmware that has stopped cannot acknowledge D3, and it must not
++	 * keep the system from suspending. Reload it on resume instead.
++	 */
++	if (bus->state != BRCMF_BUS_UP) {
++		brcmf_err(bus, "firmware not running, reloading it on resume\n");
++		goto reload;
++	}
+ 	brcmf_bus_change_state(bus, BRCMF_BUS_DOWN);
+ 
+ 	devinfo->mbdata_completed = false;
+@@ -3021,14 +3033,20 @@ static int brcmf_pcie_pm_enter_D3(struct device *dev)
+ 	wait_event_timeout(devinfo->mbdata_resp_wait, devinfo->mbdata_completed,
+ 			   BRCMF_PCIE_MBDATA_TIMEOUT);
+ 	if (!devinfo->mbdata_completed) {
+-		brcmf_err(bus, "Timeout on response for entering D3 substate\n");
+-		brcmf_bus_change_state(bus, BRCMF_BUS_UP);
+-		return -EIO;
++		brcmf_err(bus, "Timeout on response for entering D3 substate, reloading firmware on resume\n");
++		goto reload;
+ 	}
+ 
+ 	devinfo->state = BRCMFMAC_PCIE_STATE_DOWN;
+ 
+ 	return 0;
++
++reload:
++	brcmf_bus_change_state(bus, BRCMF_BUS_DOWN);
++	brcmf_pcie_intr_disable(devinfo);
++	devinfo->state = BRCMFMAC_PCIE_STATE_DOWN;
++	devinfo->reload_on_resume = true;
++	return 0;
+ }
+ 
+ 
+@@ -3045,6 +3063,9 @@ static int brcmf_pcie_pm_leave_D3(struct device *dev)
+ 	devinfo = bus->bus_priv.pcie->devinfo;
+ 	brcmf_dbg(PCIE, "Enter, dev=%p, bus=%p\n", dev, bus);
+ 
++	if (devinfo->reload_on_resume)
++		goto cleanup;
++
+ 	/* Check if device is still up and running, if so we are ready */
+ 	if (brcmf_pcie_read_pcie32(devinfo, devinfo->reginfo->intmask) != 0) {
+ 		brcmf_dbg(PCIE, "Try to wakeup device....\n");
+@@ -3058,6 +3079,7 @@ static int brcmf_pcie_pm_leave_D3(struct device *dev)
+ 		brcmf_pcie_intr_enable(devinfo);
+ 		brcmf_pcie_hostready(devinfo);
+ 		brcmf_pcie_fwcon_timer(devinfo, true);
++		brcmf_bus_allow_reset_work(bus);
+ 		return 0;
+ 	}
+ 

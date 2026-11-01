@@ -1,4 +1,4 @@
-From 12705ea29ddc31add27a762470613ed0f7fd4869 Mon Sep 17 00:00:00 2001
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
 From: Yureka <yuka@yuka.dev>
 Date: Mon, 1 Jun 2026 09:07:45 +0200
 Subject: [PATCH] cpuidle-apple: load on M3 / Pro / Max / Ultra
@@ -12,7 +12,7 @@ Signed-off-by: Yureka <yuka@yuka.dev>
  1 file changed, 6 insertions(+), 1 deletion(-)
 
 diff --git a/drivers/cpuidle/cpuidle-apple.c b/drivers/cpuidle/cpuidle-apple.c
-index b7504066d75a..3d2b804df8a2 100644
+index b750406..3d2b804 100644
 --- a/drivers/cpuidle/cpuidle-apple.c
 +++ b/drivers/cpuidle/cpuidle-apple.c
 @@ -148,12 +148,17 @@ static int __init apple_cpuidle_init(void)
@@ -34,6 +34,3 @@ index b7504066d75a..3d2b804df8a2 100644
  		return 0;
  
  	pdev = platform_device_register_simple("cpuidle-apple", -1, NULL, 0);
--- 
-2.47.3
-

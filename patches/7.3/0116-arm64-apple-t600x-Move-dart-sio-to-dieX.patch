@@ -1,4 +1,4 @@
-From 5fc00aeff08acad3ee63b319167a06690d7427aa Mon Sep 17 00:00:00 2001
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
 From: Janne Grunau <j@jannau.net>
 Date: Sun, 19 Nov 2023 14:55:00 +0100
 Subject: [PATCH] arm64: apple: t600x: Move dart_sio* to dieX
@@ -13,7 +13,7 @@ Signed-off-by: Janne Grunau <j@jannau.net>
  2 files changed, 18 insertions(+), 18 deletions(-)
 
 diff --git a/arch/arm64/boot/dts/apple/t600x-die0.dtsi b/arch/arm64/boot/dts/apple/t600x-die0.dtsi
-index e73ace6f7d84..5188467c9a14 100644
+index e73ace6..5188467 100644
 --- a/arch/arm64/boot/dts/apple/t600x-die0.dtsi
 +++ b/arch/arm64/boot/dts/apple/t600x-die0.dtsi
 @@ -235,24 +235,6 @@ display: display-subsystem {
@@ -42,7 +42,7 @@ index e73ace6f7d84..5188467c9a14 100644
  		compatible = "apple,t6000-fpwm", "apple,s5l-fpwm";
  		reg = <0x3 0x9b030000 0x0 0x4000>;
 diff --git a/arch/arm64/boot/dts/apple/t600x-dieX.dtsi b/arch/arm64/boot/dts/apple/t600x-dieX.dtsi
-index 4fae2ebd54e1..0e76ca1f264a 100644
+index 4fae2eb..0e76ca1 100644
 --- a/arch/arm64/boot/dts/apple/t600x-dieX.dtsi
 +++ b/arch/arm64/boot/dts/apple/t600x-dieX.dtsi
 @@ -224,6 +224,24 @@ DIE_NODE(pinctrl_aop): pinctrl@293820000 {
@@ -70,6 +70,3 @@ index 4fae2ebd54e1..0e76ca1f264a 100644
  	DIE_NODE(pinctrl_ap): pinctrl@39b028000 {
  		compatible = "apple,t6000-pinctrl", "apple,pinctrl";
  		reg = <0x3 0x9b028000 0x0 0x4000>;
--- 
-2.47.3
-

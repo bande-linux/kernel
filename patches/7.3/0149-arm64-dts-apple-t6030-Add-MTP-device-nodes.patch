@@ -1,4 +1,4 @@
-From c5da0ce1405bc129aeaa4dc5db800113ca905eda Mon Sep 17 00:00:00 2001
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
 From: Janne Grunau <j@jannau.net>
 Date: Thu, 21 May 2026 23:31:32 +0200
 Subject: [PATCH] arm64: dts: apple: t6030: Add MTP device nodes
@@ -10,7 +10,7 @@ Signed-off-by: Janne Grunau <j@jannau.net>
  1 file changed, 77 insertions(+)
 
 diff --git a/arch/arm64/boot/dts/apple/t6030.dtsi b/arch/arm64/boot/dts/apple/t6030.dtsi
-index d85cda6416a0..c22c6d078f41 100644
+index d85cda6..c22c6d0 100644
 --- a/arch/arm64/boot/dts/apple/t6030.dtsi
 +++ b/arch/arm64/boot/dts/apple/t6030.dtsi
 @@ -929,6 +929,83 @@ pinctrl_aop: pinctrl@374824000 {
@@ -97,6 +97,3 @@ index d85cda6416a0..c22c6d078f41 100644
  		ans_mbox: mbox@389408000 {
  			compatible = "apple,t6030-asc-mailbox", "apple,asc-mailbox-v4";
  			reg = <0x3 0x89408000 0x0 0x4000>;
--- 
-2.47.3
-

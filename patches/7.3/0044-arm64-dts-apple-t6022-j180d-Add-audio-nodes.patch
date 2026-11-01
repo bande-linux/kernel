@@ -1,4 +1,4 @@
-From a0cb9e53ed4cabdfe97352bb3f524f53de13c641 Mon Sep 17 00:00:00 2001
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
 From: Hector Martin <marcan@marcan.st>
 Date: Sun, 9 Apr 2023 23:48:38 +0900
 Subject: [PATCH] arm64: dts: apple: t6022-j180d: Add audio nodes
@@ -12,7 +12,7 @@ Signed-off-by: Janne Grunau <j@jannau.net>
  1 file changed, 76 insertions(+)
 
 diff --git a/arch/arm64/boot/dts/apple/t6022-j180d.dts b/arch/arm64/boot/dts/apple/t6022-j180d.dts
-index f76b887429dd..7d92505e3fd2 100644
+index f76b887..7d92505 100644
 --- a/arch/arm64/boot/dts/apple/t6022-j180d.dts
 +++ b/arch/arm64/boot/dts/apple/t6022-j180d.dts
 @@ -521,6 +521,82 @@ atcphy7_usb3: endpoint {
@@ -98,6 +98,3 @@ index f76b887429dd..7d92505e3fd2 100644
  /*
   * Delete unused PCIe nodes, the Mac Pro uses slightly different PCIe
   * controllers with a single port connected to a PM40100 PCIe switch
--- 
-2.47.3
-

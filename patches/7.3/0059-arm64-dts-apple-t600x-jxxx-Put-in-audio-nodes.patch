@@ -1,4 +1,4 @@
-From ca2f1dc932eee39ed167790422ba506c1cfe71ce Mon Sep 17 00:00:00 2001
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
 From: =?UTF-8?q?Martin=20Povi=C5=A1er?= <povik+lin@cutebit.org>
 Date: Fri, 11 Mar 2022 22:16:25 +0100
 Subject: [PATCH] arm64: dts: apple: t600x-jxxx: Put in audio nodes
@@ -43,7 +43,7 @@ Signed-off-by: James Calligeros <jcalligeros99@gmail.com>
  8 files changed, 208 insertions(+)
 
 diff --git a/arch/arm64/boot/dts/apple/t6000-j314s.dts b/arch/arm64/boot/dts/apple/t6000-j314s.dts
-index 1430b91ff1b1..dab8e99fa324 100644
+index 1430b91..dab8e99 100644
 --- a/arch/arm64/boot/dts/apple/t6000-j314s.dts
 +++ b/arch/arm64/boot/dts/apple/t6000-j314s.dts
 @@ -24,3 +24,8 @@ &wifi0 {
@@ -56,7 +56,7 @@ index 1430b91ff1b1..dab8e99fa324 100644
 +	model = "MacBook Pro J314";
 +};
 diff --git a/arch/arm64/boot/dts/apple/t6000-j316s.dts b/arch/arm64/boot/dts/apple/t6000-j316s.dts
-index da0cbe7d9673..2cdfac3c40c8 100644
+index da0cbe7..2cdfac3 100644
 --- a/arch/arm64/boot/dts/apple/t6000-j316s.dts
 +++ b/arch/arm64/boot/dts/apple/t6000-j316s.dts
 @@ -24,3 +24,8 @@ &wifi0 {
@@ -69,7 +69,7 @@ index da0cbe7d9673..2cdfac3c40c8 100644
 +	model = "MacBook Pro J316";
 +};
 diff --git a/arch/arm64/boot/dts/apple/t6001-j314c.dts b/arch/arm64/boot/dts/apple/t6001-j314c.dts
-index c37097dcfdb3..7495698beb02 100644
+index c37097d..7495698 100644
 --- a/arch/arm64/boot/dts/apple/t6001-j314c.dts
 +++ b/arch/arm64/boot/dts/apple/t6001-j314c.dts
 @@ -24,3 +24,8 @@ &wifi0 {
@@ -82,7 +82,7 @@ index c37097dcfdb3..7495698beb02 100644
 +	model = "MacBook Pro J314";
 +};
 diff --git a/arch/arm64/boot/dts/apple/t6001-j316c.dts b/arch/arm64/boot/dts/apple/t6001-j316c.dts
-index 3bc6e0c3294c..6622b6e225a6 100644
+index 3bc6e0c..6622b6e 100644
 --- a/arch/arm64/boot/dts/apple/t6001-j316c.dts
 +++ b/arch/arm64/boot/dts/apple/t6001-j316c.dts
 @@ -24,3 +24,8 @@ &wifi0 {
@@ -95,7 +95,7 @@ index 3bc6e0c3294c..6622b6e225a6 100644
 +	model = "MacBook Pro J316";
 +};
 diff --git a/arch/arm64/boot/dts/apple/t6001-j375c.dts b/arch/arm64/boot/dts/apple/t6001-j375c.dts
-index 08276114c1d8..bfaafad6f60b 100644
+index 0827611..bfaafad 100644
 --- a/arch/arm64/boot/dts/apple/t6001-j375c.dts
 +++ b/arch/arm64/boot/dts/apple/t6001-j375c.dts
 @@ -25,4 +25,9 @@ &bluetooth0 {
@@ -109,7 +109,7 @@ index 08276114c1d8..bfaafad6f60b 100644
 +
  #include "hwmon-fan-dual.dtsi"
 diff --git a/arch/arm64/boot/dts/apple/t6002-j375d.dts b/arch/arm64/boot/dts/apple/t6002-j375d.dts
-index e6eb6b6c386d..1e8b31e99136 100644
+index e6eb6b6..1e8b31e 100644
 --- a/arch/arm64/boot/dts/apple/t6002-j375d.dts
 +++ b/arch/arm64/boot/dts/apple/t6002-j375d.dts
 @@ -21,6 +21,11 @@ aliases {
@@ -125,7 +125,7 @@ index e6eb6b6c386d..1e8b31e99136 100644
  &i2c0 {
  	/* front-right */
 diff --git a/arch/arm64/boot/dts/apple/t600x-j314-j316.dtsi b/arch/arm64/boot/dts/apple/t600x-j314-j316.dtsi
-index f634b97b81b6..790f4269eccd 100644
+index f634b97..790f426 100644
 --- a/arch/arm64/boot/dts/apple/t600x-j314-j316.dtsi
 +++ b/arch/arm64/boot/dts/apple/t600x-j314-j316.dtsi
 @@ -169,6 +169,95 @@ hpm5: usb-pd@3a {
@@ -265,7 +265,7 @@ index f634b97b81b6..790f4269eccd 100644
  #include "hwmon-laptop.dtsi"
  #include "hwmon-fan-dual.dtsi"
 diff --git a/arch/arm64/boot/dts/apple/t600x-j375.dtsi b/arch/arm64/boot/dts/apple/t600x-j375.dtsi
-index d2c8977bc015..65b2abd521b1 100644
+index d2c8977..65b2abd 100644
 --- a/arch/arm64/boot/dts/apple/t600x-j375.dtsi
 +++ b/arch/arm64/boot/dts/apple/t600x-j375.dtsi
 @@ -349,10 +349,66 @@ atcphy3_usb3: endpoint {
@@ -335,6 +335,3 @@ index d2c8977bc015..65b2abd521b1 100644
  /* PCIe devices */
  &port00 {
  	/* WLAN */
--- 
-2.47.3
-

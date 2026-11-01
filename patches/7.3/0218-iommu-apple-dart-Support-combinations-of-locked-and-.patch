@@ -1,4 +1,4 @@
-From 0255fa4af63523b04232090b3d7149b114361485 Mon Sep 17 00:00:00 2001
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
 From: Janne Grunau <j@jannau.net>
 Date: Wed, 9 Apr 2025 18:08:08 +0200
 Subject: [PATCH] iommu: apple-dart: Support combinations of locked and
@@ -18,7 +18,7 @@ Signed-off-by: Janne Grunau <j@jannau.net>
  1 file changed, 4 insertions(+)
 
 diff --git a/drivers/iommu/apple-dart.c b/drivers/iommu/apple-dart.c
-index 22a2aef905e6..a831aeec9d80 100644
+index 22a2aef..a831aee 100644
 --- a/drivers/iommu/apple-dart.c
 +++ b/drivers/iommu/apple-dart.c
 @@ -294,6 +294,7 @@ struct apple_dart_domain {
@@ -46,6 +46,3 @@ index 22a2aef905e6..a831aeec9d80 100644
  
  	for (i = 0; i < MAX_DARTS_PER_DEVICE; ++i) {
  		if (cfg->stream_maps[i].dart == dart) {
--- 
-2.47.3
-

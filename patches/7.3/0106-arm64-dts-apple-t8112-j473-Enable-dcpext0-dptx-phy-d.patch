@@ -1,4 +1,4 @@
-From 9816bc75ce86d926708d0331bb57da6af6ae1f74 Mon Sep 17 00:00:00 2001
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
 From: Janne Grunau <j@jannau.net>
 Date: Sat, 28 Oct 2023 23:40:47 +0200
 Subject: [PATCH] arm64: dts: apple: t8112-j473: Enable
@@ -20,7 +20,7 @@ Signed-off-by: Janne Grunau <j@jannau.net>
  1 file changed, 34 insertions(+), 2 deletions(-)
 
 diff --git a/arch/arm64/boot/dts/apple/t8112-j473.dts b/arch/arm64/boot/dts/apple/t8112-j473.dts
-index 886325ebe24b..02d3b7fe4cee 100644
+index 886325e..02d3b7f 100644
 --- a/arch/arm64/boot/dts/apple/t8112-j473.dts
 +++ b/arch/arm64/boot/dts/apple/t8112-j473.dts
 @@ -19,20 +19,52 @@ / {
@@ -78,6 +78,3 @@ index 886325ebe24b..02d3b7fe4cee 100644
  /*
   * Keep the power-domains used for the HDMI port on.
   */
--- 
-2.47.3
-

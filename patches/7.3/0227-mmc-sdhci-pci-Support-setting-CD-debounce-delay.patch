@@ -1,4 +1,4 @@
-From d1cd23a25f145903c2f4c9b13381761e481da680 Mon Sep 17 00:00:00 2001
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
 From: Hector Martin <marcan@marcan.st>
 Date: Thu, 5 May 2022 02:27:35 +0900
 Subject: [PATCH] mmc: sdhci-pci: Support setting CD debounce delay
@@ -20,7 +20,7 @@ Signed-off-by: Hector Martin <marcan@marcan.st>
  1 file changed, 8 insertions(+), 2 deletions(-)
 
 diff --git a/drivers/mmc/host/sdhci-pci-core.c b/drivers/mmc/host/sdhci-pci-core.c
-index 434ffdb49540..e73ccce7f189 100644
+index 434ffdb..e73ccce 100644
 --- a/drivers/mmc/host/sdhci-pci-core.c
 +++ b/drivers/mmc/host/sdhci-pci-core.c
 @@ -2129,6 +2129,7 @@ static struct sdhci_pci_slot *sdhci_pci_probe_slot(
@@ -61,6 +61,3 @@ index 434ffdb49540..e73ccce7f189 100644
  		if (ret == -EPROBE_DEFER)
  			goto remove;
  		else if (ret == 0)
--- 
-2.47.3
-

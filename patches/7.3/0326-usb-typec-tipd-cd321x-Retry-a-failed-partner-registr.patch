@@ -1,0 +1,43 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: Mikael Hug <mikaelhug@gmail.com>
+Date: Sat, 31 Oct 2026 02:53:45 +0000
+Subject: [PATCH] usb: typec: tipd: cd321x: Retry a failed partner registration
+ for any partner
+
+When typec_register_partner() fails, cd321x_update_work() leaves the
+ERR_PTR in tps->partner and clears cur_partner_identity, expecting the
+next update to see a changed partner and register it again. But
+old_connected is computed as !!tps->partner, so it stays true, and
+partner_changed only becomes true for a replug or for a PD partner whose
+identity differs from the cleared one. A non-PD partner, or a PD partner
+that never answered Discover Identity, is therefore never registered
+until the cable is unplugged.
+
+Set tps->partner back to NULL instead, so that the next update treats
+the port as newly connected and registers the partner. Every user of
+tps->partner already handles NULL, and the identity is stored again
+before the next registration, so the memset is no longer needed.
+
+Fixes: 2313aa30e057 ("usb: typec: tipd: cd321x: Fix update work lifetime and partner retry")
+Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>
+Claude-Session: https://claude.ai/code/session_01UqitcmCNS6G33aQUShi39x
+---
+ drivers/usb/typec/tipd/core.c | 5 ++---
+ 1 file changed, 2 insertions(+), 3 deletions(-)
+
+diff --git a/drivers/usb/typec/tipd/core.c b/drivers/usb/typec/tipd/core.c
+index 9cac6ac..ae549fb 100644
+--- a/drivers/usb/typec/tipd/core.c
++++ b/drivers/usb/typec/tipd/core.c
+@@ -932,9 +932,8 @@ static void cd321x_update_work(struct work_struct *work)
+ 		tps->partner = typec_register_partner(tps->port, &desc);
+ 		if (IS_ERR(tps->partner)) {
+ 			dev_warn(tps->dev, "%s: failed to register partner\n", __func__);
+-			/* Make the next update see a changed partner and retry */
+-			memset(&cd321x->cur_partner_identity, 0,
+-			       sizeof(cd321x->cur_partner_identity));
++			/* Look disconnected so that the next update registers it again */
++			tps->partner = NULL;
+ 			return;
+ 		}
+ 

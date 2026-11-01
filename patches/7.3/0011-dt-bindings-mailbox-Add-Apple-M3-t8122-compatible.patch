@@ -1,4 +1,4 @@
-From 588ac15fc0d111892cd1686768219860dc978bf5 Mon Sep 17 00:00:00 2001
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
 From: Michael Reeves <michael.reeves077@gmail.com>
 Date: Sat, 31 Jan 2026 13:37:01 +1100
 Subject: [PATCH] dt-bindings: mailbox: Add Apple M3 (t8122) compatible
@@ -14,7 +14,7 @@ Signed-off-by: Michael Reeves <michael.reeves077@gmail.com>
  1 file changed, 1 insertion(+)
 
 diff --git a/Documentation/devicetree/bindings/mailbox/apple,mailbox.yaml b/Documentation/devicetree/bindings/mailbox/apple,mailbox.yaml
-index 28985cc62c25..946c909c6922 100644
+index 28985cc..946c909 100644
 --- a/Documentation/devicetree/bindings/mailbox/apple,mailbox.yaml
 +++ b/Documentation/devicetree/bindings/mailbox/apple,mailbox.yaml
 @@ -30,6 +30,7 @@ properties:
@@ -25,6 +25,3 @@ index 28985cc62c25..946c909c6922 100644
                - apple,t6000-asc-mailbox
                - apple,t6020-asc-mailbox
            - const: apple,asc-mailbox-v4
--- 
-2.47.3
-

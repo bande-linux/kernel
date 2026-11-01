@@ -2,8 +2,10 @@
 # prepare.sh <debian source dir> <version>
 # Turns Debian's linux source into ours: the apple-arm64-16k flavour on top of Debian's own
 # arm64-16k config, our patches for its series (scripts/series.sh) after Debian's own, and the
-# bande release with its +bande ABI. Exits 3 when our patches need porting to a newer series or
-# one of them doesn't apply, leaving quilt at the failing patch.
+# bande release with its +bande ABI. For a series newer than ours it first starts
+# patches/<series>/ as a copy of our newest. Exits 3 when one of our patches doesn't apply,
+# leaving quilt at the failing patch (follow-debian.yml then has Claude refresh them), 4 when
+# Debian is behind our newest series, and fails rather than prepare a source without our patches.
 set -euo pipefail
 src=$(realpath "$1") version=$2
 repo=$(dirname "$(dirname "$(realpath "$0")")")
@@ -12,7 +14,16 @@ set +e
 patches=$("$repo/scripts/series.sh" "$(dpkg-parsechangelog -S Version)")
 rc=$?
 set -e
-[ $rc = 0 ] || exit $rc
+if [ $rc = 3 ]; then
+    upstream=$(dpkg-parsechangelog -S Version); upstream=${upstream%%-*}
+    new=$repo/patches/$(echo "${upstream%%~*}" | cut -d. -f1-2)
+    cp -a "$patches" "$new"
+    echo "prepare: started $(basename "$new") from our $(basename "$patches") patches" >&2
+    patches=$new
+elif [ $rc != 0 ]; then
+    exit $rc
+fi
+[ -n "$patches" ] || { echo "prepare: no patches; we never build Debian's kernel without them" >&2; exit 1; }
 
 python3 - debian/config/defines.toml debian/config/arm64/defines.toml <<'EOF'
 import sys
@@ -41,11 +52,11 @@ hardware_long = 'Apple Silicon Macs (Mac mini M2), with the Bande Apple patches'
 """
     open(arm64, 'w').write(s)
 EOF
-cat "$repo/config/apple.config" ${patches:+"$patches/apple.config"} > debian/config/arm64/config.apple
+cat "$repo/config/apple.config" "$patches/apple.config" > debian/config/arm64/config.apple
 
 apple=debian/patches/features/arm64/apple
 mkdir -p "$apple"
-[ -z "$patches" ] || while read -r patch; do
+while read -r patch; do
     [ -n "$patch" ] && [ "${patch#\#}" = "$patch" ] || continue
     cp "$patches/$patch" "$apple/"
     grep -qxF "features/arm64/apple/$patch" debian/patches/series ||
@@ -60,6 +71,9 @@ if [ "$(dpkg-parsechangelog -S Version)" != "$version" ]; then
     DEBEMAIL=ci@bande-linux.github.io DEBFULLNAME="Bande CI" \
         dch -v "$version" -D bande --force-distribution "Build the apple-arm64-16k flavour with the Bande patches." 2>/dev/null
 fi
+applied=$(grep -c "^features/arm64/apple/" debian/patches/series || true)
+[ "$applied" -gt 0 ] && [ "$(quilt applied 2>/dev/null | grep -c features/arm64/apple/)" = "$applied" ] ||
+    { echo "prepare: our patches are not all applied" >&2; exit 1; }
 debian/rules debian/control-real > /dev/null 2>&1 || true
 grep -q '^Package: linux-image-apple-arm64-16k$' debian/control ||
     { echo "prepare: debian/control has no apple-arm64-16k flavour" >&2; exit 1; }

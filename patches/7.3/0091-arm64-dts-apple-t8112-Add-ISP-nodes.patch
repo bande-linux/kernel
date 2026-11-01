@@ -1,4 +1,4 @@
-From 9a881fcee1ce0c812296742055f161bc3f9ecff4 Mon Sep 17 00:00:00 2001
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
 From: Hector Martin <marcan@marcan.st>
 Date: Fri, 8 Sep 2023 00:46:11 +0900
 Subject: [PATCH] arm64: dts: apple: t8112: Add ISP nodes
@@ -13,7 +13,7 @@ Signed-off-by: Hector Martin <marcan@marcan.st>
  2 files changed, 168 insertions(+)
 
 diff --git a/arch/arm64/boot/dts/apple/t8112-pmgr.dtsi b/arch/arm64/boot/dts/apple/t8112-pmgr.dtsi
-index 7ff5052d1cdc..9ed831031ae6 100644
+index 7ff5052..9ed8310 100644
 --- a/arch/arm64/boot/dts/apple/t8112-pmgr.dtsi
 +++ b/arch/arm64/boot/dts/apple/t8112-pmgr.dtsi
 @@ -967,6 +967,123 @@ ps_sep: power-controller@c00 {
@@ -141,7 +141,7 @@ index 7ff5052d1cdc..9ed831031ae6 100644
  		compatible = "apple,t8112-pmgr-pwrstate", "apple,pmgr-pwrstate";
  		reg = <0x8000 4>;
 diff --git a/arch/arm64/boot/dts/apple/t8112.dtsi b/arch/arm64/boot/dts/apple/t8112.dtsi
-index 43afef365e69..f43df54ce2cb 100644
+index 43afef3..f43df54 100644
 --- a/arch/arm64/boot/dts/apple/t8112.dtsi
 +++ b/arch/arm64/boot/dts/apple/t8112.dtsi
 @@ -624,6 +624,57 @@ dfr_mipi_out: port@1 {
@@ -202,6 +202,3 @@ index 43afef365e69..f43df54ce2cb 100644
  		disp0_dart: iommu@231304000 {
  			compatible = "apple,t8112-dart", "apple,t8110-dart";
  			reg = <0x2 0x31304000 0x0 0x4000>;
--- 
-2.47.3
-

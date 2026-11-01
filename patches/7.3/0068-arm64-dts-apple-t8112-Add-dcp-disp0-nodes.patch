@@ -1,4 +1,4 @@
-From eb3e5409ab5e3d5340da3109bb5c7567679bd05c Mon Sep 17 00:00:00 2001
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
 From: Janne Grunau <j@jannau.net>
 Date: Sun, 20 Nov 2022 20:22:57 +0100
 Subject: [PATCH] arm64: dts: apple: t8112: Add dcp/disp0 nodes
@@ -23,7 +23,7 @@ Signed-off-by: Janne Grunau <j@jannau.net>
  7 files changed, 142 insertions(+), 2 deletions(-)
 
 diff --git a/arch/arm64/boot/dts/apple/t8112-j413.dts b/arch/arm64/boot/dts/apple/t8112-j413.dts
-index 72a16161c13f..4371b2d37459 100644
+index 72a1616..4371b2d 100644
 --- a/arch/arm64/boot/dts/apple/t8112-j413.dts
 +++ b/arch/arm64/boot/dts/apple/t8112-j413.dts
 @@ -37,6 +37,21 @@ led-0 {
@@ -49,7 +49,7 @@ index 72a16161c13f..4371b2d37459 100644
   * Force the bus number assignments so that we can declare some of the
   * on-board devices and properties that are populated by the bootloader
 diff --git a/arch/arm64/boot/dts/apple/t8112-j415.dts b/arch/arm64/boot/dts/apple/t8112-j415.dts
-index 383f6587fe3e..4cdf687dc0c9 100644
+index 383f658..4cdf687 100644
 --- a/arch/arm64/boot/dts/apple/t8112-j415.dts
 +++ b/arch/arm64/boot/dts/apple/t8112-j415.dts
 @@ -37,6 +37,21 @@ led-0 {
@@ -75,7 +75,7 @@ index 383f6587fe3e..4cdf687dc0c9 100644
   * Force the bus number assignments so that we can declare some of the
   * on-board devices and properties that are populated by the bootloader
 diff --git a/arch/arm64/boot/dts/apple/t8112-j473.dts b/arch/arm64/boot/dts/apple/t8112-j473.dts
-index 76df7091dbeb..1c32f1554fe3 100644
+index 76df709..1c32f15 100644
 --- a/arch/arm64/boot/dts/apple/t8112-j473.dts
 +++ b/arch/arm64/boot/dts/apple/t8112-j473.dts
 @@ -24,6 +24,15 @@ aliases {
@@ -95,7 +95,7 @@ index 76df7091dbeb..1c32f1554fe3 100644
   * Keep the power-domains used for the HDMI port on.
   */
 diff --git a/arch/arm64/boot/dts/apple/t8112-j493.dts b/arch/arm64/boot/dts/apple/t8112-j493.dts
-index 8bd3650188cc..d20668265d6b 100644
+index 8bd3650..d206682 100644
 --- a/arch/arm64/boot/dts/apple/t8112-j493.dts
 +++ b/arch/arm64/boot/dts/apple/t8112-j493.dts
 @@ -52,6 +52,20 @@ &ps_dispdfr_be {
@@ -120,7 +120,7 @@ index 8bd3650188cc..d20668265d6b 100644
  	status = "okay";
  };
 diff --git a/arch/arm64/boot/dts/apple/t8112-jxxx.dtsi b/arch/arm64/boot/dts/apple/t8112-jxxx.dtsi
-index 562e7a25a1e8..d471201fd774 100644
+index 562e7a2..d471201 100644
 --- a/arch/arm64/boot/dts/apple/t8112-jxxx.dtsi
 +++ b/arch/arm64/boot/dts/apple/t8112-jxxx.dtsi
 @@ -13,6 +13,10 @@ / {
@@ -143,7 +143,7 @@ index 562e7a25a1e8..d471201fd774 100644
  			status = "disabled";
  		};
 diff --git a/arch/arm64/boot/dts/apple/t8112-pmgr.dtsi b/arch/arm64/boot/dts/apple/t8112-pmgr.dtsi
-index 8b3297d75992..276f1ab35f06 100644
+index 8b3297d..276f1ab 100644
 --- a/arch/arm64/boot/dts/apple/t8112-pmgr.dtsi
 +++ b/arch/arm64/boot/dts/apple/t8112-pmgr.dtsi
 @@ -669,7 +669,6 @@ ps_disp0_sys: power-controller@370 {
@@ -163,7 +163,7 @@ index 8b3297d75992..276f1ab35f06 100644
  
  	ps_dispext_sys: power-controller@380 {
 diff --git a/arch/arm64/boot/dts/apple/t8112.dtsi b/arch/arm64/boot/dts/apple/t8112.dtsi
-index 2d1e0f677f1b..9b719807222d 100644
+index 2d1e0f6..9b71980 100644
 --- a/arch/arm64/boot/dts/apple/t8112.dtsi
 +++ b/arch/arm64/boot/dts/apple/t8112.dtsi
 @@ -371,6 +371,14 @@ nco_clkref: clock-ref-nco {
@@ -271,6 +271,3 @@ index 2d1e0f677f1b..9b719807222d 100644
  		pmgr: power-management@23b700000 {
  			compatible = "apple,t8112-pmgr", "apple,pmgr", "syscon", "simple-mfd";
  			#address-cells = <1>;
--- 
-2.47.3
-

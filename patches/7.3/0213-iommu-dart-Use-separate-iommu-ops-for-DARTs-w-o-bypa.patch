@@ -1,4 +1,4 @@
-From 09ccbe31e1c433f5dc2a483febdcc3edbc160e71 Mon Sep 17 00:00:00 2001
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
 From: Janne Grunau <j@jannau.net>
 Date: Sun, 16 Mar 2025 22:53:21 +0100
 Subject: [PATCH] iommu/dart: Use separate iommu_ops for DARTs w/o bypass
@@ -16,7 +16,7 @@ Signed-off-by: Janne Grunau <j@jannau.net>
  1 file changed, 35 insertions(+), 18 deletions(-)
 
 diff --git a/drivers/iommu/apple-dart.c b/drivers/iommu/apple-dart.c
-index 9391efc8f7dd..d081786396cc 100644
+index 9391efc..d081786 100644
 --- a/drivers/iommu/apple-dart.c
 +++ b/drivers/iommu/apple-dart.c
 @@ -1059,6 +1059,11 @@ static int apple_dart_def_domain_type(struct device *dev)
@@ -97,6 +97,3 @@ index 9391efc8f7dd..d081786396cc 100644
  	if (ret)
  		goto err_sysfs_remove;
  
--- 
-2.47.3
-

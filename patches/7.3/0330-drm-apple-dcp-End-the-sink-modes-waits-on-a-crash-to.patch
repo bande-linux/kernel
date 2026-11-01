@@ -1,0 +1,34 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: Mikael Hug <mikaelhug@gmail.com>
+Date: Sat, 31 Oct 2026 02:59:54 +0000
+Subject: [PATCH] drm: apple: dcp: End the sink modes waits on a crash too
+
+Commit dfbb9f87da42 ("drm: apple: Bound modeset retries, fence hotplug
+work across suspend and serialise the release") wakes the publication
+waiters from dcp_rtk_crashed(), but only the wait in dcp_poweron()
+tests crashed. dcp_publish_wait_done(), used by the sink modes work,
+does not, so after a crash that work still sleeps the full
+DCP_PUBLISH_TIMEOUT before it notices.
+
+Test crashed in dcp_publish_wait_done() as well.
+
+Fixes: dfbb9f87da42 ("drm: apple: Bound modeset retries, fence hotplug work across suspend and serialise the release")
+Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>
+Claude-Session: https://claude.ai/code/session_01UqitcmCNS6G33aQUShi39x
+---
+ drivers/gpu/drm/apple/dcp.c | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/drivers/gpu/drm/apple/dcp.c b/drivers/gpu/drm/apple/dcp.c
+index 3d74ec6..7644cb6 100644
+--- a/drivers/gpu/drm/apple/dcp.c
++++ b/drivers/gpu/drm/apple/dcp.c
+@@ -716,7 +716,7 @@ static void _dcp_poweron(struct apple_dcp *dcp, bool open_client)
+ static bool dcp_publish_wait_done(struct apple_dcp *dcp, u32 seq)
+ {
+ 	return READ_ONCE(dcp->publish_seq) != seq || READ_ONCE(dcp->powered) ||
+-	       READ_ONCE(dcp->stopping);
++	       READ_ONCE(dcp->stopping) || READ_ONCE(dcp->crashed);
+ }
+ 
+ static void dcp_wake_publish_waiters(struct apple_dcp *dcp)

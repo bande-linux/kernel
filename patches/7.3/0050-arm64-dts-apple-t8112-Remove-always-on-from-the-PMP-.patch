@@ -1,4 +1,4 @@
-From a00289341771629ea7436e950ecf37340103a59c Mon Sep 17 00:00:00 2001
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
 From: Hector Martin <marcan@marcan.st>
 Date: Mon, 24 Apr 2023 23:31:20 +0900
 Subject: [PATCH] arm64: dts: apple: t8112: Remove always-on from the PMP node
@@ -17,7 +17,7 @@ Signed-off-by: Janne Grunau <j@jannau.net>
  1 file changed, 2 insertions(+), 3 deletions(-)
 
 diff --git a/arch/arm64/boot/dts/apple/t8112-pmgr.dtsi b/arch/arm64/boot/dts/apple/t8112-pmgr.dtsi
-index 7c050c6f2707..118694dd9b5f 100644
+index 7c050c6..118694d 100644
 --- a/arch/arm64/boot/dts/apple/t8112-pmgr.dtsi
 +++ b/arch/arm64/boot/dts/apple/t8112-pmgr.dtsi
 @@ -672,7 +672,7 @@ ps_disp0_fe: power-controller@378 {
@@ -46,6 +46,3 @@ index 7c050c6f2707..118694dd9b5f 100644
  	};
  
  	ps_pms_sram: power-controller@418 {
--- 
-2.47.3
-

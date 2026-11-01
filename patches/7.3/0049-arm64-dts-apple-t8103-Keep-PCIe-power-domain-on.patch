@@ -1,4 +1,4 @@
-From 3a3e37a771510a08d35baad570385bdd4cd5ce89 Mon Sep 17 00:00:00 2001
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
 From: Hector Martin <marcan@marcan.st>
 Date: Thu, 17 Mar 2022 23:49:07 +0900
 Subject: [PATCH] arm64: dts: apple: t8103: Keep PCIe power domain on
@@ -13,7 +13,7 @@ Signed-off-by: Hector Martin <marcan@marcan.st>
  1 file changed, 1 insertion(+)
 
 diff --git a/arch/arm64/boot/dts/apple/t8103-pmgr.dtsi b/arch/arm64/boot/dts/apple/t8103-pmgr.dtsi
-index fef8a4058f14..a55b1fd2b52c 100644
+index fef8a40..a55b1fd 100644
 --- a/arch/arm64/boot/dts/apple/t8103-pmgr.dtsi
 +++ b/arch/arm64/boot/dts/apple/t8103-pmgr.dtsi
 @@ -717,6 +717,7 @@ ps_apcie_gp: power-controller@3e8 {
@@ -24,6 +24,3 @@ index fef8a4058f14..a55b1fd2b52c 100644
  	};
  
  	ps_ans2: power-controller@3f0 {
--- 
-2.47.3
-

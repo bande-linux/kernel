@@ -1,4 +1,4 @@
-From 4af55bbe731f8db129091d3bba40e6187ab5e543 Mon Sep 17 00:00:00 2001
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
 From: Sasha Finkelstein <k@chaosmail.tech>
 Date: Thu, 4 Jun 2026 14:11:26 +0200
 Subject: [PATCH] dts: apple: t[603x,8122]: Add MCA and supporting nodes
@@ -20,7 +20,7 @@ Signed-off-by: Sasha Finkelstein <k@chaosmail.tech>
  11 files changed, 221 insertions(+)
 
 diff --git a/arch/arm64/boot/dts/apple/t6030-pmgr.dtsi b/arch/arm64/boot/dts/apple/t6030-pmgr.dtsi
-index 932388ea13c9..70b75372784e 100644
+index 932388e..70b7537 100644
 --- a/arch/arm64/boot/dts/apple/t6030-pmgr.dtsi
 +++ b/arch/arm64/boot/dts/apple/t6030-pmgr.dtsi
 @@ -552,6 +552,7 @@ ps_mca0: power-controller@308 {
@@ -56,7 +56,7 @@ index 932388ea13c9..70b75372784e 100644
  
  	ps_ioa1: power-controller@3a0 {
 diff --git a/arch/arm64/boot/dts/apple/t6030.dtsi b/arch/arm64/boot/dts/apple/t6030.dtsi
-index f66eac1da3ea..be03c16a11a4 100644
+index f66eac1..be03c16 100644
 --- a/arch/arm64/boot/dts/apple/t6030.dtsi
 +++ b/arch/arm64/boot/dts/apple/t6030.dtsi
 @@ -424,6 +424,16 @@ clk_200m: clock-200m {
@@ -145,7 +145,7 @@ index f66eac1da3ea..be03c16a11a4 100644
  			compatible = "apple,t6030-aic3", "apple,t8122-aic3";
  			#interrupt-cells = <3>;
 diff --git a/arch/arm64/boot/dts/apple/t6031-base.dtsi b/arch/arm64/boot/dts/apple/t6031-base.dtsi
-index 55891125010e..4bf7ce8535ca 100644
+index 5589112..4bf7ce8 100644
 --- a/arch/arm64/boot/dts/apple/t6031-base.dtsi
 +++ b/arch/arm64/boot/dts/apple/t6031-base.dtsi
 @@ -487,6 +487,16 @@ clk_200m: clock-200m {
@@ -166,7 +166,7 @@ index 55891125010e..4bf7ce8535ca 100644
  		#address-cells = <2>;
  		#size-cells = <2>;
 diff --git a/arch/arm64/boot/dts/apple/t6031-die0.dtsi b/arch/arm64/boot/dts/apple/t6031-die0.dtsi
-index 90d0f83c81b4..46b1e2ffc8c2 100644
+index 90d0f83..46b1e2f 100644
 --- a/arch/arm64/boot/dts/apple/t6031-die0.dtsi
 +++ b/arch/arm64/boot/dts/apple/t6031-die0.dtsi
 @@ -7,6 +7,13 @@
@@ -229,7 +229,7 @@ index 90d0f83c81b4..46b1e2ffc8c2 100644
  		compatible = "apple,t6031-pcie", "apple,t6020-pcie";
  		device_type = "pci";
 diff --git a/arch/arm64/boot/dts/apple/t6031-dieX.dtsi b/arch/arm64/boot/dts/apple/t6031-dieX.dtsi
-index 293557158029..89f201787b03 100644
+index 2935571..89f2017 100644
 --- a/arch/arm64/boot/dts/apple/t6031-dieX.dtsi
 +++ b/arch/arm64/boot/dts/apple/t6031-dieX.dtsi
 @@ -92,6 +92,15 @@ DIE_NODE(pinctrl_aop): pinctrl@2a8824000 {
@@ -249,7 +249,7 @@ index 293557158029..89f201787b03 100644
  		compatible = "apple,t6031-pinctrl", "apple,t8103-pinctrl";
  		reg = <0x2 0xb3000000 0x0 0x4000>;
 diff --git a/arch/arm64/boot/dts/apple/t6031-pmgr.dtsi b/arch/arm64/boot/dts/apple/t6031-pmgr.dtsi
-index f80ee5f7ebcf..02e62cda7852 100644
+index f80ee5f..02e62cd 100644
 --- a/arch/arm64/boot/dts/apple/t6031-pmgr.dtsi
 +++ b/arch/arm64/boot/dts/apple/t6031-pmgr.dtsi
 @@ -765,6 +765,7 @@ DIE_NODE(ps_mca0): power-controller@4e8 {
@@ -285,7 +285,7 @@ index f80ee5f7ebcf..02e62cda7852 100644
  
  	DIE_NODE(ps_msr1): power-controller@508 {
 diff --git a/arch/arm64/boot/dts/apple/t6032-j575d.dts b/arch/arm64/boot/dts/apple/t6032-j575d.dts
-index 028507bd5594..fb96cc16031d 100644
+index 028507b..fb96cc1 100644
 --- a/arch/arm64/boot/dts/apple/t6032-j575d.dts
 +++ b/arch/arm64/boot/dts/apple/t6032-j575d.dts
 @@ -45,4 +45,9 @@ &serial0 {
@@ -299,7 +299,7 @@ index 028507bd5594..fb96cc16031d 100644
 +
  #include "spi1-nvram.dtsi"
 diff --git a/arch/arm64/boot/dts/apple/t603x-j514-j516.dtsi b/arch/arm64/boot/dts/apple/t603x-j514-j516.dtsi
-index f31615604750..fbd492b8d79b 100644
+index f316156..fbd492b 100644
 --- a/arch/arm64/boot/dts/apple/t603x-j514-j516.dtsi
 +++ b/arch/arm64/boot/dts/apple/t603x-j514-j516.dtsi
 @@ -67,6 +67,10 @@ &fpwm0 {
@@ -314,7 +314,7 @@ index f31615604750..fbd492b8d79b 100644
  
  /*
 diff --git a/arch/arm64/boot/dts/apple/t8122-jxxx.dtsi b/arch/arm64/boot/dts/apple/t8122-jxxx.dtsi
-index 38952bc4fb98..34a9465ba61a 100644
+index 38952bc..34a9465 100644
 --- a/arch/arm64/boot/dts/apple/t8122-jxxx.dtsi
 +++ b/arch/arm64/boot/dts/apple/t8122-jxxx.dtsi
 @@ -73,4 +73,8 @@ bluetooth0: bluetooth@0,1 {
@@ -327,7 +327,7 @@ index 38952bc4fb98..34a9465ba61a 100644
 +
  #include "spi1-nvram.dtsi"
 diff --git a/arch/arm64/boot/dts/apple/t8122-pmgr.dtsi b/arch/arm64/boot/dts/apple/t8122-pmgr.dtsi
-index d3b3f9e71860..6c7182d72481 100644
+index d3b3f9e..6c7182d 100644
 --- a/arch/arm64/boot/dts/apple/t8122-pmgr.dtsi
 +++ b/arch/arm64/boot/dts/apple/t8122-pmgr.dtsi
 @@ -657,6 +657,7 @@ ps_mca0: power-controller@398 {
@@ -363,7 +363,7 @@ index d3b3f9e71860..6c7182d72481 100644
  
  	ps_ioa1: power-controller@3c0 {
 diff --git a/arch/arm64/boot/dts/apple/t8122.dtsi b/arch/arm64/boot/dts/apple/t8122.dtsi
-index 1452711f64ad..f9ac4d4b9fc8 100644
+index 1452711..f9ac4d4 100644
 --- a/arch/arm64/boot/dts/apple/t8122.dtsi
 +++ b/arch/arm64/boot/dts/apple/t8122.dtsi
 @@ -354,6 +354,16 @@ clk_200m: clock-200m {
@@ -455,6 +455,3 @@ index 1452711f64ad..f9ac4d4b9fc8 100644
  		aic: interrupt-controller@2d1000000 {
  			compatible = "apple,t8122-aic3";
  			#interrupt-cells = <3>;
--- 
-2.47.3
-

@@ -1,4 +1,4 @@
-From 4721a4a4fb06b6ccb5332dfe84c562d0f680d146 Mon Sep 17 00:00:00 2001
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
 From: Janne Grunau <j@jannau.net>
 Date: Sat, 28 Oct 2023 23:12:33 +0200
 Subject: [PATCH] arm64: dts: apple: t8112: Add dptx-phy node
@@ -14,7 +14,7 @@ Signed-off-by: Janne Grunau <j@jannau.net>
  1 file changed, 11 insertions(+)
 
 diff --git a/arch/arm64/boot/dts/apple/t8112.dtsi b/arch/arm64/boot/dts/apple/t8112.dtsi
-index 5d351467fef4..4923d58700c3 100644
+index 5d35146..4923d58 100644
 --- a/arch/arm64/boot/dts/apple/t8112.dtsi
 +++ b/arch/arm64/boot/dts/apple/t8112.dtsi
 @@ -1056,6 +1056,17 @@ pcie_pins: pcie-pins {
@@ -35,6 +35,3 @@ index 5d351467fef4..4923d58700c3 100644
  		pinctrl_nub: pinctrl@23d1f0000 {
  			compatible = "apple,t8112-pinctrl", "apple,pinctrl";
  			reg = <0x2 0x3d1f0000 0x0 0x4000>;
--- 
-2.47.3
-

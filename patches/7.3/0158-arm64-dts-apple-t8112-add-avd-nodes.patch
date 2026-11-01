@@ -1,4 +1,4 @@
-From a6ff8b3bcc37324b49cedd11f116202767f8a57c Mon Sep 17 00:00:00 2001
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
 From: sofus <sofus.c@icloud.com>
 Date: Tue, 30 Jun 2026 13:27:42 +0200
 Subject: [PATCH] arm64: dts: apple: t8112: add avd nodes
@@ -10,7 +10,7 @@ Signed-off-by: sofus <sofus.c@icloud.com>
  1 file changed, 28 insertions(+), 1 deletion(-)
 
 diff --git a/arch/arm64/boot/dts/apple/t8112.dtsi b/arch/arm64/boot/dts/apple/t8112.dtsi
-index 918560329186..334005bf1daa 100644
+index 9185603..334005b 100644
 --- a/arch/arm64/boot/dts/apple/t8112.dtsi
 +++ b/arch/arm64/boot/dts/apple/t8112.dtsi
 @@ -1153,7 +1153,6 @@ pmp_report_avd_sys: report@a {
@@ -56,6 +56,3 @@ index 918560329186..334005bf1daa 100644
  		dispext0_dart: iommu@271304000 {
  			compatible = "apple,t8112-dart", "apple,t8110-dart";
  			reg = <0x2 0x71304000 0x0 0x4000>;
--- 
-2.47.3
-

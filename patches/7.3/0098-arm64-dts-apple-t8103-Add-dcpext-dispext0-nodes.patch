@@ -1,4 +1,4 @@
-From 785bc580ad63eaf444e9cd6237f8bacf625343c1 Mon Sep 17 00:00:00 2001
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
 From: Janne Grunau <j@jannau.net>
 Date: Fri, 30 Sep 2022 22:30:13 +0200
 Subject: [PATCH] arm64: dts: apple: t8103: Add dcpext/dispext0 nodes
@@ -10,7 +10,7 @@ Signed-off-by: Janne Grunau <j@jannau.net>
  1 file changed, 75 insertions(+)
 
 diff --git a/arch/arm64/boot/dts/apple/t8103.dtsi b/arch/arm64/boot/dts/apple/t8103.dtsi
-index 35f1fe7956ae..3b08b9cd2dc6 100644
+index 35f1fe7..3b08b9c 100644
 --- a/arch/arm64/boot/dts/apple/t8103.dtsi
 +++ b/arch/arm64/boot/dts/apple/t8103.dtsi
 @@ -416,6 +416,14 @@ clk_disp0: clock-disp0 {
@@ -109,6 +109,3 @@ index 35f1fe7956ae..3b08b9cd2dc6 100644
  		ans_mbox: mbox@277408000 {
  			compatible = "apple,t8103-asc-mailbox", "apple,asc-mailbox-v4";
  			reg = <0x2 0x77408000 0x0 0x4000>;
--- 
-2.47.3
-

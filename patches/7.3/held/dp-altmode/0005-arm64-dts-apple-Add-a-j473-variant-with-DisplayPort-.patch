@@ -1,0 +1,135 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: Mikael Hug <mikaelhug@gmail.com>
+Date: Sat, 31 Oct 2026 00:19:22 +0000
+Subject: [PATCH] arm64: dts: apple: Add a j473 variant with DisplayPort on
+ USB-C
+
+The Mac mini (M2) drives HDMI from DCPext and leaves DCP (disp0) unused.
+Add t8112-j473-dpalt.dtb, which also routes DCP through atcphy1 to the
+back-right USB-C port, so DisplayPort alternate mode can be brought up
+without changing the default j473 DT:
+
+- restore the dcp alias, so the loader sets up the DCP firmware and
+  carveouts and enables the node,
+- add disp0_dart to the display subsystem, after dispext0's DART, which
+  the loader uses for the HDMI framebuffer as the first one,
+- describe the DisplayPort path with the OF graph from DCP port 1 to
+  atcphy1 port 2 (apple,atcphy.yaml). The Type-C port controller sets
+  the PHY mode and reports HPD on the USB-C connector node, which the
+  display driver finds through this graph.
+
+The crossbar of atcphy1 selects disp0 with state 0.
+
+The dtb is not built or installed by default (only with OF_ALL_DTBS),
+because the boot payload holds every installed dtb and the loader picks
+one by compatible. With the alias present, the loader fails the boot if it
+cannot set up DCP, as on the laptops.
+
+DisplayPort audio is not part of this. DisplayPort does not survive
+system suspend yet, because neither the display crossbar nor atcphy
+restore their state on resume. This variant adds no always-on power
+domains to hide that.
+
+Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>
+Claude-Session: https://claude.ai/code/session_01UqitcmCNS6G33aQUShi39x
+---
+ arch/arm64/boot/dts/apple/Makefile            |  3 +
+ .../arm64/boot/dts/apple/t8112-j473-dpalt.dts | 76 +++++++++++++++++++
+ 2 files changed, 79 insertions(+)
+
+diff --git a/arch/arm64/boot/dts/apple/Makefile b/arch/arm64/boot/dts/apple/Makefile
+index 62999574a..8fd3563b3 100644
+--- a/arch/arm64/boot/dts/apple/Makefile
++++ b/arch/arm64/boot/dts/apple/Makefile
+@@ -96,6 +96,9 @@ dtb-$(CONFIG_ARCH_APPLE) += t6034-j514m.dtb
+ dtb-$(CONFIG_ARCH_APPLE) += t6034-j516m.dtb
+ dtb-$(CONFIG_ARCH_APPLE) += t8112-j413.dtb
+ dtb-$(CONFIG_ARCH_APPLE) += t8112-j415.dtb
++# Bring-up only, not built or installed by default (only with OF_ALL_DTBS):
++# the boot payload holds every installed j473 dtb and the loader picks one.
++dtb- += t8112-j473-dpalt.dtb
+ dtb-$(CONFIG_ARCH_APPLE) += t8112-j473.dtb
+ dtb-$(CONFIG_ARCH_APPLE) += t8112-j493.dtb
+ dtb-$(CONFIG_ARCH_APPLE) += t8122-j433.dtb
+diff --git a/arch/arm64/boot/dts/apple/t8112-j473-dpalt.dts b/arch/arm64/boot/dts/apple/t8112-j473-dpalt.dts
+new file mode 100644
+index 000000000..57c60d382
+--- /dev/null
++++ b/arch/arm64/boot/dts/apple/t8112-j473-dpalt.dts
+@@ -0,0 +1,76 @@
++// SPDX-License-Identifier: GPL-2.0+ OR MIT
++/*
++ * Apple Mac mini (M2, 2023), with DisplayPort alternate mode on the
++ * back-right USB-C port
++ *
++ * target-type: J473
++ *
++ * The HDMI port stays on DCPext. DCP (disp0), which is unused on this
++ * machine otherwise, drives DisplayPort through atcphy1 to the USB-C
++ * port of hpm1. The Type-C port controller sets the PHY mode and reports
++ * HPD.
++ *
++ * Bring-up only: DisplayPort does not survive system suspend yet, because
++ * neither the display crossbar nor atcphy restore their state on resume.
++ *
++ * Copyright The Asahi Linux Contributors
++ */
++
++#include "t8112-j473.dts"
++
++/ {
++	aliases {
++		/*
++		 * The loader sets up the DCP firmware and carveouts for it, and
++		 * fails the boot if it cannot.
++		 */
++		dcp = &dcp;
++	};
++};
++
++/*
++ * The loader maps the framebuffer through, and locks, the first DART here,
++ * which must be dispext0 for the HDMI framebuffer.
++ */
++&display {
++	iommus = <&dispext0_dart 0 0x0 0x0 0xf 0xffff0000>,
++		 <&disp0_dart 0 0x0 0x0 0xf 0xffff0000>;
++};
++
++&disp0_dart {
++	status = "okay";
++};
++
++&dcp {
++	/* enabled by the loader */
++	apple,connector-type = "DP";
++
++	phys = <&atcphy1 PHY_TYPE_DP>;
++	phy-names = "dp-phy";
++	mux-controls = <&atcphy1_xbar 0>;
++	mux-control-names = "dp-xbar";
++	mux-index = <0>;
++	apple,dptx-phy = <1>;
++
++	ports {
++		port@1 {
++			reg = <1>;
++
++			dcp_dp_out: endpoint {
++				remote-endpoint = <&atcphy1_dp>;
++			};
++		};
++	};
++};
++
++&atcphy1 {
++	ports {
++		port@2 {
++			reg = <2>;
++
++			atcphy1_dp: endpoint {
++				remote-endpoint = <&dcp_dp_out>;
++			};
++		};
++	};
++};

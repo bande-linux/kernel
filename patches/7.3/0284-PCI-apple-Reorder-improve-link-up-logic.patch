@@ -1,0 +1,42 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: Hector Martin <marcan@marcan.st>
+Date: Thu, 18 May 2023 16:18:29 +0900
+Subject: [PATCH] PCI: apple: Reorder & improve link-up logic
+
+Always re-check LINKSTS right before deciding whether to start the link
+training and wait for it, just in case the link happened to come up
+while we were setting up IRQs. Also, always do the clock-gate disable
+even if the link is already up.
+
+Signed-off-by: Hector Martin <marcan@marcan.st>
+(cherry picked from commit ab8c0ea6026fe884048534040c188047f0efcc3d)
+---
+ drivers/pci/controller/pcie-apple.c | 14 +++++++-------
+ 1 file changed, 7 insertions(+), 7 deletions(-)
+
+diff --git a/drivers/pci/controller/pcie-apple.c b/drivers/pci/controller/pcie-apple.c
+index 4a2b5c6..8a7574d 100644
+--- a/drivers/pci/controller/pcie-apple.c
++++ b/drivers/pci/controller/pcie-apple.c
+@@ -698,14 +698,14 @@ static int apple_pcie_setup_port(struct apple_pcie *pcie,
+ 	ret = apple_pcie_port_register_irqs(port);
+ 	WARN_ON(ret);
+ 
+-	if (link_stat & PORT_LINKSTS_UP)
+-		return 0;
+-
+-	/* start link training */
+-	writel_relaxed(PORT_LTSSMCTL_START, port->base + PORT_LTSSMCTL);
++	link_stat = readl_relaxed(port->base + PORT_LINKSTS);
++	if (!(link_stat & PORT_LINKSTS_UP)) {
++		/* start link training */
++		writel_relaxed(PORT_LTSSMCTL_START, port->base + PORT_LTSSMCTL);
+ 
+-	if (!wait_for_completion_timeout(&pcie->event, link_up_timeout * HZ / 1000))
+-		dev_warn(pcie->dev, "%pOF link didn't come up\n", np);
++		if (!wait_for_completion_timeout(&pcie->event, link_up_timeout * HZ / 1000))
++			dev_warn(pcie->dev, "%pOF link didn't come up\n", np);
++	}
+ 
+ 	return 0;
+ }

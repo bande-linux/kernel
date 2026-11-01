@@ -1,4 +1,4 @@
-From fa5b80dc0881727571a6ea0fc348c0148d39e099 Mon Sep 17 00:00:00 2001
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
 From: Alyssa Rosenzweig <alyssa@rosenzweig.io>
 Date: Mon, 10 Feb 2025 14:39:53 -0500
 Subject: [PATCH] iommu/dart: Track if the DART is locked
@@ -17,7 +17,7 @@ Signed-off-by: Janne Grunau <j@jannau.net>
  1 file changed, 10 insertions(+), 2 deletions(-)
 
 diff --git a/drivers/iommu/apple-dart.c b/drivers/iommu/apple-dart.c
-index 54b285334bb7..28a63374f944 100644
+index 54b2853..28a6337 100644
 --- a/drivers/iommu/apple-dart.c
 +++ b/drivers/iommu/apple-dart.c
 @@ -203,6 +203,7 @@ struct apple_dart_hw {
@@ -68,6 +68,3 @@ index 54b285334bb7..28a63374f944 100644
  	return 0;
  
  err_sysfs_remove:
--- 
-2.47.3
-

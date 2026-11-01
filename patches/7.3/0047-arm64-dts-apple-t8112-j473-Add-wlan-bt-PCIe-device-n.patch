@@ -1,4 +1,4 @@
-From f2aa21739e154a94a8ff76395a2b49bc08c91586 Mon Sep 17 00:00:00 2001
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
 From: Janne Grunau <j@jannau.net>
 Date: Tue, 14 Feb 2023 10:07:49 +0100
 Subject: [PATCH] arm64: dts: apple: t8112-j473: Add wlan/bt PCIe device nodes
@@ -10,7 +10,7 @@ Signed-off-by: Janne Grunau <j@jannau.net>
  1 file changed, 18 insertions(+)
 
 diff --git a/arch/arm64/boot/dts/apple/t8112-j473.dts b/arch/arm64/boot/dts/apple/t8112-j473.dts
-index 105a9d118980..9411e43868b3 100644
+index 105a9d1..9411e43 100644
 --- a/arch/arm64/boot/dts/apple/t8112-j473.dts
 +++ b/arch/arm64/boot/dts/apple/t8112-j473.dts
 @@ -18,7 +18,9 @@ / {
@@ -46,6 +46,3 @@ index 105a9d118980..9411e43868b3 100644
  };
  
  &port01 {
--- 
-2.47.3
-

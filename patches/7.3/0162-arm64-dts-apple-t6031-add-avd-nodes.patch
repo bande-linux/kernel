@@ -1,4 +1,4 @@
-From 72f52d8363b8847b6661d693c263bd476a7e18b5 Mon Sep 17 00:00:00 2001
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
 From: sofus <sofus.c@icloud.com>
 Date: Fri, 26 Jun 2026 16:49:07 +0200
 Subject: [PATCH] arm64: dts: apple: t6031: add avd nodes
@@ -10,7 +10,7 @@ Signed-off-by: sofus <sofus.c@icloud.com>
  1 file changed, 24 insertions(+)
 
 diff --git a/arch/arm64/boot/dts/apple/t6031-dieX.dtsi b/arch/arm64/boot/dts/apple/t6031-dieX.dtsi
-index 89f201787b03..cf8076eab1fd 100644
+index 89f2017..cf8076e 100644
 --- a/arch/arm64/boot/dts/apple/t6031-dieX.dtsi
 +++ b/arch/arm64/boot/dts/apple/t6031-dieX.dtsi
 @@ -92,6 +92,30 @@ DIE_NODE(pinctrl_aop): pinctrl@2a8824000 {
@@ -44,6 +44,3 @@ index 89f201787b03..cf8076eab1fd 100644
  	DIE_NODE(sio_dart): iommu@391004000 {
  		compatible = "apple,t6031-dart", "apple,t8110-dart";
  		reg = <0x3 0x91004000 0x0 0x4000>;
--- 
-2.47.3
-

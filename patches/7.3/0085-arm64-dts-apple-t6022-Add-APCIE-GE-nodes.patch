@@ -1,4 +1,4 @@
-From 4315175c63374c323d02474dbc8b6d3c795c7e0f Mon Sep 17 00:00:00 2001
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
 From: Hector Martin <marcan@marcan.st>
 Date: Mon, 7 Aug 2023 19:53:50 +0900
 Subject: [PATCH] arm64: dts: apple: t6022: Add APCIE-GE nodes
@@ -30,7 +30,7 @@ Signed-off-by: Janne Grunau <j@jannau.net>
  5 files changed, 474 insertions(+), 4 deletions(-)
 
 diff --git a/arch/arm64/boot/dts/apple/t6022-j180d.dts b/arch/arm64/boot/dts/apple/t6022-j180d.dts
-index c0674aad5c49..570cf88e5b20 100644
+index c0674aa..570cf88 100644
 --- a/arch/arm64/boot/dts/apple/t6022-j180d.dts
 +++ b/arch/arm64/boot/dts/apple/t6022-j180d.dts
 @@ -11,6 +11,7 @@
@@ -409,7 +409,7 @@ index c0674aad5c49..570cf88e5b20 100644
   * controllers with a single port connected to a PM40100 PCIe switch
 diff --git a/arch/arm64/boot/dts/apple/t6022-pcie-ge.dtsi b/arch/arm64/boot/dts/apple/t6022-pcie-ge.dtsi
 new file mode 100644
-index 000000000000..e49d27355c32
+index 0000000..e49d273
 --- /dev/null
 +++ b/arch/arm64/boot/dts/apple/t6022-pcie-ge.dtsi
 @@ -0,0 +1,27 @@
@@ -441,7 +441,7 @@ index 000000000000..e49d27355c32
 +#undef DIE_NO
 +#undef SOC_NODE
 diff --git a/arch/arm64/boot/dts/apple/t6022.dtsi b/arch/arm64/boot/dts/apple/t6022.dtsi
-index d803edbc4440..26850a1441c4 100644
+index d803edb..26850a1 100644
 --- a/arch/arm64/boot/dts/apple/t6022.dtsi
 +++ b/arch/arm64/boot/dts/apple/t6022.dtsi
 @@ -366,4 +366,10 @@ &gpu {
@@ -456,7 +456,7 @@ index d803edbc4440..26850a1441c4 100644
 +
  #include "hwmon-common.dtsi"
 diff --git a/arch/arm64/boot/dts/apple/t602x-gpio-pins.dtsi b/arch/arm64/boot/dts/apple/t602x-gpio-pins.dtsi
-index e41b6475f792..c5de99bd2e5c 100644
+index e41b647..c5de99b 100644
 --- a/arch/arm64/boot/dts/apple/t602x-gpio-pins.dtsi
 +++ b/arch/arm64/boot/dts/apple/t602x-gpio-pins.dtsi
 @@ -78,4 +78,8 @@ pcie_pins: pcie-pins {
@@ -470,7 +470,7 @@ index e41b6475f792..c5de99bd2e5c 100644
  };
 diff --git a/arch/arm64/boot/dts/apple/t602x-pcie-ge.dtsi b/arch/arm64/boot/dts/apple/t602x-pcie-ge.dtsi
 new file mode 100644
-index 000000000000..3da388c9ae58
+index 0000000..3da388c
 --- /dev/null
 +++ b/arch/arm64/boot/dts/apple/t602x-pcie-ge.dtsi
 @@ -0,0 +1,89 @@
@@ -563,6 +563,3 @@ index 000000000000..3da388c9ae58
 +		status = "disabled";
 +	};
 +};
--- 
-2.47.3
-

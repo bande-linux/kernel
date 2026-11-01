@@ -1,4 +1,4 @@
-From b05cc0e624ec48de911294b506e8b30464125152 Mon Sep 17 00:00:00 2001
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
 From: Michael Reeves <michael.reeves077@gmail.com>
 Date: Fri, 30 Jan 2026 21:27:05 +1100
 Subject: [PATCH] arm64: dts: apple: Add SMC to M3 (t8122) device tree
@@ -14,7 +14,7 @@ Signed-off-by: Michael Reeves <michael.reeves077@gmail.com>
  1 file changed, 27 insertions(+)
 
 diff --git a/arch/arm64/boot/dts/apple/t8122.dtsi b/arch/arm64/boot/dts/apple/t8122.dtsi
-index 1ee61c5b3409..648fcd518e01 100644
+index 1ee61c5..648fcd5 100644
 --- a/arch/arm64/boot/dts/apple/t8122.dtsi
 +++ b/arch/arm64/boot/dts/apple/t8122.dtsi
 @@ -397,6 +397,33 @@ wdt: watchdog@2e42b0000 {
@@ -51,6 +51,3 @@ index 1ee61c5b3409..648fcd518e01 100644
  		pinctrl_smc: pinctrl@2ec820000 {
  			compatible = "apple,t8122-pinctrl", "apple,t8103-pinctrl";
  			reg = <0x2 0xec820000 0x0 0x4000>;
--- 
-2.47.3
-

@@ -1,4 +1,4 @@
-From 53d994bff3e4675f61aef8dbbbf0ccdbd84aa55d Mon Sep 17 00:00:00 2001
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
 From: Hector Martin <marcan@marcan.st>
 Date: Mon, 20 Sep 2021 02:27:09 +0900
 Subject: [PATCH] arm64: apple: t8103: Add display controller related device
@@ -39,7 +39,7 @@ Signed-off-by: Janne Grunau <j@jannau.net>
  8 files changed, 159 insertions(+), 2 deletions(-)
 
 diff --git a/arch/arm64/boot/dts/apple/t8103-j274.dts b/arch/arm64/boot/dts/apple/t8103-j274.dts
-index 5304de8d7253..32bcfa1d4525 100644
+index 5304de8..32bcfa1 100644
 --- a/arch/arm64/boot/dts/apple/t8103-j274.dts
 +++ b/arch/arm64/boot/dts/apple/t8103-j274.dts
 @@ -22,6 +22,10 @@ aliases {
@@ -54,7 +54,7 @@ index 5304de8d7253..32bcfa1d4525 100644
  	brcm,board-type = "apple,atlantisb";
  };
 diff --git a/arch/arm64/boot/dts/apple/t8103-j293.dts b/arch/arm64/boot/dts/apple/t8103-j293.dts
-index 95f00d9b21d8..282fed395610 100644
+index 95f00d9..282fed3 100644
 --- a/arch/arm64/boot/dts/apple/t8103-j293.dts
 +++ b/arch/arm64/boot/dts/apple/t8103-j293.dts
 @@ -39,6 +39,20 @@ led-0 {
@@ -79,7 +79,7 @@ index 95f00d9b21d8..282fed395610 100644
  	brcm,board-type = "apple,honshu";
  };
 diff --git a/arch/arm64/boot/dts/apple/t8103-j313.dts b/arch/arm64/boot/dts/apple/t8103-j313.dts
-index d41defd42b99..14950fa924df 100644
+index d41defd..14950fa 100644
 --- a/arch/arm64/boot/dts/apple/t8103-j313.dts
 +++ b/arch/arm64/boot/dts/apple/t8103-j313.dts
 @@ -31,6 +31,20 @@ led-0 {
@@ -104,7 +104,7 @@ index d41defd42b99..14950fa924df 100644
  	brcm,board-type = "apple,shikoku";
  };
 diff --git a/arch/arm64/boot/dts/apple/t8103-j456.dts b/arch/arm64/boot/dts/apple/t8103-j456.dts
-index d277704b988b..0b89b44b12e6 100644
+index d277704..0b89b44 100644
 --- a/arch/arm64/boot/dts/apple/t8103-j456.dts
 +++ b/arch/arm64/boot/dts/apple/t8103-j456.dts
 @@ -22,6 +22,20 @@ aliases {
@@ -129,7 +129,7 @@ index d277704b988b..0b89b44b12e6 100644
  	brcm,board-type = "apple,capri";
  };
 diff --git a/arch/arm64/boot/dts/apple/t8103-j457.dts b/arch/arm64/boot/dts/apple/t8103-j457.dts
-index 2e7d344f88a5..c1007dc4385e 100644
+index 2e7d344..c1007dc 100644
 --- a/arch/arm64/boot/dts/apple/t8103-j457.dts
 +++ b/arch/arm64/boot/dts/apple/t8103-j457.dts
 @@ -22,6 +22,20 @@ aliases {
@@ -154,7 +154,7 @@ index 2e7d344f88a5..c1007dc4385e 100644
   * Adjust pcie0's iommu-map to account for the disabled port01.
   */
 diff --git a/arch/arm64/boot/dts/apple/t8103-jxxx.dtsi b/arch/arm64/boot/dts/apple/t8103-jxxx.dtsi
-index 96121fdb8468..a8ee3e6ebdf7 100644
+index 96121fd..a8ee3e6 100644
 --- a/arch/arm64/boot/dts/apple/t8103-jxxx.dtsi
 +++ b/arch/arm64/boot/dts/apple/t8103-jxxx.dtsi
 @@ -12,6 +12,10 @@
@@ -189,7 +189,7 @@ index 96121fdb8468..a8ee3e6ebdf7 100644
  		device_type = "memory";
  		reg = <0x8 0 0x2 0>; /* To be filled by loader */
 diff --git a/arch/arm64/boot/dts/apple/t8103-pmgr.dtsi b/arch/arm64/boot/dts/apple/t8103-pmgr.dtsi
-index 196912349077..f0ae11bf6ce6 100644
+index 1969123..f0ae11b 100644
 --- a/arch/arm64/boot/dts/apple/t8103-pmgr.dtsi
 +++ b/arch/arm64/boot/dts/apple/t8103-pmgr.dtsi
 @@ -652,7 +652,6 @@ ps_disp0_fe: power-controller@360 {
@@ -209,7 +209,7 @@ index 196912349077..f0ae11bf6ce6 100644
  	};
  };
 diff --git a/arch/arm64/boot/dts/apple/t8103.dtsi b/arch/arm64/boot/dts/apple/t8103.dtsi
-index f22d68b62a3c..d293b6b888d9 100644
+index f22d68b..d293b6b 100644
 --- a/arch/arm64/boot/dts/apple/t8103.dtsi
 +++ b/arch/arm64/boot/dts/apple/t8103.dtsi
 @@ -346,6 +346,14 @@ clk_200m: clock-200m {
@@ -320,6 +320,3 @@ index f22d68b62a3c..d293b6b888d9 100644
  		pinctrl_ap: pinctrl@23c100000 {
  			compatible = "apple,t8103-pinctrl", "apple,pinctrl";
  			reg = <0x2 0x3c100000 0x0 0x100000>;
--- 
-2.47.3
-

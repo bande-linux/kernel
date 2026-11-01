@@ -1,4 +1,4 @@
-From 65c4b328d59c53c793af5a14a1da94d0a0dcc728 Mon Sep 17 00:00:00 2001
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
 From: Janne Grunau <j@jannau.net>
 Date: Tue, 1 Apr 2025 20:20:45 +0200
 Subject: [PATCH] iommu: Handle translated device firmware mappings
@@ -11,7 +11,7 @@ Signed-off-by: Janne Grunau <j@jannau.net>
  2 files changed, 28 insertions(+), 5 deletions(-)
 
 diff --git a/drivers/iommu/iommu.c b/drivers/iommu/iommu.c
-index c8f2550edbc9..d8ef3d084a94 100644
+index c8f2550..d8ef3d0 100644
 --- a/drivers/iommu/iommu.c
 +++ b/drivers/iommu/iommu.c
 @@ -1215,21 +1215,29 @@ static int iommu_create_device_fw_mappings(struct iommu_domain *domain,
@@ -86,7 +86,7 @@ index c8f2550edbc9..d8ef3d084a94 100644
  	if (dev->iommu->attach_deferred) {
  		if (new_domain == group->default_domain)
 diff --git a/include/linux/iommu.h b/include/linux/iommu.h
-index dc4549caba67..6e0fabb43045 100644
+index dc4549c..6e0fabb 100644
 --- a/include/linux/iommu.h
 +++ b/include/linux/iommu.h
 @@ -877,6 +877,7 @@ struct iommu_fault_param {
@@ -105,6 +105,3 @@ index dc4549caba67..6e0fabb43045 100644
  };
  
  int iommu_device_register(struct iommu_device *iommu,
--- 
-2.47.3
-

@@ -1,4 +1,4 @@
-From bcbadee30df867f407c21a3a182a69e555df3f6c Mon Sep 17 00:00:00 2001
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
 From: Janne Grunau <j@jannau.net>
 Date: Fri, 26 Nov 2021 00:24:15 +0100
 Subject: [PATCH] arm64: dts: apple: t8103: Add spi3 keyboard node
@@ -14,7 +14,7 @@ Signed-off-by: Janne Grunau <j@jannau.net>
  2 files changed, 42 insertions(+)
 
 diff --git a/arch/arm64/boot/dts/apple/t8103-j293.dts b/arch/arm64/boot/dts/apple/t8103-j293.dts
-index 1d074b9e6018..d813ed7d14a9 100644
+index 1d074b9..d813ed7 100644
 --- a/arch/arm64/boot/dts/apple/t8103-j293.dts
 +++ b/arch/arm64/boot/dts/apple/t8103-j293.dts
 @@ -59,6 +59,27 @@ &typec1 {
@@ -46,7 +46,7 @@ index 1d074b9e6018..d813ed7d14a9 100644
  	status = "okay";
  };
 diff --git a/arch/arm64/boot/dts/apple/t8103-j313.dts b/arch/arm64/boot/dts/apple/t8103-j313.dts
-index f8b2b1637b9d..69556adbf2fc 100644
+index f8b2b16..69556ad 100644
 --- a/arch/arm64/boot/dts/apple/t8103-j313.dts
 +++ b/arch/arm64/boot/dts/apple/t8103-j313.dts
 @@ -55,4 +55,25 @@ &typec1 {
@@ -75,6 +75,3 @@ index f8b2b1637b9d..69556adbf2fc 100644
 +};
 +
  #include "hwmon-laptop.dtsi"
--- 
-2.47.3
-

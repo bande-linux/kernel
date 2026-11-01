@@ -1,4 +1,4 @@
-From 20d7b5cad4eb809156bc4d2fe7748b10d439e446 Mon Sep 17 00:00:00 2001
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
 From: Janne Grunau <j@jannau.net>
 Date: Sat, 30 May 2026 12:37:41 +0200
 Subject: [PATCH] arm64: dts: apple: Add PCIe nodes for t6031
@@ -13,7 +13,7 @@ Signed-off-by: Yureka <yuka@yuka.dev>
  2 files changed, 172 insertions(+)
 
 diff --git a/arch/arm64/boot/dts/apple/t6031-die0.dtsi b/arch/arm64/boot/dts/apple/t6031-die0.dtsi
-index c5571851ac07..4524419dae62 100644
+index c557185..4524419 100644
 --- a/arch/arm64/boot/dts/apple/t6031-die0.dtsi
 +++ b/arch/arm64/boot/dts/apple/t6031-die0.dtsi
 @@ -300,4 +300,169 @@ serial0: serial@391200000 {
@@ -187,7 +187,7 @@ index c5571851ac07..4524419dae62 100644
 +	};
  };
 diff --git a/arch/arm64/boot/dts/apple/t6031-gpio-pins.dtsi b/arch/arm64/boot/dts/apple/t6031-gpio-pins.dtsi
-index 5e4727e357d2..863f64d8fc3f 100644
+index 5e4727e..863f64d 100644
 --- a/arch/arm64/boot/dts/apple/t6031-gpio-pins.dtsi
 +++ b/arch/arm64/boot/dts/apple/t6031-gpio-pins.dtsi
 @@ -50,4 +50,11 @@ i2c8_pins: i2c8-pins {
@@ -202,6 +202,3 @@ index 5e4727e357d2..863f64d8fc3f 100644
 +			<APPLE_PINMUX(3, 1)>;
 +	};
  };
--- 
-2.47.3
-

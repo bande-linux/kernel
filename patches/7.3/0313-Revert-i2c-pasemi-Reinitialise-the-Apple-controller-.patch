@@ -1,0 +1,92 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: Mikael Hug <mikaelhug@gmail.com>
+Date: Sat, 31 Oct 2026 00:43:30 +0000
+Subject: [PATCH] Revert "i2c: pasemi: Reinitialise the Apple controller on
+ resume"
+
+This reverts commit cb3835606dbc66a08b55f99cc146f2dcdd2c418c.
+
+Test kernel 5 replaces the prep/hw-pm series with
+prep/hw-pm-v5-tablemax-v2, which carries the reworked versions.
+
+Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>
+Claude-Session: https://claude.ai/code/session_01UqitcmCNS6G33aQUShi39x
+---
+ drivers/i2c/busses/i2c-pasemi-core.c     |  7 -------
+ drivers/i2c/busses/i2c-pasemi-core.h     |  1 -
+ drivers/i2c/busses/i2c-pasemi-platform.c | 26 ------------------------
+ 3 files changed, 34 deletions(-)
+
+diff --git a/drivers/i2c/busses/i2c-pasemi-core.c b/drivers/i2c/busses/i2c-pasemi-core.c
+index 5afb837..c5f7a17 100644
+--- a/drivers/i2c/busses/i2c-pasemi-core.c
++++ b/drivers/i2c/busses/i2c-pasemi-core.c
+@@ -466,13 +466,6 @@ int pasemi_i2c_common_probe(struct pasemi_smbus *smbus)
+ }
+ EXPORT_SYMBOL_GPL(pasemi_i2c_common_probe);
+ 
+-void pasemi_i2c_reinit(struct pasemi_smbus *smbus)
+-{
+-	reg_write(smbus, REG_IMASK, 0);
+-	pasemi_reset(smbus);
+-}
+-EXPORT_SYMBOL_GPL(pasemi_i2c_reinit);
+-
+ irqreturn_t pasemi_irq_handler(int irq, void *dev_id)
+ {
+ 	struct pasemi_smbus *smbus = dev_id;
+diff --git a/drivers/i2c/busses/i2c-pasemi-core.h b/drivers/i2c/busses/i2c-pasemi-core.h
+index 2678df6..88821f4 100644
+--- a/drivers/i2c/busses/i2c-pasemi-core.h
++++ b/drivers/i2c/busses/i2c-pasemi-core.h
+@@ -22,6 +22,5 @@ struct pasemi_smbus {
+ };
+ 
+ int pasemi_i2c_common_probe(struct pasemi_smbus *smbus);
+-void pasemi_i2c_reinit(struct pasemi_smbus *smbus);
+ 
+ irqreturn_t pasemi_irq_handler(int irq, void *dev_id);
+diff --git a/drivers/i2c/busses/i2c-pasemi-platform.c b/drivers/i2c/busses/i2c-pasemi-platform.c
+index b310a12..a486a37 100644
+--- a/drivers/i2c/busses/i2c-pasemi-platform.c
++++ b/drivers/i2c/busses/i2c-pasemi-platform.c
+@@ -91,31 +91,6 @@ static int pasemi_platform_i2c_probe(struct platform_device *pdev)
+ 
+ static void pasemi_platform_i2c_remove(struct platform_device *pdev) { }
+ 
+-static int pasemi_platform_i2c_suspend_noirq(struct device *dev)
+-{
+-	struct pasemi_platform_i2c_data *data = dev_get_drvdata(dev);
+-
+-	i2c_mark_adapter_suspended(&data->smbus.adapter);
+-
+-	return 0;
+-}
+-
+-static int pasemi_platform_i2c_resume_noirq(struct device *dev)
+-{
+-	struct pasemi_platform_i2c_data *data = dev_get_drvdata(dev);
+-
+-	/* The controller loses its configuration when its power domain is off. */
+-	pasemi_i2c_reinit(&data->smbus);
+-	i2c_mark_adapter_resumed(&data->smbus.adapter);
+-
+-	return 0;
+-}
+-
+-static const struct dev_pm_ops pasemi_platform_i2c_pm_ops = {
+-	NOIRQ_SYSTEM_SLEEP_PM_OPS(pasemi_platform_i2c_suspend_noirq,
+-				  pasemi_platform_i2c_resume_noirq)
+-};
+-
+ static const struct of_device_id pasemi_platform_i2c_of_match[] = {
+ 	{ .compatible = "apple,t8103-i2c" },
+ 	{ .compatible = "apple,i2c" },
+@@ -127,7 +102,6 @@ static struct platform_driver pasemi_platform_i2c_driver = {
+ 	.driver	= {
+ 		.name			= "i2c-apple",
+ 		.of_match_table		= pasemi_platform_i2c_of_match,
+-		.pm			= pm_sleep_ptr(&pasemi_platform_i2c_pm_ops),
+ 	},
+ 	.probe	= pasemi_platform_i2c_probe,
+ 	.remove = pasemi_platform_i2c_remove,

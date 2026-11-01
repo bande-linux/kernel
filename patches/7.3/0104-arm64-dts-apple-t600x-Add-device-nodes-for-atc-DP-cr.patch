@@ -1,4 +1,4 @@
-From ed4320a637e39f8755261c0ead1d9de618828553 Mon Sep 17 00:00:00 2001
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
 From: Janne Grunau <j@jannau.net>
 Date: Mon, 6 Nov 2023 00:35:54 +0100
 Subject: [PATCH] arm64: dts: apple: t600x: Add device nodes for atc DP
@@ -12,7 +12,7 @@ Signed-off-by: Janne Grunau <j@jannau.net>
  2 files changed, 34 insertions(+)
 
 diff --git a/arch/arm64/boot/dts/apple/t6002-j375d.dts b/arch/arm64/boot/dts/apple/t6002-j375d.dts
-index df9b7d659c7b..78a5ad020fbd 100644
+index df9b7d6..78a5ad0 100644
 --- a/arch/arm64/boot/dts/apple/t6002-j375d.dts
 +++ b/arch/arm64/boot/dts/apple/t6002-j375d.dts
 @@ -197,11 +197,13 @@ atcphy5_usb3: endpoint {
@@ -30,7 +30,7 @@ index df9b7d659c7b..78a5ad020fbd 100644
  /* delete unused always-on power-domains on die 1 */
  
 diff --git a/arch/arm64/boot/dts/apple/t600x-dieX.dtsi b/arch/arm64/boot/dts/apple/t600x-dieX.dtsi
-index eb6e9a5135ea..4fae2ebd54e1 100644
+index eb6e9a5..4fae2eb 100644
 --- a/arch/arm64/boot/dts/apple/t600x-dieX.dtsi
 +++ b/arch/arm64/boot/dts/apple/t600x-dieX.dtsi
 @@ -302,6 +302,14 @@ DIE_NODE(atcphy0): phy@703000000 {
@@ -91,6 +91,3 @@ index eb6e9a5135ea..4fae2ebd54e1 100644
 +		status = "disabled";
 +	};
  };
--- 
-2.47.3
-

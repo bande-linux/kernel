@@ -1,4 +1,4 @@
-From e9424494b4ee65a12b2184a04f26a648f3f12dfd Mon Sep 17 00:00:00 2001
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
 From: Yureka Lilian <yureka@cyberchaos.dev>
 Date: Sun, 5 Jul 2026 15:17:25 +0200
 Subject: [PATCH] dt-bindings: pinctrl: apple,pinctrl: Add t8132 compatible
@@ -14,7 +14,7 @@ Signed-off-by: Yureka Lilian <yureka@cyberchaos.dev>
  1 file changed, 1 insertion(+)
 
 diff --git a/Documentation/devicetree/bindings/pinctrl/apple,pinctrl.yaml b/Documentation/devicetree/bindings/pinctrl/apple,pinctrl.yaml
-index f08d2c4f5784..bc6d41b63b5d 100644
+index f08d2c4..bc6d41b 100644
 --- a/Documentation/devicetree/bindings/pinctrl/apple,pinctrl.yaml
 +++ b/Documentation/devicetree/bindings/pinctrl/apple,pinctrl.yaml
 @@ -23,6 +23,7 @@ properties:
@@ -25,6 +25,3 @@ index f08d2c4f5784..bc6d41b63b5d 100644
            - const: apple,t8103-pinctrl
        - items:
            # Do not add additional SoC to this list.
--- 
-2.47.3
-

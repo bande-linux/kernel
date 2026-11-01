@@ -1,4 +1,4 @@
-From 2c4b846b687a650cd4c54382f0321a8d87de027a Mon Sep 17 00:00:00 2001
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
 From: Sasha Finkelstein <fnkl.kernel@gmail.com>
 Date: Sun, 10 Nov 2024 23:25:31 +0100
 Subject: [PATCH] arm64: dts: apple: Add SEP device tree nodes
@@ -13,7 +13,7 @@ Signed-off-by: Sasha Finkelstein <fnkl.kernel@gmail.com>
  4 files changed, 123 insertions(+)
 
 diff --git a/arch/arm64/boot/dts/apple/t600x-die0.dtsi b/arch/arm64/boot/dts/apple/t600x-die0.dtsi
-index 4913e9d82fb5..654574c90309 100644
+index 4913e9d..654574c 100644
 --- a/arch/arm64/boot/dts/apple/t600x-die0.dtsi
 +++ b/arch/arm64/boot/dts/apple/t600x-die0.dtsi
 @@ -249,6 +249,37 @@ dcp_dart: iommu@38b30c000 {
@@ -55,7 +55,7 @@ index 4913e9d82fb5..654574c90309 100644
  		compatible = "apple,t6000-dpaudio", "apple,dpaudio";
  		reg = <0x3 0x9b500000 0x0 0x4000>;
 diff --git a/arch/arm64/boot/dts/apple/t602x-die0.dtsi b/arch/arm64/boot/dts/apple/t602x-die0.dtsi
-index f21ab34d0fed..ad9c86a5ac1d 100644
+index f21ab34..ad9c86a 100644
 --- a/arch/arm64/boot/dts/apple/t602x-die0.dtsi
 +++ b/arch/arm64/boot/dts/apple/t602x-die0.dtsi
 @@ -435,6 +435,38 @@ display: display-subsystem {
@@ -98,7 +98,7 @@ index f21ab34d0fed..ad9c86a5ac1d 100644
  		compatible = "apple,t6020-fpwm", "apple,s5l-fpwm";
  		reg = <0x3 0x9b030000 0x0 0x4000>;
 diff --git a/arch/arm64/boot/dts/apple/t8103.dtsi b/arch/arm64/boot/dts/apple/t8103.dtsi
-index 22df49b472dc..6c07868755bd 100644
+index 22df49b..6c07868 100644
 --- a/arch/arm64/boot/dts/apple/t8103.dtsi
 +++ b/arch/arm64/boot/dts/apple/t8103.dtsi
 @@ -1291,6 +1291,36 @@ pinctrl_smc: pinctrl@23e820000 {
@@ -139,7 +139,7 @@ index 22df49b472dc..6c07868755bd 100644
  			compatible = "apple,t8103-pinctrl", "apple,pinctrl";
  			reg = <0x2 0x4a820000 0x0 0x4000>;
 diff --git a/arch/arm64/boot/dts/apple/t8112.dtsi b/arch/arm64/boot/dts/apple/t8112.dtsi
-index 527b754e60f3..a19528d579cf 100644
+index 527b754..a19528d 100644
 --- a/arch/arm64/boot/dts/apple/t8112.dtsi
 +++ b/arch/arm64/boot/dts/apple/t8112.dtsi
 @@ -1464,6 +1464,36 @@ mtp_hid: input@8000 {
@@ -179,6 +179,3 @@ index 527b754e60f3..a19528d579cf 100644
  		dispext0_dart: iommu@271304000 {
  			compatible = "apple,t8112-dart", "apple,t8110-dart";
  			reg = <0x2 0x71304000 0x0 0x4000>;
--- 
-2.47.3
-

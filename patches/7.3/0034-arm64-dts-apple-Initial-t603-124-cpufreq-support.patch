@@ -1,4 +1,4 @@
-From de16ff8316a8ed9d94de11d4957d43f0cca20060 Mon Sep 17 00:00:00 2001
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
 From: Yureka <yuka@yuka.dev>
 Date: Mon, 1 Jun 2026 19:18:39 +0200
 Subject: [PATCH] arm64: dts: apple: Initial t603[124] cpufreq support
@@ -11,7 +11,7 @@ Signed-off-by: Yureka <yuka@yuka.dev>
  2 files changed, 193 insertions(+)
 
 diff --git a/arch/arm64/boot/dts/apple/t6031-base.dtsi b/arch/arm64/boot/dts/apple/t6031-base.dtsi
-index 74e1fa51242d..060bd7ad766a 100644
+index 74e1fa5..060bd7a 100644
 --- a/arch/arm64/boot/dts/apple/t6031-base.dtsi
 +++ b/arch/arm64/boot/dts/apple/t6031-base.dtsi
 @@ -83,6 +83,8 @@ cpu_e00: cpu@0 {
@@ -309,7 +309,7 @@ index 74e1fa51242d..060bd7ad766a 100644
  		compatible = "arm,armv8-timer";
  		interrupt-parent = <&aic>;
 diff --git a/arch/arm64/boot/dts/apple/t6031-dieX.dtsi b/arch/arm64/boot/dts/apple/t6031-dieX.dtsi
-index 524a72f5483e..293557158029 100644
+index 524a72f..2935571 100644
 --- a/arch/arm64/boot/dts/apple/t6031-dieX.dtsi
 +++ b/arch/arm64/boot/dts/apple/t6031-dieX.dtsi
 @@ -7,6 +7,24 @@
@@ -337,6 +337,3 @@ index 524a72f5483e..293557158029 100644
  	DIE_NODE(pmgr): power-management@292280000 {
  		compatible = "apple,t6031-pmgr", "apple,t8103-pmgr", "syscon", "simple-mfd";
  		#address-cells = <1>;
--- 
-2.47.3
-

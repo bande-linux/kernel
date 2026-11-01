@@ -1,4 +1,4 @@
-From 0579b5be425853695204213a3109850ecc1fcf7c Mon Sep 17 00:00:00 2001
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
 From: Janne Grunau <j@jannau.net>
 Date: Sat, 27 Apr 2024 12:57:52 +0200
 Subject: [PATCH] arm64: apple: t8112-j473: Enable sio explicitly
@@ -12,7 +12,7 @@ Signed-off-by: Janne Grunau <j@jannau.net>
  1 file changed, 5 insertions(+)
 
 diff --git a/arch/arm64/boot/dts/apple/t8112-j473.dts b/arch/arm64/boot/dts/apple/t8112-j473.dts
-index e6d306bebc63..b9fa3cc427c2 100644
+index e6d306b..b9fa3cc 100644
 --- a/arch/arm64/boot/dts/apple/t8112-j473.dts
 +++ b/arch/arm64/boot/dts/apple/t8112-j473.dts
 @@ -66,6 +66,11 @@ &dcpext {
@@ -27,6 +27,3 @@ index e6d306bebc63..b9fa3cc427c2 100644
  &dpaudio1 {
  	status = "okay";
  };
--- 
-2.47.3
-

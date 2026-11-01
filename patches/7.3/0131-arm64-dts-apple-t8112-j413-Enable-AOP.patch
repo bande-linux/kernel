@@ -1,4 +1,4 @@
-From d2a8dbd3141a958b6b38b1264f23ef3af94c6f43 Mon Sep 17 00:00:00 2001
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
 From: Janne Grunau <j@jannau.net>
 Date: Mon, 30 Dec 2024 15:10:42 +0100
 Subject: [PATCH] arm64: dts: apple: t8112-j413: Enable AOP
@@ -10,7 +10,7 @@ Signed-off-by: Janne Grunau <j@jannau.net>
  1 file changed, 16 insertions(+)
 
 diff --git a/arch/arm64/boot/dts/apple/t8112-j413.dts b/arch/arm64/boot/dts/apple/t8112-j413.dts
-index 415ccfc79f92..2abef089e611 100644
+index 415ccfc..2abef08 100644
 --- a/arch/arm64/boot/dts/apple/t8112-j413.dts
 +++ b/arch/arm64/boot/dts/apple/t8112-j413.dts
 @@ -168,6 +168,22 @@ &fpwm1 {
@@ -36,6 +36,3 @@ index 415ccfc79f92..2abef089e611 100644
  &aop_audio {
  	apple,chassis-name = "J413";
  	apple,machine-kind = "MacBook Air";
--- 
-2.47.3
-

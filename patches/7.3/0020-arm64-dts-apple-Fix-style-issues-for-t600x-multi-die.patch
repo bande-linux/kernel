@@ -1,4 +1,4 @@
-From 4fdfa151a967cf9b85a1c20b131e08d313ffbed0 Mon Sep 17 00:00:00 2001
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
 From: Janne Grunau <j@jannau.net>
 Date: Tue, 1 Sep 2026 14:56:44 +0200
 Subject: [PATCH] arm64: dts: apple: Fix style issues for t600x multi die .dtsi
@@ -21,7 +21,7 @@ Signed-off-by: Janne Grunau <j@jannau.net>
  5 files changed, 19 insertions(+), 17 deletions(-)
 
 diff --git a/arch/arm64/boot/dts/apple/t6001.dtsi b/arch/arm64/boot/dts/apple/t6001.dtsi
-index 4fb934d7e71f..e0acf2ba078b 100644
+index 4fb934d..e0acf2b 100644
 --- a/arch/arm64/boot/dts/apple/t6001.dtsi
 +++ b/arch/arm64/boot/dts/apple/t6001.dtsi
 @@ -35,18 +35,17 @@ soc {
@@ -49,7 +49,7 @@ index 4fb934d7e71f..e0acf2ba078b 100644
  
  &aic {
 diff --git a/arch/arm64/boot/dts/apple/t6002.dtsi b/arch/arm64/boot/dts/apple/t6002.dtsi
-index 0f81fc612a2a..91ce9a665cab 100644
+index 0f81fc6..91ce9a6 100644
 --- a/arch/arm64/boot/dts/apple/t6002.dtsi
 +++ b/arch/arm64/boot/dts/apple/t6002.dtsi
 @@ -254,30 +254,28 @@ die1: soc@2200000000 {
@@ -92,7 +92,7 @@ index 0f81fc612a2a..91ce9a665cab 100644
  &aic {
  	affinities {
 diff --git a/arch/arm64/boot/dts/apple/t600x-die0.dtsi b/arch/arm64/boot/dts/apple/t600x-die0.dtsi
-index 49b23f3da980..122a566e75d1 100644
+index 49b23f3..122a566 100644
 --- a/arch/arm64/boot/dts/apple/t600x-die0.dtsi
 +++ b/arch/arm64/boot/dts/apple/t600x-die0.dtsi
 @@ -6,7 +6,7 @@
@@ -110,7 +110,7 @@ index 49b23f3da980..122a566e75d1 100644
  	};
 +};
 diff --git a/arch/arm64/boot/dts/apple/t600x-dieX.dtsi b/arch/arm64/boot/dts/apple/t600x-dieX.dtsi
-index 9676d5127039..7ab60873faf1 100644
+index 9676d51..7ab6087 100644
 --- a/arch/arm64/boot/dts/apple/t600x-dieX.dtsi
 +++ b/arch/arm64/boot/dts/apple/t600x-dieX.dtsi
 @@ -6,6 +6,7 @@
@@ -127,7 +127,7 @@ index 9676d5127039..7ab60873faf1 100644
  	};
 +};
 diff --git a/arch/arm64/boot/dts/apple/t600x-nvme.dtsi b/arch/arm64/boot/dts/apple/t600x-nvme.dtsi
-index 7dff738d317e..3a8e2299eac4 100644
+index 7dff738..3a8e229 100644
 --- a/arch/arm64/boot/dts/apple/t600x-nvme.dtsi
 +++ b/arch/arm64/boot/dts/apple/t600x-nvme.dtsi
 @@ -5,6 +5,7 @@
@@ -143,6 +143,3 @@ index 7dff738d317e..3a8e2299eac4 100644
  		resets = <&DIE_NODE(ps_ans2)>;
  	};
 +};
--- 
-2.47.3
-

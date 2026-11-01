@@ -1,4 +1,4 @@
-From 499fc3425f225aec38857625d7a4de6df049a58f Mon Sep 17 00:00:00 2001
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
 From: Sasha Finkelstein <k@chaosmail.tech>
 Date: Sat, 22 Aug 2026 21:22:41 +0200
 Subject: [PATCH] arm64: dts: apple: t8122: Add acio nodes
@@ -13,7 +13,7 @@ Signed-off-by: Sasha Finkelstein <k@chaosmail.tech>
  4 files changed, 321 insertions(+)
 
 diff --git a/arch/arm64/boot/dts/apple/t8122-jxxx.dtsi b/arch/arm64/boot/dts/apple/t8122-jxxx.dtsi
-index cfd2492c2701..6c67f340b2fb 100644
+index cfd2492..6c67f34 100644
 --- a/arch/arm64/boot/dts/apple/t8122-jxxx.dtsi
 +++ b/arch/arm64/boot/dts/apple/t8122-jxxx.dtsi
 @@ -16,6 +16,11 @@ aliases {
@@ -78,7 +78,7 @@ index cfd2492c2701..6c67f340b2fb 100644
  &dwc3_0 {
  	ports {
 diff --git a/arch/arm64/boot/dts/apple/t8122-usbpd-i2c.dtsi b/arch/arm64/boot/dts/apple/t8122-usbpd-i2c.dtsi
-index 1da3234ddef9..87fa10796099 100644
+index 1da3234..87fa107 100644
 --- a/arch/arm64/boot/dts/apple/t8122-usbpd-i2c.dtsi
 +++ b/arch/arm64/boot/dts/apple/t8122-usbpd-i2c.dtsi
 @@ -41,6 +41,12 @@ typec0_connector_ss: endpoint {
@@ -108,7 +108,7 @@ index 1da3234ddef9..87fa10796099 100644
  		};
  	};
 diff --git a/arch/arm64/boot/dts/apple/t8122-usbpd-spmi.dtsi b/arch/arm64/boot/dts/apple/t8122-usbpd-spmi.dtsi
-index 8cc104aefa5d..1f6f3f3d48ef 100644
+index 8cc104a..1f6f3f3 100644
 --- a/arch/arm64/boot/dts/apple/t8122-usbpd-spmi.dtsi
 +++ b/arch/arm64/boot/dts/apple/t8122-usbpd-spmi.dtsi
 @@ -44,6 +44,12 @@ typec0_connector_ss: endpoint {
@@ -138,7 +138,7 @@ index 8cc104aefa5d..1f6f3f3d48ef 100644
  		};
  	};
 diff --git a/arch/arm64/boot/dts/apple/t8122.dtsi b/arch/arm64/boot/dts/apple/t8122.dtsi
-index 3ca46ab59664..c13aa1c8fed7 100644
+index 3ca46ab..c13aa1c 100644
 --- a/arch/arm64/boot/dts/apple/t8122.dtsi
 +++ b/arch/arm64/boot/dts/apple/t8122.dtsi
 @@ -720,6 +720,20 @@ pcie_pins: pcie-pins {
@@ -419,6 +419,3 @@ index 3ca46ab59664..c13aa1c8fed7 100644
  		dwc3_1: usb@b02280000 {
  			compatible = "apple,t8122-dwc3", "apple,t8103-dwc3";
  			reg = <0xb 0x02280000 0x0 0xcd00>, <0xb 0x0228cd00 0x0 0x3200>;
--- 
-2.47.3
-

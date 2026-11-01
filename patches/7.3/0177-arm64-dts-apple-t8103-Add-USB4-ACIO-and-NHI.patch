@@ -1,4 +1,4 @@
-From 5aef5f950c7fe58818eec27f3318b8579367a73b Mon Sep 17 00:00:00 2001
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
 From: Sven Peter <sven@kernel.org>
 Date: Thu, 20 Aug 2026 20:37:25 +0200
 Subject: [PATCH] arm64: dts: apple: t8103: Add USB4 ACIO and NHI
@@ -15,7 +15,7 @@ Signed-off-by: Sven Peter <sven@kernel.org>
  2 files changed, 249 insertions(+)
 
 diff --git a/arch/arm64/boot/dts/apple/t8103-jxxx.dtsi b/arch/arm64/boot/dts/apple/t8103-jxxx.dtsi
-index a8ee3e6ebdf7..7b968da19383 100644
+index a8ee3e6..7b968da 100644
 --- a/arch/arm64/boot/dts/apple/t8103-jxxx.dtsi
 +++ b/arch/arm64/boot/dts/apple/t8103-jxxx.dtsi
 @@ -21,6 +21,10 @@ aliases {
@@ -108,7 +108,7 @@ index a8ee3e6ebdf7..7b968da19383 100644
   * Force the bus number assignments so that we can declare some of the
   * on-board devices and properties that are populated by the bootloader
 diff --git a/arch/arm64/boot/dts/apple/t8103.dtsi b/arch/arm64/boot/dts/apple/t8103.dtsi
-index 174fd47af215..e3a91f893107 100644
+index 174fd47..e3a91f8 100644
 --- a/arch/arm64/boot/dts/apple/t8103.dtsi
 +++ b/arch/arm64/boot/dts/apple/t8103.dtsi
 @@ -1347,6 +1347,14 @@ pinctrl_aop: pinctrl@24a820000 {
@@ -320,6 +320,3 @@ index 174fd47af215..e3a91f893107 100644
  		dwc3_1: usb@502280000 {
  			compatible = "apple,t8103-dwc3";
  			reg = <0x5 0x02280000 0x0 0xcd00>, <0x5 0x0228cd00 0x0 0x3200>;
--- 
-2.47.3
-

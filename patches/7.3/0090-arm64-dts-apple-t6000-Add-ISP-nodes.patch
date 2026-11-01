@@ -1,4 +1,4 @@
-From 8bc933e1623a2ad2ddbd66a4d11186e1b443285f Mon Sep 17 00:00:00 2001
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
 From: Eileen Yoon <eyn@gmx.com>
 Date: Sat, 2 Sep 2023 01:39:10 +0900
 Subject: [PATCH] arm64: dts: apple: t6000: Add ISP nodes
@@ -11,7 +11,7 @@ Signed-off-by: Eileen Yoon <eyn@gmx.com>
  2 files changed, 129 insertions(+)
 
 diff --git a/arch/arm64/boot/dts/apple/t600x-die0.dtsi b/arch/arm64/boot/dts/apple/t600x-die0.dtsi
-index 3bf402f48c53..e73ace6f7d84 100644
+index 3bf402f..e73ace6 100644
 --- a/arch/arm64/boot/dts/apple/t600x-die0.dtsi
 +++ b/arch/arm64/boot/dts/apple/t600x-die0.dtsi
 @@ -492,6 +492,55 @@ agx_mbox: mbox@406408000 {
@@ -71,7 +71,7 @@ index 3bf402f48c53..e73ace6f7d84 100644
  		compatible = "apple,t6000-dart";
  		reg = <0x5 0x81008000 0x0 0x4000>;
 diff --git a/arch/arm64/boot/dts/apple/t600x-pmgr.dtsi b/arch/arm64/boot/dts/apple/t600x-pmgr.dtsi
-index 84d5e126e232..b6a46662358a 100644
+index 84d5e12..b6a4666 100644
 --- a/arch/arm64/boot/dts/apple/t600x-pmgr.dtsi
 +++ b/arch/arm64/boot/dts/apple/t600x-pmgr.dtsi
 @@ -1452,6 +1452,86 @@ DIE_NODE(ps_venc_me1): power-controller@8020 {
@@ -161,6 +161,3 @@ index 84d5e126e232..b6a46662358a 100644
  };
  
  &DIE_NODE(pmgr_south) {
--- 
-2.47.3
-

@@ -1,4 +1,4 @@
-From 5099da5ba7cf17c76685c2078b13ef32309c3eb2 Mon Sep 17 00:00:00 2001
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
 From: Janne Grunau <j@jannau.net>
 Date: Mon, 22 Dec 2025 22:33:21 +0100
 Subject: [PATCH] arm64: dts: apple: t8103: Add ATC display crossbar devices
@@ -14,7 +14,7 @@ Signed-off-by: Janne Grunau <j@jannau.net>
  1 file changed, 14 insertions(+)
 
 diff --git a/arch/arm64/boot/dts/apple/t8103.dtsi b/arch/arm64/boot/dts/apple/t8103.dtsi
-index 4e5bf4e8997c..e8ec24a99b49 100644
+index 4e5bf4e..e8ec24a 100644
 --- a/arch/arm64/boot/dts/apple/t8103.dtsi
 +++ b/arch/arm64/boot/dts/apple/t8103.dtsi
 @@ -1567,6 +1567,13 @@ atcphy0: phy@383000000 {
@@ -45,6 +45,3 @@ index 4e5bf4e8997c..e8ec24a99b49 100644
  		pcie0_dart_0: iommu@681008000 {
  			compatible = "apple,t8103-dart";
  			reg = <0x6 0x81008000 0x0 0x4000>;
--- 
-2.47.3
-

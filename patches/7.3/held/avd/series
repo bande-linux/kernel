@@ -1,0 +1,5 @@
+0001-dt-bindings-media-Add-Apple-Video-Decoder.patch
+0002-media-apple-Add-Apple-Video-Decoder-driver.patch
+0003-media-apple-avd-Add-HEVC-decoding.patch
+0004-media-apple-avd-Add-VP9-decoding.patch
+0005-MAINTAINERS-Add-the-Apple-video-decoder-to-ARM-APPLE.patch

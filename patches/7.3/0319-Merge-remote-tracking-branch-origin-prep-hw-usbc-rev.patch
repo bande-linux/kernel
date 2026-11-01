@@ -1,0 +1,57 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: Mikael Hug <mikaelhug@gmail.com>
+Date: Sat, 31 Oct 2026 00:45:44 +0000
+Subject: [PATCH] Merge remote-tracking branch
+ 'origin/prep/hw-usbc-review-fixes' into prep/hw-test5
+
+---
+ drivers/usb/dwc3/dwc3-apple.c | 2 ++
+ drivers/usb/typec/tipd/core.c | 8 +++++++-
+ 2 files changed, 9 insertions(+), 1 deletion(-)
+
+diff --git a/drivers/usb/dwc3/dwc3-apple.c b/drivers/usb/dwc3/dwc3-apple.c
+index f2b0f79..b7d5c32 100644
+--- a/drivers/usb/dwc3/dwc3-apple.c
++++ b/drivers/usb/dwc3/dwc3-apple.c
+@@ -214,6 +214,8 @@ static int dwc3_apple_core_probe(struct dwc3_apple *appledwc)
+ 	ret = dwc3_core_probe(&probe_data);
+ 	if (ret) {
+ 		devres_release_group(appledwc->dev, group);
++		/* The PHY references are gone, make dwc3_core_init() get them again */
++		appledwc->dwc.phys_ready = false;
+ 		return ret;
+ 	}
+ 	devres_close_group(appledwc->dev, group);
+diff --git a/drivers/usb/typec/tipd/core.c b/drivers/usb/typec/tipd/core.c
+index 8e69ba6..9cac6ac 100644
+--- a/drivers/usb/typec/tipd/core.c
++++ b/drivers/usb/typec/tipd/core.c
+@@ -932,6 +932,9 @@ static void cd321x_update_work(struct work_struct *work)
+ 		tps->partner = typec_register_partner(tps->port, &desc);
+ 		if (IS_ERR(tps->partner)) {
+ 			dev_warn(tps->dev, "%s: failed to register partner\n", __func__);
++			/* Make the next update see a changed partner and retry */
++			memset(&cd321x->cur_partner_identity, 0,
++			       sizeof(cd321x->cur_partner_identity));
+ 			return;
+ 		}
+ 
+@@ -1872,7 +1875,8 @@ static void cd321x_remove(struct tps6598x *tps)
+ {
+ 	struct cd321x *cd321x = container_of(tps, struct cd321x, tps);
+ 
+-	cancel_delayed_work_sync(&cd321x->update_work);
++	/* Also keeps cd321x_dr_set() from queueing it again */
++	disable_delayed_work_sync(&cd321x->update_work);
+ }
+ 
+ static int tps6598x_probe(struct i2c_client *client)
+@@ -2016,6 +2020,8 @@ static int tps6598x_probe(struct i2c_client *client)
+ 	return 0;
+ 
+ err_disconnect:
++	if (tps->data->remove)
++		tps->data->remove(tps);
+ 	tps6598x_disconnect(tps, 0);
+ err_unregister_port:
+ 	tps->data->unregister_port(tps);

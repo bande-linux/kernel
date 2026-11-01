@@ -1,4 +1,4 @@
-From 7984ad8ded1d993bf29f6b40c00ceaf042f2aa27 Mon Sep 17 00:00:00 2001
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
 From: Michael Reeves <michael.reeves077@gmail.com>
 Date: Fri, 30 Jan 2026 22:06:07 +1100
 Subject: [PATCH] arm64: dts: apple: t8122: Add MTP device nodes to Macbook
@@ -15,7 +15,7 @@ Signed-off-by: Michael Reeves <michael.reeves077@gmail.com>
  3 files changed, 117 insertions(+)
 
 diff --git a/arch/arm64/boot/dts/apple/t8122-j504.dts b/arch/arm64/boot/dts/apple/t8122-j504.dts
-index d285ae37f30a..54950a66f89e 100644
+index d285ae3..54950a6 100644
 --- a/arch/arm64/boot/dts/apple/t8122-j504.dts
 +++ b/arch/arm64/boot/dts/apple/t8122-j504.dts
 @@ -62,5 +62,44 @@ &fpwm1 {
@@ -64,7 +64,7 @@ index d285ae37f30a..54950a66f89e 100644
  #include "hwmon-fan-dual.dtsi"
  #include "hwmon-laptop.dtsi"
 diff --git a/arch/arm64/boot/dts/apple/t8122-j613.dts b/arch/arm64/boot/dts/apple/t8122-j613.dts
-index 222fa8477249..7f5e0be62da2 100644
+index 222fa84..7f5e0be 100644
 --- a/arch/arm64/boot/dts/apple/t8122-j613.dts
 +++ b/arch/arm64/boot/dts/apple/t8122-j613.dts
 @@ -42,4 +42,43 @@ &fpwm1 {
@@ -112,7 +112,7 @@ index 222fa8477249..7f5e0be62da2 100644
 +
  #include "hwmon-laptop.dtsi"
 diff --git a/arch/arm64/boot/dts/apple/t8122-j615.dts b/arch/arm64/boot/dts/apple/t8122-j615.dts
-index 3366d92c0228..13e1a3158c2c 100644
+index 3366d92..13e1a31 100644
 --- a/arch/arm64/boot/dts/apple/t8122-j615.dts
 +++ b/arch/arm64/boot/dts/apple/t8122-j615.dts
 @@ -42,4 +42,43 @@ &fpwm1 {
@@ -159,6 +159,3 @@ index 3366d92c0228..13e1a3158c2c 100644
 +};
 +
  #include "hwmon-laptop.dtsi"
--- 
-2.47.3
-

@@ -1,4 +1,4 @@
-From f29e6bb9a01912fd838352c94ceff3d1a2175e85 Mon Sep 17 00:00:00 2001
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
 From: Janne Grunau <j@jannau.net>
 Date: Sat, 4 Nov 2023 22:44:17 +0100
 Subject: [PATCH] arm64: dts: apple: Disable ps_isp_sys unless it is used
@@ -16,7 +16,7 @@ Signed-off-by: Janne Grunau <j@jannau.net>
  4 files changed, 7 insertions(+)
 
 diff --git a/arch/arm64/boot/dts/apple/isp-common.dtsi b/arch/arm64/boot/dts/apple/isp-common.dtsi
-index 09564eedc035..dd6ec1ab3fce 100644
+index 09564ee..dd6ec1a 100644
 --- a/arch/arm64/boot/dts/apple/isp-common.dtsi
 +++ b/arch/arm64/boot/dts/apple/isp-common.dtsi
 @@ -41,3 +41,7 @@ &isp_dart1 {
@@ -28,7 +28,7 @@ index 09564eedc035..dd6ec1ab3fce 100644
 +	status = "okay";
 +};
 diff --git a/arch/arm64/boot/dts/apple/t600x-pmgr.dtsi b/arch/arm64/boot/dts/apple/t600x-pmgr.dtsi
-index b6a46662358a..cf274aaf632c 100644
+index b6a4666..cf274aa 100644
 --- a/arch/arm64/boot/dts/apple/t600x-pmgr.dtsi
 +++ b/arch/arm64/boot/dts/apple/t600x-pmgr.dtsi
 @@ -1370,6 +1370,7 @@ DIE_NODE(ps_isp_sys): power-controller@3a8 {
@@ -40,7 +40,7 @@ index b6a46662358a..cf274aaf632c 100644
  
  	DIE_NODE(ps_venc_sys): power-controller@3b0 {
 diff --git a/arch/arm64/boot/dts/apple/t8103-pmgr.dtsi b/arch/arm64/boot/dts/apple/t8103-pmgr.dtsi
-index 4d1422d7e8b5..10facd0c01e4 100644
+index 4d1422d..10facd0 100644
 --- a/arch/arm64/boot/dts/apple/t8103-pmgr.dtsi
 +++ b/arch/arm64/boot/dts/apple/t8103-pmgr.dtsi
 @@ -812,6 +812,7 @@ ps_isp_sys: power-controller@400 {
@@ -52,7 +52,7 @@ index 4d1422d7e8b5..10facd0c01e4 100644
  
  	ps_venc_sys: power-controller@408 {
 diff --git a/arch/arm64/boot/dts/apple/t8112-pmgr.dtsi b/arch/arm64/boot/dts/apple/t8112-pmgr.dtsi
-index 9ed831031ae6..102ff3ad0535 100644
+index 9ed8310..102ff3a 100644
 --- a/arch/arm64/boot/dts/apple/t8112-pmgr.dtsi
 +++ b/arch/arm64/boot/dts/apple/t8112-pmgr.dtsi
 @@ -821,6 +821,7 @@ ps_isp_sys: power-controller@438 {
@@ -63,6 +63,3 @@ index 9ed831031ae6..102ff3ad0535 100644
  	};
  
  	ps_venc_sys: power-controller@440 {
--- 
-2.47.3
-

@@ -1,4 +1,4 @@
-From 04ffed428e06b984f33f28953429a93ffb288d7c Mon Sep 17 00:00:00 2001
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
 From: Janne Grunau <j@jannau.net>
 Date: Mon, 13 Nov 2023 23:58:10 +0100
 Subject: [PATCH] arm64: apple: t8112-pmgr: SIO: Add audio, spi and uart
@@ -19,7 +19,7 @@ Signed-off-by: Janne Grunau <j@jannau.net>
  1 file changed, 1 insertion(+), 1 deletion(-)
 
 diff --git a/arch/arm64/boot/dts/apple/t8112-pmgr.dtsi b/arch/arm64/boot/dts/apple/t8112-pmgr.dtsi
-index 102ff3ad0535..ab8ec9bd4e44 100644
+index 102ff3a..ab8ec9b 100644
 --- a/arch/arm64/boot/dts/apple/t8112-pmgr.dtsi
 +++ b/arch/arm64/boot/dts/apple/t8112-pmgr.dtsi
 @@ -176,7 +176,7 @@ ps_sio_cpu: power-controller@1c0 {
@@ -31,6 +31,3 @@ index 102ff3ad0535..ab8ec9bd4e44 100644
  	};
  
  	ps_fpwm0: power-controller@1c8 {
--- 
-2.47.3
-

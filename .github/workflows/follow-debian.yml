@@ -41,6 +41,17 @@ jobs:
           version=$(scripts/version.sh "$debian")
           published=$(scripts/published.sh)
           build=true
+          # We only build Debian's kernel with our Mac patches: while Debian is on an older series
+          # than our newest patches (testing behind experimental), there is nothing to build.
+          set +e
+          scripts/series.sh "$debian" > /dev/null
+          series_rc=$?
+          set -e
+          if [ $series_rc = 4 ] || [ $series_rc = 1 ]; then
+            echo "Debian: linux $debian; no build: our patches are for a newer series, paused until Debian reaches it"
+            echo "build=false" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
           built=$(gh api "repos/$GITHUB_REPOSITORY/actions/artifacts?name=bande-version-$version" \
             --jq '[.artifacts[] | select(.expired | not)] | length')
           if [ -z "$TEST_VERSION" ] && [ "$FORCE" != true ] && { [ "$published" = "$version" ] || [ "$built" -gt 0 ]; }; then
@@ -105,8 +116,9 @@ jobs:
           docker exec -u fixer build bash -c 'curl -fsSL https://claude.ai/install.sh | bash -s stable >/dev/null'
           docker exec -u fixer -e CLAUDE_CODE_OAUTH_TOKEN -w /work build bash -c '
             src=$(ls -d /work/linux-*/)
+            series=$(ls -d /repo/patches/$(echo "'"${DEBIAN_VERSION%%-*}"'" | sed "s/~.*//" | cut -d. -f1-2))
             ~/.local/bin/claude -p "$(cat /repo/scripts/refresh-prompt.md)
-          The Debian source is $src, version '"$DEBIAN_VERSION"'. Our patches are listed in /repo/patches/series." \
+          The Debian source is $src, version '"$DEBIAN_VERSION"'. Our patches are in $series/, listed in $series/series." \
               --model claude-opus-5-5 --effort high --permission-mode dontAsk --max-turns 300 \
               --add-dir /repo/patches \
               --allowedTools "Read" "Edit" "Write" "Glob" "Grep" "Bash(quilt *)" "Bash(cd *)" "Bash(ls *)" \
@@ -114,6 +126,18 @@ jobs:
           docker exec build sh -c 'rm -rf /work/*'
           docker exec build /repo/scripts/build.sh fetch "$DEBIAN_VERSION" /work
           docker exec build sh -c '/repo/scripts/prepare.sh /work/linux-*/ "$0"' "$VERSION"
+
+      - name: Keep the refreshed patches on a branch
+        if: steps.prepare.outputs.rc == '3'
+        run: |
+          # The refresh and the build may outlast the job's time limit; keep the refreshed series
+          # on its own branch, so it isn't lost. It reaches main only after the checks below.
+          git config user.name "Bande CI"
+          git config user.email "ci@bande-linux.github.io"
+          git checkout -b "refresh/linux-${DEBIAN_VERSION//[~:]/-}"
+          git add patches
+          git commit -m "Refresh the patches for Debian linux $DEBIAN_VERSION (by Claude)"
+          git push -f origin HEAD
 
       - name: Build the flavour and bande-os-apple
         run: docker exec build /repo/scripts/build.sh compile "$VERSION" /work /out
@@ -124,14 +148,17 @@ jobs:
       - name: Boot it in QEMU
         run: docker exec build /repo/scripts/qemu-boot.sh /out
 
-      - name: Commit refreshed patches
-        if: steps.prepare.outputs.rc == '3'
+      - name: Commit refreshed or new patches
+        if: inputs.debian_version == ''
         run: |
+          # Only now, with the build and its checks passed: a refreshed series (Claude) or a new
+          # one prepare.sh started from our newest. A test build never commits.
           git config user.name "Bande CI"
           git config user.email "ci@bande-linux.github.io"
           git add patches
-          git commit -m "Refresh the patches for Debian linux $DEBIAN_VERSION (by Claude)"
-          git push origin HEAD:main
+          git diff --cached --quiet || git commit -m "Port the patches to Debian linux $DEBIAN_VERSION"
+          [ "$(git rev-parse HEAD)" = "$(git rev-parse origin/main)" ] || git push origin HEAD:main
+          [ "${{ steps.prepare.outputs.rc }}" != 3 ] || git push origin --delete "refresh/linux-${DEBIAN_VERSION//[~:]/-}"
 
       - name: Name the version
         run: echo "$VERSION" > "$RUNNER_TEMP/version"

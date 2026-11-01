@@ -1,4 +1,4 @@
-From a7ee1bf8ab4686145ade60a59e8715626cccce09 Mon Sep 17 00:00:00 2001
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
 From: James Calligeros <jcalligeros99@gmail.com>
 Date: Sun, 21 Jun 2026 21:13:03 +1000
 Subject: [PATCH] arm64: dts: apple: t8112: Use new codec bus keeper config
@@ -12,7 +12,7 @@ Signed-off-by: James Calligeros <jcalligeros99@gmail.com>
  3 files changed, 12 insertions(+), 6 deletions(-)
 
 diff --git a/arch/arm64/boot/dts/apple/t8112-j413.dts b/arch/arm64/boot/dts/apple/t8112-j413.dts
-index 6221935058c7..6a49b6727e3f 100644
+index 6221935..6a49b67 100644
 --- a/arch/arm64/boot/dts/apple/t8112-j413.dts
 +++ b/arch/arm64/boot/dts/apple/t8112-j413.dts
 @@ -111,7 +111,6 @@ speaker_left_woof: codec@38 {
@@ -43,7 +43,7 @@ index 6221935058c7..6a49b6727e3f 100644
  			cpu {
  				sound-dai = <&mca 0>, <&mca 1>;
 diff --git a/arch/arm64/boot/dts/apple/t8112-j415.dts b/arch/arm64/boot/dts/apple/t8112-j415.dts
-index 6c5175af6f3e..7dfd891fd4c1 100644
+index 6c5175a..7dfd891 100644
 --- a/arch/arm64/boot/dts/apple/t8112-j415.dts
 +++ b/arch/arm64/boot/dts/apple/t8112-j415.dts
 @@ -111,7 +111,6 @@ speaker_left_woof1: codec@38 {
@@ -74,7 +74,7 @@ index 6c5175af6f3e..7dfd891fd4c1 100644
  			cpu {
  				sound-dai = <&mca 0>, <&mca 1>;
 diff --git a/arch/arm64/boot/dts/apple/t8112-j493.dts b/arch/arm64/boot/dts/apple/t8112-j493.dts
-index 3a7b7cc5fcb8..49d3c8548dcf 100644
+index 3a7b7cc..49d3c85 100644
 --- a/arch/arm64/boot/dts/apple/t8112-j493.dts
 +++ b/arch/arm64/boot/dts/apple/t8112-j493.dts
 @@ -158,7 +158,6 @@ speaker_left_front: codec@39 {
@@ -104,6 +104,3 @@ index 3a7b7cc5fcb8..49d3c8548dcf 100644
  
  			cpu {
  				sound-dai = <&mca 0>, <&mca 1>;
--- 
-2.47.3
-

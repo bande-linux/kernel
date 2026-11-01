@@ -1,4 +1,4 @@
-From b6676565a98e67be4b0bc949546f2c727f55e996 Mon Sep 17 00:00:00 2001
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
 From: Janne Grunau <j@jannau.net>
 Date: Sun, 28 Jun 2026 19:55:44 +0200
 Subject: [PATCH] arm64: dts: apple: t603x/t8122-j504: Use new codec bus keeper
@@ -12,7 +12,7 @@ Signed-off-by: Janne Grunau <j@jannau.net>
  2 files changed, 8 insertions(+), 4 deletions(-)
 
 diff --git a/arch/arm64/boot/dts/apple/t603x-j514-j516.dtsi b/arch/arm64/boot/dts/apple/t603x-j514-j516.dtsi
-index 592db69e1720..368619ac2631 100644
+index 592db69..368619a 100644
 --- a/arch/arm64/boot/dts/apple/t603x-j514-j516.dtsi
 +++ b/arch/arm64/boot/dts/apple/t603x-j514-j516.dtsi
 @@ -128,7 +128,6 @@ speaker_left_woof1: codec@38 {
@@ -43,7 +43,7 @@ index 592db69e1720..368619ac2631 100644
  			cpu {
  				sound-dai = <&mca 0>, <&mca 1>;
 diff --git a/arch/arm64/boot/dts/apple/t8122-j504.dts b/arch/arm64/boot/dts/apple/t8122-j504.dts
-index 47441684f77a..f45c19883be5 100644
+index 4744168..f45c198 100644
 --- a/arch/arm64/boot/dts/apple/t8122-j504.dts
 +++ b/arch/arm64/boot/dts/apple/t8122-j504.dts
 @@ -124,7 +124,6 @@ speaker_left_woof1: codec@38 {
@@ -73,6 +73,3 @@ index 47441684f77a..f45c19883be5 100644
  
  			cpu {
  				sound-dai = <&mca 0>, <&mca 1>;
--- 
-2.47.3
-

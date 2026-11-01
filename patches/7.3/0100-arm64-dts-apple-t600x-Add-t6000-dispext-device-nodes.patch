@@ -1,4 +1,4 @@
-From bb9227745f862664c4f65be02f40986905423b9d Mon Sep 17 00:00:00 2001
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
 From: Janne Grunau <j@jannau.net>
 Date: Thu, 20 Oct 2022 20:44:02 +0200
 Subject: [PATCH] arm64: dts: apple: t600x: Add t6000 dispext device nodes
@@ -19,7 +19,7 @@ Signed-off-by: Janne Grunau <j@jannau.net>
  4 files changed, 170 insertions(+), 3 deletions(-)
 
 diff --git a/arch/arm64/boot/dts/apple/t6002.dtsi b/arch/arm64/boot/dts/apple/t6002.dtsi
-index 3f391ce6e33d..e16717f6bdcb 100644
+index 3f391ce..e16717f 100644
 --- a/arch/arm64/boot/dts/apple/t6002.dtsi
 +++ b/arch/arm64/boot/dts/apple/t6002.dtsi
 @@ -303,6 +303,16 @@ &cpu_p20 &cpu_p21 &cpu_p22 &cpu_p23
@@ -40,7 +40,7 @@ index 3f391ce6e33d..e16717f6bdcb 100644
  	// On t6002, the die0 GPU power domain needs both AFR power domains
  	power-domains = <&ps_afr>, <&ps_afr_die1>;
 diff --git a/arch/arm64/boot/dts/apple/t600x-common.dtsi b/arch/arm64/boot/dts/apple/t600x-common.dtsi
-index d07ab3ef80d9..070904ee7e87 100644
+index d07ab3e..070904e 100644
 --- a/arch/arm64/boot/dts/apple/t600x-common.dtsi
 +++ b/arch/arm64/boot/dts/apple/t600x-common.dtsi
 @@ -441,6 +441,34 @@ clk_disp0: clock-disp0 {
@@ -79,7 +79,7 @@ index d07ab3ef80d9..070904ee7e87 100644
  	 * This is a fabulated representation of the input clock
  	 * to NCO since we don't know the true clock tree.
 diff --git a/arch/arm64/boot/dts/apple/t600x-dieX.dtsi b/arch/arm64/boot/dts/apple/t600x-dieX.dtsi
-index 7ab60873faf1..eb6e9a5135ea 100644
+index 7ab6087..eb6e9a5 100644
 --- a/arch/arm64/boot/dts/apple/t600x-dieX.dtsi
 +++ b/arch/arm64/boot/dts/apple/t600x-dieX.dtsi
 @@ -25,6 +25,134 @@ DIE_NODE(cpufreq_p1): cpufreq@212e20000 {
@@ -218,7 +218,7 @@ index 7ab60873faf1..eb6e9a5135ea 100644
  		compatible = "apple,t6000-pmgr", "apple,pmgr", "syscon", "simple-mfd";
  		#address-cells = <1>;
 diff --git a/arch/arm64/boot/dts/apple/t600x-j314-j316.dtsi b/arch/arm64/boot/dts/apple/t600x-j314-j316.dtsi
-index 5b9143756217..9483e74ac650 100644
+index 5b91437..9483e74 100644
 --- a/arch/arm64/boot/dts/apple/t600x-j314-j316.dtsi
 +++ b/arch/arm64/boot/dts/apple/t600x-j314-j316.dtsi
 @@ -407,10 +407,11 @@ dwc3_2_ss: endpoint {
@@ -236,6 +236,3 @@ index 5b9143756217..9483e74ac650 100644
  
  /* ATC3 is used for DisplayPort -> HDMI only */
  &dwc3_3_dart_0 {
--- 
-2.47.3
-

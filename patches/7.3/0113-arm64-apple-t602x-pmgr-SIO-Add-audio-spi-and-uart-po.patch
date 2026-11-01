@@ -1,4 +1,4 @@
-From f75ababe6fd920136fe7fffb3644baf1956d963c Mon Sep 17 00:00:00 2001
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
 From: Janne Grunau <j@jannau.net>
 Date: Sun, 21 Apr 2024 18:01:37 +0200
 Subject: [PATCH] arm64: apple: t602x: pmgr: SIO: Add audio, spi and uart
@@ -19,7 +19,7 @@ Signed-off-by: Janne Grunau <j@jannau.net>
  1 file changed, 1 insertion(+), 1 deletion(-)
 
 diff --git a/arch/arm64/boot/dts/apple/t602x-pmgr.dtsi b/arch/arm64/boot/dts/apple/t602x-pmgr.dtsi
-index 7d70e8bb0818..b9233f252e6c 100644
+index 7d70e8b..b9233f2 100644
 --- a/arch/arm64/boot/dts/apple/t602x-pmgr.dtsi
 +++ b/arch/arm64/boot/dts/apple/t602x-pmgr.dtsi
 @@ -1260,7 +1260,7 @@ DIE_NODE(ps_sio_cpu): power-controller@1e0 {
@@ -31,6 +31,3 @@ index 7d70e8bb0818..b9233f252e6c 100644
  	};
  
  	DIE_NODE(ps_fpwm0): power-controller@1e8 {
--- 
-2.47.3
-

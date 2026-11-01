@@ -1,4 +1,4 @@
-From b12391534c165bb1490735b6642a85130ba871ec Mon Sep 17 00:00:00 2001
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
 From: Janne Grunau <j@jannau.net>
 Date: Sun, 30 Mar 2025 23:53:20 +0200
 Subject: [PATCH] iommu/dart: Add iommu_ops for locked DARTs
@@ -23,7 +23,7 @@ Signed-off-by: Janne Grunau <j@jannau.net>
  1 file changed, 163 insertions(+), 4 deletions(-)
 
 diff --git a/drivers/iommu/apple-dart.c b/drivers/iommu/apple-dart.c
-index 28a63374f944..e70cc33103ef 100644
+index 28a6337..e70cc33 100644
 --- a/drivers/iommu/apple-dart.c
 +++ b/drivers/iommu/apple-dart.c
 @@ -235,6 +235,8 @@ struct apple_dart {
@@ -278,6 +278,3 @@ index 28a63374f944..e70cc33103ef 100644
  		ret = iommu_device_register(&dart->iommu, &apple_dart_iommu_no_bypass_ops, dev);
  	else
  		ret = iommu_device_register(&dart->iommu, &apple_dart_iommu_ops, dev);
--- 
-2.47.3
-

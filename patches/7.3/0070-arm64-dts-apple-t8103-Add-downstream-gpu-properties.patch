@@ -1,4 +1,4 @@
-From 12c6ad72cf7fbf0e8da4b25037c44e02a090153a Mon Sep 17 00:00:00 2001
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
 From: Asahi Lina <lina@asahilina.net>
 Date: Thu, 18 Aug 2022 02:15:43 +0900
 Subject: [PATCH] arm64: dts: apple: t8103: Add downstream gpu properties
@@ -15,7 +15,7 @@ Signed-off-by: Asahi Lina <lina@asahilina.net>
  4 files changed, 97 insertions(+), 7 deletions(-)
 
 diff --git a/arch/arm64/boot/dts/apple/t8103-j274.dts b/arch/arm64/boot/dts/apple/t8103-j274.dts
-index 32bcfa1d4525..29e326ae4000 100644
+index 32bcfa1..29e326a 100644
 --- a/arch/arm64/boot/dts/apple/t8103-j274.dts
 +++ b/arch/arm64/boot/dts/apple/t8103-j274.dts
 @@ -132,4 +132,8 @@ codec {
@@ -28,7 +28,7 @@ index 32bcfa1d4525..29e326ae4000 100644
 +
  #include "hwmon-mini.dtsi"
 diff --git a/arch/arm64/boot/dts/apple/t8103-j456.dts b/arch/arm64/boot/dts/apple/t8103-j456.dts
-index 0b89b44b12e6..c384d4dfd19a 100644
+index 0b89b44..c384d4d 100644
 --- a/arch/arm64/boot/dts/apple/t8103-j456.dts
 +++ b/arch/arm64/boot/dts/apple/t8103-j456.dts
 @@ -133,3 +133,7 @@ codec {
@@ -40,7 +40,7 @@ index 0b89b44b12e6..c384d4dfd19a 100644
 +	apple,perf-base-pstate = <3>;
 +};
 diff --git a/arch/arm64/boot/dts/apple/t8103-j457.dts b/arch/arm64/boot/dts/apple/t8103-j457.dts
-index c1007dc4385e..28e3eedfc35b 100644
+index c1007dc..28e3eed 100644
 --- a/arch/arm64/boot/dts/apple/t8103-j457.dts
 +++ b/arch/arm64/boot/dts/apple/t8103-j457.dts
 @@ -114,3 +114,7 @@ codec {
@@ -52,7 +52,7 @@ index c1007dc4385e..28e3eedfc35b 100644
 +	apple,perf-base-pstate = <3>;
 +};
 diff --git a/arch/arm64/boot/dts/apple/t8103.dtsi b/arch/arm64/boot/dts/apple/t8103.dtsi
-index d293b6b888d9..dc6e666b2dce 100644
+index d293b6b..dc6e666 100644
 --- a/arch/arm64/boot/dts/apple/t8103.dtsi
 +++ b/arch/arm64/boot/dts/apple/t8103.dtsi
 @@ -303,6 +303,50 @@ opp15 {
@@ -179,6 +179,3 @@ index d293b6b888d9..dc6e666b2dce 100644
  		};
  
  		agx_mbox: mbox@206408000 {
--- 
-2.47.3
-

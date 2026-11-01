@@ -1,4 +1,4 @@
-From 9689be8c8f2d16269ed98efbbabd78f1240bb053 Mon Sep 17 00:00:00 2001
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
 From: Michael Reeves <michael.reeves077@gmail.com>
 Date: Fri, 30 Jan 2026 21:43:14 +1100
 Subject: [PATCH] arm64: dts: apple: Add MTP DockChannel to M3 device tree
@@ -22,7 +22,7 @@ Signed-off-by: Michael Reeves <michael.reeves077@gmail.com>
  1 file changed, 77 insertions(+)
 
 diff --git a/arch/arm64/boot/dts/apple/t8122.dtsi b/arch/arm64/boot/dts/apple/t8122.dtsi
-index d2ce284b69a8..8db99fc574f0 100644
+index d2ce284..8db99fc 100644
 --- a/arch/arm64/boot/dts/apple/t8122.dtsi
 +++ b/arch/arm64/boot/dts/apple/t8122.dtsi
 @@ -827,6 +827,83 @@ pinctrl_aop: pinctrl@2f4824000 {
@@ -109,6 +109,3 @@ index d2ce284b69a8..8db99fc574f0 100644
  		ans_mbox: mbox@309408000 {
  			compatible = "apple,t8122-asc-mailbox", "apple,asc-mailbox-v4";
  			reg = <0x3 0x09408000 0x0 0x4000>;
--- 
-2.47.3
-

@@ -1,4 +1,4 @@
-From 5a3515a74b21040146368ddc75b3f7ed16b8e89d Mon Sep 17 00:00:00 2001
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
 From: Janne Grunau <j@jannau.net>
 Date: Mon, 22 Dec 2025 22:33:21 +0100
 Subject: [PATCH] arm64: dts: apple: t8112: Add ATC display crossbar devices
@@ -14,7 +14,7 @@ Signed-off-by: Janne Grunau <j@jannau.net>
  1 file changed, 14 insertions(+)
 
 diff --git a/arch/arm64/boot/dts/apple/t8112.dtsi b/arch/arm64/boot/dts/apple/t8112.dtsi
-index e894f73b335c..f7a7693c850c 100644
+index e894f73..f7a7693 100644
 --- a/arch/arm64/boot/dts/apple/t8112.dtsi
 +++ b/arch/arm64/boot/dts/apple/t8112.dtsi
 @@ -1656,6 +1656,13 @@ atcphy0: phy@383000000 {
@@ -45,6 +45,3 @@ index e894f73b335c..f7a7693c850c 100644
  		pcie0_dart: iommu@681008000 {
  			compatible = "apple,t8110-dart";
  			reg = <0x6 0x81008000 0x0 0x4000>;
--- 
-2.47.3
-

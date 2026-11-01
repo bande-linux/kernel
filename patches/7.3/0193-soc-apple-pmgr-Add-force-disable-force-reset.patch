@@ -1,4 +1,4 @@
-From ec9cc63301ddf76eed4a70cfe388441d0e7d4bf9 Mon Sep 17 00:00:00 2001
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
 From: Asahi Lina <lina@asahilina.net>
 Date: Fri, 29 Sep 2023 22:07:30 +0900
 Subject: [PATCH] soc: apple: pmgr: Add force-disable/force-reset
@@ -15,7 +15,7 @@ Signed-off-by: Asahi Lina <lina@asahilina.net>
  1 file changed, 37 insertions(+), 6 deletions(-)
 
 diff --git a/drivers/pmdomain/apple/pmgr-pwrstate.c b/drivers/pmdomain/apple/pmgr-pwrstate.c
-index 82c33cf727a8..c2e37eabb89f 100644
+index 82c33cf..c2e37ea 100644
 --- a/drivers/pmdomain/apple/pmgr-pwrstate.c
 +++ b/drivers/pmdomain/apple/pmgr-pwrstate.c
 @@ -21,7 +21,8 @@
@@ -110,6 +110,3 @@ index 82c33cf727a8..c2e37eabb89f 100644
  	/* Turn on auto-PM if the domain is already on */
  	if (active)
  		regmap_update_bits(regmap, ps->offset, APPLE_PMGR_FLAGS | APPLE_PMGR_AUTO_ENABLE,
--- 
-2.47.3
-

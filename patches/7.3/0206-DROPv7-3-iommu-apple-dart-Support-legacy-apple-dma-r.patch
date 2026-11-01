@@ -1,4 +1,4 @@
-From d828edac46e4bc1ccaaf866c8dbbb4313ae76751 Mon Sep 17 00:00:00 2001
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
 From: Janne Grunau <j@jannau.net>
 Date: Wed, 19 Aug 2026 13:54:56 +0200
 Subject: [PATCH] DROPv7.3: iommu: apple-dart: Support legacy "apple,dma-range"
@@ -11,7 +11,7 @@ Signed-off-by: Janne Grunau <j@jannau.net>
  1 file changed, 30 insertions(+), 2 deletions(-)
 
 diff --git a/drivers/iommu/apple-dart.c b/drivers/iommu/apple-dart.c
-index 864c25efbaf3..4c0aed085168 100644
+index 864c25e..4c0aed0 100644
 --- a/drivers/iommu/apple-dart.c
 +++ b/drivers/iommu/apple-dart.c
 @@ -225,6 +225,9 @@ struct apple_dart {
@@ -81,6 +81,3 @@ index 864c25efbaf3..4c0aed085168 100644
  	if (dart->num_streams > DART_MAX_STREAMS) {
  		dev_err(&pdev->dev, "Too many streams (%d > %d)\n",
  			dart->num_streams, DART_MAX_STREAMS);
--- 
-2.47.3
-

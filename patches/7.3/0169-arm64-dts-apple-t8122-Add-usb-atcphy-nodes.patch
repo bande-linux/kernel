@@ -1,4 +1,4 @@
-From 55975a40fdfaf6a886345ef986199fa5588e8221 Mon Sep 17 00:00:00 2001
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
 From: Sasha Finkelstein <k@chaosmail.tech>
 Date: Sat, 25 Jul 2026 21:53:55 +0200
 Subject: [PATCH] arm64: dts: apple: t8122: Add usb/atcphy nodes
@@ -17,7 +17,7 @@ Signed-off-by: Janne Grunau <j@jannau.net>
  7 files changed, 362 insertions(+), 2 deletions(-)
 
 diff --git a/arch/arm64/boot/dts/apple/t8122-j504.dts b/arch/arm64/boot/dts/apple/t8122-j504.dts
-index 8e92ebd7a300..4c36e01bae64 100644
+index 8e92ebd..4c36e01 100644
 --- a/arch/arm64/boot/dts/apple/t8122-j504.dts
 +++ b/arch/arm64/boot/dts/apple/t8122-j504.dts
 @@ -57,6 +57,16 @@ &pcie1_dart {
@@ -38,7 +38,7 @@ index 8e92ebd7a300..4c36e01bae64 100644
  &fpwm1 {
  	status = "okay";
 diff --git a/arch/arm64/boot/dts/apple/t8122-j613.dts b/arch/arm64/boot/dts/apple/t8122-j613.dts
-index e38de36873c2..aa9e49dc4d12 100644
+index e38de36..aa9e49d 100644
 --- a/arch/arm64/boot/dts/apple/t8122-j613.dts
 +++ b/arch/arm64/boot/dts/apple/t8122-j613.dts
 @@ -10,6 +10,7 @@
@@ -50,7 +50,7 @@ index e38de36873c2..aa9e49dc4d12 100644
  #include <dt-bindings/leds/common.h>
  
 diff --git a/arch/arm64/boot/dts/apple/t8122-j615.dts b/arch/arm64/boot/dts/apple/t8122-j615.dts
-index 38fda19345ec..99e6fd33d5a6 100644
+index 38fda19..99e6fd3 100644
 --- a/arch/arm64/boot/dts/apple/t8122-j615.dts
 +++ b/arch/arm64/boot/dts/apple/t8122-j615.dts
 @@ -10,6 +10,7 @@
@@ -62,7 +62,7 @@ index 38fda19345ec..99e6fd33d5a6 100644
  #include <dt-bindings/leds/common.h>
  
 diff --git a/arch/arm64/boot/dts/apple/t8122-jxxx.dtsi b/arch/arm64/boot/dts/apple/t8122-jxxx.dtsi
-index e5de3e680523..cfd2492c2701 100644
+index e5de3e6..cfd2492 100644
 --- a/arch/arm64/boot/dts/apple/t8122-jxxx.dtsi
 +++ b/arch/arm64/boot/dts/apple/t8122-jxxx.dtsi
 @@ -11,6 +11,8 @@
@@ -168,7 +168,7 @@ index e5de3e680523..cfd2492c2701 100644
  	status = "okay";
  };
 diff --git a/arch/arm64/boot/dts/apple/t8122-usbpd-i2c.dtsi b/arch/arm64/boot/dts/apple/t8122-usbpd-i2c.dtsi
-index 112c5199cabd..1da3234ddef9 100644
+index 112c519..1da3234 100644
 --- a/arch/arm64/boot/dts/apple/t8122-usbpd-i2c.dtsi
 +++ b/arch/arm64/boot/dts/apple/t8122-usbpd-i2c.dtsi
 @@ -18,15 +18,61 @@ hpm0: usb-pd@38 {
@@ -237,7 +237,7 @@ index 112c5199cabd..1da3234ddef9 100644
  };
 diff --git a/arch/arm64/boot/dts/apple/t8122-usbpd-spmi.dtsi b/arch/arm64/boot/dts/apple/t8122-usbpd-spmi.dtsi
 new file mode 100644
-index 000000000000..8cc104aefa5d
+index 0000000..8cc104a
 --- /dev/null
 +++ b/arch/arm64/boot/dts/apple/t8122-usbpd-spmi.dtsi
 @@ -0,0 +1,94 @@
@@ -336,7 +336,7 @@ index 000000000000..8cc104aefa5d
 +	};
 +};
 diff --git a/arch/arm64/boot/dts/apple/t8122.dtsi b/arch/arm64/boot/dts/apple/t8122.dtsi
-index c77beba6f54a..3ca46ab59664 100644
+index c77beba..3ca46ab 100644
 --- a/arch/arm64/boot/dts/apple/t8122.dtsi
 +++ b/arch/arm64/boot/dts/apple/t8122.dtsi
 @@ -815,6 +815,20 @@ rtc_offset: rtc-offset@f900 {
@@ -473,6 +473,3 @@ index c77beba6f54a..3ca46ab59664 100644
  	};
  };
  
--- 
-2.47.3
-

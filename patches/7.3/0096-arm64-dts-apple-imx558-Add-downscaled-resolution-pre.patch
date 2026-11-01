@@ -1,4 +1,4 @@
-From 35e1608b2fd6404b1d6fb05a713f4255350d68ae Mon Sep 17 00:00:00 2001
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
 From: Hector Martin <marcan@marcan.st>
 Date: Sun, 8 Oct 2023 19:53:27 +0900
 Subject: [PATCH] arm64: dts: apple: imx558: Add downscaled resolution presets
@@ -13,7 +13,7 @@ Signed-off-by: Hector Martin <marcan@marcan.st>
  1 file changed, 42 insertions(+)
 
 diff --git a/arch/arm64/boot/dts/apple/isp-imx558.dtsi b/arch/arm64/boot/dts/apple/isp-imx558.dtsi
-index a23785b7d5e6..d55854c883f5 100644
+index a23785b..d55854c 100644
 --- a/arch/arm64/boot/dts/apple/isp-imx558.dtsi
 +++ b/arch/arm64/boot/dts/apple/isp-imx558.dtsi
 @@ -46,5 +46,47 @@ preset4 {
@@ -64,6 +64,3 @@ index a23785b7d5e6..d55854c883f5 100644
 +		};
  	};
  };
--- 
-2.47.3
-

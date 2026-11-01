@@ -1,4 +1,4 @@
-From 20a6bc8d0fd52e8098c95b4125f06416ad0346b4 Mon Sep 17 00:00:00 2001
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
 From: Hector Martin <marcan@marcan.st>
 Date: Thu, 12 Oct 2023 23:18:14 +0900
 Subject: [PATCH] soc: apple: pmgr: Add externally-clocked property
@@ -18,7 +18,7 @@ Signed-off-by: Hector Martin <marcan@marcan.st>
  1 file changed, 25 insertions(+), 10 deletions(-)
 
 diff --git a/drivers/pmdomain/apple/pmgr-pwrstate.c b/drivers/pmdomain/apple/pmgr-pwrstate.c
-index c2e37eabb89f..52bf2bf92f5b 100644
+index c2e37ea..52bf2bf 100644
 --- a/drivers/pmdomain/apple/pmgr-pwrstate.c
 +++ b/drivers/pmdomain/apple/pmgr-pwrstate.c
 @@ -47,6 +47,7 @@ struct apple_pmgr_ps {
@@ -84,6 +84,3 @@ index c2e37eabb89f..52bf2bf92f5b 100644
  	/* Turn on auto-PM if the domain is already on */
  	if (active)
  		regmap_update_bits(regmap, ps->offset, APPLE_PMGR_FLAGS | APPLE_PMGR_AUTO_ENABLE,
--- 
-2.47.3
-

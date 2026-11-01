@@ -1,0 +1,39 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: Mikael Hug <mikaelhug@gmail.com>
+Date: Fri, 30 Oct 2026 15:16:01 +0000
+Subject: [PATCH] usb: dwc3: apple: Set driver data before the first cable
+ connect
+
+dwc3_apple_remove() takes the glue state from the platform driver data,
+but only dwc3_core_probe() sets it, and that runs lazily on the first
+role switch to host or device. Unbinding the driver (or unloading the
+module) before any USB cable was connected therefore dereferences NULL
+when it takes appledwc->lock.
+
+Set the driver data to the embedded struct dwc3 in probe, the same
+pointer dwc3_core_probe() stores later, so remove works in every state.
+
+Found while tracing the role flow on the Mac mini (M2, j473): port 1
+(Back-right) stays in DWC3_APPLE_PROBE_PENDING until a USB partner
+appears, so its drvdata is NULL for the whole boot without a cable.
+
+Fixes: 0ec946d32ef7 ("usb: dwc3: Add Apple Silicon DWC3 glue layer driver")
+
+Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>
+Claude-Session: https://claude.ai/code/session_01UqitcmCNS6G33aQUShi39x
+---
+ drivers/usb/dwc3/dwc3-apple.c | 1 +
+ 1 file changed, 1 insertion(+)
+
+diff --git a/drivers/usb/dwc3/dwc3-apple.c b/drivers/usb/dwc3/dwc3-apple.c
+index 40c3ccf..44bca0e 100644
+--- a/drivers/usb/dwc3/dwc3-apple.c
++++ b/drivers/usb/dwc3/dwc3-apple.c
+@@ -475,6 +475,7 @@ static int dwc3_apple_probe(struct platform_device *pdev)
+ 	 * details.
+ 	 */
+ 	appledwc->state = DWC3_APPLE_PROBE_PENDING;
++	platform_set_drvdata(pdev, &appledwc->dwc);
+ 	ret = dwc3_apple_setup_role_switch(appledwc);
+ 	if (ret)
+ 		return dev_err_probe(&pdev->dev, ret, "Failed to setup role switch\n");

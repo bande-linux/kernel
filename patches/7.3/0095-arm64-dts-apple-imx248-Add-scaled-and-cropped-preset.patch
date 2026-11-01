@@ -1,4 +1,4 @@
-From 8dc1925e1652992345230f3553cfade396346cdd Mon Sep 17 00:00:00 2001
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
 From: Janne Grunau <j@jannau.net>
 Date: Sat, 7 Oct 2023 00:38:24 +0200
 Subject: [PATCH] arm64: dts: apple: imx248: Add scaled and cropped presets
@@ -17,7 +17,7 @@ Signed-off-by: Janne Grunau <j@jannau.net>
  1 file changed, 35 insertions(+)
 
 diff --git a/arch/arm64/boot/dts/apple/isp-imx248.dtsi b/arch/arm64/boot/dts/apple/isp-imx248.dtsi
-index acad3ecf0331..0a4ac1a0152c 100644
+index acad3ec..0a4ac1a 100644
 --- a/arch/arm64/boot/dts/apple/isp-imx248.dtsi
 +++ b/arch/arm64/boot/dts/apple/isp-imx248.dtsi
 @@ -18,5 +18,40 @@ preset0 {
@@ -61,6 +61,3 @@ index acad3ecf0331..0a4ac1a0152c 100644
 +		};
  	};
  };
--- 
-2.47.3
-

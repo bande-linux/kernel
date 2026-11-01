@@ -1,4 +1,4 @@
-From 17407298ebb9c4e887e30d567db9b976bf8ca4c7 Mon Sep 17 00:00:00 2001
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
 From: Sasha Finkelstein <k@chaosmail.tech>
 Date: Tue, 21 Jul 2026 00:35:54 +0200
 Subject: [PATCH] arm64: dts: apple: t603x: Add usb-related spmi controllers
@@ -11,7 +11,7 @@ Signed-off-by: Sasha Finkelstein <k@chaosmail.tech>
  2 files changed, 54 insertions(+)
 
 diff --git a/arch/arm64/boot/dts/apple/t6030.dtsi b/arch/arm64/boot/dts/apple/t6030.dtsi
-index 7fc525d5f90a..2ceb60aafebd 100644
+index 7fc525d..2ceb60a 100644
 --- a/arch/arm64/boot/dts/apple/t6030.dtsi
 +++ b/arch/arm64/boot/dts/apple/t6030.dtsi
 @@ -853,6 +853,8 @@ nub_spmi: spmi@364714000 {
@@ -55,7 +55,7 @@ index 7fc525d5f90a..2ceb60aafebd 100644
  			compatible = "apple,t6030-asc-mailbox", "apple,asc-mailbox-v4";
  			reg = <0x3 0x6c408000 0x0 0x4000>;
 diff --git a/arch/arm64/boot/dts/apple/t6031-die0.dtsi b/arch/arm64/boot/dts/apple/t6031-die0.dtsi
-index 2afb028b0990..7ca801e7c2f6 100644
+index 2afb028..7ca801e 100644
 --- a/arch/arm64/boot/dts/apple/t6031-die0.dtsi
 +++ b/arch/arm64/boot/dts/apple/t6031-die0.dtsi
 @@ -38,6 +38,8 @@ nub_spmi: spmi@2a1014000 {
@@ -100,6 +100,3 @@ index 2afb028b0990..7ca801e7c2f6 100644
  	smc_mbox: mbox@2a4408000 {
  		compatible = "apple,t6031-asc-mailbox", "apple,asc-mailbox-v4";
  		reg = <0x2 0xa4408000 0x0 0x4000>;
--- 
-2.47.3
-

@@ -1,4 +1,4 @@
-From c38af1dd334b219facb3bf9d16ea098f0cdbc7d4 Mon Sep 17 00:00:00 2001
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
 From: James Calligeros <jcalligeros99@gmail.com>
 Date: Fri, 19 Jun 2026 20:27:17 +1000
 Subject: [PATCH] arm64: dts: apple: t602x: add apple,iomfb-surfaces to DCP
@@ -14,7 +14,7 @@ Signed-off-by: James Calligeros <jcalligeros99@gmail.com>
  2 files changed, 3 insertions(+)
 
 diff --git a/arch/arm64/boot/dts/apple/t602x-die0.dtsi b/arch/arm64/boot/dts/apple/t602x-die0.dtsi
-index cd6ed1106e82..f928a122a432 100644
+index cd6ed11..f928a12 100644
 --- a/arch/arm64/boot/dts/apple/t602x-die0.dtsi
 +++ b/arch/arm64/boot/dts/apple/t602x-die0.dtsi
 @@ -617,6 +617,7 @@ dcp: dcp@389c00000 {
@@ -26,7 +26,7 @@ index cd6ed1106e82..f928a122a432 100644
  		power-domains = <&pmp_report_disp0>;
  		#else
 diff --git a/arch/arm64/boot/dts/apple/t602x-dieX.dtsi b/arch/arm64/boot/dts/apple/t602x-dieX.dtsi
-index b04a39cb6560..2bae07db21c2 100644
+index b04a39c..2bae07d 100644
 --- a/arch/arm64/boot/dts/apple/t602x-dieX.dtsi
 +++ b/arch/arm64/boot/dts/apple/t602x-dieX.dtsi
 @@ -101,6 +101,7 @@ DIE_NODE(dcpext0):  dcp@289c00000 {
@@ -45,6 +45,3 @@ index b04a39cb6560..2bae07db21c2 100644
  		#ifdef APPLE_USE_PMP
  		power-domains = <&DIE_NODE(pmp_report_dispext1)>;
  		#else
--- 
-2.47.3
-

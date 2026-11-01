@@ -1,4 +1,4 @@
-From 6248e2a4af737a0a024df780656c9bfd9ba8662c Mon Sep 17 00:00:00 2001
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
 From: Janne Grunau <j@jannau.net>
 Date: Sun, 19 Nov 2023 14:57:09 +0100
 Subject: [PATCH] arm64: apple: t600x: Add sio and dpaudio device nodes
@@ -11,7 +11,7 @@ Signed-off-by: Janne Grunau <j@jannau.net>
  2 files changed, 168 insertions(+)
 
 diff --git a/arch/arm64/boot/dts/apple/t600x-die0.dtsi b/arch/arm64/boot/dts/apple/t600x-die0.dtsi
-index 5188467c9a14..a148cf5cf900 100644
+index 5188467..a148cf5 100644
 --- a/arch/arm64/boot/dts/apple/t600x-die0.dtsi
 +++ b/arch/arm64/boot/dts/apple/t600x-die0.dtsi
 @@ -187,6 +187,27 @@ dcp_dart: iommu@38b30c000 {
@@ -61,7 +61,7 @@ index 5188467c9a14..a148cf5cf900 100644
  
  	display: display-subsystem {
 diff --git a/arch/arm64/boot/dts/apple/t600x-dieX.dtsi b/arch/arm64/boot/dts/apple/t600x-dieX.dtsi
-index 0e76ca1f264a..2fa1fa5a1820 100644
+index 0e76ca1..2fa1fa5 100644
 --- a/arch/arm64/boot/dts/apple/t600x-dieX.dtsi
 +++ b/arch/arm64/boot/dts/apple/t600x-dieX.dtsi
 @@ -87,6 +87,17 @@ DIE_NODE(dcpext0):  dcp@289c00000 {
@@ -221,6 +221,3 @@ index 0e76ca1f264a..2fa1fa5a1820 100644
  	DIE_NODE(dwc3_0): usb@702280000 {
  		compatible = "apple,t6000-dwc3", "apple,t8103-dwc3";
  		reg = <0x7 0x02280000 0x0 0xcd00>, <0x7 0x0228cd00 0x0 0x3200>;
--- 
-2.47.3
-

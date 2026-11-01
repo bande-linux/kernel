@@ -1,4 +1,4 @@
-From 3a350da063c121f188c27e5c71e8cb07ed76c5b9 Mon Sep 17 00:00:00 2001
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
 From: Sven Peter <sven@kernel.org>
 Date: Thu, 20 Aug 2026 20:37:25 +0200
 Subject: [PATCH] arm64: dts: apple: t8112: Add USB4 ACIO and NHI
@@ -14,7 +14,7 @@ Signed-off-by: Sven Peter <sven@kernel.org>
  2 files changed, 251 insertions(+)
 
 diff --git a/arch/arm64/boot/dts/apple/t8112-jxxx.dtsi b/arch/arm64/boot/dts/apple/t8112-jxxx.dtsi
-index d471201fd774..1f46f2069503 100644
+index d471201..1f46f20 100644
 --- a/arch/arm64/boot/dts/apple/t8112-jxxx.dtsi
 +++ b/arch/arm64/boot/dts/apple/t8112-jxxx.dtsi
 @@ -19,6 +19,10 @@ aliases {
@@ -107,7 +107,7 @@ index d471201fd774..1f46f2069503 100644
  	status = "okay";
  };
 diff --git a/arch/arm64/boot/dts/apple/t8112.dtsi b/arch/arm64/boot/dts/apple/t8112.dtsi
-index a660f4d612dc..8ae55040ab18 100644
+index a660f4d..8ae5504 100644
 --- a/arch/arm64/boot/dts/apple/t8112.dtsi
 +++ b/arch/arm64/boot/dts/apple/t8112.dtsi
 @@ -1501,6 +1501,14 @@ pinctrl_aop: pinctrl@24a820000 {
@@ -321,6 +321,3 @@ index a660f4d612dc..8ae55040ab18 100644
  		dwc3_1: usb@502280000 {
  			compatible = "apple,t8112-dwc3", "apple,t8103-dwc3";
  			reg = <0x5 0x02280000 0x0 0xcd00>, <0x5 0x0228cd00 0x0 0x3200>;
--- 
-2.47.3
-

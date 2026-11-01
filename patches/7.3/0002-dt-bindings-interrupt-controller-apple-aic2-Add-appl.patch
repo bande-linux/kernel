@@ -1,4 +1,4 @@
-From 2dbd24c794d1dbad23d311347fc60c099b879867 Mon Sep 17 00:00:00 2001
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
 From: Yureka Lilian <yureka@cyberchaos.dev>
 Date: Sun, 5 Jul 2026 15:17:21 +0200
 Subject: [PATCH] dt-bindings: interrupt-controller: apple,aic2: Add
@@ -15,7 +15,7 @@ Reviewed-by: Krzysztof Kozlowski <krzysztof.kozlowski@oss.qualcomm.com>
  1 file changed, 1 insertion(+)
 
 diff --git a/Documentation/devicetree/bindings/interrupt-controller/apple,aic2.yaml b/Documentation/devicetree/bindings/interrupt-controller/apple,aic2.yaml
-index 726a6720e05f..1cb886785173 100644
+index 726a672..1cb8867 100644
 --- a/Documentation/devicetree/bindings/interrupt-controller/apple,aic2.yaml
 +++ b/Documentation/devicetree/bindings/interrupt-controller/apple,aic2.yaml
 @@ -45,6 +45,7 @@ properties:
@@ -26,6 +26,3 @@ index 726a6720e05f..1cb886785173 100644
            - const: apple,t8122-aic3
        - const: apple,t8122-aic3
  
--- 
-2.47.3
-

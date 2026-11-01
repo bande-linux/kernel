@@ -1,4 +1,4 @@
-From 3c4db9bc11f3c714aa7c9b6c6abaa5e0d6ec76b4 Mon Sep 17 00:00:00 2001
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
 From: Janne Grunau <j@jannau.net>
 Date: Sun, 29 Oct 2023 10:39:17 +0100
 Subject: [PATCH] arm64: dts: apple: t602x: Add lpdptx-phy node
@@ -14,7 +14,7 @@ Signed-off-by: Janne Grunau <j@jannau.net>
  1 file changed, 11 insertions(+)
 
 diff --git a/arch/arm64/boot/dts/apple/t602x-dieX.dtsi b/arch/arm64/boot/dts/apple/t602x-dieX.dtsi
-index abcd2dc861f1..6c040e51bb01 100644
+index abcd2dc..6c040e5 100644
 --- a/arch/arm64/boot/dts/apple/t602x-dieX.dtsi
 +++ b/arch/arm64/boot/dts/apple/t602x-dieX.dtsi
 @@ -248,6 +248,17 @@ DIE_NODE(pinctrl_ap): pinctrl@39b028000 {
@@ -35,6 +35,3 @@ index abcd2dc861f1..6c040e51bb01 100644
  	DIE_NODE(pmgr_gfx): power-management@404e80000 {
  		compatible = "apple,t6020-pmgr", "apple,t8103-pmgr", "syscon", "simple-mfd";
  		#address-cells = <1>;
--- 
-2.47.3
-

@@ -1,4 +1,4 @@
-From f8e4948a2d8108da4972cb224eb02819b56e334f Mon Sep 17 00:00:00 2001
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
 From: Janne Grunau <j@jannau.net>
 Date: Mon, 24 Aug 2026 09:58:31 +0200
 Subject: [PATCH] iommu: apple-dart: Use remap feature
@@ -20,7 +20,7 @@ Signed-off-by: Janne Grunau <j@jannau.net>
  1 file changed, 61 insertions(+), 9 deletions(-)
 
 diff --git a/drivers/iommu/apple-dart.c b/drivers/iommu/apple-dart.c
-index bd873ed9e900..9d1f6cd6649a 100644
+index bd873ed..9d1f6cd 100644
 --- a/drivers/iommu/apple-dart.c
 +++ b/drivers/iommu/apple-dart.c
 @@ -77,10 +77,16 @@
@@ -191,6 +191,3 @@ index bd873ed9e900..9d1f6cd6649a 100644
  	.fmt = APPLE_DART2,
  	.max_sid_count = 256,
  
--- 
-2.47.3
-

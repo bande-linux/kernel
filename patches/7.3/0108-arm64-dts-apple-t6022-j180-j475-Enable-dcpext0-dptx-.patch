@@ -1,4 +1,4 @@
-From 39d4471bc4a0c25b0100a6a329f7b23a83fced1b Mon Sep 17 00:00:00 2001
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
 From: Janne Grunau <j@jannau.net>
 Date: Sat, 4 Nov 2023 22:33:29 +0100
 Subject: [PATCH] arm64: dts: apple: t6022-{j180,j475}: Enable
@@ -16,7 +16,7 @@ Signed-off-by: Janne Grunau <j@jannau.net>
  2 files changed, 46 insertions(+), 3 deletions(-)
 
 diff --git a/arch/arm64/boot/dts/apple/t6022-j475d.dts b/arch/arm64/boot/dts/apple/t6022-j475d.dts
-index 225af57d776a..0f859a44f3ad 100644
+index 225af57..0f859a4 100644
 --- a/arch/arm64/boot/dts/apple/t6022-j475d.dts
 +++ b/arch/arm64/boot/dts/apple/t6022-j475d.dts
 @@ -22,6 +22,7 @@ / {
@@ -40,7 +40,7 @@ index 225af57d776a..0f859a44f3ad 100644
  &port01 {
  	pwren-gpios = <&smc_gpio 22 GPIO_ACTIVE_HIGH>;
 diff --git a/arch/arm64/boot/dts/apple/t6022-jxxxd.dtsi b/arch/arm64/boot/dts/apple/t6022-jxxxd.dtsi
-index 5b7b41ce07c3..4edfce4ee5ed 100644
+index 5b7b41c..4edfce4 100644
 --- a/arch/arm64/boot/dts/apple/t6022-jxxxd.dtsi
 +++ b/arch/arm64/boot/dts/apple/t6022-jxxxd.dtsi
 @@ -9,11 +9,48 @@
@@ -95,6 +95,3 @@ index 5b7b41ce07c3..4edfce4ee5ed 100644
  };
  
  /* delete missing dcp0/disp0 */
--- 
-2.47.3
-

@@ -1,4 +1,4 @@
-From 0105491e57c56fc7d29b71fedcf3bd43fcd21252 Mon Sep 17 00:00:00 2001
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
 From: Janne Grunau <j@jannau.net>
 Date: Sat, 23 May 2026 11:14:54 +0200
 Subject: [PATCH] arm64: dts: apple: t8122: Keep ps_apcie_phy_sw always-on
@@ -15,7 +15,7 @@ Signed-off-by: Janne Grunau <j@jannau.net>
  1 file changed, 1 insertion(+), 1 deletion(-)
 
 diff --git a/arch/arm64/boot/dts/apple/t8122-pmgr.dtsi b/arch/arm64/boot/dts/apple/t8122-pmgr.dtsi
-index 64093792e0ad..d3b3f9e71860 100644
+index 6409379..d3b3f9e 100644
 --- a/arch/arm64/boot/dts/apple/t8122-pmgr.dtsi
 +++ b/arch/arm64/boot/dts/apple/t8122-pmgr.dtsi
 @@ -899,7 +899,7 @@ ps_apcie_phy_sw: power-controller@4a0 {
@@ -27,6 +27,3 @@ index 64093792e0ad..d3b3f9e71860 100644
  	};
  
  	ps_atc0_cio_pcie: power-controller@4a8 {
--- 
-2.47.3
-

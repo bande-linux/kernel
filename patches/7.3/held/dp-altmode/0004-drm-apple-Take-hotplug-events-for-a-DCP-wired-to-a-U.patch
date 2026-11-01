@@ -1,0 +1,273 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: Mikael Hug <mikaelhug@gmail.com>
+Date: Sat, 31 Oct 2026 00:17:41 +0000
+Subject: [PATCH] drm: apple: Take hotplug events for a DCP wired to a USB-C
+ connector
+
+A DCP whose DisplayPort output goes through a Type-C PHY to a USB-C
+connector has no HPD line of its own. In the DT graph that is DCP port 1
+to PHY port 2, and PHY port 0 to the connector's SuperSpeed port, as in
+apple,atcphy.yaml. The Type-C port controller reports HPD with
+drm_connector_oob_hotplug_event() on the fwnode of the USB-C connector
+node, so use that node as the DRM connector's fwnode.
+
+A DCP without such a graph keeps the fwnode it had: its own for DCPext
+and for a DCP with a DP PHY, and none otherwise. The 14"/16" MacBook
+Pros are the only machines with a DCP graph today, and they have nothing
+on port 0 of that PHY.
+
+The oob_hotplug_event hook must not block, but setting up the link waits
+for link training for up to 2 s. Do it from a freezable work item
+instead. A disconnect followed by a connect, before the work runs, is
+applied as both, so the link is set up again after the PHY changed its
+lane configuration. The hook takes only a spinlock, against unbind. The
+debug printk in the hook becomes a dev_dbg.
+
+That graph also makes fwnode_typec_mux_get() find the PHY. Probe would
+then force the PHY into DisplayPort pin assignment C, which is only
+right for the DP-to-HDMI converter hardwired to a PHY on those MacBook
+Pros. Do that only when such a converter is present, recognised by its
+HPD GPIO, and otherwise leave the mux to the Type-C port controller.
+
+Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>
+Claude-Session: https://claude.ai/code/session_01UqitcmCNS6G33aQUShi39x
+---
+ drivers/gpu/drm/apple/apple_drv.c    | 35 +++++++++++--
+ drivers/gpu/drm/apple/dcp-internal.h |  5 ++
+ drivers/gpu/drm/apple/dcp.c          | 76 +++++++++++++++++++++++++---
+ drivers/gpu/drm/apple/dcp.h          |  3 +-
+ 4 files changed, 104 insertions(+), 15 deletions(-)
+
+diff --git a/drivers/gpu/drm/apple/apple_drv.c b/drivers/gpu/drm/apple/apple_drv.c
+index 2250f3210..2b14b3f91 100644
+--- a/drivers/gpu/drm/apple/apple_drv.c
++++ b/drivers/gpu/drm/apple/apple_drv.c
+@@ -89,12 +89,12 @@ static void apple_connector_oob_hotplug(struct drm_connector *connector,
+ {
+ 	struct apple_connector *apple_connector = to_apple_connector(connector);
+ 
+-	printk("#### oob_hotplug status:0x%x ####\n", (u32)status);
++	dev_dbg(&apple_connector->dcp->dev, "oob hotplug status %d\n", status);
+ 
+ 	if (status == connector_status_connected)
+-		dcp_dptx_connect_oob(apple_connector->dcp, 0);
++		dcp_dptx_oob_hotplug(apple_connector->dcp, true);
+ 	else if (status == connector_status_disconnected)
+-		dcp_dptx_disconnect_oob(apple_connector->dcp, 0);
++		dcp_dptx_oob_hotplug(apple_connector->dcp, false);
+ 	else
+ 		dev_err(&apple_connector->dcp->dev, "unexpected connector status"
+ 			":0x%x in oob_hotplug event\n", (u32)status);
+@@ -264,6 +264,30 @@ static const struct drm_crtc_helper_funcs apple_crtc_helper_funcs = {
+ 	.mode_fixup		= dcp_crtc_mode_fixup,
+ };
+ 
++/*
++ * A DCP whose DisplayPort output (port 1) goes through a Type-C PHY to a
++ * USB-C connector gets its hotplug events from the Type-C port controller.
++ * That reports them with drm_connector_oob_hotplug_event() on the fwnode of
++ * the USB-C connector node, so use that node as the DRM connector's fwnode.
++ * Returns a reference to the node, or NULL.
++ */
++static struct fwnode_handle *apple_dcp_typec_connector(struct device *dev)
++{
++	struct device_node *phy __free(device_node) =
++		of_graph_get_remote_node(dev->of_node, 1, -1);
++	struct device_node *con __free(device_node) = NULL;
++
++	if (!phy)
++		return NULL;
++
++	/* Port 0 of the Type-C PHY goes to the connector's SuperSpeed port */
++	con = of_graph_get_remote_node(phy, 0, -1);
++	if (!con || !of_device_is_compatible(con, "usb-c-connector"))
++		return NULL;
++
++	return of_fwnode_handle(no_free_ptr(con));
++}
++
+ static int apple_probe_per_dcp(struct device *dev,
+ 			       struct drm_device *drm,
+ 			       struct platform_device *dcp,
+@@ -334,8 +358,9 @@ static int apple_probe_per_dcp(struct device *dev,
+ 	drm_connector_helper_add(&connector->base,
+ 				 &apple_connector_helper_funcs);
+ 
+-	// HACK:
+-	if (dcp_ext)
++	connector->base.fwnode = apple_dcp_typec_connector(&dcp->dev);
++	// HACK: DCPext and DCPs with a DP PHY are claimed by their own fwnode
++	if (!connector->base.fwnode && dcp_ext)
+ 		connector->base.fwnode = fwnode_handle_get(dcp->dev.fwnode);
+ 
+ 	ret = drm_connector_init(drm, &connector->base, &apple_connector_funcs,
+diff --git a/drivers/gpu/drm/apple/dcp-internal.h b/drivers/gpu/drm/apple/dcp-internal.h
+index f07fb3be2..4f5ded5f0 100644
+--- a/drivers/gpu/drm/apple/dcp-internal.h
++++ b/drivers/gpu/drm/apple/dcp-internal.h
+@@ -280,6 +280,11 @@ struct apple_dcp {
+ 	bool iomfb_on;
+ 	bool client_open;
+ 	struct work_struct sink_modes_wq;
++	/* out-of-band HPD events, DCP_OOB_HPD_* bits, applied by oob_hpd_wq */
++	unsigned long oob_hpd_events;
++	struct work_struct oob_hpd_wq;
++	spinlock_t oob_hpd_lock; /* protects oob_hpd_stopped */
++	bool oob_hpd_stopped;
+ 	struct work_struct hpd_resume_wq;
+ 	struct delayed_work release_wq;
+ 
+diff --git a/drivers/gpu/drm/apple/dcp.c b/drivers/gpu/drm/apple/dcp.c
+index 7644cb652..86dd1fbf8 100644
+--- a/drivers/gpu/drm/apple/dcp.c
++++ b/drivers/gpu/drm/apple/dcp.c
+@@ -444,9 +444,8 @@ static int dcp_dptx_disconnect(struct apple_dcp *dcp, u32 port)
+ 	return 0;
+ }
+ 
+-int dcp_dptx_connect_oob(struct platform_device *pdev, u32 port)
++static int dcp_dptx_connect_oob(struct apple_dcp *dcp, u32 port)
+ {
+-	struct apple_dcp *dcp = platform_get_drvdata(pdev);
+ 	bool was_connected = dcp->dptxport[port].connected;
+ 	int ret;
+ 
+@@ -457,10 +456,8 @@ int dcp_dptx_connect_oob(struct platform_device *pdev, u32 port)
+ 	return ret;
+ }
+ 
+-int dcp_dptx_disconnect_oob(struct platform_device *pdev, u32 port)
++static int dcp_dptx_disconnect_oob(struct apple_dcp *dcp, u32 port)
+ {
+-	struct apple_dcp *dcp = platform_get_drvdata(pdev);
+-
+ 	disconnected_hpd_event(dcp->connector);
+ 
+ 	if (dcp->avep)
+@@ -472,6 +469,53 @@ int dcp_dptx_disconnect_oob(struct platform_device *pdev, u32 port)
+ 	return dcp_dptx_disconnect(dcp, port);
+ }
+ 
++#define DCP_OOB_HPD_DISCONNECT	0
++#define DCP_OOB_HPD_CONNECT	1
++
++static void dcp_work_oob_hpd(struct work_struct *work)
++{
++	struct apple_dcp *dcp = container_of(work, struct apple_dcp, oob_hpd_wq);
++	int ret;
++
++	/* A disconnect queued before a connect is applied first */
++	if (test_and_clear_bit(DCP_OOB_HPD_DISCONNECT, &dcp->oob_hpd_events))
++		dcp_dptx_disconnect_oob(dcp, 0);
++
++	if (test_and_clear_bit(DCP_OOB_HPD_CONNECT, &dcp->oob_hpd_events)) {
++		ret = dcp_dptx_connect_oob(dcp, 0);
++		if (ret)
++			dev_warn(dcp->dev, "out-of-band connect failed: %d\n", ret);
++	}
++}
++
++/**
++ * dcp_dptx_oob_hotplug() - Out-of-band HPD from the Type-C port controller
++ * @pdev: DCP platform device
++ * @connected: new HPD state
++ *
++ * Called from the DRM connector's oob_hotplug_event hook, which must not block,
++ * so the link is set up or released from a work item. A connect after a
++ * disconnect that is not applied yet is kept as a disconnect and a connect,
++ * so the link is set up again after a PHY reconfiguration.
++ */
++void dcp_dptx_oob_hotplug(struct platform_device *pdev, bool connected)
++{
++	struct apple_dcp *dcp = platform_get_drvdata(pdev);
++	unsigned long flags;
++
++	if (connected) {
++		set_bit(DCP_OOB_HPD_CONNECT, &dcp->oob_hpd_events);
++	} else {
++		clear_bit(DCP_OOB_HPD_CONNECT, &dcp->oob_hpd_events);
++		set_bit(DCP_OOB_HPD_DISCONNECT, &dcp->oob_hpd_events);
++	}
++
++	spin_lock_irqsave(&dcp->oob_hpd_lock, flags);
++	if (!dcp->oob_hpd_stopped)
++		queue_work(system_freezable_wq, &dcp->oob_hpd_wq);
++	spin_unlock_irqrestore(&dcp->oob_hpd_lock, flags);
++}
++
+ static irqreturn_t dcp_dp2hdmi_hpd(int irq, void *data)
+ {
+ 	struct apple_dcp *dcp = data;
+@@ -815,6 +859,11 @@ static void dcp_stop_hpd_work(struct apple_dcp *dcp)
+ 	cancel_work_sync(&dcp->hpd_resume_wq);
+ 	cancel_work_sync(&dcp->sink_modes_wq);
+ 	cancel_delayed_work_sync(&dcp->release_wq);
++
++	spin_lock_irq(&dcp->oob_hpd_lock);
++	dcp->oob_hpd_stopped = true;
++	spin_unlock_irq(&dcp->oob_hpd_lock);
++	cancel_work_sync(&dcp->oob_hpd_wq);
+ }
+ 
+ void dcp_hpd_suspend(struct platform_device *pdev)
+@@ -849,6 +898,9 @@ void dcp_hpd_resume(struct platform_device *pdev)
+ 	dcp->suspended = false;
+ 	pending = dcp->hotplug_pending;
+ 	spin_unlock(&dcp->hotplug_lock);
++	spin_lock_irq(&dcp->oob_hpd_lock);
++	dcp->oob_hpd_stopped = false;
++	spin_unlock_irq(&dcp->oob_hpd_lock);
+ 	if (dcp->hdmi_hpd_irq)
+ 		enable_irq(dcp->hdmi_hpd_irq);
+ 	if (dcp->hdmi_hpd)
+@@ -1478,6 +1530,10 @@ static int dcp_platform_probe(struct platform_device *pdev)
+ 	mutex_init(&dcp->modes_lock);
+ 	mutex_init(&dcp->power_mutex);
+ 	INIT_WORK(&dcp->sink_modes_wq, dcp_work_sink_modes);
++	INIT_WORK(&dcp->oob_hpd_wq, dcp_work_oob_hpd);
++	spin_lock_init(&dcp->oob_hpd_lock);
++	dcp->oob_hpd_events = 0;
++	dcp->oob_hpd_stopped = false;
+ 	INIT_WORK(&dcp->hpd_resume_wq, dcp_work_hpd_resume);
+ 	INIT_DELAYED_WORK(&dcp->release_wq, dcp_work_release_display);
+ 
+@@ -1567,10 +1623,14 @@ static int dcp_platform_probe(struct platform_device *pdev)
+ 				dev_warn(dev, "mux_control_select failed: %d\n", ret);
+ 
+ 			/*
+-			 * Switch atcphy to DP-only. should move to a Macbook Pro
++			 * Switch atcphy to DP-only. Should move to a Macbook Pro
+ 			 * 14-/16-inch specific DP-to-HDMI drm_bridge.
++			 *
++			 * Only a DP-to-HDMI converter is hardwired to the PHY. On
++			 * a USB-C port the Type-C port controller sets the mux.
+ 			 */
+-			dcp->typec_mux = fwnode_typec_mux_get(dev_fwnode(dcp->dev));
++			if (dcp->hdmi_hpd)
++				dcp->typec_mux = fwnode_typec_mux_get(dev_fwnode(dcp->dev));
+ 			if (!IS_ERR_OR_NULL(dcp->typec_mux)) {
+ 				struct typec_altmode alt = {
+ 					.svid = USB_TYPEC_DP_SID,
+@@ -1581,7 +1641,7 @@ static int dcp_platform_probe(struct platform_device *pdev)
+ 				};
+ 				int ret = typec_mux_set(dcp->typec_mux, &state);
+ 				dev_info(dev, "typec_mux_set() returned: %d\n", ret);
+-			} else {
++			} else if (dcp->hdmi_hpd) {
+ 				dev_info(dev, "fwnode_typec_mux_get() returned: %ld\n",
+ 						IS_ERR(dcp->typec_mux) ? PTR_ERR(dcp->typec_mux) : 0);
+ 				dcp->typec_mux = NULL;
+diff --git a/drivers/gpu/drm/apple/dcp.h b/drivers/gpu/drm/apple/dcp.h
+index 05d1339c7..021ba48f8 100644
+--- a/drivers/gpu/drm/apple/dcp.h
++++ b/drivers/gpu/drm/apple/dcp.h
+@@ -55,8 +55,7 @@ bool dcp_crtc_mode_fixup(struct drm_crtc *crtc,
+ void dcp_set_dimensions(struct apple_dcp *dcp);
+ void dcp_send_message(struct apple_dcp *dcp, u8 endpoint, u64 message);
+ 
+-int dcp_dptx_connect_oob(struct platform_device *pdev, u32 port);
+-int dcp_dptx_disconnect_oob(struct platform_device *pdev, u32 port);
++void dcp_dptx_oob_hotplug(struct platform_device *pdev, bool connected);
+ 
+ int iomfb_start_rtkit(struct apple_dcp *dcp);
+ void iomfb_shutdown(struct apple_dcp *dcp);

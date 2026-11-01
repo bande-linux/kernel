@@ -1,4 +1,4 @@
-From a59e769839dba87bd733d9232a74ad34748d7be7 Mon Sep 17 00:00:00 2001
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
 From: Sasha Finkelstein <fnkl.kernel@gmail.com>
 Date: Thu, 26 Feb 2026 18:15:38 +0100
 Subject: [PATCH] arm64: dts: apple: Add PMP nodes and hook up power reporting
@@ -31,7 +31,7 @@ Signed-off-by: Sasha Finkelstein <fnkl.kernel@gmail.com>
  19 files changed, 749 insertions(+)
 
 diff --git a/arch/arm64/boot/dts/apple/t6000.dtsi b/arch/arm64/boot/dts/apple/t6000.dtsi
-index c9e4e52d9aac..db7ea6eac5a6 100644
+index c9e4e52..db7ea6e 100644
 --- a/arch/arm64/boot/dts/apple/t6000.dtsi
 +++ b/arch/arm64/boot/dts/apple/t6000.dtsi
 @@ -18,6 +18,23 @@ / {
@@ -59,7 +59,7 @@ index c9e4e52d9aac..db7ea6eac5a6 100644
  &gpu {
  	compatible = "apple,agx-t6000", "apple,agx-g13x";
 diff --git a/arch/arm64/boot/dts/apple/t6001.dtsi b/arch/arm64/boot/dts/apple/t6001.dtsi
-index 364a956663b9..46ce496825dd 100644
+index 364a956..46ce496 100644
 --- a/arch/arm64/boot/dts/apple/t6001.dtsi
 +++ b/arch/arm64/boot/dts/apple/t6001.dtsi
 @@ -69,6 +69,18 @@ p-core-pmu-affinity {
@@ -82,7 +82,7 @@ index 364a956663b9..46ce496825dd 100644
  	compatible = "apple,agx-t6001", "apple,agx-g13c", "apple,agx-g13s";
  };
 diff --git a/arch/arm64/boot/dts/apple/t6002.dtsi b/arch/arm64/boot/dts/apple/t6002.dtsi
-index e16717f6bdcb..d34a03b374df 100644
+index e16717f..d34a03b 100644
 --- a/arch/arm64/boot/dts/apple/t6002.dtsi
 +++ b/arch/arm64/boot/dts/apple/t6002.dtsi
 @@ -318,6 +318,63 @@ &ps_gfx {
@@ -150,7 +150,7 @@ index e16717f6bdcb..d34a03b374df 100644
  	compatible = "apple,agx-t6002", "apple,agx-g13d", "apple,agx-g13s";
  };
 diff --git a/arch/arm64/boot/dts/apple/t600x-common.dtsi b/arch/arm64/boot/dts/apple/t600x-common.dtsi
-index 070904ee7e87..f41cc72b38d1 100644
+index 070904e..f41cc72 100644
 --- a/arch/arm64/boot/dts/apple/t600x-common.dtsi
 +++ b/arch/arm64/boot/dts/apple/t600x-common.dtsi
 @@ -13,6 +13,9 @@ / {
@@ -164,7 +164,7 @@ index 070904ee7e87..f41cc72b38d1 100644
  
  	cpus {
 diff --git a/arch/arm64/boot/dts/apple/t600x-die0.dtsi b/arch/arm64/boot/dts/apple/t600x-die0.dtsi
-index 4b197c95c2c3..e4f001158c67 100644
+index 4b197c9..e4f0011 100644
 --- a/arch/arm64/boot/dts/apple/t600x-die0.dtsi
 +++ b/arch/arm64/boot/dts/apple/t600x-die0.dtsi
 @@ -31,12 +31,205 @@ pmgr_misc: power-management@28e20c000 {
@@ -398,7 +398,7 @@ index 4b197c95c2c3..e4f001158c67 100644
  			<&ps_isp_set4>, <&ps_isp_set5>, <&ps_isp_set6>,
  			<&ps_isp_set7>, <&ps_isp_set8>;
 diff --git a/arch/arm64/boot/dts/apple/t600x-dieX.dtsi b/arch/arm64/boot/dts/apple/t600x-dieX.dtsi
-index 2fa1fa5a1820..e5330e43b520 100644
+index 2fa1fa5..e5330e4 100644
 --- a/arch/arm64/boot/dts/apple/t600x-dieX.dtsi
 +++ b/arch/arm64/boot/dts/apple/t600x-dieX.dtsi
 @@ -74,7 +74,11 @@ DIE_NODE(dcpext0):  dcp@289c00000 {
@@ -426,7 +426,7 @@ index 2fa1fa5a1820..e5330e43b520 100644
  		clocks = <&DIE_NODE(clk_dispext1)>;
  		phandle = <&DIE_NODE(dcpext1)>;
 diff --git a/arch/arm64/boot/dts/apple/t600x-j314-j316.dtsi b/arch/arm64/boot/dts/apple/t600x-j314-j316.dtsi
-index a4a194263f7a..391bcdaedd66 100644
+index a4a1942..391bcda 100644
 --- a/arch/arm64/boot/dts/apple/t600x-j314-j316.dtsi
 +++ b/arch/arm64/boot/dts/apple/t600x-j314-j316.dtsi
 @@ -633,3 +633,7 @@ codec {
@@ -438,7 +438,7 @@ index a4a194263f7a..391bcdaedd66 100644
 +	status = "okay";
 +};
 diff --git a/arch/arm64/boot/dts/apple/t600x-pmgr.dtsi b/arch/arm64/boot/dts/apple/t600x-pmgr.dtsi
-index 1429554ed545..833a59ecf379 100644
+index 1429554..833a59e 100644
 --- a/arch/arm64/boot/dts/apple/t600x-pmgr.dtsi
 +++ b/arch/arm64/boot/dts/apple/t600x-pmgr.dtsi
 @@ -426,6 +426,7 @@ DIE_NODE(ps_pmp): power-controller@2d8 {
@@ -458,7 +458,7 @@ index 1429554ed545..833a59ecf379 100644
  
  	DIE_NODE(ps_apcie_st_sys): power-controller@2e8 {
 diff --git a/arch/arm64/boot/dts/apple/t6020.dtsi b/arch/arm64/boot/dts/apple/t6020.dtsi
-index 482a1e5f53d0..500726e697a8 100644
+index 482a1e5..500726e 100644
 --- a/arch/arm64/boot/dts/apple/t6020.dtsi
 +++ b/arch/arm64/boot/dts/apple/t6020.dtsi
 @@ -18,6 +18,13 @@ / {
@@ -476,7 +476,7 @@ index 482a1e5f53d0..500726e697a8 100644
  &gpu {
  	compatible = "apple,agx-t6020", "apple,agx-g14x", "apple,agx-g14s";
 diff --git a/arch/arm64/boot/dts/apple/t6022-jxxxd.dtsi b/arch/arm64/boot/dts/apple/t6022-jxxxd.dtsi
-index 31231251f7de..4264fdf766e8 100644
+index 3123125..4264fdf 100644
 --- a/arch/arm64/boot/dts/apple/t6022-jxxxd.dtsi
 +++ b/arch/arm64/boot/dts/apple/t6022-jxxxd.dtsi
 @@ -68,6 +68,7 @@ &dpaudio1_die1 {
@@ -488,7 +488,7 @@ index 31231251f7de..4264fdf766e8 100644
  /delete-node/ &ps_disp0_cpu0_die1;
  /delete-node/ &ps_disp0_fe_die1;
 diff --git a/arch/arm64/boot/dts/apple/t6022.dtsi b/arch/arm64/boot/dts/apple/t6022.dtsi
-index a14cdc6c45db..1c6a67ddf0ac 100644
+index a14cdc6..1c6a67d 100644
 --- a/arch/arm64/boot/dts/apple/t6022.dtsi
 +++ b/arch/arm64/boot/dts/apple/t6022.dtsi
 @@ -357,6 +357,26 @@ &ps_gfx {
@@ -519,7 +519,7 @@ index a14cdc6c45db..1c6a67ddf0ac 100644
  	compatible = "apple,agx-t6022", "apple,agx-g14x", "apple,agx-g14d", "apple,agx-g14s";
  
 diff --git a/arch/arm64/boot/dts/apple/t602x-common.dtsi b/arch/arm64/boot/dts/apple/t602x-common.dtsi
-index a7cad364e895..e370a2e12473 100644
+index a7cad36..e370a2e 100644
 --- a/arch/arm64/boot/dts/apple/t602x-common.dtsi
 +++ b/arch/arm64/boot/dts/apple/t602x-common.dtsi
 @@ -13,6 +13,9 @@ / {
@@ -533,7 +533,7 @@ index a7cad364e895..e370a2e12473 100644
  
  	cpus {
 diff --git a/arch/arm64/boot/dts/apple/t602x-die0.dtsi b/arch/arm64/boot/dts/apple/t602x-die0.dtsi
-index ad9c86a5ac1d..350f91d1209f 100644
+index ad9c86a..350f91d 100644
 --- a/arch/arm64/boot/dts/apple/t602x-die0.dtsi
 +++ b/arch/arm64/boot/dts/apple/t602x-die0.dtsi
 @@ -31,12 +31,223 @@ pmgr_misc: power-management@28e20c000 {
@@ -785,7 +785,7 @@ index ad9c86a5ac1d..350f91d1209f 100644
  		clocks = <&clk_disp0>;
  		phandle = <&dcp>;
 diff --git a/arch/arm64/boot/dts/apple/t602x-dieX.dtsi b/arch/arm64/boot/dts/apple/t602x-dieX.dtsi
-index e01bb328390f..ab0b3cec00c4 100644
+index e01bb32..ab0b3ce 100644
 --- a/arch/arm64/boot/dts/apple/t602x-dieX.dtsi
 +++ b/arch/arm64/boot/dts/apple/t602x-dieX.dtsi
 @@ -73,7 +73,11 @@ DIE_NODE(dcpext0):  dcp@289c00000 {
@@ -813,7 +813,7 @@ index e01bb328390f..ab0b3cec00c4 100644
  		clocks = <&DIE_NODE(clk_dispext1)>;
  		phandle = <&DIE_NODE(dcpext1)>;
 diff --git a/arch/arm64/boot/dts/apple/t602x-pmgr.dtsi b/arch/arm64/boot/dts/apple/t602x-pmgr.dtsi
-index b9233f252e6c..4ead781fea68 100644
+index b9233f2..4ead781 100644
 --- a/arch/arm64/boot/dts/apple/t602x-pmgr.dtsi
 +++ b/arch/arm64/boot/dts/apple/t602x-pmgr.dtsi
 @@ -454,6 +454,7 @@ DIE_NODE(ps_pmp): power-controller@2c8 {
@@ -833,7 +833,7 @@ index b9233f252e6c..4ead781fea68 100644
  
  	DIE_NODE(ps_dispext0_cpu0): power-controller@2d8 {
 diff --git a/arch/arm64/boot/dts/apple/t8112-j413.dts b/arch/arm64/boot/dts/apple/t8112-j413.dts
-index 2abef089e611..6221935058c7 100644
+index 2abef08..6221935 100644
 --- a/arch/arm64/boot/dts/apple/t8112-j413.dts
 +++ b/arch/arm64/boot/dts/apple/t8112-j413.dts
 @@ -261,3 +261,7 @@ &isp {
@@ -845,7 +845,7 @@ index 2abef089e611..6221935058c7 100644
 +	status = "okay";
 +};
 diff --git a/arch/arm64/boot/dts/apple/t8112-j415.dts b/arch/arm64/boot/dts/apple/t8112-j415.dts
-index 0824758d380c..6c5175af6f3e 100644
+index 0824758..6c5175a 100644
 --- a/arch/arm64/boot/dts/apple/t8112-j415.dts
 +++ b/arch/arm64/boot/dts/apple/t8112-j415.dts
 @@ -287,3 +287,7 @@ &isp {
@@ -857,7 +857,7 @@ index 0824758d380c..6c5175af6f3e 100644
 +	status = "okay";
 +};
 diff --git a/arch/arm64/boot/dts/apple/t8112-j493.dts b/arch/arm64/boot/dts/apple/t8112-j493.dts
-index 7481f82c027e..3a7b7cc5fcb8 100644
+index 7481f82..3a7b7cc 100644
 --- a/arch/arm64/boot/dts/apple/t8112-j493.dts
 +++ b/arch/arm64/boot/dts/apple/t8112-j493.dts
 @@ -315,3 +315,7 @@ tp_accel {
@@ -869,7 +869,7 @@ index 7481f82c027e..3a7b7cc5fcb8 100644
 +	status = "okay";
 +};
 diff --git a/arch/arm64/boot/dts/apple/t8112.dtsi b/arch/arm64/boot/dts/apple/t8112.dtsi
-index f7a7693c850c..918560329186 100644
+index f7a7693..9185603 100644
 --- a/arch/arm64/boot/dts/apple/t8112.dtsi
 +++ b/arch/arm64/boot/dts/apple/t8112.dtsi
 @@ -22,6 +22,9 @@ / {
@@ -1112,6 +1112,3 @@ index f7a7693c850c..918560329186 100644
  			resets = <&ps_dispext_cpu0>;
  			clocks = <&clk_dispext0>;
  			apple,dcp-index = <1>;
--- 
-2.47.3
-

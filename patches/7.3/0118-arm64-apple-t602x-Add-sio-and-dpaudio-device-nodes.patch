@@ -1,4 +1,4 @@
-From 3196c8d79e310e06c20f96856d3efd97d6561d7b Mon Sep 17 00:00:00 2001
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
 From: Janne Grunau <j@jannau.net>
 Date: Sun, 21 Jan 2024 14:45:49 +0100
 Subject: [PATCH] arm64: apple: t602x: Add sio and dpaudio device nodes
@@ -12,7 +12,7 @@ Signed-off-by: Janne Grunau <j@jannau.net>
  3 files changed, 178 insertions(+), 9 deletions(-)
 
 diff --git a/arch/arm64/boot/dts/apple/t6022-jxxxd.dtsi b/arch/arm64/boot/dts/apple/t6022-jxxxd.dtsi
-index 4edfce4ee5ed..94eca4f7d8cc 100644
+index 4edfce4..94eca4f 100644
 --- a/arch/arm64/boot/dts/apple/t6022-jxxxd.dtsi
 +++ b/arch/arm64/boot/dts/apple/t6022-jxxxd.dtsi
 @@ -58,6 +58,7 @@ &dcpext0_die1 {
@@ -24,7 +24,7 @@ index 4edfce4ee5ed..94eca4f7d8cc 100644
  /* delete power-domains for missing disp0 / disp0_die1 */
  /delete-node/ &ps_disp0_cpu0;
 diff --git a/arch/arm64/boot/dts/apple/t602x-die0.dtsi b/arch/arm64/boot/dts/apple/t602x-die0.dtsi
-index de527eebfc60..3a0a2d838784 100644
+index de527ee..3a0a2d8 100644
 --- a/arch/arm64/boot/dts/apple/t602x-die0.dtsi
 +++ b/arch/arm64/boot/dts/apple/t602x-die0.dtsi
 @@ -353,6 +353,17 @@ disp0_piodma: piodma {
@@ -90,7 +90,7 @@ index de527eebfc60..3a0a2d838784 100644
  		compatible = "apple,t6020-mca", "apple,t8103-mca", "apple,mca";
  		reg = <0x3 0x9b600000 0x0 0x10000>,
 diff --git a/arch/arm64/boot/dts/apple/t602x-dieX.dtsi b/arch/arm64/boot/dts/apple/t602x-dieX.dtsi
-index c33cf680e5a1..e01bb328390f 100644
+index c33cf68..e01bb32 100644
 --- a/arch/arm64/boot/dts/apple/t602x-dieX.dtsi
 +++ b/arch/arm64/boot/dts/apple/t602x-dieX.dtsi
 @@ -86,6 +86,17 @@ DIE_NODE(dcpext0):  dcp@289c00000 {
@@ -259,6 +259,3 @@ index c33cf680e5a1..e01bb328390f 100644
  	DIE_NODE(lpdptxphy): phy@39c000000 {
  		compatible = "apple,t6020-dptx-phy", "apple,dptx-phy";
  		reg = <0x3 0x9c000000 0x0 0x4000>,
--- 
-2.47.3
-

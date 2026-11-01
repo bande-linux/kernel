@@ -1,0 +1,51 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: Yureka Lilian <yureka@cyberchaos.dev>
+Date: Fri, 4 Sep 2026 11:13:39 +0200
+Subject: [PATCH] pmdomain: add pmp-report offsets for t6030,t8122
+
+t6031/t6034 continue using the same offsets as t602x
+
+Signed-off-by: Yureka Lilian <yureka@cyberchaos.dev>
+(cherry picked from commit e092d51bc9d773f7058fe578515c5f915c0adf2c)
+---
+ drivers/pmdomain/apple/pmp-report.c | 16 ++++++++++++++++
+ 1 file changed, 16 insertions(+)
+
+diff --git a/drivers/pmdomain/apple/pmp-report.c b/drivers/pmdomain/apple/pmp-report.c
+index ee0dd1f..39a10a0 100644
+--- a/drivers/pmdomain/apple/pmp-report.c
++++ b/drivers/pmdomain/apple/pmp-report.c
+@@ -68,6 +68,13 @@ static const struct apple_pmp_report_offsets apple_pmp_offsets_t602x = {
+ 	.status = 0x10,
+ };
+ 
++static const struct apple_pmp_report_offsets apple_pmp_offsets_t6030 = {
++	.tgt_read = 0x1180,
++	.tgt_write = 0x108c0,
++	.actual = 0x11c0,
++	.status = 0x10,
++};
++
+ static const struct apple_pmp_report_offsets apple_pmp_offsets_t8112 = {
+ 	.tgt_read = 0xa00,
+ 	.tgt_write = 0x10500,
+@@ -75,10 +82,19 @@ static const struct apple_pmp_report_offsets apple_pmp_offsets_t8112 = {
+ 	.status = 0x10,
+ };
+ 
++static const struct apple_pmp_report_offsets apple_pmp_offsets_t8122 = {
++	.tgt_read = 0x1000,
++	.tgt_write = 0x10800,
++	.actual = 0x1080,
++	.status = 0x10,
++};
++
+ static const struct of_device_id apple_pmp_report_of_match[] = {
+ 	{ .compatible = "apple,t6000-pmp-v2-report", .data = &apple_pmp_offsets_t600x },
+ 	{ .compatible = "apple,t6020-pmp-v2-report", .data = &apple_pmp_offsets_t602x },
++	{ .compatible = "apple,t6030-pmp-v2-report", .data = &apple_pmp_offsets_t6030 },
+ 	{ .compatible = "apple,t8112-pmp-v2-report", .data = &apple_pmp_offsets_t8112 },
++	{ .compatible = "apple,t8122-pmp-v2-report", .data = &apple_pmp_offsets_t8122 },
+ 	{}
+ };
+ 

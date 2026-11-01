@@ -1,4 +1,4 @@
-From cf1d346e9413b95b5d55eb04c710dc04f8eeb48d Mon Sep 17 00:00:00 2001
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
 From: Janne Grunau <j@jannau.net>
 Date: Tue, 4 Aug 2026 21:42:33 +0200
 Subject: [PATCH] arm64: dts: apple: t8122: Add ISP nodes
@@ -19,7 +19,7 @@ Signed-off-by: Janne Grunau <j@jannau.net>
  7 files changed, 201 insertions(+)
 
 diff --git a/arch/arm64/boot/dts/apple/t8122-j433.dts b/arch/arm64/boot/dts/apple/t8122-j433.dts
-index e8d5f0964564..9ceb6a6ebcdf 100644
+index e8d5f09..9ceb6a6 100644
 --- a/arch/arm64/boot/dts/apple/t8122-j433.dts
 +++ b/arch/arm64/boot/dts/apple/t8122-j433.dts
 @@ -75,4 +75,10 @@ codec {
@@ -34,7 +34,7 @@ index e8d5f0964564..9ceb6a6ebcdf 100644
 +
  #include "hwmon-fan-dual.dtsi"
 diff --git a/arch/arm64/boot/dts/apple/t8122-j434.dts b/arch/arm64/boot/dts/apple/t8122-j434.dts
-index a374c16f794e..1e5d75aa02b4 100644
+index a374c16..1e5d75a 100644
 --- a/arch/arm64/boot/dts/apple/t8122-j434.dts
 +++ b/arch/arm64/boot/dts/apple/t8122-j434.dts
 @@ -81,4 +81,10 @@ codec {
@@ -49,7 +49,7 @@ index a374c16f794e..1e5d75aa02b4 100644
 +
  #include "hwmon-fan-dual.dtsi"
 diff --git a/arch/arm64/boot/dts/apple/t8122-j504.dts b/arch/arm64/boot/dts/apple/t8122-j504.dts
-index e1babb6b45e1..8e92ebd7a300 100644
+index e1babb6..8e92ebd 100644
 --- a/arch/arm64/boot/dts/apple/t8122-j504.dts
 +++ b/arch/arm64/boot/dts/apple/t8122-j504.dts
 @@ -243,5 +243,11 @@ codec {
@@ -65,7 +65,7 @@ index e1babb6b45e1..8e92ebd7a300 100644
  #include "hwmon-fan-dual.dtsi"
  #include "hwmon-laptop.dtsi"
 diff --git a/arch/arm64/boot/dts/apple/t8122-j613.dts b/arch/arm64/boot/dts/apple/t8122-j613.dts
-index 4d860ac590ed..e38de36873c2 100644
+index 4d860ac..e38de36 100644
 --- a/arch/arm64/boot/dts/apple/t8122-j613.dts
 +++ b/arch/arm64/boot/dts/apple/t8122-j613.dts
 @@ -193,4 +193,11 @@ tp_accel {
@@ -81,7 +81,7 @@ index 4d860ac590ed..e38de36873c2 100644
 +
  #include "hwmon-laptop.dtsi"
 diff --git a/arch/arm64/boot/dts/apple/t8122-j615.dts b/arch/arm64/boot/dts/apple/t8122-j615.dts
-index 9f795673a1df..38fda19345ec 100644
+index 9f79567..38fda19 100644
 --- a/arch/arm64/boot/dts/apple/t8122-j615.dts
 +++ b/arch/arm64/boot/dts/apple/t8122-j615.dts
 @@ -193,4 +193,11 @@ tp_accel {
@@ -97,7 +97,7 @@ index 9f795673a1df..38fda19345ec 100644
 +
  #include "hwmon-laptop.dtsi"
 diff --git a/arch/arm64/boot/dts/apple/t8122-pmgr.dtsi b/arch/arm64/boot/dts/apple/t8122-pmgr.dtsi
-index 6c7182d72481..662fda943588 100644
+index 6c7182d..662fda9 100644
 --- a/arch/arm64/boot/dts/apple/t8122-pmgr.dtsi
 +++ b/arch/arm64/boot/dts/apple/t8122-pmgr.dtsi
 @@ -225,6 +225,7 @@ ps_isp_sys: power-controller@1e8 {
@@ -233,7 +233,7 @@ index 6c7182d72481..662fda943588 100644
  		compatible = "apple,t8122-pmgr-pwrstate", "apple,t8103-pmgr-pwrstate";
  		reg = <0x8000 4>;
 diff --git a/arch/arm64/boot/dts/apple/t8122.dtsi b/arch/arm64/boot/dts/apple/t8122.dtsi
-index 2d4f69d943c3..c77beba6f54a 100644
+index 2d4f69d..c77beba 100644
 --- a/arch/arm64/boot/dts/apple/t8122.dtsi
 +++ b/arch/arm64/boot/dts/apple/t8122.dtsi
 @@ -570,6 +570,57 @@ mca: i2s@2a3400000 {
@@ -294,6 +294,3 @@ index 2d4f69d943c3..c77beba6f54a 100644
  		nco: clock-controller@2d0044000 {
  			compatible = "apple,t8122-nco", "apple,t8103-nco";
  			reg = <0x2 0xd0044000 0x0 0x14000>;
--- 
-2.47.3
-

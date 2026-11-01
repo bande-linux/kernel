@@ -1,7 +1,7 @@
 #!/bin/bash
 # config-diff.sh <source dir>: run in debian:testing after build.sh compile.
-# Proves our kernel is Debian's arm64-16k kernel plus config/apple.config (and the series'
-# patches/<series>/apple.config when it has our patches): generates Debian's own arm64-16k
+# Proves our kernel is Debian's arm64-16k kernel plus config/apple.config and the series'
+# patches/<series>/apple.config: generates Debian's own arm64-16k
 # config from the same source with Debian's build, and fails if any option Debian sets differs
 # in our built config without being listed, or if a listed option didn't take effect. Options
 # Debian doesn't have at all (the Apple drivers and what they enable) are only listed.
@@ -16,7 +16,7 @@ ours=debian/build/build_arm64_none_apple-arm64-16k/.config
 [ -f "$ours" ] || { echo "config-diff: no built apple-arm64-16k config in $src" >&2; exit 1; }
 patches=$("$repo/scripts/series.sh" "$(dpkg-parsechangelog -S Version)")
 wanted=$(mktemp)
-cat "$repo/config/apple.config" ${patches:+"$patches/apple.config"} > "$wanted"
+cat "$repo/config/apple.config" "$patches/apple.config" > "$wanted"
 
 python3 - "$theirs" "$ours" "$wanted" <<'EOF'
 import re, sys

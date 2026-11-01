@@ -1,4 +1,4 @@
-From 6e880c2eb6331a63749542f298bd7c79afd45382 Mon Sep 17 00:00:00 2001
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
 From: Asahi Lina <lina@asahilina.net>
 Date: Thu, 3 Nov 2022 01:03:44 +0900
 Subject: [PATCH] arm64: dts: apple: t600x: Add downstream gpu properties
@@ -18,7 +18,7 @@ Signed-off-by: Asahi Lina <lina@asahilina.net>
  7 files changed, 118 insertions(+), 9 deletions(-)
 
 diff --git a/arch/arm64/boot/dts/apple/t6000.dtsi b/arch/arm64/boot/dts/apple/t6000.dtsi
-index 0ad77c98073f..c9e4e52d9aac 100644
+index 0ad77c9..c9e4e52 100644
 --- a/arch/arm64/boot/dts/apple/t6000.dtsi
 +++ b/arch/arm64/boot/dts/apple/t6000.dtsi
 @@ -9,6 +9,8 @@
@@ -38,7 +38,7 @@ index 0ad77c98073f..c9e4e52d9aac 100644
 +	compatible = "apple,agx-t6000", "apple,agx-g13x";
  };
 diff --git a/arch/arm64/boot/dts/apple/t6001-j375c.dts b/arch/arm64/boot/dts/apple/t6001-j375c.dts
-index 5e94076e0eb3..ce684be7c8dc 100644
+index 5e94076..ce684be 100644
 --- a/arch/arm64/boot/dts/apple/t6001-j375c.dts
 +++ b/arch/arm64/boot/dts/apple/t6001-j375c.dts
 @@ -46,4 +46,13 @@ usb_hub_rst-hog {
@@ -56,7 +56,7 @@ index 5e94076e0eb3..ce684be7c8dc 100644
 +
  #include "hwmon-fan-dual.dtsi"
 diff --git a/arch/arm64/boot/dts/apple/t6001.dtsi b/arch/arm64/boot/dts/apple/t6001.dtsi
-index e0acf2ba078b..fd37790193d6 100644
+index e0acf2b..fd37790 100644
 --- a/arch/arm64/boot/dts/apple/t6001.dtsi
 +++ b/arch/arm64/boot/dts/apple/t6001.dtsi
 @@ -16,6 +16,10 @@
@@ -80,7 +80,7 @@ index e0acf2ba078b..fd37790193d6 100644
  
  #include "hwmon-common.dtsi"
 diff --git a/arch/arm64/boot/dts/apple/t6002-j375d.dts b/arch/arm64/boot/dts/apple/t6002-j375d.dts
-index 1e8b31e99136..df9b7d659c7b 100644
+index 1e8b31e..df9b7d6 100644
 --- a/arch/arm64/boot/dts/apple/t6002-j375d.dts
 +++ b/arch/arm64/boot/dts/apple/t6002-j375d.dts
 @@ -213,3 +213,12 @@ atcphy5_usb3: endpoint {
@@ -97,7 +97,7 @@ index 1e8b31e99136..df9b7d659c7b 100644
 +	apple,ppm-kp = <0.355>;
 +};
 diff --git a/arch/arm64/boot/dts/apple/t6002.dtsi b/arch/arm64/boot/dts/apple/t6002.dtsi
-index 91ce9a665cab..8d20821da0be 100644
+index 91ce9a6..8d20821 100644
 --- a/arch/arm64/boot/dts/apple/t6002.dtsi
 +++ b/arch/arm64/boot/dts/apple/t6002.dtsi
 @@ -16,6 +16,10 @@
@@ -121,7 +121,7 @@ index 91ce9a665cab..8d20821da0be 100644
  
  #include "hwmon-common.dtsi"
 diff --git a/arch/arm64/boot/dts/apple/t600x-common.dtsi b/arch/arm64/boot/dts/apple/t600x-common.dtsi
-index 186f0459d6b7..4a1b8a9a59a0 100644
+index 186f045..4a1b8a9 100644
 --- a/arch/arm64/boot/dts/apple/t600x-common.dtsi
 +++ b/arch/arm64/boot/dts/apple/t600x-common.dtsi
 @@ -337,6 +337,50 @@ opp15 {
@@ -199,7 +199,7 @@ index 186f0459d6b7..4a1b8a9a59a0 100644
  	};
  };
 diff --git a/arch/arm64/boot/dts/apple/t600x-die0.dtsi b/arch/arm64/boot/dts/apple/t600x-die0.dtsi
-index 74bf652068d3..3bf402f48c53 100644
+index 74bf652..3bf402f 100644
 --- a/arch/arm64/boot/dts/apple/t600x-die0.dtsi
 +++ b/arch/arm64/boot/dts/apple/t600x-die0.dtsi
 @@ -440,6 +440,43 @@ gpu: gpu@406400000 {
@@ -246,6 +246,3 @@ index 74bf652068d3..3bf402f48c53 100644
  	};
  
  	agx_mbox: mbox@406408000 {
--- 
-2.47.3
-

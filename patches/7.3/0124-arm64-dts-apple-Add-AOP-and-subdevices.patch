@@ -1,4 +1,4 @@
-From f842957894dc126fb27aeaa5c3f0c33aa5b00055 Mon Sep 17 00:00:00 2001
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
 From: Sasha Finkelstein <fnkl.kernel@gmail.com>
 Date: Sat, 9 Nov 2024 18:44:45 +0100
 Subject: [PATCH] arm64: dts: apple: Add AOP and subdevices
@@ -13,7 +13,7 @@ Signed-off-by: Sasha Finkelstein <fnkl.kernel@gmail.com>
  4 files changed, 248 insertions(+)
 
 diff --git a/arch/arm64/boot/dts/apple/t600x-die0.dtsi b/arch/arm64/boot/dts/apple/t600x-die0.dtsi
-index a148cf5cf900..4913e9d82fb5 100644
+index a148cf5..4913e9d 100644
 --- a/arch/arm64/boot/dts/apple/t600x-die0.dtsi
 +++ b/arch/arm64/boot/dts/apple/t600x-die0.dtsi
 @@ -168,6 +168,68 @@ wdt: watchdog@2922b0000 {
@@ -86,7 +86,7 @@ index a148cf5cf900..4913e9d82fb5 100644
  		compatible = "apple,t6000-dart";
  		reg = <0x3 0x8b304000 0x0 0x4000>;
 diff --git a/arch/arm64/boot/dts/apple/t602x-die0.dtsi b/arch/arm64/boot/dts/apple/t602x-die0.dtsi
-index 3a0a2d838784..f21ab34d0fed 100644
+index 3a0a2d8..f21ab34 100644
 --- a/arch/arm64/boot/dts/apple/t602x-die0.dtsi
 +++ b/arch/arm64/boot/dts/apple/t602x-die0.dtsi
 @@ -168,6 +168,68 @@ pinctrl_smc: pinctrl@2a2820000 {
@@ -159,7 +159,7 @@ index 3a0a2d838784..f21ab34d0fed 100644
  		compatible = "apple,t6020-mtp", "apple,t6020-rtk-helper-asc4", "apple,mtp", "apple,rtk-helper-asc4";
  		reg = <0x2 0xa9400000 0x0 0x4000>,
 diff --git a/arch/arm64/boot/dts/apple/t8103.dtsi b/arch/arm64/boot/dts/apple/t8103.dtsi
-index b547a62e6102..22df49b472dc 100644
+index b547a62..22df49b 100644
 --- a/arch/arm64/boot/dts/apple/t8103.dtsi
 +++ b/arch/arm64/boot/dts/apple/t8103.dtsi
 @@ -1312,6 +1312,68 @@ pinctrl_aop: pinctrl@24a820000 {
@@ -232,7 +232,7 @@ index b547a62e6102..22df49b472dc 100644
  			compatible = "apple,t8103-dart";
  			reg = <0x2 0x71304000 0x0 0x4000>;
 diff --git a/arch/arm64/boot/dts/apple/t8112.dtsi b/arch/arm64/boot/dts/apple/t8112.dtsi
-index 9d6968ad34f1..527b754e60f3 100644
+index 9d6968a..527b754 100644
 --- a/arch/arm64/boot/dts/apple/t8112.dtsi
 +++ b/arch/arm64/boot/dts/apple/t8112.dtsi
 @@ -1328,6 +1328,68 @@ pinctrl_aop: pinctrl@24a820000 {
@@ -304,6 +304,3 @@ index 9d6968ad34f1..527b754e60f3 100644
  		mtp: mtp@24e400000 {
  			compatible = "apple,t8112-mtp", "apple,t8112-rtk-helper-asc4", "apple,mtp", "apple,rtk-helper-asc4";
  			reg = <0x2 0x4e400000 0x0 0x4000>,
--- 
-2.47.3
-

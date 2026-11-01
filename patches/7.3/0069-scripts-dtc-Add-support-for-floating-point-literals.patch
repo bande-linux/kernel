@@ -1,4 +1,4 @@
-From 768aa7f0af38c9b5e5b2527d7637abfe3df6bee1 Mon Sep 17 00:00:00 2001
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
 From: Asahi Lina <lina@asahilina.net>
 Date: Wed, 2 Nov 2022 15:58:07 +0900
 Subject: [PATCH] scripts/dtc: Add support for floating-point literals
@@ -13,7 +13,7 @@ Signed-off-by: Asahi Lina <lina@asahilina.net>
  4 files changed, 66 insertions(+)
 
 diff --git a/scripts/dtc/data.c b/scripts/dtc/data.c
-index 5b25aa060416..ce449824c80a 100644
+index 5b25aa0..ce44982 100644
 --- a/scripts/dtc/data.c
 +++ b/scripts/dtc/data.c
 @@ -184,6 +184,33 @@ struct data data_append_integer(struct data d, uint64_t value, int bits)
@@ -51,7 +51,7 @@ index 5b25aa060416..ce449824c80a 100644
  {
  	struct fdt_reserve_entry re;
 diff --git a/scripts/dtc/dtc-lexer.l b/scripts/dtc/dtc-lexer.l
-index 1b129b118b0f..f625e35eaf02 100644
+index 1b129b1..f625e35 100644
 --- a/scripts/dtc/dtc-lexer.l
 +++ b/scripts/dtc/dtc-lexer.l
 @@ -148,6 +148,28 @@ static void PRINTF(1, 2) lexical_error(const char *fmt, ...);
@@ -84,7 +84,7 @@ index 1b129b118b0f..f625e35eaf02 100644
  			/* Missed includes or macro definitions while
  			 * preprocessing can lead to unexpected identifiers in
 diff --git a/scripts/dtc/dtc-parser.y b/scripts/dtc/dtc-parser.y
-index 4d5eece52624..225a6b41b14f 100644
+index 4d5eece..225a6b4 100644
 --- a/scripts/dtc/dtc-parser.y
 +++ b/scripts/dtc/dtc-parser.y
 @@ -48,6 +48,7 @@ static bool is_ref_relative(const char *ref)
@@ -139,7 +139,7 @@ index 4d5eece52624..225a6b41b14f 100644
  	  DT_LITERAL
  	| DT_CHAR_LITERAL
 diff --git a/scripts/dtc/dtc.h b/scripts/dtc/dtc.h
-index 473552ebf017..2d823d3ee231 100644
+index 473552e..2d823d3 100644
 --- a/scripts/dtc/dtc.h
 +++ b/scripts/dtc/dtc.h
 @@ -177,6 +177,7 @@ struct data data_insert_at_marker(struct data d, struct marker *m,
@@ -150,6 +150,3 @@ index 473552ebf017..2d823d3ee231 100644
  struct data data_append_re(struct data d, uint64_t address, uint64_t size);
  struct data data_append_addr(struct data d, uint64_t addr);
  struct data data_append_byte(struct data d, uint8_t byte);
--- 
-2.47.3
-

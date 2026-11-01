@@ -1,4 +1,4 @@
-From fa80bd711736c39d0ac8e6cee5318ff399b82f32 Mon Sep 17 00:00:00 2001
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
 From: Janne Grunau <j@jannau.net>
 Date: Fri, 19 Sep 2025 20:32:09 +0200
 Subject: [PATCH] arm64: dts: apple: t8103: Mark pcie node as dma-coherent
@@ -10,7 +10,7 @@ Signed-off-by: Janne Grunau <j@jannau.net>
  1 file changed, 2 insertions(+)
 
 diff --git a/arch/arm64/boot/dts/apple/t8103.dtsi b/arch/arm64/boot/dts/apple/t8103.dtsi
-index 5b68bf0df4e6..f22d68b62a3c 100644
+index 5b68bf0..f22d68b 100644
 --- a/arch/arm64/boot/dts/apple/t8103.dtsi
 +++ b/arch/arm64/boot/dts/apple/t8103.dtsi
 @@ -1187,6 +1187,8 @@ pcie0: pcie@690000000 {
@@ -22,6 +22,3 @@ index 5b68bf0df4e6..f22d68b62a3c 100644
  			port00: pci@0,0 {
  				device_type = "pci";
  				reg = <0x0 0x0 0x0 0x0 0x0>;
--- 
-2.47.3
-

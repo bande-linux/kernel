@@ -1,4 +1,4 @@
-From 9693baf484e3acb420fd7fb3f19fd2b8c91fe743 Mon Sep 17 00:00:00 2001
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
 From: Janne Grunau <j@jannau.net>
 Date: Tue, 1 Apr 2025 20:31:56 +0200
 Subject: [PATCH] iommu: Rename iommu_create_device_direct_mappings()
@@ -13,7 +13,7 @@ Signed-off-by: Janne Grunau <j@jannau.net>
  1 file changed, 11 insertions(+), 11 deletions(-)
 
 diff --git a/drivers/iommu/iommu.c b/drivers/iommu/iommu.c
-index dd6b0213445b..c8f2550edbc9 100644
+index dd6b021..c8f2550 100644
 --- a/drivers/iommu/iommu.c
 +++ b/drivers/iommu/iommu.c
 @@ -161,8 +161,8 @@ static void __iommu_group_set_domain_nofail(struct iommu_group *group,
@@ -82,6 +82,3 @@ index dd6b0213445b..c8f2550edbc9 100644
  			if (ret)
  				goto err_restore_domain;
  		}
--- 
-2.47.3
-

@@ -1,0 +1,41 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: Mikael Hug <mikaelhug@gmail.com>
+Date: Sat, 31 Oct 2026 00:46:13 +0000
+Subject: [PATCH] Merge remote-tracking branch 'origin/prep/hw-audio-4' into
+ prep/hw-test5
+
+sound/soc/codecs/tas2764.c merged without a textual conflict, but the
+result was wrong. hw-audio-4 40423999045a adds the else branch that turns
+off the sense transmit, using "return ret" on its errors. review/audio
+e87870fbd701 turned the probe error paths into "goto err_disable_reg".
+Two of the three error returns in the sense block were left as
+"return ret", which would keep the amplifier regulator enabled and SDZ
+high after a failed probe. All three now use goto err_disable_reg.
+
+Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>
+Claude-Session: https://claude.ai/code/session_01UqitcmCNS6G33aQUShi39x
+---
+ sound/soc/codecs/tas2764.c | 9 +++++++++
+ 1 file changed, 9 insertions(+)
+
+diff --git a/sound/soc/codecs/tas2764.c b/sound/soc/codecs/tas2764.c
+index 7fbece7..e876702 100644
+--- a/sound/soc/codecs/tas2764.c
++++ b/sound/soc/codecs/tas2764.c
+@@ -816,7 +816,16 @@ static int tas2764_codec_probe(struct snd_soc_component *component)
+ 	if (tas2764->i_sense_slot != -1 && tas2764->v_sense_slot != -1) {
+ 		ret = tas2764_set_ivsense_transmit(tas2764, tas2764->i_sense_slot,
+ 						   tas2764->v_sense_slot);
++		if (ret < 0)
++			goto err_disable_reg;
++	} else {
++		ret = snd_soc_component_update_bits(component, TAS2764_TDM_CFG5,
++						    TAS2764_TDM_CFG5_VSNS_ENABLE, 0);
++		if (ret < 0)
++			goto err_disable_reg;
+ 
++		ret = snd_soc_component_update_bits(component, TAS2764_TDM_CFG6,
++						    TAS2764_TDM_CFG6_ISNS_ENABLE, 0);
+ 		if (ret < 0)
+ 			goto err_disable_reg;
+ 	}

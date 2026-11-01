@@ -1,4 +1,4 @@
-From c6fe8793c099663226cbdb6c8e8e224ced306837 Mon Sep 17 00:00:00 2001
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
 From: =?UTF-8?q?Martin=20Povi=C5=A1er?= <povik+lin@cutebit.org>
 Date: Fri, 28 Apr 2023 19:10:56 +0200
 Subject: [PATCH] iommu: apple-dart: Link to consumers with blanket RPM_ACTIVE
@@ -31,7 +31,7 @@ Signed-off-by: Martin Povišer <povik+lin@cutebit.org>
  1 file changed, 3 insertions(+), 3 deletions(-)
 
 diff --git a/drivers/iommu/apple-dart.c b/drivers/iommu/apple-dart.c
-index 0bb7cef4ea52..cf7cab4e2b99 100644
+index 0bb7cef..cf7cab4 100644
 --- a/drivers/iommu/apple-dart.c
 +++ b/drivers/iommu/apple-dart.c
 @@ -750,9 +750,9 @@ static struct iommu_device *apple_dart_probe_device(struct device *dev)
@@ -47,6 +47,3 @@ index 0bb7cef4ea52..cf7cab4e2b99 100644
  
  	return &cfg->stream_maps[0].dart->iommu;
  }
--- 
-2.47.3
-

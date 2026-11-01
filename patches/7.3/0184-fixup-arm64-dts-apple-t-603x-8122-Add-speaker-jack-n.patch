@@ -1,4 +1,4 @@
-From bc822440c50b7ede2fe1afd1e1280c456c5884f5 Mon Sep 17 00:00:00 2001
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
 From: James Calligeros <jcalligeros99@gmail.com>
 Date: Tue, 8 Sep 2026 20:52:45 +1000
 Subject: [PATCH] fixup! arm64: dts: apple: t[603x,8122]: Add speaker/jack
@@ -11,7 +11,7 @@ Signed-off-by: James Calligeros <jcalligeros99@gmail.com>
  1 file changed, 31 insertions(+), 9 deletions(-)
 
 diff --git a/arch/arm64/boot/dts/apple/t8122-j615.dts b/arch/arm64/boot/dts/apple/t8122-j615.dts
-index 99e6fd33d5a6..d5e29386f84c 100644
+index 99e6fd3..d5e2938 100644
 --- a/arch/arm64/boot/dts/apple/t8122-j615.dts
 +++ b/arch/arm64/boot/dts/apple/t8122-j615.dts
 @@ -61,12 +61,12 @@ &bluetooth0 {
@@ -98,6 +98,3 @@ index 99e6fd33d5a6..d5e29386f84c 100644
  			};
  		};
  
--- 
-2.47.3
-

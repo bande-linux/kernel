@@ -1,0 +1,35 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: Janne Grunau <j@jannau.net>
+Date: Fri, 26 Sep 2025 09:37:43 +0200
+Subject: [PATCH] power: reset: macsmc-reboot: Prevent probing without of_node
+
+MFD will probe sub devices declared with MFD_CELL_OF() even without
+match on the device tree compatible. macsmc-reboot depends on nvmem
+provided via device tree. Fail probe() with -ENODEV if this information
+is missing.
+
+Signed-off-by: Janne Grunau <j@jannau.net>
+(cherry picked from commit 34acdd7dbd8538bc66bafce6cbe8d6563cf391e2)
+---
+ drivers/power/reset/macsmc-reboot.c | 8 ++++++++
+ 1 file changed, 8 insertions(+)
+
+diff --git a/drivers/power/reset/macsmc-reboot.c b/drivers/power/reset/macsmc-reboot.c
+index 9fc36fa..7688cfd 100644
+--- a/drivers/power/reset/macsmc-reboot.c
++++ b/drivers/power/reset/macsmc-reboot.c
+@@ -204,6 +204,14 @@ static int macsmc_reboot_probe(struct platform_device *pdev)
+ 	struct macsmc_reboot *reboot;
+ 	int ret, i;
+ 
++	/*
++	 * MFD will probe this device even without a node in the device tree,
++	 * thus bail out early if the SMC on the current machines does not
++	 * support reboot and has no node in the device tree.
++	 */
++	if (!pdev->dev.of_node)
++		return -ENODEV;
++
+ 	reboot = devm_kzalloc(&pdev->dev, sizeof(*reboot), GFP_KERNEL);
+ 	if (!reboot)
+ 		return -ENOMEM;

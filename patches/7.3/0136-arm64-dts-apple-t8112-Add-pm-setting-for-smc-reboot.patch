@@ -1,4 +1,4 @@
-From 74b2fdd05ee08e548dcfd136a80d36f7790c0111 Mon Sep 17 00:00:00 2001
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
 From: Janne Grunau <j@jannau.net>
 Date: Sat, 6 Sep 2025 11:23:04 +0200
 Subject: [PATCH] arm64: dts: apple: t8112: Add "pm_setting" for smc_reboot
@@ -12,7 +12,7 @@ Signed-off-by: Janne Grunau <j@jannau.net>
  1 file changed, 2 insertions(+), 2 deletions(-)
 
 diff --git a/arch/arm64/boot/dts/apple/t8112.dtsi b/arch/arm64/boot/dts/apple/t8112.dtsi
-index a19528d579cf..e894f73b335c 100644
+index a19528d..e894f73 100644
 --- a/arch/arm64/boot/dts/apple/t8112.dtsi
 +++ b/arch/arm64/boot/dts/apple/t8112.dtsi
 @@ -1257,9 +1257,9 @@ smc_gpio: gpio {
@@ -27,6 +27,3 @@ index a19528d579cf..e894f73b335c 100644
  			};
  
  			smc_hwmon: hwmon {
--- 
-2.47.3
-

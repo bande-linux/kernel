@@ -1,4 +1,4 @@
-From 57546b786b4b79a7a0a7468088dbcb16091d68f6 Mon Sep 17 00:00:00 2001
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
 From: Hector Martin <marcan@marcan.st>
 Date: Thu, 12 Oct 2023 23:20:47 +0900
 Subject: [PATCH] arm64: dts: apple: t8103: Mark MCA power states as
@@ -11,7 +11,7 @@ Signed-off-by: Hector Martin <marcan@marcan.st>
  1 file changed, 6 insertions(+)
 
 diff --git a/arch/arm64/boot/dts/apple/t8103-pmgr.dtsi b/arch/arm64/boot/dts/apple/t8103-pmgr.dtsi
-index a55b1fd2b52c..9bddd5bf8660 100644
+index a55b1fd..9bddd5b 100644
 --- a/arch/arm64/boot/dts/apple/t8103-pmgr.dtsi
 +++ b/arch/arm64/boot/dts/apple/t8103-pmgr.dtsi
 @@ -493,6 +493,7 @@ ps_mca0: power-controller@2b8 {
@@ -62,6 +62,3 @@ index a55b1fd2b52c..9bddd5bf8660 100644
  	};
  
  	ps_dpa0: power-controller@2e8 {
--- 
-2.47.3
-

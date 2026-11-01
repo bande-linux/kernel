@@ -1,4 +1,4 @@
-From b14a0b3ce77f435a96f49ffd8dba827cc5844734 Mon Sep 17 00:00:00 2001
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
 From: Janne Grunau <j@jannau.net>
 Date: Thu, 11 Nov 2021 21:31:21 +0100
 Subject: [PATCH] arm64: dts: apple: j31[46]: Add keyboard nodes
@@ -13,7 +13,7 @@ Signed-off-by: Janne Grunau <j@jannau.net>
  1 file changed, 21 insertions(+)
 
 diff --git a/arch/arm64/boot/dts/apple/t600x-j314-j316.dtsi b/arch/arm64/boot/dts/apple/t600x-j314-j316.dtsi
-index 369084fd0c34..f634b97b81b6 100644
+index 369084f..f634b97 100644
 --- a/arch/arm64/boot/dts/apple/t600x-j314-j316.dtsi
 +++ b/arch/arm64/boot/dts/apple/t600x-j314-j316.dtsi
 @@ -173,6 +173,27 @@ &nco_clkref {
@@ -44,6 +44,3 @@ index 369084fd0c34..f634b97b81b6 100644
  /* PCIe devices */
  &port00 {
  	/* WLAN */
--- 
-2.47.3
-

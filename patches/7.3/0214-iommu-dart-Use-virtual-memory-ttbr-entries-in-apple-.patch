@@ -1,4 +1,4 @@
-From ff83bf63cfa234c772ca144d3ad341129077120a Mon Sep 17 00:00:00 2001
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
 From: Janne Grunau <j@jannau.net>
 Date: Sun, 30 Mar 2025 23:05:27 +0200
 Subject: [PATCH] iommu/dart: Use virtual memory ttbr entries in apple_dart_cfg
@@ -18,7 +18,7 @@ Signed-off-by: Janne Grunau <j@jannau.net>
  3 files changed, 6 insertions(+), 5 deletions(-)
 
 diff --git a/drivers/iommu/apple-dart.c b/drivers/iommu/apple-dart.c
-index d081786396cc..54b285334bb7 100644
+index d081786..54b2853 100644
 --- a/drivers/iommu/apple-dart.c
 +++ b/drivers/iommu/apple-dart.c
 @@ -590,9 +590,10 @@ apple_dart_setup_translation(struct apple_dart_domain *domain,
@@ -36,7 +36,7 @@ index d081786396cc..54b285334bb7 100644
  		apple_dart_hw_clear_ttbr(stream_map, i);
  
 diff --git a/drivers/iommu/io-pgtable-dart.c b/drivers/iommu/io-pgtable-dart.c
-index cbc5d6aa2daa..fdaf0584f535 100644
+index cbc5d6a..fdaf058 100644
 --- a/drivers/iommu/io-pgtable-dart.c
 +++ b/drivers/iommu/io-pgtable-dart.c
 @@ -435,7 +435,7 @@ apple_dart_alloc_pgtable(struct io_pgtable_cfg *cfg, void *cookie)
@@ -49,7 +49,7 @@ index cbc5d6aa2daa..fdaf0584f535 100644
  
  	return &data->iop;
 diff --git a/include/linux/io-pgtable.h b/include/linux/io-pgtable.h
-index e19872e37e06..c3b1b92910d9 100644
+index e19872e..c3b1b92 100644
 --- a/include/linux/io-pgtable.h
 +++ b/include/linux/io-pgtable.h
 @@ -177,7 +177,7 @@ struct io_pgtable_cfg {
@@ -61,6 +61,3 @@ index e19872e37e06..c3b1b92910d9 100644
  			u32 n_ttbrs;
  			u32 n_levels;
  		} apple_dart_cfg;
--- 
-2.47.3
-

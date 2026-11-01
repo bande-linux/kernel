@@ -1,4 +1,4 @@
-From 47c1093e6b4600cbe684405e4c39245294f10133 Mon Sep 17 00:00:00 2001
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
 From: Eileen Yoon <eyn@gmx.com>
 Date: Thu, 31 Aug 2023 19:10:27 +0900
 Subject: [PATCH] arm64: dts: apple: t8103: Add ISP nodes
@@ -11,7 +11,7 @@ Signed-off-by: Eileen Yoon <eyn@gmx.com>
  2 files changed, 172 insertions(+)
 
 diff --git a/arch/arm64/boot/dts/apple/t8103-pmgr.dtsi b/arch/arm64/boot/dts/apple/t8103-pmgr.dtsi
-index a97d64b66573..4d1422d7e8b5 100644
+index a97d64b..4d1422d 100644
 --- a/arch/arm64/boot/dts/apple/t8103-pmgr.dtsi
 +++ b/arch/arm64/boot/dts/apple/t8103-pmgr.dtsi
 @@ -1009,6 +1009,123 @@ ps_disp0_cpu0: power-controller@10018 {
@@ -139,7 +139,7 @@ index a97d64b66573..4d1422d7e8b5 100644
  
  &pmgr_mini {
 diff --git a/arch/arm64/boot/dts/apple/t8103.dtsi b/arch/arm64/boot/dts/apple/t8103.dtsi
-index 135d8ad2e93b..35f1fe7956ae 100644
+index 135d8ad..35f1fe7 100644
 --- a/arch/arm64/boot/dts/apple/t8103.dtsi
 +++ b/arch/arm64/boot/dts/apple/t8103.dtsi
 @@ -670,6 +670,61 @@ display: display-subsystem {
@@ -204,6 +204,3 @@ index 135d8ad2e93b..35f1fe7956ae 100644
  		sio_dart: iommu@235004000 {
  			compatible = "apple,t8103-dart";
  			reg = <0x2 0x35004000 0x0 0x4000>;
--- 
-2.47.3
-

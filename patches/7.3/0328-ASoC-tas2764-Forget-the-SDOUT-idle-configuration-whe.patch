@@ -1,0 +1,39 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: Mikael Hug <mikaelhug@gmail.com>
+Date: Sat, 31 Oct 2026 03:03:35 +0000
+Subject: [PATCH] ASoC: tas2764: Forget the SDOUT idle configuration when
+ resetting the chip
+
+tas2764_set_dai_tdm_idle() skips the register writes when the requested
+idle mask and mode match idle_slot_config. That cache lives in the I2C
+driver data, but tas2764_codec_probe() resets the chip, which puts the
+SDOUT idle slots back to Hi-Z, every time the component is probed. When
+the sound card is bound again before tas2764_set_bclk_ratio() has
+cropped the cached mask, for example after a probe deferral, the same
+configuration is requested again and never written, and the unused
+slots stay Hi-Z.
+
+Clear the cached configuration together with the register cache after
+the reset.
+
+Fixes: 45573ee1f2ba ("ASoC: tas2764: expose SDOUT bus keeper via set_tdm_idle operation")
+Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>
+Claude-Session: https://claude.ai/code/session_01UqitcmCNS6G33aQUShi39x
+---
+ sound/soc/codecs/tas2764.c | 3 +++
+ 1 file changed, 3 insertions(+)
+
+diff --git a/sound/soc/codecs/tas2764.c b/sound/soc/codecs/tas2764.c
+index e876702..52b15cf 100644
+--- a/sound/soc/codecs/tas2764.c
++++ b/sound/soc/codecs/tas2764.c
+@@ -784,6 +784,9 @@ static int tas2764_codec_probe(struct snd_soc_component *component)
+ 
+ 	tas2764_reset(tas2764);
+ 	regmap_reinit_cache(tas2764->regmap, &tas2764_i2c_regmap);
++	/* The reset put the SDOUT idle slots back to Hi-Z */
++	tas2764->idle_slot_config.tx_mask = 0;
++	tas2764->idle_slot_config.tx_mode = 0;
+ 
+ 	if (tas2764->irq) {
+ 		ret = snd_soc_component_write(tas2764->component, TAS2764_INT_MASK0, 0x00);

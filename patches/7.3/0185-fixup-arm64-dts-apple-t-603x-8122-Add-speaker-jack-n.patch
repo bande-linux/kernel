@@ -1,4 +1,4 @@
-From 8907687cef43dc3f8450c8574f6ea50c09cf1175 Mon Sep 17 00:00:00 2001
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
 From: sofus <sofus.c@icloud.com>
 Date: Fri, 11 Sep 2026 09:42:03 +0200
 Subject: [PATCH] fixup! arm64: dts: apple: t[603x,8122]: Add speaker/jack
@@ -12,7 +12,7 @@ Signed-off-by: sofus <sofus.c@icloud.com>
  2 files changed, 2 insertions(+), 2 deletions(-)
 
 diff --git a/arch/arm64/boot/dts/apple/t6030-j514s.dts b/arch/arm64/boot/dts/apple/t6030-j514s.dts
-index aa5db1e84483..724d94dc6557 100644
+index aa5db1e..724d94d 100644
 --- a/arch/arm64/boot/dts/apple/t6030-j514s.dts
 +++ b/arch/arm64/boot/dts/apple/t6030-j514s.dts
 @@ -65,7 +65,7 @@ &speaker_right_woof2 {
@@ -25,7 +25,7 @@ index aa5db1e84483..724d94dc6557 100644
  
  &aop_audio {
 diff --git a/arch/arm64/boot/dts/apple/t6030-j516s.dts b/arch/arm64/boot/dts/apple/t6030-j516s.dts
-index 5532faac8ed8..c6fb1c55cecf 100644
+index 5532faa..c6fb1c5 100644
 --- a/arch/arm64/boot/dts/apple/t6030-j516s.dts
 +++ b/arch/arm64/boot/dts/apple/t6030-j516s.dts
 @@ -65,7 +65,7 @@ &speaker_right_woof2 {
@@ -37,6 +37,3 @@ index 5532faac8ed8..c6fb1c55cecf 100644
  };
  
  &aop_audio {
--- 
-2.47.3
-

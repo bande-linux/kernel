@@ -1,4 +1,4 @@
-From e431ed36bd40ab23743313becaece62fb9a5fdc3 Mon Sep 17 00:00:00 2001
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
 From: Michael Reeves <michael.reeves077@gmail.com>
 Date: Sat, 31 Jan 2026 13:03:06 +1100
 Subject: [PATCH] dt-bindings: iommu: apple,sart: Add Apple M3 compatibles
@@ -12,7 +12,7 @@ Signed-off-by: Michael Reeves <michael.reeves077@gmail.com>
  1 file changed, 1 insertion(+)
 
 diff --git a/Documentation/devicetree/bindings/iommu/apple,sart.yaml b/Documentation/devicetree/bindings/iommu/apple,sart.yaml
-index 88e66d4b13c6..8fd7775704ab 100644
+index 88e66d4..8fd7775 100644
 --- a/Documentation/devicetree/bindings/iommu/apple,sart.yaml
 +++ b/Documentation/devicetree/bindings/iommu/apple,sart.yaml
 @@ -33,6 +33,7 @@ properties:
@@ -23,6 +23,3 @@ index 88e66d4b13c6..8fd7775704ab 100644
            - const: apple,t6000-sart
        - enum:
            - apple,t6000-sart
--- 
-2.47.3
-

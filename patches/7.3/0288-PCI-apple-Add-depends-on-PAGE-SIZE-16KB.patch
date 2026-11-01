@@ -1,0 +1,29 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: Janne Grunau <j@jannau.net>
+Date: Fri, 9 Sep 2022 19:52:19 +0200
+Subject: [PATCH] PCI: apple: Add depends on PAGE_SIZE_16KB
+
+The iommu on Apple's M1 and M2 supports only a page size of 16kB and is
+mandatory for PCIe devices. The PCI controller itself is not affeccted
+by the CPU page size the page size mismatch devices are renderer useless
+due to non-working DMA. While the the iommu prints a warning in this
+scenario it seems a common and hard to debug problem.
+
+Signed-off-by: Janne Grunau <j@jannau.net>
+(cherry picked from commit 0b860a946ad3863c7243a8576444c884c47ed68c)
+---
+ drivers/pci/controller/Kconfig | 1 +
+ 1 file changed, 1 insertion(+)
+
+diff --git a/drivers/pci/controller/Kconfig b/drivers/pci/controller/Kconfig
+index d246bbe..d050529 100644
+--- a/drivers/pci/controller/Kconfig
++++ b/drivers/pci/controller/Kconfig
+@@ -45,6 +45,7 @@ config PCIE_APPLE
+ 	depends on ARCH_APPLE || COMPILE_TEST
+ 	depends on OF
+ 	depends on PCI_MSI
++	depends on PAGE_SIZE_16KB || COMPILE_TEST
+ 	select PCI_HOST_COMMON
+ 	select IRQ_MSI_LIB
+ 	help

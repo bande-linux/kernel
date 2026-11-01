@@ -1,4 +1,4 @@
-From 813af13e4a119d943e27576c83fe401e48e9952f Mon Sep 17 00:00:00 2001
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
 From: Janne Grunau <j@jannau.net>
 Date: Sat, 27 Apr 2024 12:57:52 +0200
 Subject: [PATCH] arm64: apple: t60x0/t60x1: Enable sio explicitly
@@ -13,7 +13,7 @@ Signed-off-by: Janne Grunau <j@jannau.net>
  2 files changed, 10 insertions(+)
 
 diff --git a/arch/arm64/boot/dts/apple/t600x-j314-j316.dtsi b/arch/arm64/boot/dts/apple/t600x-j314-j316.dtsi
-index e4a5e8294e76..fb956fa1c241 100644
+index e4a5e82..fb956fa 100644
 --- a/arch/arm64/boot/dts/apple/t600x-j314-j316.dtsi
 +++ b/arch/arm64/boot/dts/apple/t600x-j314-j316.dtsi
 @@ -111,6 +111,11 @@ &dcpext0 {
@@ -29,7 +29,7 @@ index e4a5e8294e76..fb956fa1c241 100644
  	status = "okay";
  };
 diff --git a/arch/arm64/boot/dts/apple/t600x-j375.dtsi b/arch/arm64/boot/dts/apple/t600x-j375.dtsi
-index 13a8cdb20c58..c684657e0e19 100644
+index 13a8cdb..c684657 100644
 --- a/arch/arm64/boot/dts/apple/t600x-j375.dtsi
 +++ b/arch/arm64/boot/dts/apple/t600x-j375.dtsi
 @@ -60,6 +60,11 @@ &dcp {
@@ -44,6 +44,3 @@ index 13a8cdb20c58..c684657e0e19 100644
  /* USB Type C */
  &i2c0 {
  	hpm0: usb-pd@38 {
--- 
-2.47.3
-

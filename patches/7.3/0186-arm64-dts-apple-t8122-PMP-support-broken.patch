@@ -1,4 +1,4 @@
-From 092bf4305aad214c737bb8455c65c7f76b817c5f Mon Sep 17 00:00:00 2001
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
 From: Yureka Lilian <yureka@cyberchaos.dev>
 Date: Fri, 4 Sep 2026 11:13:41 +0200
 Subject: [PATCH] arm64: dts: apple: t8122: PMP support (broken)
@@ -14,7 +14,7 @@ Signed-off-by: Yureka Lilian <yureka@cyberchaos.dev>
  1 file changed, 159 insertions(+)
 
 diff --git a/arch/arm64/boot/dts/apple/t8122.dtsi b/arch/arm64/boot/dts/apple/t8122.dtsi
-index c13aa1c8fed7..b834e9f586d9 100644
+index c13aa1c..b834e9f 100644
 --- a/arch/arm64/boot/dts/apple/t8122.dtsi
 +++ b/arch/arm64/boot/dts/apple/t8122.dtsi
 @@ -20,6 +20,12 @@ / {
@@ -219,6 +219,3 @@ index c13aa1c8fed7..b834e9f586d9 100644
  			power-domain-names = "ans", "apcie0";
  			resets = <&ps_ans>;
  		};
--- 
-2.47.3
-

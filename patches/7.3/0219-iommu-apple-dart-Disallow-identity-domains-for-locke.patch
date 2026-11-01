@@ -1,4 +1,4 @@
-From 0d35c0c89ffe6dd464350176491456fd9c25bdd6 Mon Sep 17 00:00:00 2001
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
 From: Janne Grunau <j@jannau.net>
 Date: Wed, 9 Apr 2025 18:20:02 +0200
 Subject: [PATCH] iommu: apple-dart: Disallow identity domains for locked DARTs
@@ -14,7 +14,7 @@ Signed-off-by: Janne Grunau <j@jannau.net>
  1 file changed, 6 insertions(+)
 
 diff --git a/drivers/iommu/apple-dart.c b/drivers/iommu/apple-dart.c
-index a831aeec9d80..7dff75c574cc 100644
+index a831aee..7dff75c 100644
 --- a/drivers/iommu/apple-dart.c
 +++ b/drivers/iommu/apple-dart.c
 @@ -868,6 +868,9 @@ static int apple_dart_attach_dev_identity(struct iommu_domain *domain,
@@ -37,6 +37,3 @@ index a831aeec9d80..7dff75c574cc 100644
  	for_each_stream_map(i, cfg, stream_map)
  		WARN_ON(pm_runtime_get_sync(stream_map->dart->dev) < 0);
  
--- 
-2.47.3
-

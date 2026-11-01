@@ -1,4 +1,4 @@
-From d091e61583f0d296812276697b6bca3c1858ab2a Mon Sep 17 00:00:00 2001
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
 From: Hector Martin <marcan@marcan.st>
 Date: Mon, 24 Apr 2023 23:27:52 +0900
 Subject: [PATCH] arm64: dts: apple: t600x: Remove obsolete comment in ans2
@@ -11,7 +11,7 @@ Signed-off-by: Hector Martin <marcan@marcan.st>
  1 file changed, 6 deletions(-)
 
 diff --git a/arch/arm64/boot/dts/apple/t600x-pmgr.dtsi b/arch/arm64/boot/dts/apple/t600x-pmgr.dtsi
-index 3f507cbc65f0..3315b392b21d 100644
+index 3f507cb..3315b39 100644
 --- a/arch/arm64/boot/dts/apple/t600x-pmgr.dtsi
 +++ b/arch/arm64/boot/dts/apple/t600x-pmgr.dtsi
 @@ -1387,12 +1387,6 @@ DIE_NODE(ps_ans2): power-controller@3b8 {
@@ -27,6 +27,3 @@ index 3f507cbc65f0..3315b392b21d 100644
  		power-domains = <&DIE_NODE(ps_afnc2_lw0)>;
  	};
  
--- 
-2.47.3
-

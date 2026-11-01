@@ -1,4 +1,4 @@
-From 633d99a5ad6e1d4a741a2b984b616299887a2972 Mon Sep 17 00:00:00 2001
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
 From: Janne Grunau <j@jannau.net>
 Date: Mon, 2 Jan 2023 19:20:55 +0100
 Subject: [PATCH] soc: apple: rtkit: Add devm_apple_rtkit_free()
@@ -15,7 +15,7 @@ Signed-off-by: Janne Grunau <j@jannau.net>
  2 files changed, 13 insertions(+)
 
 diff --git a/drivers/soc/apple/rtkit.c b/drivers/soc/apple/rtkit.c
-index a3fdac8f6f06..6b0ffb1201d6 100644
+index a3fdac8..6b0ffb1 100644
 --- a/drivers/soc/apple/rtkit.c
 +++ b/drivers/soc/apple/rtkit.c
 @@ -974,6 +974,12 @@ struct apple_rtkit *devm_apple_rtkit_init(struct device *dev, void *cookie,
@@ -32,7 +32,7 @@ index a3fdac8f6f06..6b0ffb1201d6 100644
  MODULE_AUTHOR("Sven Peter <sven@svenpeter.dev>");
  MODULE_DESCRIPTION("Apple RTKit driver");
 diff --git a/include/linux/soc/apple/rtkit.h b/include/linux/soc/apple/rtkit.h
-index bda3c528b515..d87a14dd99d2 100644
+index bda3c52..d87a14d 100644
 --- a/include/linux/soc/apple/rtkit.h
 +++ b/include/linux/soc/apple/rtkit.h
 @@ -78,6 +78,13 @@ struct apple_rtkit;
@@ -49,6 +49,3 @@ index bda3c528b515..d87a14dd99d2 100644
  
  /*
   * Non-devm version of devm_apple_rtkit_init. Must be freed with
--- 
-2.47.3
-

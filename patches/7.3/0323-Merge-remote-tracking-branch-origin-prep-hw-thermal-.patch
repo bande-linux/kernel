@@ -1,0 +1,473 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: Mikael Hug <mikaelhug@gmail.com>
+Date: Sat, 31 Oct 2026 00:47:12 +0000
+Subject: [PATCH] Merge remote-tracking branch 'origin/prep/hw-thermal-4' into
+ prep/hw-test5
+
+---
+ .../bindings/hwmon/apple,smc-hwmon.yaml       |  18 ++-
+ .../devicetree/bindings/mfd/apple,smc.yaml    |   1 +
+ Documentation/hwmon/macsmc-hwmon.rst          |   5 +
+ MAINTAINERS                                   |   1 +
+ arch/arm64/boot/dts/apple/t8112-j473.dts      | 119 ++++++++++++++++++
+ arch/arm64/boot/dts/apple/t8112.dtsi          |   8 ++
+ drivers/hwmon/macsmc-hwmon.c                  | 104 +++++++++++++--
+ include/dt-bindings/hwmon/apple,smc-hwmon.h   |  13 ++
+ 8 files changed, 260 insertions(+), 9 deletions(-)
+
+diff --git a/Documentation/devicetree/bindings/hwmon/apple,smc-hwmon.yaml b/Documentation/devicetree/bindings/hwmon/apple,smc-hwmon.yaml
+index 64149ef..a0b5186 100644
+--- a/Documentation/devicetree/bindings/hwmon/apple,smc-hwmon.yaml
++++ b/Documentation/devicetree/bindings/hwmon/apple,smc-hwmon.yaml
+@@ -40,6 +40,15 @@ properties:
+   compatible:
+     const: apple,smc-hwmon
+ 
++  "#thermal-sensor-cells":
++    const: 1
++    description:
++      The cell is the SMC key of the sensor, which must be the apple,key-id
++      of one of the temperature-* nodes of this node. It is a 32-bit number
++      with the first character of the key in the most significant byte.
++      Use APPLE_SMC_KEY() from <dt-bindings/hwmon/apple,smc-hwmon.h> to
++      write it.
++
+ patternProperties:
+   "^current-[A-Za-z0-9]{4}$":
+     $ref: "#/$defs/sensor"
+@@ -82,4 +91,11 @@ patternProperties:
+     $ref: "#/$defs/sensor"
+     unevaluatedProperties: false
+ 
+-additionalProperties: false
++allOf:
++  - if:
++      required:
++        - "#thermal-sensor-cells"
++    then:
++      $ref: /schemas/thermal/thermal-sensor.yaml#
++
++unevaluatedProperties: false
+diff --git a/Documentation/devicetree/bindings/mfd/apple,smc.yaml b/Documentation/devicetree/bindings/mfd/apple,smc.yaml
+index d5d30c0..dbab731 100644
+--- a/Documentation/devicetree/bindings/mfd/apple,smc.yaml
++++ b/Documentation/devicetree/bindings/mfd/apple,smc.yaml
+@@ -97,6 +97,7 @@ examples:
+ 
+         hwmon {
+           compatible = "apple,smc-hwmon";
++          #thermal-sensor-cells = <1>;
+ 
+           current-ID0R {
+             apple,key-id = "ID0R";
+diff --git a/Documentation/hwmon/macsmc-hwmon.rst b/Documentation/hwmon/macsmc-hwmon.rst
+index 6903f76..a9265a3 100644
+--- a/Documentation/hwmon/macsmc-hwmon.rst
++++ b/Documentation/hwmon/macsmc-hwmon.rst
+@@ -22,6 +22,11 @@ the desktop Macs), sensors present on any given machine are described
+ via Devicetree. The driver picks these up and registers them with
+ hwmon when probed.
+ 
++Temperature sensors can also feed thermal zones. A thermal zone selects
++its sensor by SMC key (see the apple,smc-hwmon devicetree binding), so the
++zone stays on the same sensor whatever the order or number of the other
++sensors.
++
+ Manual fan speed is supported via the fan_control module parameter. This
+ is disabled by default and marked as unsafe, as it cannot be proven that
+ the system will fail safe if overheating due to manual fan control being
+diff --git a/MAINTAINERS b/MAINTAINERS
+index 49fcf55..f4cbb62 100644
+--- a/MAINTAINERS
++++ b/MAINTAINERS
+@@ -2701,6 +2701,7 @@ F:	drivers/spmi/spmi-apple-controller.c
+ F:	drivers/usb/dwc3/dwc3-apple.c
+ F:	drivers/video/backlight/apple_dwi_bl.c
+ F:	drivers/watchdog/apple_wdt.c
++F:	include/dt-bindings/hwmon/apple,smc-hwmon.h
+ F:	include/dt-bindings/interrupt-controller/apple-aic.h
+ F:	include/dt-bindings/pinctrl/apple.h
+ F:	include/linux/mfd/macsmc.h
+diff --git a/arch/arm64/boot/dts/apple/t8112-j473.dts b/arch/arm64/boot/dts/apple/t8112-j473.dts
+index c8b4d3b..6cbafeb 100644
+--- a/arch/arm64/boot/dts/apple/t8112-j473.dts
++++ b/arch/arm64/boot/dts/apple/t8112-j473.dts
+@@ -9,6 +9,8 @@
+ 
+ /dts-v1/;
+ 
++#include <dt-bindings/hwmon/apple,smc-hwmon.h>
++#include <dt-bindings/thermal/thermal.h>
+ #include "t8112.dtsi"
+ #include "t8112-jxxx.dtsi"
+ 
+@@ -25,6 +27,54 @@ aliases {
+ 		sio = &sio;
+ 		wifi0 = &wifi0;
+ 	};
++
++	thermal-zones {
++		cpu-thermal {
++			/* While throttling, poll as often as the SMC refreshes TCMb */
++			polling-delay-passive = <1000>;
++			polling-delay = <2000>;
++			thermal-sensors = <&smc_hwmon APPLE_SMC_KEY('T', 'C', 'M', 'b')>;
++
++			trips {
++				cpu_alert: cpu-alert {
++					temperature = <105000>;
++					hysteresis = <2000>;
++					type = "passive";
++				};
++
++				cpu-crit {
++					temperature = <110000>;
++					hysteresis = <0>;
++					type = "critical";
++				};
++			};
++
++			cooling-maps {
++				map0 {
++					trip = <&cpu_alert>;
++					cooling-device =
++						<&cpu_p0 THERMAL_NO_LIMIT THERMAL_NO_LIMIT>,
++						<&cpu_p1 THERMAL_NO_LIMIT THERMAL_NO_LIMIT>,
++						<&cpu_p2 THERMAL_NO_LIMIT THERMAL_NO_LIMIT>,
++						<&cpu_p3 THERMAL_NO_LIMIT THERMAL_NO_LIMIT>;
++				};
++			};
++		};
++
++		gpu-thermal {
++			polling-delay-passive = <0>;
++			polling-delay = <2000>;
++			thermal-sensors = <&smc_hwmon APPLE_SMC_KEY('T', 'g', '0', 'n')>;
++
++			trips {
++				gpu-crit {
++					temperature = <110000>;
++					hysteresis = <0>;
++					type = "critical";
++				};
++			};
++		};
++	};
+ };
+ 
+ &dockchannel_uart {
+@@ -221,3 +271,72 @@ &gpu {
+ };
+ 
+ #include "hwmon-mini.dtsi"
++
++/*
++ * SoC die sensors. The SMC keys differ between machines with the same SoC,
++ * so these are described per board.
++ */
++&smc_hwmon {
++	#thermal-sensor-cells = <1>;
++
++	/* Maximum over the P-core sensors below */
++	temperature-TCMb {
++		apple,key-id = "TCMb";
++		label = "CPU Die Max Temp";
++	};
++
++	temperature-Tp01 {
++		apple,key-id = "Tp01";
++		label = "P-core 0 Die Temp A";
++	};
++
++	temperature-Tp05 {
++		apple,key-id = "Tp05";
++		label = "P-core 0 Die Temp B";
++	};
++
++	temperature-Tp09 {
++		apple,key-id = "Tp09";
++		label = "P-core 1 Die Temp A";
++	};
++
++	temperature-Tp0D {
++		apple,key-id = "Tp0D";
++		label = "P-core 1 Die Temp B";
++	};
++
++	temperature-Tp0f {
++		apple,key-id = "Tp0f";
++		label = "P-core 2 Die Temp A";
++	};
++
++	temperature-Tp0j {
++		apple,key-id = "Tp0j";
++		label = "P-core 2 Die Temp B";
++	};
++
++	temperature-Tp0n {
++		apple,key-id = "Tp0n";
++		label = "P-core 3 Die Temp A";
++	};
++
++	temperature-Tp0r {
++		apple,key-id = "Tp0r";
++		label = "P-core 3 Die Temp B";
++	};
++
++	temperature-Tg0f {
++		apple,key-id = "Tg0f";
++		label = "GPU Die Temp 1";
++	};
++
++	temperature-Tg0n {
++		apple,key-id = "Tg0n";
++		label = "GPU Die Temp 2";
++	};
++
++	temperature-Tg0r {
++		apple,key-id = "Tg0r";
++		label = "GPU Die Temp 3";
++	};
++};
+diff --git a/arch/arm64/boot/dts/apple/t8112.dtsi b/arch/arm64/boot/dts/apple/t8112.dtsi
+index 44c3ade..528fb64 100644
+--- a/arch/arm64/boot/dts/apple/t8112.dtsi
++++ b/arch/arm64/boot/dts/apple/t8112.dtsi
+@@ -75,6 +75,7 @@ cpu_e0: cpu@0 {
+ 			next-level-cache = <&l2_cache_0>;
+ 			i-cache-size = <0x20000>;
+ 			d-cache-size = <0x10000>;
++			#cooling-cells = <2>;
+ 		};
+ 
+ 		cpu_e1: cpu@1 {
+@@ -89,6 +90,7 @@ cpu_e1: cpu@1 {
+ 			next-level-cache = <&l2_cache_0>;
+ 			i-cache-size = <0x20000>;
+ 			d-cache-size = <0x10000>;
++			#cooling-cells = <2>;
+ 		};
+ 
+ 		cpu_e2: cpu@2 {
+@@ -103,6 +105,7 @@ cpu_e2: cpu@2 {
+ 			next-level-cache = <&l2_cache_0>;
+ 			i-cache-size = <0x20000>;
+ 			d-cache-size = <0x10000>;
++			#cooling-cells = <2>;
+ 		};
+ 
+ 		cpu_e3: cpu@3 {
+@@ -117,6 +120,7 @@ cpu_e3: cpu@3 {
+ 			next-level-cache = <&l2_cache_0>;
+ 			i-cache-size = <0x20000>;
+ 			d-cache-size = <0x10000>;
++			#cooling-cells = <2>;
+ 		};
+ 
+ 		cpu_p0: cpu@10100 {
+@@ -131,6 +135,7 @@ cpu_p0: cpu@10100 {
+ 			next-level-cache = <&l2_cache_1>;
+ 			i-cache-size = <0x30000>;
+ 			d-cache-size = <0x20000>;
++			#cooling-cells = <2>;
+ 		};
+ 
+ 		cpu_p1: cpu@10101 {
+@@ -145,6 +150,7 @@ cpu_p1: cpu@10101 {
+ 			next-level-cache = <&l2_cache_1>;
+ 			i-cache-size = <0x30000>;
+ 			d-cache-size = <0x20000>;
++			#cooling-cells = <2>;
+ 		};
+ 
+ 		cpu_p2: cpu@10102 {
+@@ -159,6 +165,7 @@ cpu_p2: cpu@10102 {
+ 			next-level-cache = <&l2_cache_1>;
+ 			i-cache-size = <0x30000>;
+ 			d-cache-size = <0x20000>;
++			#cooling-cells = <2>;
+ 		};
+ 
+ 		cpu_p3: cpu@10103 {
+@@ -173,6 +180,7 @@ cpu_p3: cpu@10103 {
+ 			next-level-cache = <&l2_cache_1>;
+ 			i-cache-size = <0x30000>;
+ 			d-cache-size = <0x20000>;
++			#cooling-cells = <2>;
+ 		};
+ 
+ 		l2_cache_0: l2-cache-0 {
+diff --git a/drivers/hwmon/macsmc-hwmon.c b/drivers/hwmon/macsmc-hwmon.c
+index 1500ec2..a0a2495 100644
+--- a/drivers/hwmon/macsmc-hwmon.c
++++ b/drivers/hwmon/macsmc-hwmon.c
+@@ -27,6 +27,7 @@
+ #include <linux/module.h>
+ #include <linux/of.h>
+ #include <linux/platform_device.h>
++#include <linux/thermal.h>
+ 
+ #define MAX_LABEL_LENGTH	32
+ 
+@@ -79,8 +80,8 @@ struct macsmc_hwmon {
+ 	struct apple_smc *smc;
+ 	struct device *hwmon_dev;
+ 	struct hwmon_chip_info chip_info;
+-	/* Chip + sensor types + NULL */
+-	const struct hwmon_channel_info *channel_infos[1 + NUM_SENSOR_TYPES + 1];
++	/* Sensor types + NULL */
++	const struct hwmon_channel_info *channel_infos[NUM_SENSOR_TYPES + 1];
+ 	struct macsmc_hwmon_sensors temp;
+ 	struct macsmc_hwmon_sensors volt;
+ 	struct macsmc_hwmon_sensors curr;
+@@ -650,6 +651,10 @@ static int macsmc_hwmon_populate_sensors(struct macsmc_hwmon *hwmon,
+ 					sensor->attrs |= HWMON_T_LABEL;
+ 
+ 				hwmon->temp.count++;
++			} else if (of_property_present(hwmon_node, "#thermal-sensor-cells")) {
++				/* A thermal zone may depend on this sensor */
++				dev_warn(hwmon->dev, "%pOFn: key not found, sensor skipped\n",
++					 key_node);
+ 			}
+ 		}
+ 	}
+@@ -697,17 +702,11 @@ static void macsmc_hwmon_populate_fan_configs(u32 *configs, const struct macsmc_
+ 		configs[idx] = fans->fans[idx].attrs;
+ }
+ 
+-static const struct hwmon_channel_info *const macsmc_chip_channel_info =
+-	HWMON_CHANNEL_INFO(chip, HWMON_C_REGISTER_TZ);
+-
+ static int macsmc_hwmon_create_infos(struct macsmc_hwmon *hwmon)
+ {
+ 	struct hwmon_channel_info *channel_info;
+ 	int i = 0;
+ 
+-	/* chip */
+-	hwmon->channel_infos[i++] = macsmc_chip_channel_info;
+-
+ 	if (hwmon->curr.count) {
+ 		channel_info = &hwmon->curr.channel_info;
+ 		channel_info->type = hwmon_curr;
+@@ -771,6 +770,91 @@ static int macsmc_hwmon_create_infos(struct macsmc_hwmon *hwmon)
+ 	return 0;
+ }
+ 
++struct macsmc_hwmon_tz {
++	struct apple_smc *smc;
++	struct macsmc_hwmon_sensor *sensor;
++};
++
++static int macsmc_hwmon_tz_get_temp(struct thermal_zone_device *tz, int *temp)
++{
++	struct macsmc_hwmon_tz *tzs = thermal_zone_device_priv(tz);
++	long val;
++	int ret;
++
++	ret = macsmc_hwmon_read_key(tzs->smc, tzs->sensor, 1000, &val);
++	if (ret)
++		return ret;
++
++	/*
++	 * A NaN, an infinity or any other value out of range saturates. Do
++	 * not let one bad sample reach a critical trip and power off.
++	 */
++	if (val <= INT_MIN || val >= INT_MAX)
++		return -ENODATA;
++
++	*temp = val;
++
++	return 0;
++}
++
++static const struct thermal_zone_device_ops macsmc_hwmon_tz_ops = {
++	.get_temp = macsmc_hwmon_tz_get_temp,
++};
++
++/*
++ * The hwmon core can register thermal zones itself (HWMON_C_REGISTER_TZ), but
++ * it identifies a sensor by its channel index. Here the channel index depends
++ * on the order of the sensor nodes, which are spread over several shared .dtsi
++ * files, and on which keys the SMC firmware implements, because sensors whose
++ * key is missing are skipped. A thermal zone must never silently move to
++ * another sensor, so the sensor specifier is the SMC key instead.
++ */
++static int macsmc_hwmon_register_tzs(struct macsmc_hwmon *hwmon)
++{
++	struct macsmc_hwmon_tz *tzs;
++	u32 i;
++
++	/* Without THERMAL_OF the zone registration stub fails with -ENOTSUPP */
++	if (!IS_ENABLED(CONFIG_THERMAL_OF) ||
++	    !of_property_present(hwmon->dev->of_node, "#thermal-sensor-cells"))
++		return 0;
++
++	tzs = devm_kcalloc(hwmon->dev, hwmon->temp.count, sizeof(*tzs), GFP_KERNEL);
++	if (!tzs)
++		return -ENOMEM;
++
++	for (i = 0; i < hwmon->temp.count; i++) {
++		struct macsmc_hwmon_sensor *sensor = &hwmon->temp.sensors[i];
++		struct thermal_zone_device *tzd;
++
++		tzs[i].smc = hwmon->smc;
++		tzs[i].sensor = sensor;
++
++		/* The binding limits keys to [A-Za-z0-9], so this is positive */
++		tzd = devm_thermal_of_zone_register(hwmon->dev, sensor->macsmc_key,
++						    &tzs[i], &macsmc_hwmon_tz_ops);
++		if (IS_ERR(tzd)) {
++			/*
++			 * Keep the hwmon device either way: an error here can
++			 * come from an unrelated thermal zone in the DT.
++			 */
++			if (PTR_ERR(tzd) == -ENODEV)
++				dev_dbg(hwmon->dev, "%p4ch: no thermal zone\n",
++					&sensor->macsmc_key);
++			else
++				dev_warn(hwmon->dev,
++					 "%p4ch: failed to register thermal zone: %pe\n",
++					 &sensor->macsmc_key, tzd);
++			continue;
++		}
++
++		dev_dbg(hwmon->dev, "%p4ch: thermal zone %s\n",
++			&sensor->macsmc_key, thermal_zone_device_type(tzd));
++	}
++
++	return 0;
++}
++
+ static int macsmc_hwmon_probe(struct platform_device *pdev)
+ {
+ 	struct apple_smc *smc = dev_get_drvdata(pdev->dev.parent);
+@@ -822,6 +906,10 @@ static int macsmc_hwmon_probe(struct platform_device *pdev)
+ 		return dev_err_probe(hwmon->dev, PTR_ERR(hwmon->hwmon_dev),
+ 				     "Probing SMC hwmon device failed\n");
+ 
++	ret = macsmc_hwmon_register_tzs(hwmon);
++	if (ret)
++		return ret;
++
+ 	dev_dbg(hwmon->dev, "Registered SMC hwmon device. Sensors:\n");
+ 	dev_dbg(hwmon->dev,
+ 		"Current: %d, Fans: %d, Power: %d, Temperature: %d, Voltage: %d",
+diff --git a/include/dt-bindings/hwmon/apple,smc-hwmon.h b/include/dt-bindings/hwmon/apple,smc-hwmon.h
+new file mode 100644
+index 0000000..4e3db6f
+--- /dev/null
++++ b/include/dt-bindings/hwmon/apple,smc-hwmon.h
+@@ -0,0 +1,13 @@
++/* SPDX-License-Identifier: GPL-2.0-only OR MIT */
++/*
++ * Sensor specifiers for apple,smc-hwmon thermal sensors
++ */
++
++#ifndef _DT_BINDINGS_HWMON_APPLE_SMC_HWMON_H
++#define _DT_BINDINGS_HWMON_APPLE_SMC_HWMON_H
++
++/* An SMC key, e.g. APPLE_SMC_KEY('T', 'C', 'M', 'b') for "TCMb" */
++#define APPLE_SMC_KEY(a, b, c, d) \
++	(((a) << 24) | ((b) << 16) | ((c) << 8) | (d))
++
++#endif

@@ -1,4 +1,4 @@
-From c8a71b826161446a0386e5a8cc291e9997662466 Mon Sep 17 00:00:00 2001
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
 From: Janne Grunau <j@jannau.net>
 Date: Wed, 19 Aug 2026 10:10:38 +0200
 Subject: [PATCH] iommu: apple-dart: Support specifying the DMA aperture in the
@@ -31,7 +31,7 @@ Signed-off-by: Janne Grunau <j@jannau.net>
  1 file changed, 65 insertions(+), 9 deletions(-)
 
 diff --git a/drivers/iommu/apple-dart.c b/drivers/iommu/apple-dart.c
-index be31f5bf2c04..864c25efbaf3 100644
+index be31f5b..864c25e 100644
 --- a/drivers/iommu/apple-dart.c
 +++ b/drivers/iommu/apple-dart.c
 @@ -21,6 +21,7 @@
@@ -192,6 +192,3 @@ index be31f5bf2c04..864c25efbaf3 100644
  	}
  	dev_iommu_priv_set(dev, cfg);
  
--- 
-2.47.3
-

@@ -1,4 +1,4 @@
-From 552fc36a9bced210d65900ef958ccb34ea5a97c0 Mon Sep 17 00:00:00 2001
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
 From: Hector Martin <marcan@marcan.st>
 Date: Sun, 9 Apr 2023 23:48:38 +0900
 Subject: [PATCH] arm64: dts: apple: t602x: Add missing devices
@@ -47,7 +47,7 @@ Signed-off-by: Janne Grunau <j@jannau.net>
  19 files changed, 556 insertions(+), 12 deletions(-)
 
 diff --git a/arch/arm64/boot/dts/apple/t600x-j314-j316.dtsi b/arch/arm64/boot/dts/apple/t600x-j314-j316.dtsi
-index 8756ad40bc64..b552abb6084f 100644
+index 8756ad4..b552abb 100644
 --- a/arch/arm64/boot/dts/apple/t600x-j314-j316.dtsi
 +++ b/arch/arm64/boot/dts/apple/t600x-j314-j316.dtsi
 @@ -275,6 +275,7 @@ &nco_clkref {
@@ -86,7 +86,7 @@ index 8756ad40bc64..b552abb6084f 100644
  &dwc3_0 {
  	ports {
 diff --git a/arch/arm64/boot/dts/apple/t600x-j375.dtsi b/arch/arm64/boot/dts/apple/t600x-j375.dtsi
-index 3fe684d0bbb0..39cb7229d9f2 100644
+index 3fe684d..39cb722 100644
 --- a/arch/arm64/boot/dts/apple/t600x-j375.dtsi
 +++ b/arch/arm64/boot/dts/apple/t600x-j375.dtsi
 @@ -18,10 +18,12 @@ aliases {
@@ -103,7 +103,7 @@ index 3fe684d0bbb0..39cb7229d9f2 100644
  		serial0 = &serial0;
  		wifi0 = &wifi0;
 diff --git a/arch/arm64/boot/dts/apple/t6020-j414s.dts b/arch/arm64/boot/dts/apple/t6020-j414s.dts
-index 631c54c5f03d..18cc67a3076d 100644
+index 631c54c..18cc67a 100644
 --- a/arch/arm64/boot/dts/apple/t6020-j414s.dts
 +++ b/arch/arm64/boot/dts/apple/t6020-j414s.dts
 @@ -24,3 +24,15 @@ &wifi0 {
@@ -123,7 +123,7 @@ index 631c54c5f03d..18cc67a3076d 100644
 +	model = "MacBook Pro J414";
 +};
 diff --git a/arch/arm64/boot/dts/apple/t6020-j416s.dts b/arch/arm64/boot/dts/apple/t6020-j416s.dts
-index c277ed5889a2..b9e0973ba37c 100644
+index c277ed5..b9e0973 100644
 --- a/arch/arm64/boot/dts/apple/t6020-j416s.dts
 +++ b/arch/arm64/boot/dts/apple/t6020-j416s.dts
 @@ -24,3 +24,15 @@ &wifi0 {
@@ -143,7 +143,7 @@ index c277ed5889a2..b9e0973ba37c 100644
 +	model = "MacBook Pro J416";
 +};
 diff --git a/arch/arm64/boot/dts/apple/t6020-j474s.dts b/arch/arm64/boot/dts/apple/t6020-j474s.dts
-index e3c2635d84fa..4696b039629b 100644
+index e3c2635..4696b03 100644
 --- a/arch/arm64/boot/dts/apple/t6020-j474s.dts
 +++ b/arch/arm64/boot/dts/apple/t6020-j474s.dts
 @@ -46,4 +46,26 @@ &pcie0 {
@@ -174,7 +174,7 @@ index e3c2635d84fa..4696b039629b 100644
 +
  #include "hwmon-mini.dtsi"
 diff --git a/arch/arm64/boot/dts/apple/t6020.dtsi b/arch/arm64/boot/dts/apple/t6020.dtsi
-index bffa66a3ffff..482a1e5f53d0 100644
+index bffa66a..482a1e5 100644
 --- a/arch/arm64/boot/dts/apple/t6020.dtsi
 +++ b/arch/arm64/boot/dts/apple/t6020.dtsi
 @@ -9,6 +9,8 @@
@@ -201,7 +201,7 @@ index bffa66a3ffff..482a1e5f53d0 100644
 +	apple,ppm-ki = <28.0>;
  };
 diff --git a/arch/arm64/boot/dts/apple/t6021-j414c.dts b/arch/arm64/boot/dts/apple/t6021-j414c.dts
-index cdcf0740714d..b173caf0df0f 100644
+index cdcf074..b173caf 100644
 --- a/arch/arm64/boot/dts/apple/t6021-j414c.dts
 +++ b/arch/arm64/boot/dts/apple/t6021-j414c.dts
 @@ -24,3 +24,15 @@ &wifi0 {
@@ -221,7 +221,7 @@ index cdcf0740714d..b173caf0df0f 100644
 +	model = "MacBook Pro J414";
 +};
 diff --git a/arch/arm64/boot/dts/apple/t6021-j416c.dts b/arch/arm64/boot/dts/apple/t6021-j416c.dts
-index 6d8146b94170..2fbb00b364c7 100644
+index 6d8146b..2fbb00b 100644
 --- a/arch/arm64/boot/dts/apple/t6021-j416c.dts
 +++ b/arch/arm64/boot/dts/apple/t6021-j416c.dts
 @@ -17,6 +17,26 @@ / {
@@ -268,7 +268,7 @@ index 6d8146b94170..2fbb00b364c7 100644
 +	model = "MacBook Pro J416";
 +};
 diff --git a/arch/arm64/boot/dts/apple/t6021-j475c.dts b/arch/arm64/boot/dts/apple/t6021-j475c.dts
-index 9fe17f1f7f59..655a28cf57db 100644
+index 9fe17f1..655a28c 100644
 --- a/arch/arm64/boot/dts/apple/t6021-j475c.dts
 +++ b/arch/arm64/boot/dts/apple/t6021-j475c.dts
 @@ -29,6 +29,7 @@ &bluetooth0 {
@@ -314,7 +314,7 @@ index 9fe17f1f7f59..655a28cf57db 100644
 +
  #include "hwmon-fan-dual.dtsi"
 diff --git a/arch/arm64/boot/dts/apple/t6021.dtsi b/arch/arm64/boot/dts/apple/t6021.dtsi
-index b9dd962bd6d8..daffb7170c6d 100644
+index b9dd962..daffb71 100644
 --- a/arch/arm64/boot/dts/apple/t6021.dtsi
 +++ b/arch/arm64/boot/dts/apple/t6021.dtsi
 @@ -16,6 +16,13 @@
@@ -348,7 +348,7 @@ index b9dd962bd6d8..daffb7170c6d 100644
  
  #include "hwmon-common.dtsi"
 diff --git a/arch/arm64/boot/dts/apple/t6022-j180d.dts b/arch/arm64/boot/dts/apple/t6022-j180d.dts
-index 7d92505e3fd2..59e5825a0368 100644
+index 7d92505..59e5825 100644
 --- a/arch/arm64/boot/dts/apple/t6022-j180d.dts
 +++ b/arch/arm64/boot/dts/apple/t6022-j180d.dts
 @@ -26,8 +26,11 @@ aliases {
@@ -379,7 +379,7 @@ index 7d92505e3fd2..59e5825a0368 100644
  		device_type = "memory";
  		reg = <0x100 0 0x2 0>; /* To be filled by loader */
 diff --git a/arch/arm64/boot/dts/apple/t6022-j475d.dts b/arch/arm64/boot/dts/apple/t6022-j475d.dts
-index 32938a3bf96a..ad3e5ccc7b44 100644
+index 32938a3..ad3e5cc 100644
 --- a/arch/arm64/boot/dts/apple/t6022-j475d.dts
 +++ b/arch/arm64/boot/dts/apple/t6022-j475d.dts
 @@ -9,6 +9,8 @@
@@ -409,7 +409,7 @@ index 32938a3bf96a..ad3e5ccc7b44 100644
 +	model = "Mac Studio J475";
 +};
 diff --git a/arch/arm64/boot/dts/apple/t6022-jxxxd.dtsi b/arch/arm64/boot/dts/apple/t6022-jxxxd.dtsi
-index dc877bd604f8..5b7b41ce07c3 100644
+index dc877bd..5b7b41c 100644
 --- a/arch/arm64/boot/dts/apple/t6022-jxxxd.dtsi
 +++ b/arch/arm64/boot/dts/apple/t6022-jxxxd.dtsi
 @@ -9,6 +9,19 @@
@@ -433,7 +433,7 @@ index dc877bd604f8..5b7b41ce07c3 100644
  /delete-node/ &ps_disp0_cpu0;
  /delete-node/ &ps_disp0_fe;
 diff --git a/arch/arm64/boot/dts/apple/t6022.dtsi b/arch/arm64/boot/dts/apple/t6022.dtsi
-index 0feda70568ee..d803edbc4440 100644
+index 0feda70..d803edb 100644
 --- a/arch/arm64/boot/dts/apple/t6022.dtsi
 +++ b/arch/arm64/boot/dts/apple/t6022.dtsi
 @@ -16,6 +16,13 @@
@@ -473,7 +473,7 @@ index 0feda70568ee..d803edbc4440 100644
  
  #include "hwmon-common.dtsi"
 diff --git a/arch/arm64/boot/dts/apple/t602x-common.dtsi b/arch/arm64/boot/dts/apple/t602x-common.dtsi
-index 66b6f8347d19..617ff2415345 100644
+index 66b6f83..617ff24 100644
 --- a/arch/arm64/boot/dts/apple/t602x-common.dtsi
 +++ b/arch/arm64/boot/dts/apple/t602x-common.dtsi
 @@ -387,6 +387,134 @@ opp17 {
@@ -649,7 +649,7 @@ index 66b6f8347d19..617ff2415345 100644
  	};
  };
 diff --git a/arch/arm64/boot/dts/apple/t602x-die0.dtsi b/arch/arm64/boot/dts/apple/t602x-die0.dtsi
-index 05819755a18f..63767e465aaf 100644
+index 0581975..63767e4 100644
 --- a/arch/arm64/boot/dts/apple/t602x-die0.dtsi
 +++ b/arch/arm64/boot/dts/apple/t602x-die0.dtsi
 @@ -31,6 +31,12 @@ pmgr_misc: power-management@28e20c000 {
@@ -832,7 +832,7 @@ index 05819755a18f..63767e465aaf 100644
  			device_type = "pci";
  			reg = <0x0 0x0 0x0 0x0 0x0>;
 diff --git a/arch/arm64/boot/dts/apple/t602x-j414-j416.dtsi b/arch/arm64/boot/dts/apple/t602x-j414-j416.dtsi
-index 0e806d8ddf81..b0fa34282681 100644
+index 0e806d8..b0fa342 100644
 --- a/arch/arm64/boot/dts/apple/t602x-j414-j416.dtsi
 +++ b/arch/arm64/boot/dts/apple/t602x-j414-j416.dtsi
 @@ -14,8 +14,15 @@
@@ -902,7 +902,7 @@ index 0e806d8ddf81..b0fa34282681 100644
 +	pwren-gpios = <&smc_gpio 22 GPIO_ACTIVE_HIGH>;
 +};
 diff --git a/arch/arm64/boot/dts/apple/t602x-j474-j475.dtsi b/arch/arm64/boot/dts/apple/t602x-j474-j475.dtsi
-index 926bb4ab77af..703d929aefdd 100644
+index 926bb4a..703d929 100644
 --- a/arch/arm64/boot/dts/apple/t602x-j474-j475.dtsi
 +++ b/arch/arm64/boot/dts/apple/t602x-j474-j475.dtsi
 @@ -21,6 +21,11 @@ &framebuffer0 {
@@ -942,7 +942,7 @@ index 926bb4ab77af..703d929aefdd 100644
 +	interrupts-extended = <&pinctrl_ap 59 IRQ_TYPE_LEVEL_LOW>;
 +};
 diff --git a/arch/arm64/boot/dts/apple/t602x-pmgr.dtsi b/arch/arm64/boot/dts/apple/t602x-pmgr.dtsi
-index f5382a2faf0b..5fa2a93ad9ec 100644
+index f5382a2..5fa2a93 100644
 --- a/arch/arm64/boot/dts/apple/t602x-pmgr.dtsi
 +++ b/arch/arm64/boot/dts/apple/t602x-pmgr.dtsi
 @@ -447,6 +447,7 @@ DIE_NODE(ps_dispext0_fe): power-controller@2c0 {
@@ -969,6 +969,3 @@ index f5382a2faf0b..5fa2a93ad9ec 100644
  	};
  
  	DIE_NODE(ps_isp_fe): power-controller@4008 {
--- 
-2.47.3
-

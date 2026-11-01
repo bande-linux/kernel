@@ -1,0 +1,2745 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: Mikael Hug <mikaelhug@gmail.com>
+Date: Sat, 31 Oct 2026 00:46:48 +0000
+Subject: [PATCH] media: apple: Add Apple Video Decoder driver
+
+Add a V4L2 stateless decoder driver for AVD, the video decode block of
+the Apple M2 (t8112), starting with H.264.
+
+AVD is a Cortex-M3 coprocessor in front of the decode engines. The driver
+copies the open avd-fw firmware (https://github.com/AsahiLinux/avd-fw,
+MIT, apple/avd-fw-v3-t1.bin) into the coprocessor code memory and boots
+it. The firmware only forwards engine interrupts to the mailbox; the
+driver builds the instruction stream for each frame from the V4L2
+controls and feeds it to the VP FIFO register, then kicks the
+post-processor when the VP reports completion.
+
+The instruction encoding, register offsets, buffer sizes and the
+compressed reference layout come from the asahi avd driver (asahi tree,
+drivers/media/platform/apple/avd, by sofus and Janne Grunau, from traces
+of the macOS AppleAVD driver). This is a rewrite of it for t8112 only:
+
+- the firmware config ("AVDc" + codec mask) is read where avd-fw puts
+  it, at 0x400, after checking the image size; asahi read it at the end
+  and fell back to "all codecs" when it was missing;
+- the instruction push is bounded, and every value from userspace that
+  indexes an array, sizes a buffer or is parsed by the CPU is checked;
+- a stuck or failed job is recovered by a runtime PM power cycle instead
+  of a pmgr reset of ps_avd_sys, which also holds the DART and can race
+  DART TLB flushes and engine DMA (a test build with a one-jiffy
+  watchdog reset the SoC that way);
+- the in-flight job has one owner (IRQ, watchdog or recovery), the IRQ is
+  disabled while the domain is powered down, and unbind waits for the
+  running job;
+- output is NV12 only, 8-bit 4:2:0 progressive; 10-bit and 4:2:2, which
+  asahi advertised with the wrong pixel formats, are refused.
+
+H.264 is slice based: the engine decodes a whole picture in one job, so
+slices are copied into a per-context bitstream buffer and the job is
+submitted at the first slice queued without
+V4L2_BUF_FLAG_M2M_HOLD_CAPTURE_BUF.
+A picture whose last slice keeps the flag is released by the m2m core
+undecoded; GStreamer and FFmpeg do not do that.
+
+Tested on a Mac mini (M2) as a module with GStreamer v4l2slh264dec:
+bit-exact against FFmpeg for baseline, main, high and 4-slice 320x240,
+1080p and 2160p High; v4l2-compliance 57/57, 0 warnings. That was before
+the last robustness rework (job ownership, recovery, request validation,
+bitstream buffer), which is build-tested only. The recovery path has not
+run on hardware.
+
+Assisted-by: Claude:claude-opus-5-5
+Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>
+Claude-Session: https://claude.ai/code/session_01UqitcmCNS6G33aQUShi39x
+---
+ drivers/media/platform/Kconfig              |   1 +
+ drivers/media/platform/Makefile             |   1 +
+ drivers/media/platform/apple/Kconfig        |   5 +
+ drivers/media/platform/apple/Makefile       |   3 +
+ drivers/media/platform/apple/avd/Kconfig    |  19 +
+ drivers/media/platform/apple/avd/Makefile   |   4 +
+ drivers/media/platform/apple/avd/avd-drv.c  | 756 ++++++++++++++++++++
+ drivers/media/platform/apple/avd/avd-h264.c | 603 ++++++++++++++++
+ drivers/media/platform/apple/avd/avd-hw.c   |  65 ++
+ drivers/media/platform/apple/avd/avd-inst.h | 150 ++++
+ drivers/media/platform/apple/avd/avd-regs.h |  29 +
+ drivers/media/platform/apple/avd/avd-v4l2.c | 714 ++++++++++++++++++
+ drivers/media/platform/apple/avd/avd.h      | 238 ++++++
+ 13 files changed, 2588 insertions(+)
+
+diff --git a/drivers/media/platform/Kconfig b/drivers/media/platform/Kconfig
+index 2c7699b66..280a9db25 100644
+--- a/drivers/media/platform/Kconfig
++++ b/drivers/media/platform/Kconfig
+@@ -66,6 +66,7 @@ source "drivers/media/platform/allegro-dvt/Kconfig"
+ source "drivers/media/platform/amd/Kconfig"
+ source "drivers/media/platform/amlogic/Kconfig"
+ source "drivers/media/platform/amphion/Kconfig"
++source "drivers/media/platform/apple/Kconfig"
+ source "drivers/media/platform/arm/Kconfig"
+ source "drivers/media/platform/aspeed/Kconfig"
+ source "drivers/media/platform/atmel/Kconfig"
+diff --git a/drivers/media/platform/Makefile b/drivers/media/platform/Makefile
+index d47c47d81..aa82e1899 100644
+--- a/drivers/media/platform/Makefile
++++ b/drivers/media/platform/Makefile
+@@ -9,6 +9,7 @@ obj-y += allegro-dvt/
+ obj-y += amd/
+ obj-y += amlogic/
+ obj-y += amphion/
++obj-y += apple/
+ obj-y += arm/
+ obj-y += aspeed/
+ obj-y += atmel/
+diff --git a/drivers/media/platform/apple/Kconfig b/drivers/media/platform/apple/Kconfig
+new file mode 100644
+index 000000000..43c0a56c3
+--- /dev/null
++++ b/drivers/media/platform/apple/Kconfig
+@@ -0,0 +1,5 @@
++# SPDX-License-Identifier: GPL-2.0-only
++
++comment "Apple media platform drivers"
++
++source "drivers/media/platform/apple/avd/Kconfig"
+diff --git a/drivers/media/platform/apple/Makefile b/drivers/media/platform/apple/Makefile
+new file mode 100644
+index 000000000..d502cab93
+--- /dev/null
++++ b/drivers/media/platform/apple/Makefile
+@@ -0,0 +1,3 @@
++# SPDX-License-Identifier: GPL-2.0-only
++
++obj-y += avd/
+diff --git a/drivers/media/platform/apple/avd/Kconfig b/drivers/media/platform/apple/avd/Kconfig
+new file mode 100644
+index 000000000..81f1a440a
+--- /dev/null
++++ b/drivers/media/platform/apple/avd/Kconfig
+@@ -0,0 +1,19 @@
++# SPDX-License-Identifier: GPL-2.0-only
++
++config VIDEO_APPLE_AVD
++	tristate "Apple Video Decoder driver"
++	depends on ARCH_APPLE || COMPILE_TEST
++	depends on PM
++	depends on VIDEO_DEV
++	depends on V4L_MEM2MEM_DRIVERS
++	select MEDIA_CONTROLLER
++	select V4L2_MEM2MEM_DEV
++	select VIDEOBUF2_DMA_CONTIG
++	select V4L2_H264
++	help
++	  Support for the Apple Video Decoder (AVD) of the Apple M2, a
++	  stateless video decoder. It needs the avd-fw coprocessor
++	  firmware.
++
++	  To compile this driver as a module, choose M here: the module
++	  will be called apple-avd.
+diff --git a/drivers/media/platform/apple/avd/Makefile b/drivers/media/platform/apple/avd/Makefile
+new file mode 100644
+index 000000000..837182588
+--- /dev/null
++++ b/drivers/media/platform/apple/avd/Makefile
+@@ -0,0 +1,4 @@
++# SPDX-License-Identifier: GPL-2.0-only
++
++apple-avd-y := avd-drv.o avd-v4l2.o avd-hw.o avd-h264.o
++obj-$(CONFIG_VIDEO_APPLE_AVD) += apple-avd.o
+diff --git a/drivers/media/platform/apple/avd/avd-drv.c b/drivers/media/platform/apple/avd/avd-drv.c
+new file mode 100644
+index 000000000..81546019a
+--- /dev/null
++++ b/drivers/media/platform/apple/avd/avd-drv.c
+@@ -0,0 +1,756 @@
++// SPDX-License-Identifier: GPL-2.0
++/*
++ * Apple Video Decoder driver
++ *
++ * Copyright The Asahi Linux Contributors
++ *
++ * Based on rkvdec driver by Collabora, Ltd.
++ * Copyright (C) 2019 Collabora, Ltd.
++ * Based on rkvdec driver by Google LLC. (Tomasz Figa <tfiga@chromium.org>)
++ * Based on s5p-mfc driver by Samsung Electronics Co., Ltd.
++ * Copyright (C) 2011 Samsung Electronics Co., Ltd.
++ */
++
++#include <linux/dma-mapping.h>
++#include <linux/interrupt.h>
++#include <linux/io.h>
++#include <linux/iopoll.h>
++#include <linux/module.h>
++#include <linux/of.h>
++#include <linux/pm_runtime.h>
++#include <linux/property.h>
++#include <linux/sizes.h>
++#include <linux/slab.h>
++#include <linux/unaligned.h>
++
++#include <media/videobuf2-dma-contig.h>
++
++#include "avd.h"
++#include "avd-inst.h"
++#include "avd-regs.h"
++
++/* avd-fw places a 256-byte config at 0x400: magic "AVDc", then codec mask. */
++#define AVD_FW_CONFIG_OFFSET	0x400
++#define AVD_FW_CONFIG_MAGIC	0x63445641
++#define AVD_FW_CONFIG_CODECS	0x4
++#define AVD_FW_CONFIG_SIZE	0x100
++
++/* Instruction FIFO the asahi avd driver programs for every VP stream. */
++#define AVD_INSN_FIFO_SIZE	(12 * SZ_1M)
++
++/* Watchdog of the asahi avd driver. */
++#define AVD_TIMEOUT_MS		2000
++
++int avd_buf_alloc(struct avd_dev *avd, struct avd_buf *buf, size_t size)
++{
++	if (buf->cpu && size <= buf->size)
++		return 0;
++
++	avd_buf_free(avd, buf);
++
++	buf->cpu = dma_alloc_coherent(avd->dev, size, &buf->addr, GFP_KERNEL);
++	if (!buf->cpu)
++		return -ENOMEM;
++	buf->size = size;
++
++	return 0;
++}
++
++void avd_buf_free(struct avd_dev *avd, struct avd_buf *buf)
++{
++	if (buf->cpu)
++		dma_free_coherent(avd->dev, buf->size, buf->cpu, buf->addr);
++	memset(buf, 0, sizeof(*buf));
++}
++
++struct avd_decoded_buffer *avd_get_ref_buf(struct avd_ctx *ctx,
++					   struct avd_run *run, u64 timestamp)
++{
++	struct vb2_queue *cap_q = &ctx->fh.m2m_ctx->cap_q_ctx.q;
++	struct avd_decoded_buffer *ref;
++	struct vb2_buffer *buf;
++
++	buf = vb2_find_buffer(cap_q, timestamp);
++	if (!buf) {
++		ctx->ref_error = true;
++		buf = &run->dst->vb2_buf;
++	}
++
++	ref = vb2_to_avd_decoded_buf(buf);
++	if (ref->error)
++		ctx->ref_error = true;
++
++	return ref;
++}
++
++dma_addr_t avd_buf_addr(struct avd_decoded_buffer *buf)
++{
++	return vb2_dma_contig_plane_dma_addr(&buf->base.vb.vb2_buf, 0);
++}
++
++void avd_job_free(struct avd_ctx *ctx)
++{
++	kvfree(ctx->job.segments);
++	memset(&ctx->job, 0, sizeof(ctx->job));
++}
++
++int avd_job_begin(struct avd_ctx *ctx, unsigned int segments)
++{
++	struct avd_job *job = &ctx->job;
++
++	avd_job_free(ctx);
++	ctx->ref_error = false;
++
++	job->segments = kvcalloc(segments, sizeof(*job->segments), GFP_KERNEL);
++	if (!job->segments)
++		return -ENOMEM;
++	job->alloc = segments;
++
++	return 0;
++}
++
++int avd_job_next(struct avd_ctx *ctx)
++{
++	struct avd_job *job = &ctx->job;
++
++	if (!job->segments)
++		return -EINVAL;
++
++	if (job->num + 1 >= job->alloc) {
++		unsigned int alloc = job->alloc * 2;
++		struct avd_segment *segments;
++
++		segments = kvrealloc(job->segments,
++				     array_size(alloc, sizeof(*segments)),
++				     GFP_KERNEL);
++		if (!segments)
++			return -ENOMEM;
++		job->segments = segments;
++		job->alloc = alloc;
++	}
++
++	job->segments[++job->num].num = 0;
++
++	return 0;
++}
++
++static struct avd_ctx *avd_claim_job(struct avd_dev *avd, bool timed_out)
++{
++	struct avd_ctx *ctx;
++
++	spin_lock(&avd->job_lock);
++	ctx = avd->job_ctx;
++	if (ctx && timed_out &&
++	    time_before(jiffies, avd->job_start + msecs_to_jiffies(AVD_TIMEOUT_MS)))
++		ctx = NULL;
++	if (ctx)
++		avd->job_ctx = NULL;
++	spin_unlock(&avd->job_lock);
++
++	return ctx;
++}
++
++static void avd_queue_recovery(struct avd_dev *avd, struct avd_ctx *ctx)
++{
++	cancel_delayed_work(&avd->watchdog);
++	avd->recover_ctx = ctx;
++	queue_work(system_wq, &avd->recover_work);
++}
++
++int avd_submit_job(struct avd_ctx *ctx, enum avd_codec codec)
++{
++	struct avd_dev *avd = ctx->dev;
++	struct avd_job job = ctx->job;
++	void __iomem *queue_max, *queue_cur, *reg;
++	unsigned int vp = 0, i, idx;
++	bool stalled = false;
++	u32 max, cur;
++
++	/* The job may finish and ctx go away once the hardware has it. */
++	memset(&ctx->job, 0, sizeof(ctx->job));
++	if (!job.segments || !job.num || job.overflow) {
++		kvfree(job.segments);
++		return -EINVAL;
++	}
++
++	for (i = 0; i < codec; i++)
++		vp += avd->variant->vp_slots[i];
++
++	reg = avd->ctrl + avd->variant->vp_slot_offset + vp * 4;
++	queue_max = avd->ctrl + avd->variant->submit_queue_max_offset + vp * 4;
++	queue_cur = avd->ctrl + avd->variant->submit_queue_status_offset + vp * 4;
++
++	mutex_lock(&avd->hw_lock);
++
++	spin_lock(&avd->job_lock);
++	avd->job_ctx = ctx;
++	avd->job_start = jiffies;
++	spin_unlock(&avd->job_lock);
++	schedule_delayed_work(&avd->watchdog, msecs_to_jiffies(AVD_TIMEOUT_MS));
++
++	avd_configure_stream(avd, avd->insn_fifo.addr, vp);
++
++	writel(AVD_OP_EXEC | AVD_OP_EXEC_FLAG_START(1) | AVD_OP_EXEC_FIFO_IDX(0),
++	       reg);
++	for (idx = 0; idx <= job.num; idx++) {
++		struct avd_segment *seg = &job.segments[idx];
++
++		for (i = 0; i < seg->num; i++)
++			writel(seg->instructions[i], reg);
++		if (!idx)
++			continue;
++
++		max = readl_relaxed(queue_max);
++		if (readl_poll_timeout(queue_cur, cur, cur < max, 10, 100000)) {
++			dev_err(avd->dev, "VP %u queue stuck at %u/%u\n", vp, cur,
++				max);
++			stalled = true;
++			break;
++		}
++		writel(AVD_OP_EXEC | AVD_OP_EXEC_FLAG_END(idx == job.num), reg);
++	}
++
++	mutex_unlock(&avd->hw_lock);
++
++	kvfree(job.segments);
++
++	if (stalled) {
++		ctx = avd_claim_job(avd, false);
++		if (ctx)
++			avd_queue_recovery(avd, ctx);
++	}
++
++	return 0;
++}
++
++void avd_submit_pp(struct avd_ctx *ctx, unsigned int count)
++{
++	struct avd_dev *avd = ctx->dev;
++	void __iomem *reg = avd->ctrl + avd->variant->submit_offset;
++	u32 op = AVD_OP_EXEC | AVD_OP_EXEC_FIFO_IDX(0) |
++		 AVD_OP_EXEC_FIFO_MASK(avd->variant->fifo_slots);
++
++	writel(op | AVD_OP_EXEC_FLAG_START(1), reg);
++	for (unsigned int i = 1; i < count; i++)
++		writel(op, reg);
++}
++
++/*
++ * ps_avd_sys also holds the AVD DART (t8112.dtsi), so it is not reset; this
++ * restarts the coprocessor, and the engines only if the domain powers down.
++ */
++static void avd_recover(struct avd_dev *avd, struct avd_ctx *ctx)
++{
++	bool suspended;
++	int ret, boot = 0;
++
++	mutex_lock(&avd->hw_lock);
++	suspended = !pm_runtime_put_sync_suspend(avd->dev);
++	ret = pm_runtime_resume_and_get(avd->dev);
++	if (!ret && !suspended) {
++		disable_irq(avd->irq);
++		avd_shutdown(avd);
++		boot = avd_boot(avd);
++		enable_irq(avd->irq);
++	}
++	mutex_unlock(&avd->hw_lock);
++
++	if (ret < 0 || boot)
++		dev_err(avd->dev, "decoder restart failed: %d\n", ret ?: boot);
++	if (ret < 0)
++		avd_job_finish_no_pm(ctx, VB2_BUF_STATE_ERROR);
++	else
++		avd_job_finish(ctx, VB2_BUF_STATE_ERROR);
++}
++
++static void avd_watchdog_func(struct work_struct *work)
++{
++	struct avd_dev *avd = container_of(to_delayed_work(work),
++					   struct avd_dev, watchdog);
++	struct avd_ctx *ctx = avd_claim_job(avd, true);
++
++	if (ctx)
++		avd_recover(avd, ctx);
++}
++
++static void avd_recover_func(struct work_struct *work)
++{
++	struct avd_dev *avd = container_of(work, struct avd_dev, recover_work);
++
++	avd_recover(avd, avd->recover_ctx);
++}
++
++static irqreturn_t avd_irq_handler(int irq, void *data)
++{
++	struct avd_dev *avd = data;
++	struct avd_ctx *ctx;
++	u32 status;
++
++	status = readl(avd->mbox + AVD_REG_MBOX1_RETRIEVE);
++	writel(AVD_MBOX1_NOT_EMPTY, avd->mbox + AVD_REG_MBOX_IRQ_CLR);
++
++	if ((status & AVD_MSG_UNHANDLED) ||
++	    !(status & (AVD_MSG_PP_DONE | AVD_MSG_VP_DONE))) {
++		dev_dbg(avd->dev, "firmware status %#x\n", status);
++		ctx = avd_claim_job(avd, false);
++		if (ctx)
++			avd_queue_recovery(avd, ctx);
++	} else if (status & AVD_MSG_PP_DONE) {
++		ctx = avd_claim_job(avd, false);
++		if (ctx) {
++			cancel_delayed_work(&avd->watchdog);
++			avd_job_finish(ctx, VB2_BUF_STATE_DONE);
++		}
++	} else {
++		spin_lock(&avd->job_lock);
++		ctx = avd->job_ctx;
++		if (ctx)
++			ctx->coded_fmt_desc->ops->submit(ctx);
++		spin_unlock(&avd->job_lock);
++	}
++
++	return IRQ_HANDLED;
++}
++
++static void avd_device_run(void *priv)
++{
++	struct avd_ctx *ctx = priv;
++	struct avd_dev *avd = ctx->dev;
++	int ret;
++
++	ret = pm_runtime_resume_and_get(avd->dev);
++	if (ret < 0) {
++		avd_job_finish_no_pm(ctx, VB2_BUF_STATE_ERROR);
++		return;
++	}
++
++	ret = ctx->coded_fmt_desc->ops->run(ctx);
++	if (ret)
++		avd_job_finish(ctx, VB2_BUF_STATE_ERROR);
++}
++
++static int avd_queue_init(void *priv, struct vb2_queue *src_vq,
++			  struct vb2_queue *dst_vq)
++{
++	struct avd_ctx *ctx = priv;
++	int ret;
++
++	src_vq->type = V4L2_BUF_TYPE_VIDEO_OUTPUT_MPLANE;
++	src_vq->io_modes = VB2_MMAP | VB2_DMABUF;
++	src_vq->drv_priv = ctx;
++	src_vq->ops = &avd_queue_ops;
++	src_vq->mem_ops = &vb2_dma_contig_memops;
++	src_vq->buf_struct_size = sizeof(struct v4l2_m2m_buffer);
++	src_vq->timestamp_flags = V4L2_BUF_FLAG_TIMESTAMP_COPY;
++	src_vq->lock = &ctx->dev->vdev_lock;
++	src_vq->dev = ctx->dev->dev;
++	src_vq->supports_requests = true;
++	src_vq->requires_requests = true;
++	src_vq->subsystem_flags = ctx->coded_fmt_desc->subsystem_flags;
++
++	ret = vb2_queue_init(src_vq);
++	if (ret)
++		return ret;
++
++	dst_vq->type = V4L2_BUF_TYPE_VIDEO_CAPTURE_MPLANE;
++	dst_vq->io_modes = VB2_MMAP | VB2_DMABUF;
++	dst_vq->drv_priv = ctx;
++	dst_vq->ops = &avd_queue_ops;
++	dst_vq->mem_ops = &vb2_dma_contig_memops;
++	dst_vq->dma_attrs = DMA_ATTR_NO_KERNEL_MAPPING;
++	dst_vq->buf_struct_size = sizeof(struct avd_decoded_buffer);
++	dst_vq->timestamp_flags = V4L2_BUF_FLAG_TIMESTAMP_COPY;
++	dst_vq->lock = &ctx->dev->vdev_lock;
++	dst_vq->dev = ctx->dev->dev;
++
++	return vb2_queue_init(dst_vq);
++}
++
++static int avd_open(struct file *filp)
++{
++	struct avd_dev *avd = video_drvdata(filp);
++	struct avd_ctx *ctx;
++	int ret;
++
++	ctx = kzalloc_obj(*ctx);
++	if (!ctx)
++		return -ENOMEM;
++
++	ctx->dev = avd;
++	avd_reset_coded_fmt(ctx);
++	avd_reset_decoded_fmt(ctx);
++
++	v4l2_fh_init(&ctx->fh, video_devdata(filp));
++
++	ctx->fh.m2m_ctx = v4l2_m2m_ctx_init(avd->m2m_dev, ctx, avd_queue_init);
++	if (IS_ERR(ctx->fh.m2m_ctx)) {
++		ret = PTR_ERR(ctx->fh.m2m_ctx);
++		goto err_exit_fh;
++	}
++
++	ret = avd_init_ctrls(ctx);
++	if (ret)
++		goto err_release_m2m;
++
++	v4l2_fh_add(&ctx->fh, filp);
++
++	return 0;
++
++err_release_m2m:
++	v4l2_m2m_ctx_release(ctx->fh.m2m_ctx);
++err_exit_fh:
++	v4l2_fh_exit(&ctx->fh);
++	kfree(ctx);
++	return ret;
++}
++
++static int avd_release(struct file *filp)
++{
++	struct avd_ctx *ctx = file_to_ctx(filp);
++
++	v4l2_fh_del(&ctx->fh, filp);
++	v4l2_m2m_ctx_release(ctx->fh.m2m_ctx);
++	v4l2_ctrl_handler_free(&ctx->ctrl_hdl);
++	v4l2_fh_exit(&ctx->fh);
++	avd_job_free(ctx);
++	kfree(ctx);
++
++	return 0;
++}
++
++static const struct v4l2_file_operations avd_fops = {
++	.owner = THIS_MODULE,
++	.open = avd_open,
++	.release = avd_release,
++	.poll = v4l2_m2m_fop_poll,
++	.unlocked_ioctl = video_ioctl2,
++	.mmap = v4l2_m2m_fop_mmap,
++};
++
++static const struct v4l2_m2m_ops avd_m2m_ops = {
++	.device_run = avd_device_run,
++};
++
++static const struct media_device_ops avd_media_ops = {
++	.req_validate = avd_request_validate,
++	.req_queue = v4l2_m2m_request_queue,
++};
++
++static void avd_v4l2_release(struct v4l2_device *v4l2_dev)
++{
++	struct avd_dev *avd = container_of(v4l2_dev, struct avd_dev, v4l2_dev);
++
++	if (avd->m2m_dev)
++		v4l2_m2m_release(avd->m2m_dev);
++	media_device_cleanup(&avd->mdev);
++	mutex_destroy(&avd->hw_lock);
++	mutex_destroy(&avd->vdev_lock);
++	kfree(avd);
++}
++
++static void avd_v4l2_put(void *data)
++{
++	struct avd_dev *avd = data;
++
++	v4l2_device_unregister(&avd->v4l2_dev);
++	v4l2_device_put(&avd->v4l2_dev);
++}
++
++static void avd_video_unregister(void *data)
++{
++	struct avd_dev *avd = data;
++
++	media_device_unregister(&avd->mdev);
++	v4l2_m2m_unregister_media_controller(avd->m2m_dev);
++	video_unregister_device(&avd->vdev);
++}
++
++static int avd_video_register(struct avd_dev *avd)
++{
++	int ret;
++
++	avd->vdev.lock = &avd->vdev_lock;
++	avd->vdev.v4l2_dev = &avd->v4l2_dev;
++	avd->vdev.fops = &avd_fops;
++	avd->vdev.release = video_device_release_empty;
++	avd->vdev.vfl_dir = VFL_DIR_M2M;
++	avd->vdev.device_caps = V4L2_CAP_STREAMING | V4L2_CAP_VIDEO_M2M_MPLANE;
++	avd->vdev.ioctl_ops = &avd_ioctl_ops;
++	video_set_drvdata(&avd->vdev, avd);
++	strscpy(avd->vdev.name, "apple-avd", sizeof(avd->vdev.name));
++
++	ret = video_register_device(&avd->vdev, VFL_TYPE_VIDEO, -1);
++	if (ret)
++		return ret;
++
++	ret = v4l2_m2m_register_media_controller(avd->m2m_dev, &avd->vdev,
++						 MEDIA_ENT_F_PROC_VIDEO_DECODER);
++	if (ret)
++		goto err_unregister_vdev;
++
++	ret = media_device_register(&avd->mdev);
++	if (ret)
++		goto err_unregister_mc;
++
++	return devm_add_action_or_reset(avd->dev, avd_video_unregister, avd);
++
++err_unregister_mc:
++	v4l2_m2m_unregister_media_controller(avd->m2m_dev);
++err_unregister_vdev:
++	video_unregister_device(&avd->vdev);
++	return ret;
++}
++
++/* VP slots and register offsets from the asahi avd driver. */
++static const struct avd_variant avd_t8112_variant = {
++	.vp_slots = {
++		[AVD_CODEC_HEVC] = 4,
++		[AVD_CODEC_H264] = 4,
++		[AVD_CODEC_VP9] = 1,
++	},
++	.fifo_slots = 15,
++	.capabilities = AVD_CAPABILITY_H264,
++	.fw_name = "apple/avd-fw-v3-t1.bin",
++	.vp_slot_offset = 0xc,
++	.submit_offset = 0x30,
++	.submit_queue_max_offset = 0x34,
++	.submit_queue_status_offset = 0x5c,
++};
++
++static const struct of_device_id avd_of_match[] = {
++	{ .compatible = "apple,t8112-avd", .data = &avd_t8112_variant },
++	{ }
++};
++MODULE_DEVICE_TABLE(of, avd_of_match);
++
++static void avd_release_firmware(void *data)
++{
++	release_firmware(data);
++}
++
++static int avd_load_firmware(struct avd_dev *avd, resource_size_t code_size)
++{
++	const u8 *config;
++	u32 magic, codecs;
++	int ret;
++
++	ret = request_firmware(&avd->fw, avd->variant->fw_name, avd->dev);
++	if (ret)
++		return ret;
++
++	ret = devm_add_action_or_reset(avd->dev, avd_release_firmware,
++				       (void *)avd->fw);
++	if (ret)
++		return ret;
++
++	if (avd->fw->size < AVD_FW_CONFIG_OFFSET + AVD_FW_CONFIG_SIZE ||
++	    avd->fw->size > code_size || !IS_ALIGNED(avd->fw->size, 4))
++		return dev_err_probe(avd->dev, -EINVAL,
++				     "invalid firmware size %zu\n",
++				     avd->fw->size);
++
++	config = avd->fw->data + AVD_FW_CONFIG_OFFSET;
++	magic = get_unaligned_le32(config);
++	if (magic != AVD_FW_CONFIG_MAGIC)
++		return dev_err_probe(avd->dev, -EINVAL,
++				     "invalid firmware config magic %#x\n",
++				     magic);
++
++	codecs = get_unaligned_le32(config + AVD_FW_CONFIG_CODECS);
++	avd->capabilities = codecs & avd->variant->capabilities;
++	if (!avd->capabilities)
++		return dev_err_probe(avd->dev, -ENODEV,
++				     "firmware supports no codec (%#x)\n",
++				     codecs);
++
++	return 0;
++}
++
++static void avd_free_insn_fifo(void *data)
++{
++	struct avd_dev *avd = data;
++
++	avd_buf_free(avd, &avd->insn_fifo);
++}
++
++static int avd_runtime_suspend(struct device *dev)
++{
++	struct avd_dev *avd = dev_get_drvdata(dev);
++
++	avd_shutdown(avd);
++	disable_irq(avd->irq);
++
++	return 0;
++}
++
++static int avd_runtime_resume(struct device *dev)
++{
++	struct avd_dev *avd = dev_get_drvdata(dev);
++	int ret;
++
++	ret = avd_boot(avd);
++	if (ret) {
++		avd_shutdown(avd);
++		return ret;
++	}
++	enable_irq(avd->irq);
++
++	return 0;
++}
++
++static void avd_pm_disable(void *data)
++{
++	struct device *dev = data;
++
++	pm_runtime_dont_use_autosuspend(dev);
++	pm_runtime_disable(dev);
++	if (!pm_runtime_status_suspended(dev)) {
++		avd_runtime_suspend(dev);
++		pm_runtime_set_suspended(dev);
++	}
++}
++
++static void avd_quiesce(void *data)
++{
++	struct avd_dev *avd = data;
++
++	v4l2_m2m_suspend(avd->m2m_dev);
++	cancel_delayed_work_sync(&avd->watchdog);
++	cancel_work_sync(&avd->recover_work);
++}
++
++static int avd_probe(struct platform_device *pdev)
++{
++	struct device *dev = &pdev->dev;
++	struct resource *code;
++	struct avd_dev *avd;
++	int ret;
++
++	avd = kzalloc_obj(*avd);
++	if (!avd)
++		return -ENOMEM;
++
++	avd->dev = dev;
++	avd->variant = device_get_match_data(dev);
++	mutex_init(&avd->vdev_lock);
++	mutex_init(&avd->hw_lock);
++	spin_lock_init(&avd->job_lock);
++	INIT_DELAYED_WORK(&avd->watchdog, avd_watchdog_func);
++	INIT_WORK(&avd->recover_work, avd_recover_func);
++	media_device_init(&avd->mdev);
++	avd->v4l2_dev.release = avd_v4l2_release;
++
++	ret = v4l2_device_register(dev, &avd->v4l2_dev);
++	if (ret) {
++		avd_v4l2_release(&avd->v4l2_dev);
++		return ret;
++	}
++	ret = devm_add_action_or_reset(dev, avd_v4l2_put, avd);
++	if (ret)
++		return ret;
++
++	platform_set_drvdata(pdev, avd);
++
++	code = platform_get_resource_byname(pdev, IORESOURCE_MEM, "code");
++	avd->code = devm_ioremap_resource(dev, code);
++	if (IS_ERR(avd->code))
++		return PTR_ERR(avd->code);
++	avd->mbox = devm_platform_ioremap_resource_byname(pdev, "mbox");
++	if (IS_ERR(avd->mbox))
++		return PTR_ERR(avd->mbox);
++	avd->ctrl = devm_platform_ioremap_resource_byname(pdev, "ctrl");
++	if (IS_ERR(avd->ctrl))
++		return PTR_ERR(avd->ctrl);
++
++	ret = avd_load_firmware(avd, resource_size(code));
++	if (ret)
++		return ret;
++
++	/* The 38-bit limit the asahi avd driver uses for t8112. */
++	ret = dma_set_mask_and_coherent(dev, DMA_BIT_MASK(38));
++	if (ret)
++		return ret;
++
++	ret = avd_buf_alloc(avd, &avd->insn_fifo, AVD_INSN_FIFO_SIZE);
++	if (ret)
++		return ret;
++	ret = devm_add_action_or_reset(dev, avd_free_insn_fifo, avd);
++	if (ret)
++		return ret;
++
++	avd->m2m_dev = v4l2_m2m_init(&avd_m2m_ops);
++	if (IS_ERR(avd->m2m_dev)) {
++		ret = PTR_ERR(avd->m2m_dev);
++		avd->m2m_dev = NULL;
++		return ret;
++	}
++	avd->mdev.dev = dev;
++	avd->mdev.ops = &avd_media_ops;
++	strscpy(avd->mdev.model, "apple-avd", sizeof(avd->mdev.model));
++	avd->v4l2_dev.mdev = &avd->mdev;
++
++	avd->irq = platform_get_irq(pdev, 1);
++	if (avd->irq < 0)
++		return avd->irq;
++	ret = devm_request_threaded_irq(dev, avd->irq, NULL, avd_irq_handler,
++					IRQF_ONESHOT | IRQF_NO_AUTOEN,
++					dev_name(dev), avd);
++	if (ret)
++		return ret;
++
++	pm_runtime_set_autosuspend_delay(dev, 100);
++	pm_runtime_use_autosuspend(dev);
++	pm_runtime_enable(dev);
++	ret = devm_add_action_or_reset(dev, avd_pm_disable, dev);
++	if (ret)
++		return ret;
++
++	ret = pm_runtime_resume_and_get(dev);
++	if (ret)
++		return dev_err_probe(dev, ret, "firmware did not boot\n");
++	pm_runtime_put_autosuspend(dev);
++
++	ret = devm_add_action_or_reset(dev, avd_quiesce, avd);
++	if (ret)
++		return ret;
++
++	return avd_video_register(avd);
++}
++
++static int avd_suspend(struct device *dev)
++{
++	struct avd_dev *avd = dev_get_drvdata(dev);
++
++	v4l2_m2m_suspend(avd->m2m_dev);
++	return pm_runtime_force_suspend(dev);
++}
++
++static int avd_resume(struct device *dev)
++{
++	struct avd_dev *avd = dev_get_drvdata(dev);
++	int ret;
++
++	ret = pm_runtime_force_resume(dev);
++	v4l2_m2m_resume(avd->m2m_dev);
++
++	return ret;
++}
++
++static const struct dev_pm_ops avd_pm_ops = {
++	SYSTEM_SLEEP_PM_OPS(avd_suspend, avd_resume)
++	RUNTIME_PM_OPS(avd_runtime_suspend, avd_runtime_resume, NULL)
++};
++
++static struct platform_driver avd_driver = {
++	.probe = avd_probe,
++	.driver = {
++		.name = "apple-avd",
++		.of_match_table = avd_of_match,
++		.pm = pm_ptr(&avd_pm_ops),
++	},
++};
++module_platform_driver(avd_driver);
++
++MODULE_DESCRIPTION("Apple Video Decoder driver");
++MODULE_LICENSE("GPL");
++MODULE_FIRMWARE("apple/avd-fw-v3-t1.bin");
+diff --git a/drivers/media/platform/apple/avd/avd-h264.c b/drivers/media/platform/apple/avd/avd-h264.c
+new file mode 100644
+index 000000000..46aa535aa
+--- /dev/null
++++ b/drivers/media/platform/apple/avd/avd-h264.c
+@@ -0,0 +1,603 @@
++// SPDX-License-Identifier: GPL-2.0
++/*
++ * Apple AVD H.264 decoding
++ *
++ * Copyright The Asahi Linux Contributors
++ * Copyright 2023 Eileen Yoon <eyn@gmx.com>
++ *
++ * Copyright (c) 2014 Rockchip Electronics Co., Ltd.
++ *	Hertz Wong <hertz.wong@rock-chips.com>
++ *	Herman Chen <herman.chen@rock-chips.com>
++ *
++ * Copyright (C) 2014 Google, Inc.
++ *	Tomasz Figa <tfiga@chromium.org>
++ */
++
++#include <media/v4l2-h264.h>
++#include <media/videobuf2-dma-contig.h>
++
++#include "avd.h"
++#include "avd-inst.h"
++
++#define H264_SCL_DIMS	(0x1000000 | ((64 / 4) << 5) | (((16 / 4) << 5) - 1))
++
++#define H264_FLAG_CI_PRED(v)			FIELD_PREP(BIT(19), !!(v))
++#define H264_FLAG_ENTROPY_CODING_MODE(v)	FIELD_PREP(BIT(20), !!(v))
++#define H264_FLAG_NOT_IDR(v)			FIELD_PREP(BIT(21), !!(v))
++
++#define H264_TRANSFORM_8X8_MODE(v)		FIELD_PREP(BIT(7), !!(v))
++
++#define H264_DEFAULT_WEIGHT_DENOM \
++	(AVD_OP_WEIGHTS_HDR_LUMA(5) | AVD_OP_WEIGHTS_HDR_CHROMA(5))
++
++struct avd_h264_run {
++	struct avd_run base;
++
++	const struct v4l2_ctrl_h264_decode_params *decode_params;
++	const struct v4l2_ctrl_h264_sps *sps;
++	const struct v4l2_ctrl_h264_pps *pps;
++	const struct v4l2_ctrl_h264_slice_params *slice_params;
++	const struct v4l2_ctrl_h264_scaling_matrix *scaling_matrix;
++	const struct v4l2_ctrl_h264_pred_weights *pred_weights;
++
++	s32 cur_poc;
++	u8 num_valid;
++};
++
++struct avd_h264_ctx {
++	struct avd_buf bitstream;
++	size_t bitstream_used;
++
++	struct avd_buf pipe_state;
++	struct avd_buf above_info;
++	struct avd_buf lf_above_info;
++	struct avd_buf lf_above;
++	struct avd_buf ip_above;
++	struct avd_buf mv_above_info;
++};
++
++/* Default 8x8 scaling lists in the decoder's order (asahi avd). */
++static const u32 default_8x8_intra[] = {
++	0x060a0d10, 0x0a0b1012, 0x0d101217, 0x10121719, 0x1217191b, 0x17191b1d,
++	0x191b1d1f, 0x1b1d1f21, 0x1217191b, 0x17191b1d, 0x191b1d1f, 0x1b1d1f21,
++	0x1d1f2124, 0x1f212426, 0x21242628, 0x2426282a,
++};
++
++static const u32 default_8x8_inter[] = {
++	0x090d0f11, 0x0d0d1113, 0x0f111315, 0x11131516, 0x13151618, 0x15161819,
++	0x1618191b, 0x18191b1c, 0x13151618, 0x15161819, 0x1618191b, 0x18191b1c,
++	0x191b1c1e, 0x1b1c1e20, 0x1c1e2021, 0x1e202123,
++};
++
++/* The decoder takes 8x8 lists as four 4x4 blocks, not in raster order. */
++static const u8 scaling_8x8_map[16] = {
++	0,  8,  16, 24,
++	4,  12, 20, 28,
++	32, 40, 48, 56,
++	36, 44, 52, 60,
++};
++
++static u32 avd_h264_mv_size(u32 w, u32 h)
++{
++	return (DIV_ROUND_UP(w, 16) + 1) * (DIV_ROUND_UP(h, 16) + 1) * 64;
++}
++
++static u32 pack4(const u8 *v)
++{
++	return AVD_SCALING_I3(v[0]) | AVD_SCALING_I2(v[1]) |
++	       AVD_SCALING_I1(v[2]) | AVD_SCALING_I0(v[3]);
++}
++
++static void stream_refs(struct avd_ctx *ctx, struct avd_h264_run *run)
++{
++	const struct v4l2_h264_dpb_entry *dpb = run->decode_params->dpb;
++	struct avd_h264_ctx *h264_ctx = ctx->priv;
++	struct avd_decoded_buffer *ref;
++	dma_addr_t addr;
++
++	push(ctx, 0);
++	push_address(ctx, h264_ctx->mv_above_info.addr);
++	push_address(ctx, run->base.mv_out);
++	push(ctx, 0);
++	push(ctx, 0);
++	push(ctx, 0);
++	push(ctx, 0);
++
++	for (int i = 0; i < V4L2_H264_NUM_DPB_ENTRIES; i++) {
++		if (!(dpb[i].flags & V4L2_H264_DPB_ENTRY_FLAG_VALID))
++			continue;
++
++		ref = avd_get_ref_buf(ctx, &run->base, dpb[i].reference_ts);
++		addr = avd_buf_addr(ref) +
++		       ref->layout.comp_offset;
++
++		push(ctx, AVD_REF_NUM(run->num_valid - 1) | AVD_REF_FLAG_CONST |
++			  AVD_REF_FLAG_LONG(dpb[i].flags &
++					    V4L2_H264_DPB_ENTRY_FLAG_LONG_TERM) |
++			  AVD_REF_DELTA_POC(run->cur_poc -
++					    dpb[i].top_field_order_cnt));
++		push_comp(ctx, addr, &ref->layout.comp);
++	}
++}
++
++static void stream_scaling(struct avd_ctx *ctx, struct avd_h264_run *run)
++{
++	const struct v4l2_ctrl_h264_scaling_matrix *scaling =
++		run->scaling_matrix;
++	u8 v[4];
++
++	push(ctx, H264_SCL_DIMS);
++
++	for (int i = 0; i < 6; i++)
++		for (int j = 0; j < 16; j += 4)
++			push(ctx, pack4(&scaling->scaling_list_4x4[i][j]));
++
++	/* Only lists 0 and 1 are used with chroma_format_idc < 3 (7.3.2.2). */
++	if (run->pps->flags & V4L2_H264_PPS_FLAG_TRANSFORM_8X8_MODE) {
++		for (int i = 0; i < 2; i++) {
++			for (int j = 0; j < 16; j++) {
++				for (int k = 0; k < 4; k++)
++					v[k] = scaling->scaling_list_8x8[i]
++						[scaling_8x8_map[j] + k];
++				push(ctx, pack4(v));
++			}
++		}
++	} else {
++		for (int i = 0; i < ARRAY_SIZE(default_8x8_intra); i++)
++			push(ctx, default_8x8_intra[i]);
++		for (int i = 0; i < ARRAY_SIZE(default_8x8_inter); i++)
++			push(ctx, default_8x8_inter[i]);
++	}
++}
++
++static void stream_hdr(struct avd_ctx *ctx, struct avd_h264_run *run)
++{
++	const struct v4l2_ctrl_h264_decode_params *decode = run->decode_params;
++	const struct v4l2_ctrl_h264_sps *sps = run->sps;
++	const struct v4l2_ctrl_h264_pps *pps = run->pps;
++	struct avd_h264_ctx *h264_ctx = ctx->priv;
++	bool idr = decode->flags & V4L2_H264_DECODE_PARAM_FLAG_IDR_PIC;
++	u32 width = (sps->pic_width_in_mbs_minus1 + 1) * 16;
++	u32 height = (sps->pic_height_in_map_units_minus1 + 1) * 16;
++	u32 bytesperline;
++
++	push(ctx, AVD_OP_HDR | AVD_OP_HDR_FLAG_DECOMP(1) |
++		  AVD_OP_HDR_FLAG_INTRA(idr) | AVD_OP_HDR_CONST |
++		  AVD_OP_HDR_FLAG_PIPE_STATE(1));
++	push(ctx, AVD_HDR_CODEC_MODE(AVD_CODEC_H264));
++	push(ctx, AVD_HDR_HEIGHT(height - 1) | AVD_HDR_WIDTH(width - 1));
++	push(ctx, 0);
++	push(ctx, AVD_HDR_HEIGHT((height - 1) >> 3) |
++		  AVD_HDR_WIDTH((width - 1) >> 3));
++	push(ctx, AVD_HDR_COMMON_CHROMA_FORMAT(sps->chroma_format_idc) |
++		  AVD_HDR_COMMON_BIT_DEPTH_L(sps->bit_depth_luma_minus8) |
++		  AVD_HDR_COMMON_BIT_DEPTH_C(sps->bit_depth_chroma_minus8) |
++		  AVD_HDR_COMMON_MIN_LUMA_CBS(1) | AVD_HDR_COMMON_LUMA_CBS(1) |
++		  H264_TRANSFORM_8X8_MODE(pps->flags &
++					  V4L2_H264_PPS_FLAG_TRANSFORM_8X8_MODE) |
++		  AVD_HDR_COMMON_FLAG0(sps->flags &
++				       V4L2_H264_SPS_FLAG_DIRECT_8X8_INFERENCE));
++	push(ctx, H264_FLAG_ENTROPY_CODING_MODE(pps->flags &
++						V4L2_H264_PPS_FLAG_ENTROPY_CODING_MODE) |
++		  H264_FLAG_NOT_IDR(!idr) |
++		  H264_FLAG_CI_PRED(pps->flags &
++				    V4L2_H264_PPS_FLAG_CONSTRAINED_INTRA_PRED));
++	push(ctx, AVD_HDR_H26X_QP_OFFSET_CB(pps->chroma_qp_index_offset) |
++		  AVD_HDR_H26X_QP_OFFSET_CR(pps->second_chroma_qp_index_offset));
++	push(ctx, AVD_HDR_FEAT_H26X | AVD_HDR_FEAT_COMMON | AVD_HDR_FEAT_H264 |
++		  AVD_HDR_FEAT_PIPE_STATE_EN);
++	push(ctx, 0);
++	push(ctx, 0);
++	push_address(ctx, h264_ctx->above_info.addr);
++	push(ctx, 0);
++	push(ctx, 0);
++	push_address(ctx, h264_ctx->pipe_state.addr);
++	push_address(ctx, h264_ctx->ip_above.addr);
++	push_address(ctx, h264_ctx->lf_above.addr);
++	push_address(ctx, h264_ctx->lf_above_info.addr);
++	push(ctx, 0);
++
++	push_comp(ctx, run->base.comp_out, &ctx->layout.comp);
++
++	bytesperline = ctx->decoded_fmt.fmt.pix_mp.plane_fmt[0].bytesperline >> 4;
++	push_address(ctx, run->base.y_out);
++	push(ctx, bytesperline);
++	push_address(ctx, run->base.uv_out);
++	push(ctx, bytesperline);
++
++	push(ctx, 0);
++	push(ctx, ((height - 1) << 16) | (width - 1));
++
++	if (!idr && run->num_valid)
++		stream_refs(ctx, run);
++
++	if (pps->flags & V4L2_H264_PPS_FLAG_SCALING_MATRIX_PRESENT)
++		stream_scaling(ctx, run);
++	else
++		push(ctx, 0);
++}
++
++static void stream_weight(struct avd_ctx *ctx, unsigned int list,
++			  unsigned int idx, unsigned int ident, s16 weight,
++			  s16 offset)
++{
++	push(ctx, AVD_OP_WEIGHTS | AVD_OP_WEIGHTS_IDENT(ident) |
++		  AVD_OP_WEIGHTS_LIST_IDX(list) | AVD_OP_WEIGHTS_INDEX(idx) |
++		  AVD_OP_WEIGHTS_WEIGHT(weight));
++	push(ctx, AVD_OP_OFFSETS | AVD_OP_OFFSETS_OFFSET(offset));
++}
++
++static void stream_weights(struct avd_ctx *ctx, struct avd_h264_run *run)
++{
++	const struct v4l2_ctrl_h264_pred_weights *weights = run->pred_weights;
++	const struct v4l2_ctrl_h264_slice_params *sl = run->slice_params;
++	bool pred_weight_req = V4L2_H264_CTRL_PRED_WEIGHTS_REQUIRED(run->pps, sl);
++	bool default_weights = run->pps->weighted_bipred_idc == 2 &&
++			       !pred_weight_req;
++	int luma_denom, chroma_denom;
++
++	if (default_weights)
++		push(ctx, AVD_OP_WEIGHTS_HDR | AVD_OP_WEIGHTS_HDR_FLAG1(1) |
++			  H264_DEFAULT_WEIGHT_DENOM);
++	else
++		push(ctx, AVD_OP_WEIGHTS_HDR |
++			  AVD_OP_WEIGHTS_HDR_FLAG0(pred_weight_req) |
++			  AVD_OP_WEIGHTS_HDR_LUMA(weights->luma_log2_weight_denom) |
++			  AVD_OP_WEIGHTS_HDR_CHROMA(weights->chroma_log2_weight_denom));
++
++	if (!pred_weight_req)
++		return;
++
++	luma_denom = 1 << weights->luma_log2_weight_denom;
++	chroma_denom = 1 << weights->chroma_log2_weight_denom;
++
++	for (int list = 0; list < 2; list++) {
++		const struct v4l2_h264_weight_factors *f =
++			&weights->weight_factors[list];
++		unsigned int num;
++
++		if (list == 1 && sl->slice_type != V4L2_H264_SLICE_TYPE_B)
++			break;
++
++		num = (list ? sl->num_ref_idx_l1_active_minus1 :
++			      sl->num_ref_idx_l0_active_minus1) + 1;
++
++		/* Default weights must not be sent: they cause artifacts (asahi avd). */
++		for (unsigned int i = 0; i < num; i++) {
++			if (f->luma_weight[i] != luma_denom || f->luma_offset[i])
++				stream_weight(ctx, list, i, 1, f->luma_weight[i],
++					      f->luma_offset[i]);
++
++			if (f->chroma_weight[i][0] != chroma_denom ||
++			    f->chroma_offset[i][0] ||
++			    f->chroma_weight[i][1] != chroma_denom ||
++			    f->chroma_offset[i][1]) {
++				stream_weight(ctx, list, i, 2,
++					      f->chroma_weight[i][0],
++					      f->chroma_offset[i][0]);
++				stream_weight(ctx, list, i, 3,
++					      f->chroma_weight[i][1],
++					      f->chroma_offset[i][1]);
++			}
++		}
++	}
++}
++
++/* header_bit_size excludes emulation prevention bytes; skip them in the NAL. */
++static int slice_data_offset(const u8 *data, u32 len, u32 header_bytes,
++			     u32 *offset)
++{
++	u32 off = 2, bytes_read = 2;
++
++	while (bytes_read < header_bytes) {
++		if (off >= len)
++			return -EINVAL;
++		if (data[off - 2] || data[off - 1] || data[off] != 0x03)
++			bytes_read++;
++		off++;
++	}
++
++	if (off >= len)
++		return -EINVAL;
++
++	*offset = off;
++	return 0;
++}
++
++static int stream_slice(struct avd_ctx *ctx, struct avd_h264_run *run,
++			struct avd_buf *slice, u32 len)
++{
++	const struct v4l2_ctrl_h264_decode_params *decode = run->decode_params;
++	const struct v4l2_ctrl_h264_pps *pps = run->pps;
++	const struct v4l2_ctrl_h264_sps *sps = run->sps;
++	const struct v4l2_ctrl_h264_slice_params *sl = run->slice_params;
++	bool cavlc = !(pps->flags & V4L2_H264_PPS_FLAG_ENTROPY_CODING_MODE);
++	u32 mbs_w = sps->pic_width_in_mbs_minus1 + 1;
++	dma_addr_t addr;
++	u32 off;
++	int ret;
++
++	ret = slice_data_offset(slice->cpu, len,
++				(sl->header_bit_size + (cavlc ? 0 : 7)) / 8,
++				&off);
++	if (ret)
++		return ret;
++
++	addr = slice->addr + off;
++	push(ctx, AVD_OP_CODED_DATA |
++		  AVD_OP_CODED_DATA_BIT_OFF(cavlc ? sl->header_bit_size % 8 : 0) |
++		  AVD_OP_CODED_DATA_ADDR(upper_32_bits(addr)));
++	push(ctx, lower_32_bits(addr));
++	push(ctx, len - off);
++
++	push(ctx, AVD_OP_SL_LOC | AVD_OP_SL_LOC_Y(sl->first_mb_in_slice / mbs_w) |
++		  AVD_OP_SL_LOC_X(sl->first_mb_in_slice % mbs_w));
++	push(ctx, AVD_OP_QP | AVD_OP_QP_VAL(26 + pps->pic_init_qp_minus26 +
++					    sl->slice_qp_delta));
++	push(ctx, AVD_OP_DBLK |
++		  AVD_OP_DBLK_FLAG_FULL_EN(sl->disable_deblocking_filter_idc == 0) |
++		  AVD_OP_DBLK_FLAG_EN(sl->disable_deblocking_filter_idc != 1) |
++		  AVD_OP_DBLK_OFF1(sl->slice_beta_offset_div2) |
++		  AVD_OP_DBLK_OFF0(sl->slice_alpha_c0_offset_div2));
++
++	if (sl->slice_type == V4L2_H264_SLICE_TYPE_P ||
++	    sl->slice_type == V4L2_H264_SLICE_TYPE_B) {
++		for (u32 i = 0; i <= sl->num_ref_idx_l0_active_minus1; i++)
++			push(ctx, AVD_OP_REF | AVD_OP_REF_LIST_IDX(0) |
++				  AVD_OP_REF_LOOP_IDX(i) |
++				  AVD_OP_REF_DBP_IDX(sl->ref_pic_list0[i].index));
++
++		if (sl->slice_type == V4L2_H264_SLICE_TYPE_B)
++			for (u32 i = 0; i <= sl->num_ref_idx_l1_active_minus1; i++)
++				push(ctx, AVD_OP_REF | AVD_OP_REF_LIST_IDX(1) |
++					  AVD_OP_REF_LOOP_IDX(i) |
++					  AVD_OP_REF_DBP_IDX(sl->ref_pic_list1[i].index));
++
++		stream_weights(ctx, run);
++	}
++
++	if (sl->first_mb_in_slice == 0) {
++		push(ctx, AVD_OP_SL_DIM_START);
++		push(ctx, AVD_SL_DIM_END_Y(sps->pic_height_in_map_units_minus1) |
++			  AVD_SL_DIM_END_X(sps->pic_width_in_mbs_minus1));
++	}
++
++	push(ctx, AVD_OP_SL_REF |
++		  AVD_OP_SL_REF_FLAG_CABAC(sl->cabac_init_idc == 1) |
++		  AVD_OP_SL_REF_FLAG1(sl->cabac_init_idc == 2) |
++		  AVD_OP_SL_REF_FLAG2(!(sl->flags &
++					V4L2_H264_SLICE_FLAG_DIRECT_SPATIAL_MV_PRED)) |
++		  AVD_OP_SL_REF_NUM_L0(sl->num_ref_idx_l0_active_minus1) |
++		  AVD_OP_SL_REF_NUM_L1(sl->num_ref_idx_l1_active_minus1) |
++		  AVD_OP_SL_REF_SLICE_P(sl->slice_type == V4L2_H264_SLICE_TYPE_P) |
++		  AVD_OP_SL_REF_SLICE_I(sl->slice_type == V4L2_H264_SLICE_TYPE_I) |
++		  AVD_OP_SL_REF_SLICE_B(sl->slice_type == V4L2_H264_SLICE_TYPE_B));
++
++	if (sl->slice_type == V4L2_H264_SLICE_TYPE_B) {
++		const struct v4l2_h264_dpb_entry *col =
++			&decode->dpb[sl->ref_pic_list1[0].index];
++		struct avd_decoded_buffer *ref;
++
++		ref = avd_get_ref_buf(ctx, &run->base, col->reference_ts);
++		push_address(ctx, avd_buf_addr(ref) + ref->layout.mv_offset);
++	}
++
++	return 0;
++}
++
++static int avd_h264_alloc_bufs(struct avd_ctx *ctx)
++{
++	struct avd_dev *avd = ctx->dev;
++	struct avd_h264_ctx *h264_ctx = ctx->priv;
++	u32 mb = DIV_ROUND_UP(ctx->decoded_fmt.fmt.pix_mp.width, 16);
++	int ret;
++
++	/* Sizes for 8-bit pictures, from the asahi avd driver. */
++	ret = avd_buf_alloc(avd, &h264_ctx->pipe_state, 0x200);
++	if (!ret)
++		ret = avd_buf_alloc(avd, &h264_ctx->above_info, mb * 20);
++	if (!ret)
++		ret = avd_buf_alloc(avd, &h264_ctx->ip_above, 8 * 4 * mb);
++	if (!ret)
++		ret = avd_buf_alloc(avd, &h264_ctx->lf_above, 8 * 4 * 4 * mb);
++	if (!ret)
++		ret = avd_buf_alloc(avd, &h264_ctx->lf_above_info, 32 * mb);
++	if (!ret)
++		ret = avd_buf_alloc(avd, &h264_ctx->mv_above_info, 32 * mb);
++	if (!ret)
++		ret = avd_buf_alloc(avd, &h264_ctx->bitstream,
++				    ctx->coded_fmt.fmt.pix_mp.plane_fmt[0].sizeimage);
++
++	return ret;
++}
++
++static void avd_h264_free_bufs(struct avd_ctx *ctx)
++{
++	struct avd_h264_ctx *h264_ctx = ctx->priv;
++	struct avd_dev *avd = ctx->dev;
++
++	avd_buf_free(avd, &h264_ctx->pipe_state);
++	avd_buf_free(avd, &h264_ctx->above_info);
++	avd_buf_free(avd, &h264_ctx->lf_above_info);
++	avd_buf_free(avd, &h264_ctx->lf_above);
++	avd_buf_free(avd, &h264_ctx->ip_above);
++	avd_buf_free(avd, &h264_ctx->mv_above_info);
++
++	avd_buf_free(avd, &h264_ctx->bitstream);
++}
++
++static int avd_h264_validate_sps(const struct v4l2_ctrl_h264_sps *sps)
++{
++	if (sps->chroma_format_idc != 1 || sps->bit_depth_luma_minus8 ||
++	    sps->bit_depth_chroma_minus8 ||
++	    !(sps->flags & V4L2_H264_SPS_FLAG_FRAME_MBS_ONLY))
++		return -EINVAL;
++
++	return 0;
++}
++
++static int avd_h264_start(struct avd_ctx *ctx)
++{
++	struct avd_h264_ctx *h264_ctx;
++	int ret;
++
++	h264_ctx = kzalloc_obj(*h264_ctx);
++	if (!h264_ctx)
++		return -ENOMEM;
++	ctx->priv = h264_ctx;
++
++	ret = avd_h264_alloc_bufs(ctx);
++	if (ret) {
++		avd_h264_free_bufs(ctx);
++		kfree(h264_ctx);
++	}
++
++	return ret;
++}
++
++static void avd_h264_stop(struct avd_ctx *ctx)
++{
++	avd_h264_free_bufs(ctx);
++	kfree(ctx->priv);
++}
++
++static void avd_h264_get_ctrls(struct avd_ctx *ctx, struct avd_h264_run *run)
++{
++	run->decode_params = avd_ctrl_ptr(ctx, V4L2_CID_STATELESS_H264_DECODE_PARAMS);
++	run->sps = avd_ctrl_ptr(ctx, V4L2_CID_STATELESS_H264_SPS);
++	run->pps = avd_ctrl_ptr(ctx, V4L2_CID_STATELESS_H264_PPS);
++	run->slice_params = avd_ctrl_ptr(ctx, V4L2_CID_STATELESS_H264_SLICE_PARAMS);
++	run->scaling_matrix = avd_ctrl_ptr(ctx, V4L2_CID_STATELESS_H264_SCALING_MATRIX);
++	run->pred_weights = avd_ctrl_ptr(ctx, V4L2_CID_STATELESS_H264_PRED_WEIGHTS);
++}
++
++static int avd_h264_validate_run(struct avd_ctx *ctx, struct avd_h264_run *run)
++{
++	const struct v4l2_ctrl_h264_slice_params *sl = run->slice_params;
++	const struct v4l2_ctrl_h264_sps *sps = run->sps;
++	const struct v4l2_pix_format_mplane *pix_mp = &ctx->decoded_fmt.fmt.pix_mp;
++	u32 mbs = (sps->pic_width_in_mbs_minus1 + 1) *
++		  (sps->pic_height_in_map_units_minus1 + 1);
++	u32 width = (sps->pic_width_in_mbs_minus1 + 1) * 16;
++	u32 height = (sps->pic_height_in_map_units_minus1 + 1) * 16;
++
++	if (avd_h264_validate_sps(sps) || run->pps->num_slice_groups_minus1)
++		return -EINVAL;
++	if (width < 64 || height < 64 || width > pix_mp->width ||
++	    height > pix_mp->height)
++		return -EINVAL;
++	if (sl->first_mb_in_slice >= mbs ||
++	    sl->num_ref_idx_l0_active_minus1 > 15 ||
++	    sl->num_ref_idx_l1_active_minus1 > 15)
++		return -EINVAL;
++
++	if (sl->slice_type == V4L2_H264_SLICE_TYPE_P ||
++	    sl->slice_type == V4L2_H264_SLICE_TYPE_B) {
++		for (u32 i = 0; i <= sl->num_ref_idx_l0_active_minus1; i++)
++			if (sl->ref_pic_list0[i].index >= V4L2_H264_NUM_DPB_ENTRIES)
++				return -EINVAL;
++	}
++	if (sl->slice_type == V4L2_H264_SLICE_TYPE_B) {
++		for (u32 i = 0; i <= sl->num_ref_idx_l1_active_minus1; i++)
++			if (sl->ref_pic_list1[i].index >= V4L2_H264_NUM_DPB_ENTRIES)
++				return -EINVAL;
++	}
++
++	return 0;
++}
++
++static int avd_h264_run(struct avd_ctx *ctx)
++{
++	struct avd_h264_ctx *h264_ctx = ctx->priv;
++	struct v4l2_h264_reflist_builder builder;
++	struct avd_h264_run run;
++	struct avd_buf slice;
++	const void *data;
++	size_t pos;
++	u32 len;
++	int ret;
++
++	ret = avd_run_preamble(ctx, &run.base);
++	if (ret)
++		return ret;
++	avd_h264_get_ctrls(ctx, &run);
++
++	ret = avd_h264_validate_run(ctx, &run);
++	if (ret)
++		return ret;
++
++	len = vb2_get_plane_payload(&run.base.src->vb2_buf, 0);
++	data = vb2_plane_vaddr(&run.base.src->vb2_buf, 0);
++	if (!data || !len)
++		return -EINVAL;
++
++	if (ctx->fh.m2m_ctx->new_frame) {
++		h264_ctx->bitstream_used = 0;
++
++		v4l2_h264_init_reflist_builder(&builder, run.decode_params,
++					       run.sps, run.decode_params->dpb);
++		run.num_valid = builder.num_valid;
++		run.cur_poc = builder.cur_pic_order_count;
++
++		ret = avd_job_begin(ctx, 2 + run.sps->pic_height_in_map_units_minus1);
++		if (ret)
++			return ret;
++		stream_hdr(ctx, &run);
++	} else if (!ctx->job.segments) {
++		return -EINVAL;
++	}
++
++	pos = ALIGN(h264_ctx->bitstream_used, AVD_ALIGN);
++	if (pos + len > h264_ctx->bitstream.size)
++		return -ENOSPC;
++	slice.cpu = h264_ctx->bitstream.cpu + pos;
++	slice.addr = h264_ctx->bitstream.addr + pos;
++	memcpy(slice.cpu, data, len);
++	h264_ctx->bitstream_used = pos + len;
++
++	ret = avd_job_next(ctx);
++	if (ret)
++		return ret;
++	ret = stream_slice(ctx, &run, &slice, len);
++	if (ret)
++		return ret;
++
++	if (run.base.src->flags & V4L2_BUF_FLAG_M2M_HOLD_CAPTURE_BUF) {
++		avd_job_finish(ctx, VB2_BUF_STATE_DONE);
++		return 0;
++	}
++
++	return avd_submit_job(ctx, AVD_CODEC_H264);
++}
++
++static void avd_h264_done(struct avd_ctx *ctx, enum vb2_buffer_state result)
++{
++	if (result == VB2_BUF_STATE_ERROR)
++		avd_job_free(ctx);
++}
++
++static int avd_h264_try_ctrl(struct v4l2_ctrl *ctrl)
++{
++	if (ctrl->id == V4L2_CID_STATELESS_H264_SPS)
++		return avd_h264_validate_sps(ctrl->p_new.p_h264_sps);
++	if (ctrl->id == V4L2_CID_STATELESS_H264_PPS &&
++	    ctrl->p_new.p_h264_pps->num_slice_groups_minus1)
++		return -EINVAL;
++
++	return 0;
++}
++
++static void avd_h264_submit(struct avd_ctx *ctx)
++{
++	avd_submit_pp(ctx, 1);
++}
++
++const struct avd_coded_fmt_ops avd_h264_fmt_ops = {
++	.mv_size = avd_h264_mv_size,
++	.start = avd_h264_start,
++	.stop = avd_h264_stop,
++	.run = avd_h264_run,
++	.submit = avd_h264_submit,
++	.done = avd_h264_done,
++	.try_ctrl = avd_h264_try_ctrl,
++};
+diff --git a/drivers/media/platform/apple/avd/avd-hw.c b/drivers/media/platform/apple/avd/avd-hw.c
+new file mode 100644
+index 000000000..b235bacca
+--- /dev/null
++++ b/drivers/media/platform/apple/avd/avd-hw.c
+@@ -0,0 +1,65 @@
++// SPDX-License-Identifier: MIT
++/*
++ * AVD coprocessor control, from the asahi avd driver (traces of the macOS
++ * AppleAVD driver).
++ */
++
++#include <linux/io.h>
++#include <linux/iopoll.h>
++
++#include "avd.h"
++#include "avd-regs.h"
++
++#define AVD_VP_INSN_FIFO_IOVA		0x150
++#define AVD_VP_INSN_FIFO_MASK		0x18c
++#define AVD_VP_INSN_FIFO_CACH		0x1c8
++#define AVD_VP_INSN_FIFO_XFER		0x204
++#define AVD_VP_CTRL_CM3_IRQ_MASK	0x0fc
++#define AVD_PP_CTRL_CM3_IRQ_MASK	0x120
++
++#define AVD_CM3_UNK			BIT(0)
++#define AVD_CM3_ERROR			BIT(1)
++#define AVD_CM3_DONE			BIT(2)
++
++#define AVD_VP_CM3_MASK	(AVD_CM3_UNK | AVD_CM3_ERROR | AVD_CM3_DONE)
++#define AVD_PP_CM3_MASK	(AVD_CM3_UNK | AVD_CM3_DONE)
++
++int avd_boot(struct avd_dev *avd)
++{
++	u32 val;
++
++	memcpy_toio(avd->code, avd->fw->data, avd->fw->size);
++
++	writel_relaxed(AVD_MBOX_ENABLE, avd->mbox + AVD_REG_MBOX1_STATUS);
++	writel_relaxed(AVD_MBOX1_NOT_EMPTY, avd->mbox + AVD_REG_MBOX_IRQ_ENABLE);
++	writel(AVD_RUN_CTRL_RUN, avd->mbox + AVD_REG_RUN_CTRL);
++
++	/* avd-fw writes 1 to flag 0 once its tunables are applied (src/avd.c). */
++	return readl_poll_timeout(avd->mbox + AVD_REG_FLAG0_SET, val, val == 1,
++				  10, 10000);
++}
++
++/* The read posts the mailbox IRQ mask before the caller powers down. */
++void avd_shutdown(struct avd_dev *avd)
++{
++	writel_relaxed(AVD_RUN_CTRL_STOP, avd->mbox + AVD_REG_RUN_CTRL);
++	writel_relaxed(1, avd->mbox + AVD_REG_FLAG0_CLR);
++	writel(0, avd->mbox + AVD_REG_MBOX_IRQ_ENABLE);
++	readl(avd->mbox + AVD_REG_MBOX_IRQ_ENABLE);
++}
++
++void avd_configure_stream(struct avd_dev *avd, dma_addr_t addr, u32 vp_slot)
++{
++	void __iomem *ctrl = avd->ctrl;
++
++	writel_relaxed(addr >> 8, ctrl + AVD_VP_INSN_FIFO_IOVA);
++	writel_relaxed(0, ctrl + AVD_VP_INSN_FIFO_MASK);
++	writel_relaxed(0, ctrl + AVD_VP_INSN_FIFO_CACH);
++	writel_relaxed(0, ctrl + AVD_VP_INSN_FIFO_XFER);
++
++	writel_relaxed(readl_relaxed(ctrl + AVD_VP_CTRL_CM3_IRQ_MASK + vp_slot * 4) |
++		       AVD_VP_CM3_MASK,
++		       ctrl + AVD_VP_CTRL_CM3_IRQ_MASK + vp_slot * 4);
++	writel_relaxed(readl_relaxed(ctrl + AVD_PP_CTRL_CM3_IRQ_MASK) |
++		       AVD_PP_CM3_MASK, ctrl + AVD_PP_CTRL_CM3_IRQ_MASK);
++}
+diff --git a/drivers/media/platform/apple/avd/avd-inst.h b/drivers/media/platform/apple/avd/avd-inst.h
+new file mode 100644
+index 000000000..8fce1fd0f
+--- /dev/null
++++ b/drivers/media/platform/apple/avd/avd-inst.h
+@@ -0,0 +1,150 @@
++/* SPDX-License-Identifier: MIT */
++/*
++ * AVD instruction stream encoding, from the asahi avd driver (traces of the
++ * macOS AppleAVD driver).
++ */
++
++#ifndef AVD_INST_H_
++#define AVD_INST_H_
++
++#include <linux/bitfield.h>
++#include <linux/types.h>
++
++#include "avd.h"
++
++#define AVD_OP_EXEC			FIELD_PREP(GENMASK(31, 24), 0x2b)
++#define AVD_OP_EXEC_FIFO_MASK(v)	FIELD_PREP(GENMASK(3, 0), v)
++#define AVD_OP_EXEC_FIFO_IDX(v)		FIELD_PREP(GENMASK(7, 4), v)
++#define AVD_OP_EXEC_FLAG_START(v)	FIELD_PREP(BIT(9), !!(v))
++#define AVD_OP_EXEC_FLAG_END(v)		FIELD_PREP(BIT(10), !!(v))
++
++#define AVD_OP_HDR			FIELD_PREP(GENMASK(31, 20), 0x2db)
++#define AVD_OP_HDR_CONST		FIELD_PREP(GENMASK(10, 0), 0x2e0)
++#define AVD_OP_HDR_FLAG_DECOMP(v)	FIELD_PREP(BIT(12), !!(v))
++#define AVD_OP_HDR_FLAG_INTRA(v)	FIELD_PREP(BIT(13), !!(v))
++#define AVD_OP_HDR_FLAG_PIPE_STATE(v)	FIELD_PREP(BIT(19), !!(v))
++
++#define AVD_OP_WEIGHTS_HDR		FIELD_PREP(GENMASK(31, 20), 0x2dd)
++#define AVD_OP_WEIGHTS_HDR_CHROMA(v)	FIELD_PREP(GENMASK(2, 0), v)
++#define AVD_OP_WEIGHTS_HDR_LUMA(v)	FIELD_PREP(GENMASK(5, 3), v)
++#define AVD_OP_WEIGHTS_HDR_FLAG0(v)	FIELD_PREP(BIT(6), !!(v))
++#define AVD_OP_WEIGHTS_HDR_FLAG1(v)	FIELD_PREP(BIT(7), !!(v))
++
++#define AVD_OP_WEIGHTS			FIELD_PREP(GENMASK(31, 20), 0x2de)
++#define AVD_OP_WEIGHTS_WEIGHT(v)	FIELD_PREP(GENMASK(8, 0), v)
++#define AVD_OP_WEIGHTS_INDEX(v)		FIELD_PREP(GENMASK(12, 9), v)
++#define AVD_OP_WEIGHTS_LIST_IDX(v)	FIELD_PREP(BIT(13), v)
++#define AVD_OP_WEIGHTS_IDENT(v)		FIELD_PREP(GENMASK(16, 14), v)
++
++#define AVD_OP_OFFSETS			FIELD_PREP(GENMASK(31, 20), 0x2df)
++#define AVD_OP_OFFSETS_OFFSET(v)	FIELD_PREP(GENMASK(15, 0), v)
++
++#define AVD_OP_CODED_DATA		FIELD_PREP(GENMASK(31, 20), 0x2d8)
++#define AVD_OP_CODED_DATA_ADDR(v)	FIELD_PREP(GENMASK(12, 0), v)
++#define AVD_OP_CODED_DATA_BIT_OFF(v)	FIELD_PREP(GENMASK(18, 15), v)
++
++#define AVD_OP_SL_LOC			FIELD_PREP(GENMASK(31, 24), 0x2c)
++#define AVD_OP_SL_LOC_X(v)		FIELD_PREP(GENMASK(11, 0), v)
++#define AVD_OP_SL_LOC_Y(v)		FIELD_PREP(GENMASK(23, 12), v)
++
++#define AVD_OP_SL_DIM_START		FIELD_PREP(GENMASK(31, 24), 0x2a)
++#define AVD_OP_SL_DIM_START_X(v)	FIELD_PREP(GENMASK(11, 0), v)
++#define AVD_OP_SL_DIM_START_Y(v)	FIELD_PREP(GENMASK(23, 12), v)
++
++#define AVD_SL_DIM_END_X(v)		FIELD_PREP(GENMASK(11, 0), v)
++#define AVD_SL_DIM_END_Y(v)		FIELD_PREP(GENMASK(23, 12), v)
++#define AVD_SL_DIM_END_COL(v)		FIELD_PREP(GENMASK(27, 24), v)
++#define AVD_SL_DIM_END_ROW(v)		FIELD_PREP(GENMASK(31, 28), v)
++
++#define AVD_OP_SL_REF			FIELD_PREP(GENMASK(31, 24), 0x2d)
++#define AVD_OP_SL_REF_MAX_MERGE(v)	FIELD_PREP(GENMASK(3, 1), v)
++#define AVD_OP_SL_REF_FLAG0(v)		FIELD_PREP(BIT(4), !!(v))
++#define AVD_OP_SL_REF_FLAG_CABAC(v)	FIELD_PREP(BIT(5), !!(v))
++#define AVD_OP_SL_REF_FLAG1(v)		FIELD_PREP(BIT(6), !!(v))
++#define AVD_OP_SL_REF_NUM_L1(v)		FIELD_PREP(GENMASK(10, 7), v)
++#define AVD_OP_SL_REF_NUM_L0(v)		FIELD_PREP(GENMASK(15, 11), v)
++#define AVD_OP_SL_REF_FLAG2(v)		FIELD_PREP(BIT(15), !!(v))
++#define AVD_OP_SL_REF_SLICE_P(v)	FIELD_PREP(BIT(16), !!(v))
++#define AVD_OP_SL_REF_SLICE_I(v)	FIELD_PREP(BIT(17), !!(v))
++#define AVD_OP_SL_REF_SLICE_B(v)	FIELD_PREP(BIT(18), !!(v))
++
++#define AVD_OP_QP			FIELD_PREP(GENMASK(31, 20), 0x2d9)
++#define AVD_OP_QP_CR_OFF(v)		FIELD_PREP(GENMASK(4, 0), v)
++#define AVD_OP_QP_CB_OFF(v)		FIELD_PREP(GENMASK(9, 5), v)
++#define AVD_OP_QP_VAL(v)		FIELD_PREP(GENMASK(17, 10), v)
++
++#define AVD_OP_DBLK			FIELD_PREP(GENMASK(31, 20), 0x2da)
++#define AVD_OP_DBLK_FLAG_SAO_CHROMA(v)	FIELD_PREP(BIT(6), !!(v))
++#define AVD_OP_DBLK_FLAG_SAO_LUMA(v)	FIELD_PREP(BIT(7), !!(v))
++#define AVD_OP_DBLK_OFF0(v)		FIELD_PREP(GENMASK(11, 8), v)
++#define AVD_OP_DBLK_OFF1(v)		FIELD_PREP(GENMASK(16, 12), v)
++#define AVD_OP_DBLK_FLAG_EN(v)		FIELD_PREP(BIT(16), !!(v))
++#define AVD_OP_DBLK_FLAG_FULL_EN(v)	FIELD_PREP(BIT(17), !!(v))
++#define AVD_OP_DBLK_FLAG_TILES_EN(v)	FIELD_PREP(BIT(18), !!(v))
++#define AVD_OP_DBLK_FLAG_PCM_EN(v)	FIELD_PREP(BIT(19), !!(v))
++
++#define AVD_OP_REF			FIELD_PREP(GENMASK(31, 20), 0x2dc)
++#define AVD_OP_REF_DBP_IDX(v)		FIELD_PREP(GENMASK(3, 0), v)
++#define AVD_OP_REF_LOOP_IDX(v)		FIELD_PREP(GENMASK(7, 4), v)
++#define AVD_OP_REF_LIST_IDX(v)		FIELD_PREP(GENMASK(11, 8), v)
++
++#define AVD_HDR_CODEC_MODE(v)		FIELD_PREP(GENMASK(28, 24), v)
++#define AVD_HDR_WIDTH(v)		FIELD_PREP(GENMASK(15, 0), v)
++#define AVD_HDR_HEIGHT(v)		FIELD_PREP(GENMASK(31, 16), v)
++
++#define AVD_HDR_FEAT_H264		FIELD_PREP(GENMASK(3, 0), 10)
++#define AVD_HDR_FEAT_PIPE_STATE_EN	FIELD_PREP(GENMASK(7, 4), 3)
++#define AVD_HDR_FEAT_VP9		FIELD_PREP(BIT(17), 1)
++#define AVD_HDR_FEAT_H26X		FIELD_PREP(BIT(20), 1)
++#define AVD_HDR_FEAT_COMMON		FIELD_PREP(BIT(21), 1)
++
++#define AVD_HDR_COMMON_FLAG0(v)		FIELD_PREP(BIT(0), !!(v))
++#define AVD_HDR_COMMON_TR_INTRA(v)	FIELD_PREP(GENMASK(4, 1), v)
++#define AVD_HDR_COMMON_TR_INTER(v)	FIELD_PREP(GENMASK(7, 4), v)
++#define AVD_HDR_COMMON_LUMA_TBS(v)	FIELD_PREP(GENMASK(8, 7), v)
++#define AVD_HDR_COMMON_MIN_LUMA_TBS(v)	FIELD_PREP(GENMASK(10, 9), v)
++#define AVD_HDR_COMMON_LUMA_CBS(v)	FIELD_PREP(GENMASK(12, 11), v)
++#define AVD_HDR_COMMON_MIN_LUMA_CBS(v)	FIELD_PREP(GENMASK(14, 13), v)
++#define AVD_HDR_COMMON_BIT_DEPTH_L(v)	FIELD_PREP(GENMASK(18, 15), v)
++#define AVD_HDR_COMMON_BIT_DEPTH_C(v)	FIELD_PREP(GENMASK(23, 19), v)
++#define AVD_HDR_COMMON_CHROMA_FORMAT(v)	FIELD_PREP(GENMASK(26, 24), v)
++
++#define AVD_HDR_H26X_QP_OFFSET_CR(v)	FIELD_PREP(GENMASK(4, 0), v)
++#define AVD_HDR_H26X_QP_OFFSET_CB(v)	FIELD_PREP(GENMASK(9, 5), v)
++
++#define AVD_SCALING_I0(v)		FIELD_PREP(GENMASK(7, 0), v)
++#define AVD_SCALING_I1(v)		FIELD_PREP(GENMASK(15, 8), v)
++#define AVD_SCALING_I2(v)		FIELD_PREP(GENMASK(23, 16), v)
++#define AVD_SCALING_I3(v)		FIELD_PREP(GENMASK(31, 24), v)
++
++#define AVD_REF_NUM(v)			FIELD_PREP(GENMASK(31, 28), v)
++#define AVD_REF_FLAG_CONST		FIELD_PREP(BIT(24), 1)
++#define AVD_REF_FLAG_LONG(v)		FIELD_PREP(BIT(17), !!(v))
++#define AVD_REF_DELTA_POC(v)		FIELD_PREP(GENMASK(16, 0), v)
++
++static inline void push(struct avd_ctx *ctx, u32 inst)
++{
++	struct avd_job *job = &ctx->job;
++	struct avd_segment *seg = &job->segments[job->num];
++
++	if (seg->num >= AVD_MAX_INST) {
++		job->overflow = true;
++		return;
++	}
++	seg->instructions[seg->num++] = inst;
++}
++
++static inline void push_address(struct avd_ctx *ctx, dma_addr_t addr)
++{
++	push(ctx, addr >> 8);
++}
++
++/* The compressed planes are addressed in units of 128 bytes. */
++static inline void push_comp(struct avd_ctx *ctx, dma_addr_t addr,
++			     const struct avd_comp *comp)
++{
++	for (int i = 0; i < ARRAY_SIZE(comp->offsets); i++)
++		push(ctx, (addr + comp->offsets[i]) >> 7);
++}
++
++#endif /* AVD_INST_H_ */
+diff --git a/drivers/media/platform/apple/avd/avd-regs.h b/drivers/media/platform/apple/avd/avd-regs.h
+new file mode 100644
+index 000000000..e86fdb3ca
+--- /dev/null
++++ b/drivers/media/platform/apple/avd/avd-regs.h
+@@ -0,0 +1,29 @@
++/* SPDX-License-Identifier: MIT */
++/* AVD coprocessor mailbox registers, from the asahi avd driver and avd-fw. */
++
++#ifndef AVD_REGS_H_
++#define AVD_REGS_H_
++
++#include <linux/bits.h>
++
++#define AVD_REG_RUN_CTRL	0x08
++#define AVD_RUN_CTRL_RUN	BIT(0)
++#define AVD_RUN_CTRL_STOP	(BIT(1) | BIT(2) | BIT(3))
++
++#define AVD_REG_MBOX_IRQ_ENABLE	0x48
++#define AVD_REG_MBOX_IRQ_CLR	0x4c
++#define AVD_MBOX1_NOT_EMPTY	BIT(3)
++
++#define AVD_REG_MBOX1_STATUS	0x5c
++#define AVD_REG_MBOX1_RETRIEVE	0x64
++#define AVD_MBOX_ENABLE		BIT(0)
++
++#define AVD_REG_FLAG0_SET	0x90
++#define AVD_REG_FLAG0_CLR	0x98
++
++/* Messages avd-fw sends on mailbox 1 (avd-fw src/irq.c). */
++#define AVD_MSG_UNHANDLED	BIT(16)
++#define AVD_MSG_PP_DONE		BIT(12)
++#define AVD_MSG_VP_DONE		BIT(8)
++
++#endif /* AVD_REGS_H_ */
+diff --git a/drivers/media/platform/apple/avd/avd-v4l2.c b/drivers/media/platform/apple/avd/avd-v4l2.c
+new file mode 100644
+index 000000000..1dae2abdc
+--- /dev/null
++++ b/drivers/media/platform/apple/avd/avd-v4l2.c
+@@ -0,0 +1,714 @@
++// SPDX-License-Identifier: GPL-2.0
++/*
++ * Apple Video Decoder driver
++ *
++ * Copyright The Asahi Linux Contributors
++ *
++ * Based on rkvdec driver by Collabora, Ltd.
++ * Copyright (C) 2019 Collabora, Ltd.
++ * Based on rkvdec driver by Google LLC. (Tomasz Figa <tfiga@chromium.org>)
++ * Based on s5p-mfc driver by Samsung Electronics Co., Ltd.
++ * Copyright (C) 2011 Samsung Electronics Co., Ltd.
++ */
++
++#include <linux/log2.h>
++#include <linux/pm_runtime.h>
++#include <linux/sizes.h>
++
++#include <media/v4l2-event.h>
++#include <media/v4l2-mem2mem.h>
++#include <media/videobuf2-dma-contig.h>
++
++#include "avd.h"
++
++#define AVD_MIN_SIZE		64
++#define AVD_MAX_SIZE		4096
++
++/* The decoder writes 64-pixel-wide, 16-line-aligned pictures (asahi avd). */
++static const struct v4l2_frmsize_stepwise avd_capture_frmsize = {
++	.min_width = AVD_MIN_SIZE,
++	.max_width = AVD_MAX_SIZE,
++	.step_width = 64,
++	.min_height = AVD_MIN_SIZE,
++	.max_height = AVD_MAX_SIZE,
++	.step_height = 16,
++};
++
++static void avd_tile_meta(u32 w, u32 h, u32 bpp, u32 tile_dim, u32 meta_bytes,
++			  u32 *tile, u32 *meta)
++{
++	u32 tiles_w = DIV_ROUND_UP(w, tile_dim);
++	u32 tiles_h = DIV_ROUND_UP(h, tile_dim);
++
++	*tile = ALIGN(tiles_w * tiles_h * tile_dim * tile_dim *
++		      DIV_ROUND_UP(bpp, 8), 16);
++	*meta = ALIGN(roundup_pow_of_two(tiles_w) * roundup_pow_of_two(tiles_h) *
++		      meta_bytes, 16);
++}
++
++/* Compressed copy: 32x32 luma, 16x16 chroma tiles, 32/8 metadata bytes (asahi avd). */
++static void avd_fill_layout(struct avd_ctx *ctx, struct avd_layout *layout,
++			    const struct v4l2_pix_format_mplane *pix_mp)
++{
++	const struct avd_coded_fmt_ops *ops = ctx->coded_fmt_desc->ops;
++	u32 y, y_meta, uv, uv_meta;
++
++	avd_tile_meta(pix_mp->width, pix_mp->height, 8, 32, 32, &y, &y_meta);
++	avd_tile_meta(pix_mp->width / 2, pix_mp->height / 2, 16, 16, 8, &uv,
++		      &uv_meta);
++
++	layout->comp.offsets[0] = y;
++	layout->comp.offsets[1] = 0;
++	layout->comp.offsets[2] = y + y_meta + uv;
++	layout->comp.offsets[3] = y + y_meta;
++	layout->comp.size = y + y_meta + uv + uv_meta;
++
++	layout->comp_offset = ALIGN(pix_mp->plane_fmt[0].sizeimage, AVD_ALIGN);
++	layout->mv_offset = ALIGN(layout->comp_offset + layout->comp.size,
++				  AVD_ALIGN);
++	layout->size = layout->mv_offset +
++		       ops->mv_size(pix_mp->width, pix_mp->height);
++}
++
++static void avd_fill_decoded_pixfmt(struct avd_ctx *ctx,
++				    struct v4l2_pix_format_mplane *pix_mp,
++				    struct avd_layout *layout)
++{
++	const struct v4l2_pix_format_mplane *coded = &ctx->coded_fmt.fmt.pix_mp;
++
++	pix_mp->width = coded->width;
++	pix_mp->height = coded->height;
++	v4l2_apply_frmsize_constraints(&pix_mp->width, &pix_mp->height,
++				       &avd_capture_frmsize);
++	v4l2_fill_pixfmt_mp(pix_mp, V4L2_PIX_FMT_NV12, pix_mp->width,
++			    pix_mp->height);
++	avd_fill_layout(ctx, layout, pix_mp);
++	pix_mp->plane_fmt[0].sizeimage = layout->size;
++	pix_mp->field = V4L2_FIELD_NONE;
++	pix_mp->colorspace = coded->colorspace;
++	pix_mp->xfer_func = coded->xfer_func;
++	pix_mp->ycbcr_enc = coded->ycbcr_enc;
++	pix_mp->quantization = coded->quantization;
++}
++
++void avd_reset_decoded_fmt(struct avd_ctx *ctx)
++{
++	struct v4l2_format *f = &ctx->decoded_fmt;
++
++	memset(f, 0, sizeof(*f));
++	f->type = V4L2_BUF_TYPE_VIDEO_CAPTURE_MPLANE;
++	avd_fill_decoded_pixfmt(ctx, &f->fmt.pix_mp, &ctx->layout);
++}
++
++static const struct v4l2_ctrl_h264_sps avd_h264_default_sps = {
++	.chroma_format_idc = 1,
++	.flags = V4L2_H264_SPS_FLAG_FRAME_MBS_ONLY,
++};
++
++static const struct v4l2_ctrl_config avd_h264_ctrl_descs[] = {
++	{
++		.id = V4L2_CID_STATELESS_H264_DECODE_PARAMS,
++	},
++	{
++		.id = V4L2_CID_STATELESS_H264_SPS,
++		.p_def.p_const = &avd_h264_default_sps,
++	},
++	{
++		.id = V4L2_CID_STATELESS_H264_PPS,
++	},
++	{
++		.id = V4L2_CID_STATELESS_H264_SCALING_MATRIX,
++	},
++	{
++		.id = V4L2_CID_STATELESS_H264_PRED_WEIGHTS,
++	},
++	{
++		.id = V4L2_CID_STATELESS_H264_SLICE_PARAMS,
++	},
++	{
++		.id = V4L2_CID_STATELESS_H264_DECODE_MODE,
++		.min = V4L2_STATELESS_H264_DECODE_MODE_SLICE_BASED,
++		.max = V4L2_STATELESS_H264_DECODE_MODE_SLICE_BASED,
++		.def = V4L2_STATELESS_H264_DECODE_MODE_SLICE_BASED,
++	},
++	{
++		.id = V4L2_CID_STATELESS_H264_START_CODE,
++		.min = V4L2_STATELESS_H264_START_CODE_NONE,
++		.max = V4L2_STATELESS_H264_START_CODE_NONE,
++		.def = V4L2_STATELESS_H264_START_CODE_NONE,
++	},
++	{
++		.id = V4L2_CID_MPEG_VIDEO_H264_PROFILE,
++		.min = V4L2_MPEG_VIDEO_H264_PROFILE_BASELINE,
++		.max = V4L2_MPEG_VIDEO_H264_PROFILE_HIGH,
++		.menu_skip_mask = BIT(V4L2_MPEG_VIDEO_H264_PROFILE_EXTENDED),
++		.def = V4L2_MPEG_VIDEO_H264_PROFILE_MAIN,
++	},
++	{
++		.id = V4L2_CID_MPEG_VIDEO_H264_LEVEL,
++		.min = V4L2_MPEG_VIDEO_H264_LEVEL_1_0,
++		.max = V4L2_MPEG_VIDEO_H264_LEVEL_5_1,
++	},
++};
++
++static const struct avd_ctrls avd_h264_ctrls = {
++	.ctrls = avd_h264_ctrl_descs,
++	.num_ctrls = ARRAY_SIZE(avd_h264_ctrl_descs),
++};
++
++/* Level 5.1 area (36864 MBs, 8912896 samples) at 4096 wide; not a height limit. */
++static const struct avd_coded_fmt_desc avd_coded_fmts[] = {
++	{
++		.fourcc = V4L2_PIX_FMT_H264_SLICE,
++		.frmsize = {
++			.min_width = AVD_MIN_SIZE,
++			.max_width = AVD_MAX_SIZE,
++			.step_width = 1,
++			.min_height = AVD_MIN_SIZE,
++			.max_height = 2304,
++			.step_height = 1,
++		},
++		.ctrls = &avd_h264_ctrls,
++		.ops = &avd_h264_fmt_ops,
++		.frame_ctrl = V4L2_CID_STATELESS_H264_SLICE_PARAMS,
++		.subsystem_flags = VB2_V4L2_FL_SUPPORTS_M2M_HOLD_CAPTURE_BUF,
++		.capability = AVD_CAPABILITY_H264,
++	},
++};
++
++static bool avd_is_capable(struct avd_ctx *ctx, unsigned int capability)
++{
++	return (ctx->dev->capabilities & capability) == capability;
++}
++
++static int avd_try_ctrl(struct v4l2_ctrl *ctrl)
++{
++	struct avd_ctx *ctx = container_of(ctrl->handler, struct avd_ctx,
++					   ctrl_hdl);
++	int ret;
++
++	for (unsigned int i = 0; i < ARRAY_SIZE(avd_coded_fmts); i++) {
++		if (!avd_is_capable(ctx, avd_coded_fmts[i].capability))
++			continue;
++		ret = avd_coded_fmts[i].ops->try_ctrl(ctrl);
++		if (ret)
++			return ret;
++	}
++
++	return 0;
++}
++
++static const struct v4l2_ctrl_ops avd_ctrl_ops = {
++	.try_ctrl = avd_try_ctrl,
++};
++
++static const struct avd_coded_fmt_desc *
++avd_enum_coded_fmt_desc(struct avd_ctx *ctx, int index)
++{
++	int fmt_idx = -1;
++	unsigned int i;
++
++	for (i = 0; i < ARRAY_SIZE(avd_coded_fmts); i++) {
++		if (!avd_is_capable(ctx, avd_coded_fmts[i].capability))
++			continue;
++		fmt_idx++;
++		if (index == fmt_idx)
++			return &avd_coded_fmts[i];
++	}
++
++	return NULL;
++}
++
++static const struct avd_coded_fmt_desc *
++avd_find_coded_fmt_desc(struct avd_ctx *ctx, u32 fourcc)
++{
++	unsigned int i;
++
++	for (i = 0; i < ARRAY_SIZE(avd_coded_fmts); i++) {
++		if (avd_is_capable(ctx, avd_coded_fmts[i].capability) &&
++		    avd_coded_fmts[i].fourcc == fourcc)
++			return &avd_coded_fmts[i];
++	}
++
++	return NULL;
++}
++
++static u32 avd_coded_sizeimage(u32 width, u32 height)
++{
++	return max_t(u32, SZ_2M, width * height * 3 / 4);
++}
++
++void avd_reset_coded_fmt(struct avd_ctx *ctx)
++{
++	struct v4l2_format *f = &ctx->coded_fmt;
++
++	ctx->coded_fmt_desc = avd_enum_coded_fmt_desc(ctx, 0);
++
++	memset(f, 0, sizeof(*f));
++	f->type = V4L2_BUF_TYPE_VIDEO_OUTPUT_MPLANE;
++	f->fmt.pix_mp.pixelformat = ctx->coded_fmt_desc->fourcc;
++	f->fmt.pix_mp.field = V4L2_FIELD_NONE;
++	f->fmt.pix_mp.colorspace = V4L2_COLORSPACE_REC709;
++	f->fmt.pix_mp.width = ctx->coded_fmt_desc->frmsize.min_width;
++	f->fmt.pix_mp.height = ctx->coded_fmt_desc->frmsize.min_height;
++	f->fmt.pix_mp.num_planes = 1;
++	f->fmt.pix_mp.plane_fmt[0].sizeimage =
++		avd_coded_sizeimage(f->fmt.pix_mp.width, f->fmt.pix_mp.height);
++}
++
++static int avd_enum_framesizes(struct file *file, void *priv,
++			       struct v4l2_frmsizeenum *fsize)
++{
++	struct avd_ctx *ctx = file_to_ctx(file);
++	const struct avd_coded_fmt_desc *desc;
++
++	if (fsize->index != 0)
++		return -EINVAL;
++
++	desc = avd_find_coded_fmt_desc(ctx, fsize->pixel_format);
++	if (!desc)
++		return -EINVAL;
++
++	fsize->type = V4L2_FRMSIZE_TYPE_CONTINUOUS;
++	fsize->stepwise = desc->frmsize;
++
++	return 0;
++}
++
++static int avd_querycap(struct file *file, void *priv,
++			struct v4l2_capability *cap)
++{
++	strscpy(cap->driver, KBUILD_MODNAME, sizeof(cap->driver));
++	strscpy(cap->card, "Apple Video Decoder", sizeof(cap->card));
++
++	return 0;
++}
++
++static int avd_try_capture_fmt(struct file *file, void *priv,
++			       struct v4l2_format *f)
++{
++	struct avd_ctx *ctx = file_to_ctx(file);
++	struct avd_layout layout;
++
++	avd_fill_decoded_pixfmt(ctx, &f->fmt.pix_mp, &layout);
++
++	return 0;
++}
++
++static void avd_try_output_pixfmt(struct avd_ctx *ctx,
++				  struct v4l2_pix_format_mplane *pix_mp)
++{
++	const struct avd_coded_fmt_desc *desc;
++	u32 min_size;
++
++	desc = avd_find_coded_fmt_desc(ctx, pix_mp->pixelformat);
++	if (!desc) {
++		desc = avd_enum_coded_fmt_desc(ctx, 0);
++		pix_mp->pixelformat = desc->fourcc;
++	}
++
++	v4l2_apply_frmsize_constraints(&pix_mp->width, &pix_mp->height,
++				       &desc->frmsize);
++
++	pix_mp->field = V4L2_FIELD_NONE;
++	pix_mp->num_planes = 1;
++	pix_mp->plane_fmt[0].bytesperline = 0;
++	min_size = avd_coded_sizeimage(pix_mp->width, pix_mp->height);
++	pix_mp->plane_fmt[0].sizeimage = clamp_t(u32,
++						 pix_mp->plane_fmt[0].sizeimage,
++						 min_size, SZ_32M);
++}
++
++static int avd_try_output_fmt(struct file *file, void *priv,
++			      struct v4l2_format *f)
++{
++	avd_try_output_pixfmt(file_to_ctx(file), &f->fmt.pix_mp);
++	return 0;
++}
++
++static int avd_s_capture_fmt(struct file *file, void *priv,
++			     struct v4l2_format *f)
++{
++	struct avd_ctx *ctx = file_to_ctx(file);
++	struct avd_layout layout;
++	struct vb2_queue *vq;
++
++	vq = v4l2_m2m_get_vq(ctx->fh.m2m_ctx, V4L2_BUF_TYPE_VIDEO_CAPTURE_MPLANE);
++	if (vb2_is_busy(vq))
++		return -EBUSY;
++
++	avd_fill_decoded_pixfmt(ctx, &f->fmt.pix_mp, &layout);
++	ctx->decoded_fmt = *f;
++	ctx->layout = layout;
++
++	return 0;
++}
++
++static int avd_s_output_fmt(struct file *file, void *priv,
++			    struct v4l2_format *f)
++{
++	struct avd_ctx *ctx = file_to_ctx(file);
++	struct v4l2_m2m_ctx *m2m_ctx = ctx->fh.m2m_ctx;
++	struct v4l2_pix_format_mplane *pix_mp = &f->fmt.pix_mp;
++	struct vb2_queue *peer_vq, *vq;
++	bool busy;
++
++	vq = v4l2_m2m_get_vq(m2m_ctx, V4L2_BUF_TYPE_VIDEO_OUTPUT_MPLANE);
++	busy = vb2_is_busy(vq);
++	if (vb2_is_streaming(vq) ||
++	    (busy && pix_mp->pixelformat != ctx->coded_fmt.fmt.pix_mp.pixelformat))
++		return -EBUSY;
++
++	peer_vq = v4l2_m2m_get_vq(m2m_ctx, V4L2_BUF_TYPE_VIDEO_CAPTURE_MPLANE);
++	if (vb2_is_busy(peer_vq))
++		return -EBUSY;
++
++	avd_try_output_pixfmt(ctx, pix_mp);
++	if (busy)
++		pix_mp->plane_fmt[0].sizeimage =
++			ctx->coded_fmt.fmt.pix_mp.plane_fmt[0].sizeimage;
++
++	ctx->coded_fmt_desc = avd_find_coded_fmt_desc(ctx, pix_mp->pixelformat);
++	ctx->coded_fmt = *f;
++	avd_reset_decoded_fmt(ctx);
++
++	vq->subsystem_flags &= ~VB2_V4L2_FL_SUPPORTS_M2M_HOLD_CAPTURE_BUF;
++	vq->subsystem_flags |= ctx->coded_fmt_desc->subsystem_flags;
++
++	return 0;
++}
++
++static int avd_g_output_fmt(struct file *file, void *priv,
++			    struct v4l2_format *f)
++{
++	*f = file_to_ctx(file)->coded_fmt;
++	return 0;
++}
++
++static int avd_g_capture_fmt(struct file *file, void *priv,
++			     struct v4l2_format *f)
++{
++	*f = file_to_ctx(file)->decoded_fmt;
++	return 0;
++}
++
++static int avd_enum_output_fmt(struct file *file, void *priv,
++			       struct v4l2_fmtdesc *f)
++{
++	const struct avd_coded_fmt_desc *desc;
++
++	desc = avd_enum_coded_fmt_desc(file_to_ctx(file), f->index);
++	if (!desc)
++		return -EINVAL;
++
++	f->pixelformat = desc->fourcc;
++	return 0;
++}
++
++static int avd_enum_capture_fmt(struct file *file, void *priv,
++				struct v4l2_fmtdesc *f)
++{
++	if (f->index)
++		return -EINVAL;
++
++	f->pixelformat = V4L2_PIX_FMT_NV12;
++	return 0;
++}
++
++const struct v4l2_ioctl_ops avd_ioctl_ops = {
++	.vidioc_querycap = avd_querycap,
++	.vidioc_enum_framesizes = avd_enum_framesizes,
++
++	.vidioc_try_fmt_vid_cap_mplane = avd_try_capture_fmt,
++	.vidioc_try_fmt_vid_out_mplane = avd_try_output_fmt,
++	.vidioc_s_fmt_vid_out_mplane = avd_s_output_fmt,
++	.vidioc_s_fmt_vid_cap_mplane = avd_s_capture_fmt,
++	.vidioc_g_fmt_vid_out_mplane = avd_g_output_fmt,
++	.vidioc_g_fmt_vid_cap_mplane = avd_g_capture_fmt,
++	.vidioc_enum_fmt_vid_out = avd_enum_output_fmt,
++	.vidioc_enum_fmt_vid_cap = avd_enum_capture_fmt,
++
++	.vidioc_reqbufs = v4l2_m2m_ioctl_reqbufs,
++	.vidioc_querybuf = v4l2_m2m_ioctl_querybuf,
++	.vidioc_qbuf = v4l2_m2m_ioctl_qbuf,
++	.vidioc_dqbuf = v4l2_m2m_ioctl_dqbuf,
++	.vidioc_prepare_buf = v4l2_m2m_ioctl_prepare_buf,
++	.vidioc_create_bufs = v4l2_m2m_ioctl_create_bufs,
++	.vidioc_remove_bufs = v4l2_m2m_ioctl_remove_bufs,
++	.vidioc_expbuf = v4l2_m2m_ioctl_expbuf,
++
++	.vidioc_subscribe_event = v4l2_ctrl_subscribe_event,
++	.vidioc_unsubscribe_event = v4l2_event_unsubscribe,
++
++	.vidioc_streamon = v4l2_m2m_ioctl_streamon,
++	.vidioc_streamoff = v4l2_m2m_ioctl_streamoff,
++
++	.vidioc_decoder_cmd = v4l2_m2m_ioctl_stateless_decoder_cmd,
++	.vidioc_try_decoder_cmd = v4l2_m2m_ioctl_stateless_try_decoder_cmd,
++};
++
++static int avd_queue_setup(struct vb2_queue *vq, unsigned int *num_buffers,
++			   unsigned int *num_planes, unsigned int sizes[],
++			   struct device *alloc_devs[])
++{
++	struct avd_ctx *ctx = vb2_get_drv_priv(vq);
++	struct v4l2_format *f;
++
++	if (V4L2_TYPE_IS_OUTPUT(vq->type))
++		f = &ctx->coded_fmt;
++	else
++		f = &ctx->decoded_fmt;
++
++	if (*num_planes) {
++		if (*num_planes != 1 ||
++		    sizes[0] < f->fmt.pix_mp.plane_fmt[0].sizeimage)
++			return -EINVAL;
++		return 0;
++	}
++
++	*num_planes = 1;
++	sizes[0] = f->fmt.pix_mp.plane_fmt[0].sizeimage;
++
++	return 0;
++}
++
++static int avd_buf_prepare(struct vb2_buffer *vb)
++{
++	struct vb2_queue *vq = vb->vb2_queue;
++	struct avd_ctx *ctx = vb2_get_drv_priv(vq);
++	struct v4l2_format *f;
++	u32 sizeimage;
++
++	if (V4L2_TYPE_IS_OUTPUT(vq->type))
++		f = &ctx->coded_fmt;
++	else
++		f = &ctx->decoded_fmt;
++
++	sizeimage = f->fmt.pix_mp.plane_fmt[0].sizeimage;
++	if (vb2_plane_size(vb, 0) < sizeimage)
++		return -EINVAL;
++
++	if (V4L2_TYPE_IS_CAPTURE(vq->type))
++		vb2_set_plane_payload(vb, 0, sizeimage);
++
++	return 0;
++}
++
++static void avd_buf_queue(struct vb2_buffer *vb)
++{
++	struct avd_ctx *ctx = vb2_get_drv_priv(vb->vb2_queue);
++
++	v4l2_m2m_buf_queue(ctx->fh.m2m_ctx, to_vb2_v4l2_buffer(vb));
++}
++
++static int avd_buf_out_validate(struct vb2_buffer *vb)
++{
++	to_vb2_v4l2_buffer(vb)->field = V4L2_FIELD_NONE;
++	return 0;
++}
++
++static void avd_buf_request_complete(struct vb2_buffer *vb)
++{
++	struct avd_ctx *ctx = vb2_get_drv_priv(vb->vb2_queue);
++
++	v4l2_ctrl_request_complete(vb->req_obj.req, &ctx->ctrl_hdl);
++}
++
++static int avd_start_streaming(struct vb2_queue *q, unsigned int count)
++{
++	struct avd_ctx *ctx = vb2_get_drv_priv(q);
++	struct vb2_v4l2_buffer *vbuf;
++	int ret;
++
++	if (V4L2_TYPE_IS_CAPTURE(q->type))
++		return 0;
++
++	ret = ctx->coded_fmt_desc->ops->start(ctx);
++	if (!ret)
++		return 0;
++
++	while ((vbuf = v4l2_m2m_src_buf_remove(ctx->fh.m2m_ctx)))
++		v4l2_m2m_buf_done(vbuf, VB2_BUF_STATE_QUEUED);
++
++	return ret;
++}
++
++static void avd_stop_streaming(struct vb2_queue *q)
++{
++	struct avd_ctx *ctx = vb2_get_drv_priv(q);
++	struct vb2_v4l2_buffer *vbuf;
++
++	if (V4L2_TYPE_IS_OUTPUT(q->type)) {
++		ctx->coded_fmt_desc->ops->stop(ctx);
++		avd_job_free(ctx);
++	}
++
++	while (true) {
++		if (V4L2_TYPE_IS_OUTPUT(q->type))
++			vbuf = v4l2_m2m_src_buf_remove(ctx->fh.m2m_ctx);
++		else
++			vbuf = v4l2_m2m_dst_buf_remove(ctx->fh.m2m_ctx);
++		if (!vbuf)
++			break;
++
++		v4l2_ctrl_request_complete(vbuf->vb2_buf.req_obj.req,
++					   &ctx->ctrl_hdl);
++		v4l2_m2m_buf_done(vbuf, VB2_BUF_STATE_ERROR);
++	}
++}
++
++const struct vb2_ops avd_queue_ops = {
++	.queue_setup = avd_queue_setup,
++	.buf_prepare = avd_buf_prepare,
++	.buf_queue = avd_buf_queue,
++	.buf_out_validate = avd_buf_out_validate,
++	.buf_request_complete = avd_buf_request_complete,
++	.start_streaming = avd_start_streaming,
++	.stop_streaming = avd_stop_streaming,
++};
++
++void avd_job_finish_no_pm(struct avd_ctx *ctx, enum vb2_buffer_state result)
++{
++	struct vb2_v4l2_buffer *src = v4l2_m2m_next_src_buf(ctx->fh.m2m_ctx);
++	struct vb2_v4l2_buffer *dst = v4l2_m2m_next_dst_buf(ctx->fh.m2m_ctx);
++	bool held = src && (src->flags & V4L2_BUF_FLAG_M2M_HOLD_CAPTURE_BUF);
++
++	if (!held && ctx->ref_error)
++		result = VB2_BUF_STATE_ERROR;
++	if (dst)
++		vb2_to_avd_decoded_buf(&dst->vb2_buf)->error =
++			result != VB2_BUF_STATE_DONE;
++
++	ctx->coded_fmt_desc->ops->done(ctx, result);
++
++	if (src)
++		v4l2_ctrl_request_complete(src->vb2_buf.req_obj.req,
++					   &ctx->ctrl_hdl);
++
++	v4l2_m2m_buf_done_and_job_finish(ctx->dev->m2m_dev, ctx->fh.m2m_ctx,
++					 result);
++}
++
++void avd_job_finish(struct avd_ctx *ctx, enum vb2_buffer_state result)
++{
++	pm_runtime_put_autosuspend(ctx->dev->dev);
++	avd_job_finish_no_pm(ctx, result);
++}
++
++int avd_run_preamble(struct avd_ctx *ctx, struct avd_run *run)
++{
++	struct avd_decoded_buffer *dst;
++	struct media_request *src_req;
++	dma_addr_t base;
++	int ret;
++
++	memset(run, 0, sizeof(*run));
++
++	run->src = v4l2_m2m_next_src_buf(ctx->fh.m2m_ctx);
++	run->dst = v4l2_m2m_next_dst_buf(ctx->fh.m2m_ctx);
++
++	src_req = run->src->vb2_buf.req_obj.req;
++	if (src_req) {
++		ret = v4l2_ctrl_request_setup(src_req, &ctx->ctrl_hdl);
++		if (ret)
++			return ret;
++	}
++
++	run->coded_in = vb2_dma_contig_plane_dma_addr(&run->src->vb2_buf, 0);
++	base = vb2_dma_contig_plane_dma_addr(&run->dst->vb2_buf, 0);
++	run->y_out = base;
++	run->uv_out = base + ctx->decoded_fmt.fmt.pix_mp.plane_fmt[0].bytesperline *
++			     ctx->decoded_fmt.fmt.pix_mp.height;
++	run->comp_out = base + ctx->layout.comp_offset;
++	run->mv_out = base + ctx->layout.mv_offset;
++
++	dst = vb2_to_avd_decoded_buf(&run->dst->vb2_buf);
++	dst->layout = ctx->layout;
++
++	v4l2_m2m_buf_copy_metadata(run->src, run->dst);
++
++	return 0;
++}
++
++int avd_init_ctrls(struct avd_ctx *ctx)
++{
++	unsigned int i, j, nctrls = 0;
++	int ret;
++
++	for (i = 0; i < ARRAY_SIZE(avd_coded_fmts); i++)
++		if (avd_is_capable(ctx, avd_coded_fmts[i].capability))
++			nctrls += avd_coded_fmts[i].ctrls->num_ctrls;
++
++	v4l2_ctrl_handler_init(&ctx->ctrl_hdl, nctrls);
++
++	for (i = 0; i < ARRAY_SIZE(avd_coded_fmts); i++) {
++		const struct avd_ctrls *ctrls = avd_coded_fmts[i].ctrls;
++
++		if (!avd_is_capable(ctx, avd_coded_fmts[i].capability))
++			continue;
++
++		for (j = 0; j < ctrls->num_ctrls; j++) {
++			struct v4l2_ctrl_config cfg = ctrls->ctrls[j];
++
++			cfg.ops = &avd_ctrl_ops;
++			v4l2_ctrl_new_custom(&ctx->ctrl_hdl, &cfg, ctx);
++		}
++	}
++
++	ret = ctx->ctrl_hdl.error;
++	if (ret)
++		goto err_free_handler;
++
++	ret = v4l2_ctrl_handler_setup(&ctx->ctrl_hdl);
++	if (ret)
++		goto err_free_handler;
++
++	ctx->fh.ctrl_handler = &ctx->ctrl_hdl;
++	return 0;
++
++err_free_handler:
++	v4l2_ctrl_handler_free(&ctx->ctrl_hdl);
++	return ret;
++}
++
++int avd_request_validate(struct media_request *req)
++{
++	struct media_request_object *obj;
++	struct v4l2_ctrl_handler *hdl;
++	struct avd_ctx *ctx = NULL;
++	struct v4l2_ctrl *ctrl;
++	unsigned int count;
++
++	count = vb2_request_buffer_cnt(req);
++	if (!count)
++		return -ENOENT;
++	if (count > 1)
++		return -EINVAL;
++
++	list_for_each_entry(obj, &req->objects, list) {
++		if (vb2_request_object_is_buffer(obj)) {
++			struct vb2_buffer *vb = container_of(obj, struct vb2_buffer,
++							     req_obj);
++
++			ctx = vb2_get_drv_priv(vb->vb2_queue);
++			break;
++		}
++	}
++	if (!ctx)
++		return -ENOENT;
++
++	hdl = v4l2_ctrl_request_hdl_find(req, &ctx->ctrl_hdl);
++	if (!hdl)
++		return -ENOENT;
++	ctrl = v4l2_ctrl_request_hdl_ctrl_find(hdl, ctx->coded_fmt_desc->frame_ctrl);
++	v4l2_ctrl_request_hdl_put(hdl);
++	if (!ctrl)
++		return -ENOENT;
++
++	return vb2_request_validate(req);
++}
++
++void *avd_ctrl_ptr(struct avd_ctx *ctx, u32 id)
++{
++	return v4l2_ctrl_find(&ctx->ctrl_hdl, id)->p_cur.p;
++}
+diff --git a/drivers/media/platform/apple/avd/avd.h b/drivers/media/platform/apple/avd/avd.h
+new file mode 100644
+index 000000000..9908dc22c
+--- /dev/null
++++ b/drivers/media/platform/apple/avd/avd.h
+@@ -0,0 +1,238 @@
++/* SPDX-License-Identifier: GPL-2.0 */
++/*
++ * Apple Video Decoder driver
++ *
++ * Copyright The Asahi Linux Contributors
++ *
++ * Based on rkvdec driver by Collabora, Ltd.
++ * Copyright (C) 2019 Collabora, Ltd.
++ * Based on rkvdec driver by Google LLC. (Tomasz Figa <tfiga@chromium.org>)
++ * Based on s5p-mfc driver by Samsung Electronics Co., Ltd.
++ * Copyright (C) 2011 Samsung Electronics Co., Ltd.
++ */
++
++#ifndef AVD_H_
++#define AVD_H_
++
++#include <linux/firmware.h>
++#include <linux/platform_device.h>
++#include <linux/spinlock.h>
++#include <linux/workqueue.h>
++
++#include <media/v4l2-ctrls.h>
++#include <media/v4l2-device.h>
++#include <media/v4l2-ioctl.h>
++#include <media/v4l2-mem2mem.h>
++#include <media/videobuf2-v4l2.h>
++
++#define AVD_CAPABILITY_HEVC	BIT(0)
++#define AVD_CAPABILITY_H264	BIT(1)
++#define AVD_CAPABILITY_VP9	BIT(2)
++
++/* The decoder takes pixel buffer addresses shifted right by 8 (asahi avd). */
++#define AVD_ALIGN		256
++#define AVD_MAX_INST		512
++
++struct avd_ctx;
++struct avd_dev;
++
++/* Header mode in the instruction stream and VP slot order (asahi avd). */
++enum avd_codec {
++	AVD_CODEC_HEVC = 0,
++	AVD_CODEC_H264 = 1,
++	AVD_CODEC_VP9 = 2,
++	AVD_CODEC_NUM,
++};
++
++struct avd_run {
++	struct vb2_v4l2_buffer *src;
++	struct vb2_v4l2_buffer *dst;
++
++	dma_addr_t coded_in;
++	dma_addr_t y_out;
++	dma_addr_t uv_out;
++	dma_addr_t comp_out;
++	dma_addr_t mv_out;
++};
++
++struct avd_comp {
++	u32 size;
++	u32 offsets[4];
++};
++
++/* CAPTURE plane: NV12, then the compressed reference copy, then MVs. */
++struct avd_layout {
++	u32 comp_offset;
++	struct avd_comp comp;
++	u32 mv_offset;
++	u32 size;
++};
++
++struct avd_decoded_buffer {
++	/* Must be the first field in this struct. */
++	struct v4l2_m2m_buffer base;
++
++	struct avd_layout layout;
++	bool error;
++
++	union {
++		struct {
++			u16 width;
++			u16 height;
++		} vp9;
++		struct {
++			bool is_intra;
++		} hevc;
++	};
++};
++
++static inline struct avd_decoded_buffer *
++vb2_to_avd_decoded_buf(struct vb2_buffer *buf)
++{
++	return container_of(buf, struct avd_decoded_buffer, base.vb.vb2_buf);
++}
++
++struct avd_coded_fmt_ops {
++	u32 (*mv_size)(u32 width, u32 height);
++	int (*start)(struct avd_ctx *ctx);
++	void (*stop)(struct avd_ctx *ctx);
++	int (*run)(struct avd_ctx *ctx);
++	void (*submit)(struct avd_ctx *ctx);
++	void (*done)(struct avd_ctx *ctx, enum vb2_buffer_state result);
++	int (*try_ctrl)(struct v4l2_ctrl *ctrl);
++};
++
++struct avd_ctrls {
++	const struct v4l2_ctrl_config *ctrls;
++	unsigned int num_ctrls;
++};
++
++struct avd_coded_fmt_desc {
++	u32 fourcc;
++	struct v4l2_frmsize_stepwise frmsize;
++	const struct avd_ctrls *ctrls;
++	const struct avd_coded_fmt_ops *ops;
++	u32 frame_ctrl;
++	u32 subsystem_flags;
++	unsigned int capability;
++};
++
++struct avd_buf {
++	void *cpu;
++	dma_addr_t addr;
++	size_t size;
++};
++
++struct avd_variant {
++	unsigned int vp_slots[AVD_CODEC_NUM];
++	unsigned int fifo_slots;
++	unsigned int capabilities;
++	const char *fw_name;
++	u32 vp_slot_offset;
++	u32 submit_offset;
++	u32 submit_queue_max_offset;
++	u32 submit_queue_status_offset;
++};
++
++struct avd_dev {
++	struct device *dev;
++	struct v4l2_device v4l2_dev;
++	struct media_device mdev;
++	struct video_device vdev;
++	struct v4l2_m2m_dev *m2m_dev;
++
++	const struct firmware *fw;
++
++	void __iomem *code;
++	void __iomem *mbox;
++	void __iomem *ctrl;
++
++	int irq;
++	struct avd_buf insn_fifo;
++
++	/* Serialises the ioctls and the queues of all contexts. */
++	struct mutex vdev_lock;
++	/* Serialises programming a job against restarting the decoder. */
++	struct mutex hw_lock;
++
++	/* The job in flight, owned by whoever clears job_ctx under job_lock. */
++	spinlock_t job_lock;
++	struct avd_ctx *job_ctx;
++	unsigned long job_start;
++	struct delayed_work watchdog;
++	struct work_struct recover_work;
++	struct avd_ctx *recover_ctx;
++
++	const struct avd_variant *variant;
++	unsigned int capabilities;
++};
++
++struct avd_segment {
++	unsigned int num;
++	u32 instructions[AVD_MAX_INST];
++};
++
++/* Segment 0 is the frame header; every further segment is a slice or tile. */
++struct avd_job {
++	unsigned int num;
++	unsigned int alloc;
++	bool overflow;
++	struct avd_segment *segments;
++};
++
++struct avd_ctx {
++	struct v4l2_fh fh;
++	struct avd_dev *dev;
++
++	struct v4l2_format coded_fmt;
++	struct v4l2_format decoded_fmt;
++
++	const struct avd_coded_fmt_desc *coded_fmt_desc;
++	struct v4l2_ctrl_handler ctrl_hdl;
++
++	void *priv;
++
++	struct avd_layout layout;
++	struct avd_job job;
++	bool ref_error;
++};
++
++static inline struct avd_ctx *file_to_ctx(struct file *filp)
++{
++	return container_of(file_to_v4l2_fh(filp), struct avd_ctx, fh);
++}
++
++struct avd_decoded_buffer *avd_get_ref_buf(struct avd_ctx *ctx,
++					   struct avd_run *run, u64 timestamp);
++dma_addr_t avd_buf_addr(struct avd_decoded_buffer *buf);
++int avd_request_validate(struct media_request *req);
++void *avd_ctrl_ptr(struct avd_ctx *ctx, u32 id);
++
++int avd_job_begin(struct avd_ctx *ctx, unsigned int segments);
++int avd_job_next(struct avd_ctx *ctx);
++void avd_job_free(struct avd_ctx *ctx);
++int avd_submit_job(struct avd_ctx *ctx, enum avd_codec codec);
++void avd_submit_pp(struct avd_ctx *ctx, unsigned int count);
++
++int avd_buf_alloc(struct avd_dev *avd, struct avd_buf *buf, size_t size);
++void avd_buf_free(struct avd_dev *avd, struct avd_buf *buf);
++
++void avd_reset_coded_fmt(struct avd_ctx *ctx);
++void avd_reset_decoded_fmt(struct avd_ctx *ctx);
++int avd_init_ctrls(struct avd_ctx *ctx);
++
++void avd_job_finish_no_pm(struct avd_ctx *ctx, enum vb2_buffer_state result);
++void avd_job_finish(struct avd_ctx *ctx, enum vb2_buffer_state result);
++
++int avd_run_preamble(struct avd_ctx *ctx, struct avd_run *run);
++
++extern const struct avd_coded_fmt_ops avd_h264_fmt_ops;
++
++extern const struct v4l2_ioctl_ops avd_ioctl_ops;
++extern const struct vb2_ops avd_queue_ops;
++
++int avd_boot(struct avd_dev *avd);
++void avd_shutdown(struct avd_dev *avd);
++void avd_configure_stream(struct avd_dev *avd, dma_addr_t addr, u32 vp_slot);
++
++#endif /* AVD_H_ */

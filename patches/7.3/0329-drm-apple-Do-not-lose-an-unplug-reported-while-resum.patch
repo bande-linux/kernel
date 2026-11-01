@@ -1,0 +1,89 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: Mikael Hug <mikaelhug@gmail.com>
+Date: Sat, 31 Oct 2026 02:59:37 +0000
+Subject: [PATCH] drm: apple: Do not lose an unplug reported while resuming
+
+dcpep_cb_hotplug() decides under hotplug_lock that a report is ignored
+because the DCP is suspended, but marks the mode invalid and the
+hotplug work pending only after dropping the lock. dcp_hpd_resume()
+clears suspended under the lock and reads hotplug_pending after
+dropping it. If the resume runs between the two, it sees no pending
+work, and the report then leaves the mode invalid with nothing to send
+a hotplug event or set the link status: the display stays black until
+it is replugged. Commit e735f09411dd ("drm: apple: Invalidate the mode
+on an unplug reported while suspended") describes j473 reporting such
+an unplug right around the end of resume.
+
+Mark the mode invalid and the work pending inside the locked section,
+and have dcp_hpd_resume() read hotplug_pending in the section that
+clears suspended. A report is then either ignored and seen by the
+resume, or handled normally.
+
+Fixes: e735f09411dd ("drm: apple: Invalidate the mode on an unplug reported while suspended")
+Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>
+Claude-Session: https://claude.ai/code/session_01UqitcmCNS6G33aQUShi39x
+---
+ drivers/gpu/drm/apple/dcp.c            |  8 +++++++-
+ drivers/gpu/drm/apple/iomfb_template.c | 11 ++++++-----
+ 2 files changed, 13 insertions(+), 6 deletions(-)
+
+diff --git a/drivers/gpu/drm/apple/dcp.c b/drivers/gpu/drm/apple/dcp.c
+index a69cfc8..3d74ec6 100644
+--- a/drivers/gpu/drm/apple/dcp.c
++++ b/drivers/gpu/drm/apple/dcp.c
+@@ -836,18 +836,24 @@ void dcp_hpd_suspend(struct platform_device *pdev)
+ void dcp_hpd_resume(struct platform_device *pdev)
+ {
+ 	struct apple_dcp *dcp = platform_get_drvdata(pdev);
++	bool pending;
+ 
+ 	mutex_lock(&dcp->power_mutex);
+ 	WRITE_ONCE(dcp->stopping, false);
+ 	mutex_unlock(&dcp->power_mutex);
++	/*
++	 * A report ignored while suspended sets hotplug_pending under the
++	 * same lock, so it is either seen here or not ignored at all.
++	 */
+ 	spin_lock(&dcp->hotplug_lock);
+ 	dcp->suspended = false;
++	pending = dcp->hotplug_pending;
+ 	spin_unlock(&dcp->hotplug_lock);
+ 	if (dcp->hdmi_hpd_irq)
+ 		enable_irq(dcp->hdmi_hpd_irq);
+ 	if (dcp->hdmi_hpd)
+ 		schedule_work(&dcp->hpd_resume_wq);
+-	if (dcp->connector && READ_ONCE(dcp->hotplug_pending))
++	if (dcp->connector && pending)
+ 		schedule_work(&dcp->connector->hotplug_wq);
+ }
+ 
+diff --git a/drivers/gpu/drm/apple/iomfb_template.c b/drivers/gpu/drm/apple/iomfb_template.c
+index faca88a..81601d8 100644
+--- a/drivers/gpu/drm/apple/iomfb_template.c
++++ b/drivers/gpu/drm/apple/iomfb_template.c
+@@ -1101,19 +1101,20 @@ static void dcpep_cb_hotplug(struct apple_dcp *dcp, u64 *connected)
+ 	spin_lock(&dcp->hotplug_lock);
+ 	ignored = dcp->suspended;
+ 	deferred = !ignored && dcp->during_modeset;
+-	if (ignored && !*connected)
++	if (ignored && !*connected) {
+ 		dcp->hotplug_seq++;
++		dcp->valid_mode = false;
++		/* seen by dcp_hpd_resume() once it clears suspended */
++		WRITE_ONCE(dcp->hotplug_pending, true);
++	}
+ 	if (deferred) {
+ 		dcp->hotplug_deferred = true;
+ 		dcp->hotplug_deferred_connected = !!*connected;
+ 	}
+ 	spin_unlock(&dcp->hotplug_lock);
+ 
+-	if (ignored && !*connected) {
+-		dcp->valid_mode = false;
+-		WRITE_ONCE(dcp->hotplug_pending, true);
++	if (ignored && !*connected)
+ 		schedule_work(&dcp->vblank_wq);
+-	}
+ 
+ 	if (!deferred && !ignored)
+ 		dcp_apply_hotplug(dcp, !!*connected);

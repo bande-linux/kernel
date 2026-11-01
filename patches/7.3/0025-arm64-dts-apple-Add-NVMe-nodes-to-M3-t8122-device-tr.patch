@@ -1,4 +1,4 @@
-From f386e716480415ca2e5a87df5a7306609e07e0d4 Mon Sep 17 00:00:00 2001
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
 From: Michael Reeves <michael.reeves077@gmail.com>
 Date: Fri, 30 Jan 2026 21:52:08 +1100
 Subject: [PATCH] arm64: dts: apple: Add NVMe nodes to M3 (t8122) device tree
@@ -19,7 +19,7 @@ Signed-off-by: Michael Reeves <michael.reeves077@gmail.com>
  1 file changed, 39 insertions(+)
 
 diff --git a/arch/arm64/boot/dts/apple/t8122.dtsi b/arch/arm64/boot/dts/apple/t8122.dtsi
-index 648fcd518e01..9d029b0c167e 100644
+index 648fcd5..9d029b0 100644
 --- a/arch/arm64/boot/dts/apple/t8122.dtsi
 +++ b/arch/arm64/boot/dts/apple/t8122.dtsi
 @@ -465,6 +465,45 @@ pinctrl_aop: pinctrl@2f4824000 {
@@ -68,6 +68,3 @@ index 648fcd518e01..9d029b0c167e 100644
  	};
  };
  
--- 
-2.47.3
-

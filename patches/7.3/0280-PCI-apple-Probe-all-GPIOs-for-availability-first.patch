@@ -1,0 +1,64 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: Hector Martin <marcan@marcan.st>
+Date: Sun, 6 Feb 2022 21:15:39 +0900
+Subject: [PATCH] PCI: apple: Probe all GPIOs for availability first
+
+If we're probing the PCI controller and some GPIOs are not available and
+cause a probe defer, we can end up leaving some ports initialized and
+not others and making a mess.
+
+Check for PERST# GPIOs for all ports first, and just return
+-EPROBE_DEFER if any are not ready yet, without bringing anything up.
+
+Fixes: 1e33888fbe44 ("PCI: apple: Add initial hardware bring-up")
+Cc: stable@vger.kernel.org
+Acked-by: Marc Zyngier <maz@kernel.org>
+Signed-off-by: Hector Martin <marcan@marcan.st>
+Signed-off-by: Janne Grunau <j@jannau.net>
+(cherry picked from commit 0763bab64b0cda5844748afc67a5dd8669bca07f)
+---
+ drivers/pci/controller/pcie-apple.c | 24 ++++++++++++++++++++++++
+ 1 file changed, 24 insertions(+)
+
+diff --git a/drivers/pci/controller/pcie-apple.c b/drivers/pci/controller/pcie-apple.c
+index c2cffc0..bdf975f 100644
+--- a/drivers/pci/controller/pcie-apple.c
++++ b/drivers/pci/controller/pcie-apple.c
+@@ -847,13 +847,37 @@ static const struct pci_ecam_ops apple_pcie_cfg_ecam_ops = {
+ 	}
+ };
+ 
++static int apple_pcie_probe_port(struct device_node *np)
++{
++	struct gpio_desc *gd;
++
++	/* check whether the GPPIO pin exists but leave it as is */
++	gd = fwnode_gpiod_get_index(of_fwnode_handle(np), "reset", 0,
++				    GPIOD_ASIS, "PERST#");
++	if (IS_ERR(gd))
++		return PTR_ERR(gd);
++
++	gpiod_put(gd);
++	return 0;
++}
++
+ static int apple_pcie_probe(struct platform_device *pdev)
+ {
+ 	struct device *dev = &pdev->dev;
+ 	struct pci_host_bridge *bridge;
++	struct device_node *of_port;
+ 	struct apple_pcie *pcie;
+ 	int ret;
+ 
++	/* Check for probe dependencies for all ports first */
++	for_each_available_child_of_node(dev->of_node, of_port) {
++		ret = apple_pcie_probe_port(of_port);
++		if (ret) {
++			of_node_put(of_port);
++			return dev_err_probe(dev, ret, "Port %pOF probe fail\n", of_port);
++		}
++	}
++
+ 	bridge = devm_pci_alloc_host_bridge(dev, sizeof(*pcie));
+ 	if (!bridge)
+ 		return -ENOMEM;

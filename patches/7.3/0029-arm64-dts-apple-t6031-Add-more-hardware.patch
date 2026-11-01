@@ -1,4 +1,4 @@
-From d38760814e08b7351a0d8a1140dbab450522cdcb Mon Sep 17 00:00:00 2001
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
 From: Janne Grunau <j@jannau.net>
 Date: Thu, 21 May 2026 23:02:37 +0200
 Subject: [PATCH] arm64: dts: apple: t6031: Add more hardware
@@ -13,7 +13,7 @@ Signed-off-by: Janne Grunau <j@jannau.net>
  2 files changed, 106 insertions(+)
 
 diff --git a/arch/arm64/boot/dts/apple/t6031-die0.dtsi b/arch/arm64/boot/dts/apple/t6031-die0.dtsi
-index cffab6b51d12..c5571851ac07 100644
+index cffab6b..c557185 100644
 --- a/arch/arm64/boot/dts/apple/t6031-die0.dtsi
 +++ b/arch/arm64/boot/dts/apple/t6031-die0.dtsi
 @@ -26,6 +26,110 @@ wdt: watchdog@2a02d4000 {
@@ -128,7 +128,7 @@ index cffab6b51d12..c5571851ac07 100644
  		compatible = "apple,t6031-pinctrl", "apple,t8103-pinctrl";
  		reg = <0x2 0xa4820000 0x0 0x4000>;
 diff --git a/arch/arm64/boot/dts/apple/t6031.dtsi b/arch/arm64/boot/dts/apple/t6031.dtsi
-index 2ba0768c33bc..6102fc2165c0 100644
+index 2ba0768..6102fc2 100644
 --- a/arch/arm64/boot/dts/apple/t6031.dtsi
 +++ b/arch/arm64/boot/dts/apple/t6031.dtsi
 @@ -5,9 +5,11 @@
@@ -143,6 +143,3 @@ index 2ba0768c33bc..6102fc2165c0 100644
  
  #include "multi-die-cpp.h"
  
--- 
-2.47.3
-

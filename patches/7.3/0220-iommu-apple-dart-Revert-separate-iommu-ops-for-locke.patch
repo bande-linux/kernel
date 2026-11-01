@@ -1,4 +1,4 @@
-From 3ee58cbf7269a9073bcc3614effea05d55c69697 Mon Sep 17 00:00:00 2001
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
 From: Janne Grunau <j@jannau.net>
 Date: Wed, 9 Apr 2025 18:24:13 +0200
 Subject: [PATCH] iommu: apple-dart: Revert separate iommu_ops for
@@ -15,7 +15,7 @@ Signed-off-by: Janne Grunau <j@jannau.net>
  1 file changed, 20 insertions(+), 42 deletions(-)
 
 diff --git a/drivers/iommu/apple-dart.c b/drivers/iommu/apple-dart.c
-index 7dff75c574cc..cd87184d95f4 100644
+index 7dff75c..cd87184 100644
 --- a/drivers/iommu/apple-dart.c
 +++ b/drivers/iommu/apple-dart.c
 @@ -1212,15 +1212,12 @@ static int apple_dart_def_domain_type(struct device *dev)
@@ -109,6 +109,3 @@ index 7dff75c574cc..cd87184d95f4 100644
  	if (ret)
  		goto err_sysfs_remove;
  
--- 
-2.47.3
-

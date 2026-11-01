@@ -1,4 +1,4 @@
-From 912e4d51da3e4d6a26e032ada5ba7cb549ee06ed Mon Sep 17 00:00:00 2001
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
 From: Janne Grunau <j@jannau.net>
 Date: Thu, 4 Jun 2026 13:01:23 +0200
 Subject: [PATCH] arm64: dts: apple: t8122: Add "capacity-dmips-mhz" properties
@@ -27,7 +27,7 @@ Signed-off-by: Janne Grunau <j@jannau.net>
  1 file changed, 8 insertions(+)
 
 diff --git a/arch/arm64/boot/dts/apple/t8122.dtsi b/arch/arm64/boot/dts/apple/t8122.dtsi
-index 2c2e1594071c..1452711f64ad 100644
+index 2c2e159..1452711 100644
 --- a/arch/arm64/boot/dts/apple/t8122.dtsi
 +++ b/arch/arm64/boot/dts/apple/t8122.dtsi
 @@ -66,6 +66,7 @@ cpu_e0: cpu@0 {
@@ -94,6 +94,3 @@ index 2c2e1594071c..1452711f64ad 100644
  			performance-domains = <&cpufreq_p>;
  		};
  
--- 
-2.47.3
-

@@ -1,4 +1,4 @@
-From 18b801b8d1d39f8c76176b131b0e380d291f0469 Mon Sep 17 00:00:00 2001
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
 From: Janne Grunau <j@jannau.net>
 Date: Sun, 23 Aug 2026 20:35:44 +0200
 Subject: [PATCH] WIP: arm64: dts: apple: Add broken usb4 aliases m1n1 compat
@@ -20,7 +20,7 @@ Signed-off-by: Janne Grunau <j@jannau.net>
  9 files changed, 65 insertions(+)
 
 diff --git a/arch/arm64/boot/dts/apple/t6002-j375d.dts b/arch/arm64/boot/dts/apple/t6002-j375d.dts
-index a7354189c960..885744417f0a 100644
+index a735418..8857444 100644
 --- a/arch/arm64/boot/dts/apple/t6002-j375d.dts
 +++ b/arch/arm64/boot/dts/apple/t6002-j375d.dts
 @@ -22,6 +22,11 @@ aliases {
@@ -36,7 +36,7 @@ index a7354189c960..885744417f0a 100644
  };
  
 diff --git a/arch/arm64/boot/dts/apple/t600x-j314-j316.dtsi b/arch/arm64/boot/dts/apple/t600x-j314-j316.dtsi
-index 47fabac2ce5a..028f44690097 100644
+index 47fabac..028f446 100644
 --- a/arch/arm64/boot/dts/apple/t600x-j314-j316.dtsi
 +++ b/arch/arm64/boot/dts/apple/t600x-j314-j316.dtsi
 @@ -34,6 +34,13 @@ aliases {
@@ -54,7 +54,7 @@ index 47fabac2ce5a..028f44690097 100644
  
  	chosen {
 diff --git a/arch/arm64/boot/dts/apple/t600x-j375.dtsi b/arch/arm64/boot/dts/apple/t600x-j375.dtsi
-index 3910e2e48468..2cdd2e2fb510 100644
+index 3910e2e..2cdd2e2 100644
 --- a/arch/arm64/boot/dts/apple/t600x-j375.dtsi
 +++ b/arch/arm64/boot/dts/apple/t600x-j375.dtsi
 @@ -36,6 +36,15 @@ aliases {
@@ -74,7 +74,7 @@ index 3910e2e48468..2cdd2e2fb510 100644
  
  	chosen {
 diff --git a/arch/arm64/boot/dts/apple/t6022-j180d.dts b/arch/arm64/boot/dts/apple/t6022-j180d.dts
-index 9843bf9b8ece..cbfa09273c41 100644
+index 9843bf9..cbfa092 100644
 --- a/arch/arm64/boot/dts/apple/t6022-j180d.dts
 +++ b/arch/arm64/boot/dts/apple/t6022-j180d.dts
 @@ -50,6 +50,23 @@ aliases {
@@ -102,7 +102,7 @@ index 9843bf9b8ece..cbfa09273c41 100644
  
  	chosen {
 diff --git a/arch/arm64/boot/dts/apple/t6022-j475d.dts b/arch/arm64/boot/dts/apple/t6022-j475d.dts
-index 2d1848791080..6c09afcffc9a 100644
+index 2d18487..6c09afc 100644
 --- a/arch/arm64/boot/dts/apple/t6022-j475d.dts
 +++ b/arch/arm64/boot/dts/apple/t6022-j475d.dts
 @@ -29,6 +29,11 @@ aliases {
@@ -118,7 +118,7 @@ index 2d1848791080..6c09afcffc9a 100644
  };
  
 diff --git a/arch/arm64/boot/dts/apple/t603x-j514-j516.dtsi b/arch/arm64/boot/dts/apple/t603x-j514-j516.dtsi
-index b47e3327680b..74fd80bc5af7 100644
+index b47e332..74fd80b 100644
 --- a/arch/arm64/boot/dts/apple/t603x-j514-j516.dtsi
 +++ b/arch/arm64/boot/dts/apple/t603x-j514-j516.dtsi
 @@ -34,6 +34,13 @@ aliases {
@@ -136,7 +136,7 @@ index b47e3327680b..74fd80bc5af7 100644
  
  	chosen {
 diff --git a/arch/arm64/boot/dts/apple/t8103-jxxx.dtsi b/arch/arm64/boot/dts/apple/t8103-jxxx.dtsi
-index 7b968da19383..a3dc78c24b3c 100644
+index 7b968da..a3dc78c 100644
 --- a/arch/arm64/boot/dts/apple/t8103-jxxx.dtsi
 +++ b/arch/arm64/boot/dts/apple/t8103-jxxx.dtsi
 @@ -25,6 +25,11 @@ aliases {
@@ -152,7 +152,7 @@ index 7b968da19383..a3dc78c24b3c 100644
  
  	chosen {
 diff --git a/arch/arm64/boot/dts/apple/t8112-jxxx.dtsi b/arch/arm64/boot/dts/apple/t8112-jxxx.dtsi
-index 1f46f2069503..54e423ae5b5f 100644
+index 1f46f20..54e423a 100644
 --- a/arch/arm64/boot/dts/apple/t8112-jxxx.dtsi
 +++ b/arch/arm64/boot/dts/apple/t8112-jxxx.dtsi
 @@ -23,6 +23,11 @@ aliases {
@@ -168,7 +168,7 @@ index 1f46f2069503..54e423ae5b5f 100644
  
  	chosen {
 diff --git a/arch/arm64/boot/dts/apple/t8122-jxxx.dtsi b/arch/arm64/boot/dts/apple/t8122-jxxx.dtsi
-index 6c67f340b2fb..375a5ec3944c 100644
+index 6c67f34..375a5ec 100644
 --- a/arch/arm64/boot/dts/apple/t8122-jxxx.dtsi
 +++ b/arch/arm64/boot/dts/apple/t8122-jxxx.dtsi
 @@ -21,6 +21,11 @@ aliases {
@@ -183,6 +183,3 @@ index 6c67f340b2fb..375a5ec3944c 100644
  	};
  
  	chosen {
--- 
-2.47.3
-

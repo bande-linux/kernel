@@ -1,4 +1,4 @@
-From 57962f990cc4cba9fc8586920d88a8cbfa1fe08d Mon Sep 17 00:00:00 2001
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
 From: Hector Martin <marcan@marcan.st>
 Date: Tue, 25 Apr 2023 01:40:11 +0900
 Subject: [PATCH] soc: apple: apple-pmgr-pwrstate: Mark on-at-boot PDs as
@@ -19,7 +19,7 @@ Signed-off-by: Hector Martin <marcan@marcan.st>
  1 file changed, 1 insertion(+), 1 deletion(-)
 
 diff --git a/drivers/pmdomain/apple/pmgr-pwrstate.c b/drivers/pmdomain/apple/pmgr-pwrstate.c
-index c7fb7252b1a5..a92db8cf88bb 100644
+index c7fb725..a92db8c 100644
 --- a/drivers/pmdomain/apple/pmgr-pwrstate.c
 +++ b/drivers/pmdomain/apple/pmgr-pwrstate.c
 @@ -289,7 +289,7 @@ static int apple_pmgr_ps_probe(struct platform_device *pdev)
@@ -31,6 +31,3 @@ index c7fb7252b1a5..a92db8cf88bb 100644
  	}
  
  	/* Turn on auto-PM if the domain is already on */
--- 
-2.47.3
-

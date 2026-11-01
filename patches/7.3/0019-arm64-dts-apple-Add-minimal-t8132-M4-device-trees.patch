@@ -1,4 +1,4 @@
-From dfa4b757110d324979d0881f7bba60eb08636b20 Mon Sep 17 00:00:00 2001
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
 From: Yureka Lilian <yureka@cyberchaos.dev>
 Date: Tue, 11 Aug 2026 21:37:02 +0200
 Subject: [PATCH] arm64: dts: apple: Add minimal t8132 (M4) device trees
@@ -43,7 +43,7 @@ Signed-off-by: Sven Peter <sven@kernel.org>
  10 files changed, 1817 insertions(+)
 
 diff --git a/arch/arm64/boot/dts/apple/Makefile b/arch/arm64/boot/dts/apple/Makefile
-index 9fea43f760ec..62999574a36b 100644
+index 9fea43f..6299957 100644
 --- a/arch/arm64/boot/dts/apple/Makefile
 +++ b/arch/arm64/boot/dts/apple/Makefile
 @@ -103,3 +103,9 @@ dtb-$(CONFIG_ARCH_APPLE) += t8122-j434.dtb
@@ -58,7 +58,7 @@ index 9fea43f760ec..62999574a36b 100644
 +dtb-$(CONFIG_ARCH_APPLE) += t8132-j773g.dtb
 diff --git a/arch/arm64/boot/dts/apple/t8132-j604.dts b/arch/arm64/boot/dts/apple/t8132-j604.dts
 new file mode 100644
-index 000000000000..c4be915cb33a
+index 0000000..c4be915
 --- /dev/null
 +++ b/arch/arm64/boot/dts/apple/t8132-j604.dts
 @@ -0,0 +1,35 @@
@@ -99,7 +99,7 @@ index 000000000000..c4be915cb33a
 +};
 diff --git a/arch/arm64/boot/dts/apple/t8132-j623.dts b/arch/arm64/boot/dts/apple/t8132-j623.dts
 new file mode 100644
-index 000000000000..508e26056022
+index 0000000..508e260
 --- /dev/null
 +++ b/arch/arm64/boot/dts/apple/t8132-j623.dts
 @@ -0,0 +1,18 @@
@@ -123,7 +123,7 @@ index 000000000000..508e26056022
 +};
 diff --git a/arch/arm64/boot/dts/apple/t8132-j624.dts b/arch/arm64/boot/dts/apple/t8132-j624.dts
 new file mode 100644
-index 000000000000..84bdd8e343eb
+index 0000000..84bdd8e
 --- /dev/null
 +++ b/arch/arm64/boot/dts/apple/t8132-j624.dts
 @@ -0,0 +1,18 @@
@@ -147,7 +147,7 @@ index 000000000000..84bdd8e343eb
 +};
 diff --git a/arch/arm64/boot/dts/apple/t8132-j713.dts b/arch/arm64/boot/dts/apple/t8132-j713.dts
 new file mode 100644
-index 000000000000..e1fc5d47f487
+index 0000000..e1fc5d4
 --- /dev/null
 +++ b/arch/arm64/boot/dts/apple/t8132-j713.dts
 @@ -0,0 +1,35 @@
@@ -188,7 +188,7 @@ index 000000000000..e1fc5d47f487
 +};
 diff --git a/arch/arm64/boot/dts/apple/t8132-j715.dts b/arch/arm64/boot/dts/apple/t8132-j715.dts
 new file mode 100644
-index 000000000000..2672914ea76c
+index 0000000..2672914
 --- /dev/null
 +++ b/arch/arm64/boot/dts/apple/t8132-j715.dts
 @@ -0,0 +1,35 @@
@@ -229,7 +229,7 @@ index 000000000000..2672914ea76c
 +};
 diff --git a/arch/arm64/boot/dts/apple/t8132-j773g.dts b/arch/arm64/boot/dts/apple/t8132-j773g.dts
 new file mode 100644
-index 000000000000..0583cb9d19f6
+index 0000000..0583cb9
 --- /dev/null
 +++ b/arch/arm64/boot/dts/apple/t8132-j773g.dts
 @@ -0,0 +1,25 @@
@@ -260,7 +260,7 @@ index 000000000000..0583cb9d19f6
 +};
 diff --git a/arch/arm64/boot/dts/apple/t8132-jxxx.dtsi b/arch/arm64/boot/dts/apple/t8132-jxxx.dtsi
 new file mode 100644
-index 000000000000..9882ea3f85e6
+index 0000000..9882ea3
 --- /dev/null
 +++ b/arch/arm64/boot/dts/apple/t8132-jxxx.dtsi
 @@ -0,0 +1,48 @@
@@ -314,7 +314,7 @@ index 000000000000..9882ea3f85e6
 +};
 diff --git a/arch/arm64/boot/dts/apple/t8132-pmgr.dtsi b/arch/arm64/boot/dts/apple/t8132-pmgr.dtsi
 new file mode 100644
-index 000000000000..6fbf09e8f981
+index 0000000..6fbf09e
 --- /dev/null
 +++ b/arch/arm64/boot/dts/apple/t8132-pmgr.dtsi
 @@ -0,0 +1,1130 @@
@@ -1450,7 +1450,7 @@ index 000000000000..6fbf09e8f981
 +};
 diff --git a/arch/arm64/boot/dts/apple/t8132.dtsi b/arch/arm64/boot/dts/apple/t8132.dtsi
 new file mode 100644
-index 000000000000..afec92a06015
+index 0000000..afec92a
 --- /dev/null
 +++ b/arch/arm64/boot/dts/apple/t8132.dtsi
 @@ -0,0 +1,467 @@
@@ -1921,6 +1921,3 @@ index 000000000000..afec92a06015
 +};
 +
 +#include "t8132-pmgr.dtsi"
--- 
-2.47.3
-
