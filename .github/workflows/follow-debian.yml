@@ -1,4 +1,5 @@
 name: follow-debian
+run-name: "${{ github.event_name == 'schedule' && 'Hourly: follow the Debian testing kernel' || (inputs.debian_version != '' && format('Test build of Debian linux {0}', inputs.debian_version) || 'Build the Debian testing kernel') }}"
 
 on:
   schedule:
