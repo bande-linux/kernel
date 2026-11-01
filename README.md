@@ -11,7 +11,7 @@ system, and the Bande archive publishes it to the `apple` component.
 |---|---|
 | `patches/<series>/` | our patches for one upstream series (`7.3`) with their `series`, applied after Debian's own, and `apple.config`, the options that need them |
 | `config/apple.config` | the options added to Debian's `arm64-16k` config on every series |
-| `debian/bande-os-apple/` | the `bande-os-apple` metapackage: `bande-os`, the Apple kernel, and an apt pin that keeps Debian's own kernels off the Mac |
+| `debian/bande-os-apple/` | the `bande-os-apple` metapackage: `bande-desktop`, the Apple kernel, and an apt pin that keeps Debian's own kernels off the Mac |
 | `scripts/` | the build, run the same way by CI and on the mini |
 
 ## What gets built
