@@ -68,8 +68,8 @@ commits, then exported back. On the mini (any Debian machine works; no root need
 
 ```
 # Debian's source, from a build directory (see Building on the mini) or apt-get source:
-scripts/local-build.sh 7.3~rc7-1~exp1 /var/tmp/bande-kernel chroot fetch
-scripts/dev-tree.sh /var/tmp/bande-kernel/work/linux-7.3~rc7 ~/src/kernel-7.3
+scripts/local-build.sh 7.3.1-1~exp1 /var/tmp/bande-kernel chroot fetch
+scripts/dev-tree.sh /var/tmp/bande-kernel/work/linux-7.3.1 ~/src/kernel-7.3
 cd ~/src/kernel-7.3
 # change a commit (git rebase -i, git commit --fixup + autosquash, git am a new patch, ...)
 cd -
@@ -104,9 +104,9 @@ On the mini, take the shared build lock and the memory cap:
 ```
 cd ~/bande-linux/repos/kernel
 flock ~/bande-linux/kbuild.lock ~/bande-linux/bin/gentle \
-    scripts/local-build.sh 7.3~rc7-1~exp1 /var/tmp/bande-kernel
+    scripts/local-build.sh 7.3.1-1~exp1 /var/tmp/bande-kernel
 ls /var/tmp/bande-kernel/out        # the debs
-scripts/local-build.sh 7.3~rc7-1~exp1 /var/tmp/bande-kernel clean
+scripts/local-build.sh 7.3.1-1~exp1 /var/tmp/bande-kernel clean
 ```
 
 The directory must be outside your home (`/var/tmp`), because the chroot belongs to your
@@ -117,8 +117,8 @@ the mini's own. Clean up after a build.
 
 ### Until Debian testing has 7.3
 
-Our patches are for 7.3; testing has 7.2 and experimental 7.3~rc7, so CI builds nothing.
-Until then, test kernels for the mini are local builds of experimental's 7.3~rc7 with our 7.3
+Our patches are for 7.3; testing has 7.2 and experimental 7.3.1, so CI builds nothing.
+Until then, test kernels for the mini are local builds of experimental's 7.3.1 with our 7.3
 series, built as above and installed by hand (never published). Once testing reaches 7.3,
 `follow-debian.yml` builds and publishes it by itself, and the mini follows the archive.
 
