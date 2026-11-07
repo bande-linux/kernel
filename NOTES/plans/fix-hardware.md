@@ -21,7 +21,7 @@ This matches Asahi (firmware controls the fans; issue 472, closed) and a macOS t
 
 Protection also exists independently of the fan: cpu-thermal throttles at 105 °C and powers off at 110 °C, polled every 2 s. So Bande writes no fan policy. The `fan_control` parameter stays off: overriding firmware could only remove its protection, and it would be our guess at Apple's curve.
 
-Not measured: combined CPU and GPU load. The macOS test shows GPU load ramps harder, so this is the one owner check left. `gpu-thermal` read a constant 4.607 °C for about two minutes during the soak while the individual GPU sensors stayed plausible at other times. It only feeds a 110 °C critical trip, so a low reading cannot cause a shutdown, but it can hide a hot GPU from that trip.
+Closed by the owner on this evidence. CPU and GPU load together was not measured and will not be. `gpu-thermal` read a constant 4.607 °C for about two minutes during the soak; left as it is.
 
 ## Boot
 
