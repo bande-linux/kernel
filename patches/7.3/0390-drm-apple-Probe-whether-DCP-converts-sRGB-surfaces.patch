@@ -1,0 +1,45 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: Mikael Hug <mikaelhug@gmail.com>
+Date: Sat, 7 Nov 2026 19:00:00 +0100
+Subject: [PATCH] drm: apple: Probe whether DCP converts sRGB surfaces
+
+RGB surfaces are tagged DCP_COLORSPACE_NATIVE, so on a wide-gamut external
+display sRGB content is shown unconverted. Add a writable module parameter,
+off by default, that tags them DCP_COLORSPACE_BG_SRGB instead, to find out on
+real hardware whether the firmware then converts to the display's primaries.
+It takes effect at the next swap; writing 0 restores the current behaviour.
+
+Test only, not for mainline.
+---
+ drivers/gpu/drm/apple/plane.c | 9 ++++++++-
+ 1 file changed, 8 insertions(+), 1 deletion(-)
+
+--- a/drivers/gpu/drm/apple/plane.c
++++ b/drivers/gpu/drm/apple/plane.c
+@@ -19,8 +19,14 @@
+ #include <drm/drm_plane.h>
+ 
+ #include <linux/math.h>
++#include <linux/moduleparam.h>
+ #include <linux/types.h>
+ 
++static bool srgb_surfaces;
++module_param(srgb_surfaces, bool, 0644);
++MODULE_PARM_DESC(srgb_surfaces,
++		 "Probe: tag RGB surfaces as sRGB so DCP may convert them to the display's colours");
++
+ #define APPLE_GPU_CACHELINE	16
+ #define FRAC_16_16(mult, div)    (((mult) << 16) / (div))
+ 
+@@ -293,7 +299,8 @@
+ 					  enum drm_color_encoding enc)
+ {
+ 	if (!is_yuv)
+-		return DCP_COLORSPACE_NATIVE;
++		return READ_ONCE(srgb_surfaces) ? DCP_COLORSPACE_BG_SRGB :
++						  DCP_COLORSPACE_NATIVE;
+ 
+ 	switch (enc) {
+ 	case DRM_COLOR_YCBCR_BT601:
+-- 
+2.47.3

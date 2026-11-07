@@ -331,3 +331,4 @@
 0331-Merge-remote-tracking-branch-origin-prep-hw-audio-sa.patch
 0332-soc-apple-mailbox-Keep-the-send-empty-IRQ-enable-bal.patch
 0333-drm-apple-av-Refuse-audio-service-calls-after-the-se.patch
+0390-drm-apple-Probe-whether-DCP-converts-sRGB-surfaces.patch
