@@ -99,19 +99,18 @@ publishing it; `scripts/local-build.sh` is the same locally.
 
 `scripts/local-build.sh <debian version> <dir> [step...]` runs CI's steps in a Debian testing
 chroot. It needs no root and no containers: `mmdebstrap --mode=unshare` and a user namespace.
-On the mini, take the shared build lock and the memory cap:
+`kernel-build` runs it through the build queue, on a free build machine and never the mini, and
+copies the debs back:
 
 ```
-cd ~/bande-linux/repos/kernel
-flock ~/bande-linux/kbuild.lock ~/bande-linux/bin/gentle \
-    scripts/local-build.sh 7.3~rc7-1~exp1 /var/tmp/bande-kernel
+kernel-build 7.3~rc7-1~exp1
 ls /var/tmp/bande-kernel/out        # the debs
-scripts/local-build.sh 7.3~rc7-1~exp1 /var/tmp/bande-kernel clean
+kernel-build 7.3~rc7-1~exp1 clean
 ```
 
 The directory must be outside your home (`/var/tmp`), because the chroot belongs to your
 subordinate uids. A build needs about 35 GB: the chroot with its build dependencies, Debian's
-source and the build tree with debug info (32 GB). It takes about 2.5 h on the mini under `gentle`. The
+source and the build tree with debug info (32 GB). It takes about 2.5 h on the mini. The
 compiler is the one Debian's source names (`gcc-16` for 7.3), installed in the chroot, not
 the mini's own. Clean up after a build.
 
