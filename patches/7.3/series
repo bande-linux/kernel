@@ -332,3 +332,4 @@
 0332-soc-apple-mailbox-Keep-the-send-empty-IRQ-enable-bal.patch
 0333-drm-apple-av-Refuse-audio-service-calls-after-the-se.patch
 0334-PCI-Keep-Apple-silicon-root-ports-in-D0.patch
+0335-video-logo-Add-the-Bande-mark.patch
