@@ -30,7 +30,7 @@ compile)
     apt-get build-dep -y -qq --build-profiles="${profiles// /,}" . > /dev/null
     start=$SECONDS
     DEB_BUILD_PROFILES="$profiles" DEB_BUILD_OPTIONS="parallel=$(nproc) nocheck" \
-        make -f debian/rules.gen binary-arch_arm64_none_apple-arm64-16k
+        make -j"$(nproc)" -f debian/rules.gen binary-arch_arm64_none_apple-arm64-16k
     echo "build: $(( (SECONDS - start) / 60 )) min"
     mkdir -p "$out"
     for deb in "$work"/linux-*-apple-*_"$version"_arm64.deb; do
