@@ -1,0 +1,380 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: Mikael Hug <mikaelhug@gmail.com>
+Date: Sat, 7 Nov 2026 11:42:57 +0100
+Subject: [PATCH] drm: apple: audio: Report a lost link as an xrun and recover
+ in prepare
+
+A stream stopped with SNDRV_PCM_STATE_DISCONNECTED can only be recovered by
+reopening the device, and the open_cookie gate kept refusing prepare. So a
+display power cycle left PipeWire's node stalled. This fits the hang Asahi
+gave as the reason to turn the driver off by default, not yet confirmed.
+
+Stop with an xrun, which every ALSA client recovers from with prepare, and let
+prepare read the sink's elements again and select the mode for the stored
+hw_params when the connection changed. It returns -ENXIO while disconnected.
+
+Also:
+- ALSA calls the stop trigger after a failed start, so track whether the link
+  runs instead of pairing runtime PM by command; a start refused while
+  disconnected dropped a reference it never took.
+- Initialise the format sieve's rates. They were uninitialised stack and could
+  select a mode at a rate the stream does not use.
+- Cap periods to the SIO descriptor pool; larger buffers failed with -ENOMEM.
+- Suspend running streams on system sleep. Without SNDRV_PCM_INFO_RESUME,
+  clients recover with prepare after resume.
+- Drop the DEBUG define that logged each hw_params.
+---
+ drivers/gpu/drm/apple/audio.c | 199 +++++++++++++++++++++++-----------
+ 1 file changed, 133 insertions(+), 66 deletions(-)
+
+diff --git a/drivers/gpu/drm/apple/audio.c b/drivers/gpu/drm/apple/audio.c
+index 909930b63383..6837749b71d3 100644
+--- a/drivers/gpu/drm/apple/audio.c
++++ b/drivers/gpu/drm/apple/audio.c
+@@ -9,8 +9,6 @@
+  *    there's many DCP instances)
+  */
+ 
+-#define DEBUG
+-
+ #include <linux/component.h>
+ #include <linux/debugfs.h>
+ #include <linux/device.h>
+@@ -32,6 +30,8 @@
+ 
+ #define DCPAUD_ELEMENTS_MAXSIZE		16384
+ #define DCPAUD_PRODUCTATTRS_MAXSIZE	1024
++/* Half of the SIO descriptor pool, so a re-prepare can run while the old ring is released. */
++#define DCPAUD_PERIODS_MAX		32
+ 
+ struct dcp_audio {
+ 	struct device *dev;
+@@ -42,7 +42,6 @@ struct dcp_audio {
+ 	struct snd_card *card;
+ 	struct snd_jack *jack;
+ 	struct snd_pcm_substream *substream;
+-	unsigned int open_cookie;
+ 
+ 	struct mutex report_lock;
+ 	struct mutex data_lock;
+@@ -52,6 +51,11 @@ struct dcp_audio {
+ 
+ 	struct snd_pcm_chmap_elem selected_chmap;
+ 	struct dcp_sound_cookie selected_cookie;
++	struct dcp_sound_format_mask selected_sieve;
++	/* connection_cookie that elements and selected_cookie were read for */
++	unsigned int selected_connection;
++	bool prepared;
++	bool link_running;
+ 	void *elements;
+ 	void *productattrs;
+ 
+@@ -116,6 +120,7 @@ static void dcpaud_fill_fmt_sieve(struct snd_pcm_hw_params *params,
+ 				SNDRV_PCM_HW_PARAM_FORMAT);
+ 	int i;
+ 
++	sieve->rates = 0;
+ 	sieve->nchans = GENMASK(c->max, c->min);
+ 	sieve->formats = f->bits[0] | ((u64) f->bits[1]) << 32; /* TODO: don't open-code */
+ 
+@@ -145,10 +150,8 @@ static void dcpaud_consult_elements(struct dcp_audio *dcpaud,
+ 	dev_dbg(dcpaud->dev, "elements out: %llx %x %x\n", hits->formats, hits->nchans, hits->rates);
+ }
+ 
+-static int dcpaud_select_cookie(struct dcp_audio *dcpaud,
+-				 struct snd_pcm_hw_params *params)
++static int dcpaud_select_mode(struct dcp_audio *dcpaud)
+ {
+-	struct dcp_sound_format_mask sieve;
+ 	struct dcp_parse_ctx elements = {
+ 		.dcp = dev_get_drvdata(dcpaud->dcp_dev),
+ 		.blob = dcpaud->elements + 4,
+@@ -156,8 +159,8 @@ static int dcpaud_select_cookie(struct dcp_audio *dcpaud,
+ 		.pos = 0,
+ 	};
+ 
+-	dcpaud_fill_fmt_sieve(params, &sieve);
+-	return parse_sound_mode(&elements, &sieve, &dcpaud->selected_chmap,
++	return parse_sound_mode(&elements, &dcpaud->selected_sieve,
++				&dcpaud->selected_chmap,
+ 				&dcpaud->selected_cookie);
+ }
+ 
+@@ -259,7 +262,7 @@ static int dcp_pcm_open(struct snd_pcm_substream *substream)
+ 		mutex_unlock(&dcpaud->data_lock);
+ 		return -ENXIO;
+ 	}
+-	dcpaud->open_cookie = dcpaud->connection_cookie;
++	dcpaud->selected_connection = dcpaud->connection_cookie;
+ 	mutex_unlock(&dcpaud->data_lock);
+ 
+ 	ret = dcpaud_read_remote_info(dcpaud);
+@@ -280,7 +283,7 @@ static int dcp_pcm_open(struct snd_pcm_substream *substream)
+ 	hw.info = SNDRV_PCM_INFO_MMAP | SNDRV_PCM_INFO_MMAP_VALID |
+ 			  SNDRV_PCM_INFO_INTERLEAVED;
+ 	hw.periods_min = 2;
+-	hw.periods_max = UINT_MAX;
++	hw.periods_max = DCPAUD_PERIODS_MAX;
+ 	hw.period_bytes_min = 256;
+ 	hw.period_bytes_max = SIZE_MAX; // TODO dma_get_max_seg_size(dma_dev);
+ 	hw.buffer_bytes_max = SIZE_MAX;
+@@ -302,14 +305,36 @@ static int dcp_pcm_close(struct snd_pcm_substream *substream)
+ 	return snd_dmaengine_pcm_close(substream);
+ }
+ 
+-static int dcpaud_connection_up(struct dcp_audio *dcpaud)
++static bool dcpaud_connection(struct dcp_audio *dcpaud, unsigned int *cookie)
+ {
+-	bool ret;
++	bool connected;
++
+ 	mutex_lock(&dcpaud->data_lock);
+-	ret = dcpaud->connected &&
+-	      dcpaud->open_cookie == dcpaud->connection_cookie;
++	connected = dcpaud->connected;
++	*cookie = dcpaud->connection_cookie;
+ 	mutex_unlock(&dcpaud->data_lock);
+-	return ret;
++	return connected;
++}
++
++static int dcpaud_refresh_elements(struct dcp_audio *dcpaud, bool *changed)
++{
++	unsigned int cookie;
++	int ret;
++
++	*changed = false;
++	if (!dcpaud_connection(dcpaud, &cookie))
++		return -ENXIO;
++	if (cookie == dcpaud->selected_connection)
++		return 0;
++
++	ret = dcpaud_read_remote_info(dcpaud);
++	if (ret < 0)
++		return ret;
++
++	dcpaud->selected_connection = cookie;
++	dcpaud->prepared = false;
++	*changed = true;
++	return 0;
+ }
+ 
+ static int dcp_pcm_hw_params(struct snd_pcm_substream *substream,
+@@ -318,12 +343,15 @@ static int dcp_pcm_hw_params(struct snd_pcm_substream *substream,
+ 	struct dcp_audio *dcpaud = substream->pcm->private_data;
+ 	struct dma_slave_config slave_config;
+ 	struct dma_chan *chan = snd_dmaengine_pcm_get_chan(substream);
++	bool changed;
+ 	int ret;
+ 
+-	if (!dcpaud_connection_up(dcpaud))
+-		return -ENXIO;
++	ret = dcpaud_refresh_elements(dcpaud, &changed);
++	if (ret < 0)
++		return ret;
+ 
+-	ret = dcpaud_select_cookie(dcpaud, params);
++	dcpaud_fill_fmt_sieve(params, &dcpaud->selected_sieve);
++	ret = dcpaud_select_mode(dcpaud);
+ 	if (ret < 0)
+ 		return ret;
+ 	if (!ret)
+@@ -350,8 +378,14 @@ static int dcp_pcm_hw_params(struct snd_pcm_substream *substream,
+ static int dcp_pcm_hw_free(struct snd_pcm_substream *substream)
+ {
+ 	struct dcp_audio *dcpaud = substream->pcm->private_data;
++	unsigned int cookie;
++	bool connected = dcpaud_connection(dcpaud, &cookie);
++
++	if (!dcpaud->prepared)
++		return 0;
+ 
+-	if (!dcpaud_connection_up(dcpaud))
++	dcpaud->prepared = false;
++	if (!connected || cookie != dcpaud->selected_connection)
+ 		return 0;
+ 
+ 	return dcp_audiosrv_unprepare(dcpaud->dcp_dev);
+@@ -360,60 +394,89 @@ static int dcp_pcm_hw_free(struct snd_pcm_substream *substream)
+ static int dcp_pcm_prepare(struct snd_pcm_substream *substream)
+ {
+ 	struct dcp_audio *dcpaud = substream->pcm->private_data;
++	bool changed;
++	int ret;
+ 
+-	if (!dcpaud_connection_up(dcpaud))
+-		return -ENXIO;
++	ret = dcpaud_refresh_elements(dcpaud, &changed);
++	if (ret < 0)
++		return ret;
++
++	if (changed) {
++		ret = dcpaud_select_mode(dcpaud);
++		if (ret < 0)
++			return ret;
++		if (!ret)
++			return -EINVAL;
++	}
++
++	ret = dcp_audiosrv_prepare(dcpaud->dcp_dev, &dcpaud->selected_cookie);
++	if (ret < 0)
++		return ret;
+ 
+-	return dcp_audiosrv_prepare(dcpaud->dcp_dev,
+-				    &dcpaud->selected_cookie);
++	dcpaud->prepared = true;
++	return 0;
+ }
+ 
+-static int dcp_pcm_trigger(struct snd_pcm_substream *substream, int cmd)
++static int dcp_pcm_start(struct snd_pcm_substream *substream, int cmd)
+ {
+ 	struct dcp_audio *dcpaud = substream->pcm->private_data;
++	unsigned int cookie;
+ 	int ret;
+ 
+-	switch (cmd) {
+-	case SNDRV_PCM_TRIGGER_START:
+-	case SNDRV_PCM_TRIGGER_RESUME:
+-		if (!dcpaud_connection_up(dcpaud))
+-			return -ENXIO;
++	if (!dcpaud_connection(dcpaud, &cookie) ||
++	    cookie != dcpaud->selected_connection)
++		return -ENXIO;
+ 
+-		WARN_ON(pm_runtime_get_sync(dcpaud->dev) < 0);
+-		ret = dcp_audiosrv_startlink(dcpaud->dcp_dev,
+-					     &dcpaud->selected_cookie);
+-		if (ret < 0)
+-			return ret;
+-		break;
++	ret = pm_runtime_resume_and_get(dcpaud->dev);
++	if (ret < 0)
++		return ret;
++	dcpaud->link_running = true;
+ 
+-	case SNDRV_PCM_TRIGGER_STOP:
+-	case SNDRV_PCM_TRIGGER_SUSPEND:
+-		break;
++	ret = dcp_audiosrv_startlink(dcpaud->dcp_dev, &dcpaud->selected_cookie);
++	if (ret < 0)
++		return ret;
+ 
+-	default:
+-		return -EINVAL;
++	return snd_dmaengine_pcm_trigger(substream, cmd);
++}
++
++/*
++ * ALSA also stops a stream whose start failed, so this has to cope with a link
++ * that never started. The DCP may have torn the service down before this runs,
++ * which leaves nothing to stop.
++ */
++static int dcp_pcm_stop(struct snd_pcm_substream *substream, int cmd)
++{
++	struct dcp_audio *dcpaud = substream->pcm->private_data;
++	int dma_ret, ret = 0;
++
++	dma_ret = snd_dmaengine_pcm_trigger(substream, cmd);
++
++	if (dcpaud->link_running) {
++		dcpaud->link_running = false;
++		ret = dcp_audiosrv_stoplink(dcpaud->dcp_dev);
++		pm_runtime_mark_last_busy(dcpaud->dev);
++		__pm_runtime_put_autosuspend(dcpaud->dev);
++		if (ret == -ENODEV)
++			ret = 0;
+ 	}
+ 
+-	ret = snd_dmaengine_pcm_trigger(substream, cmd);
+-	if (ret < 0)
+-		return ret;
++	return dma_ret < 0 ? dma_ret : ret;
++}
+ 
++static int dcp_pcm_trigger(struct snd_pcm_substream *substream, int cmd)
++{
+ 	switch (cmd) {
+ 	case SNDRV_PCM_TRIGGER_START:
+ 	case SNDRV_PCM_TRIGGER_RESUME:
+-		break;
++		return dcp_pcm_start(substream, cmd);
+ 
+ 	case SNDRV_PCM_TRIGGER_STOP:
+ 	case SNDRV_PCM_TRIGGER_SUSPEND:
+-		ret = dcp_audiosrv_stoplink(dcpaud->dcp_dev);
+-		pm_runtime_mark_last_busy(dcpaud->dev);
+-		__pm_runtime_put_autosuspend(dcpaud->dev);
+-		if (ret < 0)
+-			return ret;
+-		break;
+-	}
++		return dcp_pcm_stop(substream, cmd);
+ 
+-	return 0;
++	default:
++		return -EINVAL;
++	}
+ }
+ 
+ struct snd_pcm_ops dcp_playback_ops = {
+@@ -489,8 +552,6 @@ static int dcpaud_create_pcm(struct dcp_audio *dcpaud)
+ /* expects to be called with data_lock locked and unlocks it */
+ static void dcpaud_report_hotplug(struct dcp_audio *dcpaud, bool connected)
+ {
+-	struct snd_pcm_substream *substream = dcpaud->substream;
+-
+ 	if (!dcpaud->card || dcpaud->connected == connected) {
+ 		mutex_unlock(&dcpaud->data_lock);
+ 		return;
+@@ -503,12 +564,8 @@ static void dcpaud_report_hotplug(struct dcp_audio *dcpaud, bool connected)
+ 
+ 	snd_jack_report(dcpaud->jack, connected ? SND_JACK_AVOUT : 0);
+ 
+-	if (!connected) {
+-		snd_pcm_stream_lock(substream);
+-		if (substream->runtime)
+-			snd_pcm_stop(substream, SNDRV_PCM_STATE_DISCONNECTED);
+-		snd_pcm_stream_unlock(substream);
+-	}
++	if (!connected)
++		snd_pcm_stop_xrun(dcpaud->substream);
+ }
+ 
+ static int dcpaud_create_jack(struct dcp_audio *dcpaud)
+@@ -741,11 +798,6 @@ static void dcpaud_shutdown(struct platform_device *pdev)
+ 
+ static __maybe_unused int dcpaud_suspend(struct device *dev)
+ {
+-	/*
+-	 * Using snd_power_change_state() does not work since the sound card
+-	 * is what resumes runtime PM.
+-	 */
+-
+ 	return 0;
+ }
+ 
+@@ -754,7 +806,22 @@ static __maybe_unused int dcpaud_resume(struct device *dev)
+ 	return 0;
+ }
+ 
+-static DEFINE_RUNTIME_DEV_PM_OPS(dcpaud_pm_ops, dcpaud_suspend, dcpaud_resume, NULL);
++static __maybe_unused int dcpaud_system_suspend(struct device *dev)
++{
++	struct dcp_audio *dcpaud = dev_get_drvdata(dev);
++
++	mutex_lock(&dcpaud->report_lock);
++	if (dcpaud->card)
++		snd_pcm_suspend_all(dcpaud->substream->pcm);
++	mutex_unlock(&dcpaud->report_lock);
++
++	return pm_runtime_force_suspend(dev);
++}
++
++static const struct dev_pm_ops dcpaud_pm_ops = {
++	SYSTEM_SLEEP_PM_OPS(dcpaud_system_suspend, pm_runtime_force_resume)
++	RUNTIME_PM_OPS(dcpaud_suspend, dcpaud_resume, NULL)
++};
+ 
+ static const struct of_device_id dcpaud_of_match[] = {
+ 	{ .compatible = "apple,dpaudio" },

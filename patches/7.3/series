@@ -334,3 +334,11 @@
 0334-PCI-Keep-Apple-silicon-root-ports-in-D0.patch
 0335-video-logo-Add-the-Bande-mark.patch
 0336-fbcon-Draw-the-logo-under-quiet.patch
+0337-drm-apple-audio-Report-a-lost-link-as-an-xrun-and-re.patch
+0338-drm-apple-audio-Add-the-ELD-control-and-name-the-car.patch
+0339-usb-typec-tipd-cd321x-Track-data-status-changes.patch
+0340-drm-connector-Replay-connected-out-of-band-hotplug-s.patch
+0341-usb-typec-tipd-cd321x-Report-DisplayPort-HPD-to-DRM.patch
+0342-drm-apple-Take-hotplug-events-for-a-DCP-wired-to-a-U.patch
+0343-arm64-dts-apple-Add-a-j473-variant-with-DisplayPort-.patch
+0344-drm-apple-dcp-Set-up-the-out-of-band-HPD-work-at-pro.patch
