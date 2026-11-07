@@ -1,0 +1,142 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: Mikael Hug <mikaelhug@gmail.com>
+Date: Sat, 7 Nov 2026 12:00:00 +0000
+Subject: [PATCH] drm: apple: dcp: Request a display again when it publishes no
+ modes
+
+A monitor plugged in or woken while it is still starting can leave the
+DCP with empty TimingElements. dcp_work_sink_modes() reopens IOMFB once,
+and if that brings no modes either the connector stays connected with no
+modes until someone replugs the cable: seen on j473 with an HDMI monitor,
+"TimingElements without valid modes!" followed by "no TimingElements
+after reopening IOMFB", and every mode-set from then on failing the
+atomic check because dcp_crtc_mode_fixup() finds no mode.
+
+Release and request the display a few times, two seconds apart, while
+HPD stays high. That is what a replug does on the DPTX side.
+
+---
+ drivers/gpu/drm/apple/dcp-internal.h | 2 ++
+ drivers/gpu/drm/apple/dcp.c          | 39 ++++++++++++++++++++++++++-
+ 2 files changed
+
+diff --git a/drivers/gpu/drm/apple/dcp-internal.h b/drivers/gpu/drm/apple/dcp-internal.h
+index f07fb3b..3ea7f37 100644
+--- a/drivers/gpu/drm/apple/dcp-internal.h
++++ b/drivers/gpu/drm/apple/dcp-internal.h
+@@ -282,6 +282,8 @@ struct apple_dcp {
+ 	struct work_struct sink_modes_wq;
+ 	struct work_struct hpd_resume_wq;
+ 	struct delayed_work release_wq;
++	struct delayed_work request_again_wq;
++	unsigned int request_tries;
+ 
+ 	u32 dptx_phy;
+ 	u32 dptx_die;
+diff --git a/drivers/gpu/drm/apple/dcp.c b/drivers/gpu/drm/apple/dcp.c
+index 7644cb6..7be775f 100644
+--- a/drivers/gpu/drm/apple/dcp.c
++++ b/drivers/gpu/drm/apple/dcp.c
+@@ -485,6 +485,7 @@ static irqreturn_t dcp_dp2hdmi_hpd(int irq, void *data)
+ 	 */
+ 	dev_info(dcp->dev, "DP2HDMI HPD irq, connected:%d\n", connected);
+ 
++	dcp->request_tries = 0;
+ 	if (connected) {
+ 		msleep(500);
+ 		connected = gpiod_get_value_cansleep(dcp->hdmi_hpd);
+@@ -712,6 +713,9 @@ static void _dcp_poweron(struct apple_dcp *dcp, bool open_client)
+ 
+ /* HDMI monitors drop HPD for about 0.6 s when they wake (j473 trace) */
+ #define DCP_RELEASE_DELAY msecs_to_jiffies(2000)
++/* A monitor still waking left the DCP with no modes until it was replugged (j473 trace) */
++#define DCP_REQUEST_AGAIN_DELAY msecs_to_jiffies(2000)
++#define DCP_REQUEST_AGAIN_TRIES 3
+ 
+ static bool dcp_publish_wait_done(struct apple_dcp *dcp, u32 seq)
+ {
+@@ -740,9 +744,14 @@ static void dcp_work_sink_modes(struct work_struct *work)
+ 	if (!wait_var_event_timeout(&dcp->publish_seq,
+ 				    dcp_publish_wait_done(dcp, seq),
+ 				    DCP_PUBLISH_TIMEOUT) ||
+-	    dcp->crashed || dcp_has_modes(dcp))
++	    dcp->crashed)
+ 		return;
+ 
++	if (dcp_has_modes(dcp)) {
++		dcp->request_tries = 0;
++		return;
++	}
++
+ 	mutex_lock(&dcp->power_mutex);
+ 	if (dcp->powered || dcp->stopping || dcp->crashed) {
+ 		mutex_unlock(&dcp->power_mutex);
+@@ -764,9 +773,32 @@ static void dcp_work_sink_modes(struct work_struct *work)
+ 		_dcp_poweroff(dcp);
+ 		dcp->iomfb_on = false;
+ 	}
++	if (dcp->hdmi_hpd && !dcp->stopping && !dcp_has_modes(dcp) &&
++	    dcp->request_tries < DCP_REQUEST_AGAIN_TRIES) {
++		dcp->request_tries++;
++		schedule_delayed_work(&dcp->request_again_wq, DCP_REQUEST_AGAIN_DELAY);
++	}
+ 	mutex_unlock(&dcp->power_mutex);
+ }
+ 
++static void dcp_work_request_again(struct work_struct *work)
++{
++	struct apple_dcp *dcp = container_of(to_delayed_work(work), struct apple_dcp,
++					     request_again_wq);
++
++	mutex_lock(&dcp->power_mutex);
++	if (!gpiod_get_value_cansleep(dcp->hdmi_hpd) || dcp->powered || dcp->stopping ||
++	    dcp->crashed) {
++		mutex_unlock(&dcp->power_mutex);
++		return;
++	}
++	dcp_dptx_disconnect(dcp, 0);
++	mutex_unlock(&dcp->power_mutex);
++
++	if (!dcp_dptx_connect(dcp, 0))
++		schedule_work(&dcp->sink_modes_wq);
++}
++
+ static void dcp_work_release_display(struct work_struct *work)
+ {
+ 	struct apple_dcp *dcp = container_of(to_delayed_work(work), struct apple_dcp,
+@@ -815,6 +847,8 @@ static void dcp_stop_hpd_work(struct apple_dcp *dcp)
+ 	cancel_work_sync(&dcp->hpd_resume_wq);
+ 	cancel_work_sync(&dcp->sink_modes_wq);
+ 	cancel_delayed_work_sync(&dcp->release_wq);
++	cancel_delayed_work_sync(&dcp->request_again_wq);
++	dcp->request_tries = 0;
+ }
+ 
+ void dcp_hpd_suspend(struct platform_device *pdev)
+@@ -868,6 +902,7 @@ void dcp_poweron(struct platform_device *pdev)
+ 	dcp_wake_publish_waiters(dcp);
+ 	cancel_work_sync(&dcp->sink_modes_wq);
+ 	cancel_delayed_work(&dcp->release_wq);
++	cancel_delayed_work(&dcp->request_again_wq);
+ 
+ 	mutex_lock(&dcp->power_mutex);
+ 	if (dcp->hdmi_hpd) {
+@@ -1480,6 +1515,7 @@ static int dcp_platform_probe(struct platform_device *pdev)
+ 	INIT_WORK(&dcp->sink_modes_wq, dcp_work_sink_modes);
+ 	INIT_WORK(&dcp->hpd_resume_wq, dcp_work_hpd_resume);
+ 	INIT_DELAYED_WORK(&dcp->release_wq, dcp_work_release_display);
++	INIT_DELAYED_WORK(&dcp->request_again_wq, dcp_work_request_again);
+ 
+ 	dcp->phy = devm_phy_optional_get(dev, "dp-phy");
+ 	if (IS_ERR(dcp->phy)) {
+@@ -1618,6 +1654,7 @@ static int dcp_platform_suspend(struct device *dev)
+ 
+ 	if (dcp->hdmi_hpd_irq) {
+ 		cancel_delayed_work_sync(&dcp->release_wq);
++		cancel_delayed_work_sync(&dcp->request_again_wq);
+ 		dcp_dptx_disconnect(dcp, 0);
+ 	}
+ 	/*
+-- 
+2.47.3
+
