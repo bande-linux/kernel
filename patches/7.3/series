@@ -333,3 +333,4 @@
 0333-drm-apple-av-Refuse-audio-service-calls-after-the-se.patch
 0334-PCI-Keep-Apple-silicon-root-ports-in-D0.patch
 0335-video-logo-Add-the-Bande-mark.patch
+0336-fbcon-Draw-the-logo-under-quiet.patch

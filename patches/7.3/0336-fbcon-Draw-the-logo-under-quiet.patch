@@ -1,0 +1,32 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: Mikael Hug <mikaelhug@gmail.com>
+Date: Sat, 7 Nov 2026 10:30:00 +0100
+Subject: [PATCH] fbcon: Draw the logo under quiet
+
+fbcon drops the boot logo when console_loglevel is at or below
+CONSOLE_LOGLEVEL_QUIET. A quiet boot is where a logo instead of text
+is wanted, and nologo and fbcon=logo-count:0 already turn it off.
+
+Remove the check, so the logo shows on a quiet boot without raising the
+loglevel, which would bring back the boot text.
+
+---
+ drivers/video/fbdev/core/fbcon.c | 3 ---
+ 1 file changed, 3 deletions(-)
+
+diff --git a/drivers/video/fbdev/core/fbcon.c b/drivers/video/fbdev/core/fbcon.c
+--- a/drivers/video/fbdev/core/fbcon.c
++++ b/drivers/video/fbdev/core/fbcon.c
+@@ -1110,9 +1110,6 @@ static void fbcon_init(struct vc_data *vc, bool init)
+ 
+ 	info = fbcon_info_from_console(vc->vc_num);
+ 
+-	if (logo_shown < 0 && console_loglevel <= CONSOLE_LOGLEVEL_QUIET)
+-		logo_shown = FBCON_LOGO_DONTSHOW;
+-
+ 	if (vc != svc || logo_shown == FBCON_LOGO_DONTSHOW ||
+ 	    (info->fix.type == FB_TYPE_TEXT))
+ 		logo = 0;
+-- 
+2.53.0
+
