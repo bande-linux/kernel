@@ -1,0 +1,51 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: Mikael Hug <mikaelhug@gmail.com>
+Date: Sat, 7 Nov 2026 10:00:00 +0100
+Subject: [PATCH] PCI: Keep Apple silicon root ports in D0
+
+A USB keyboard behind a PCIe xHCI (the USB-A ports of the M2 Mac mini)
+does not wake the system from s2idle. The key press does reach the root
+port: after such a cycle, ending with the power button, Root Status of
+the port holds PME Status with the Requester ID of the xHCI. The PME
+interrupt of the port, an MSI, has never fired.
+
+Why it does not fire is not known yet. One hypothesis: on arm64,
+pci_bridge_d3_possible() allows every PCIe port into D3, so the core may
+move the root port to D3hot once the xHCI below it is in D3hot, and a
+function in D3hot cannot signal an MSI. The other: these root ports may
+not signal a PME with an MSI at all, in any power state.
+
+Keep the root ports in D0 to test the first. This is an experiment, not
+a proven fix. If the keyboard still does not wake the system with it,
+that hypothesis is wrong and this patch should be dropped.
+
+---
+ drivers/pci/quirks.c | 13 +++++++++++++
+ 1 file changed, 13 insertions(+)
+
+diff --git a/drivers/pci/quirks.c b/drivers/pci/quirks.c
+--- a/drivers/pci/quirks.c
++++ b/drivers/pci/quirks.c
+@@ -2585,6 +2585,19 @@ static void quirk_no_aer_anfe(struct pci_dev *dev)
+ }
+ DECLARE_PCI_FIXUP_EARLY(PCI_VENDOR_ID_APPLE, 0x1802, quirk_no_aer_anfe);
+ 
++/*
++ * Experiment: the PME MSI of Apple silicon root ports does not fire on wake
++ * from s2idle, perhaps because they are in D3hot then. Keep them in D0.
++ */
++static void quirk_apple_root_port_no_d3(struct pci_dev *dev)
++{
++	if (pci_is_pcie(dev) && pci_pcie_type(dev) == PCI_EXP_TYPE_ROOT_PORT)
++		dev->dev_flags |= PCI_DEV_FLAGS_NO_D3;
++}
++DECLARE_PCI_FIXUP_CLASS_EARLY(PCI_VENDOR_ID_APPLE, PCI_ANY_ID,
++			      PCI_CLASS_BRIDGE_PCI, 8,
++			      quirk_apple_root_port_no_d3);
++
+ /*
+  * Under some circumstances, AER is not linked with extended capabilities.
+  * Force it to be linked by setting the corresponding control bit in the
+-- 
+2.53.0
+
