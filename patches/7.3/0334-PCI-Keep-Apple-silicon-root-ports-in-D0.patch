@@ -1,0 +1,50 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: Mikael Hug <mikaelhug@gmail.com>
+Date: Sat, 7 Nov 2026 10:00:00 +0100
+Subject: [PATCH] PCI: Keep Apple silicon root ports in D0
+
+A USB keyboard behind a PCIe xHCI (the USB-A ports of the M2 Mac mini)
+does not wake the system from s2idle. The key press does reach the root
+port: after such a cycle, ending with the power button, Root Status of
+the port holds PME Status with the Requester ID of the xHCI. The PME
+interrupt of the port, an MSI, has never fired.
+
+On arm64, pci_bridge_d3_possible() allows every PCIe port into D3, so
+the core moves the root port to D3hot once the xHCI below it is in
+D3hot. A function in D3hot cannot signal an MSI, and these systems have
+no platform wake path such as an ACPI GPE: the MSI of the root port is
+the only way a PME can reach the CPUs.
+
+Keep the root ports in D0, so that any PCIe device can wake the system.
+
+---
+ drivers/pci/quirks.c | 14 ++++++++++++++
+ 1 file changed, 14 insertions(+)
+
+diff --git a/drivers/pci/quirks.c b/drivers/pci/quirks.c
+--- a/drivers/pci/quirks.c
++++ b/drivers/pci/quirks.c
+@@ -2585,6 +2585,20 @@ static void quirk_no_aer_anfe(struct pci_dev *dev)
+ }
+ DECLARE_PCI_FIXUP_EARLY(PCI_VENDOR_ID_APPLE, 0x1802, quirk_no_aer_anfe);
+ 
++/*
++ * Apple silicon root ports report a PME from below them only with their own
++ * MSI, which they cannot send from D3hot, and there is no platform wake path.
++ * Keep them in D0 so that PCIe devices can wake the system.
++ */
++static void quirk_apple_root_port_no_d3(struct pci_dev *dev)
++{
++	if (pci_is_pcie(dev) && pci_pcie_type(dev) == PCI_EXP_TYPE_ROOT_PORT)
++		dev->dev_flags |= PCI_DEV_FLAGS_NO_D3;
++}
++DECLARE_PCI_FIXUP_CLASS_EARLY(PCI_VENDOR_ID_APPLE, PCI_ANY_ID,
++			      PCI_CLASS_BRIDGE_PCI, 8,
++			      quirk_apple_root_port_no_d3);
++
+ /*
+  * Under some circumstances, AER is not linked with extended capabilities.
+  * Force it to be linked by setting the corresponding control bit in the
+-- 
+2.53.0
+
