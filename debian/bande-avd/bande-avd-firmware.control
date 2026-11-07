@@ -1,0 +1,9 @@
+Package: bande-avd-firmware
+Version: @VERSION@
+Architecture: arm64
+Maintainer: Mikael Hug <mikaelhug@gmail.com>
+Section: non-free-firmware
+Priority: optional
+Description: Firmware for the Apple video decoder of the Mac mini M2
+ The open firmware of the coprocessor in front of the M2's video decode
+ engines, from AsahiLinux/avd-fw. The kernel's avd driver loads it.

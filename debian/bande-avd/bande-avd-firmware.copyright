@@ -1,0 +1,5 @@
+Format: https://www.debian.org/doc/packaging-manuals/copyright-format/1.0/
+Source: https://github.com/AsahiLinux/avd-fw
+Files: *
+Copyright: The Asahi Linux Contributors
+License: MIT

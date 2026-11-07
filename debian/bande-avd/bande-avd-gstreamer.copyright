@@ -1,0 +1,6 @@
+Format: https://www.debian.org/doc/packaging-manuals/copyright-format/1.0/
+Source: Debian source package gst-plugins-bad1.0
+Files: *
+Copyright: The GStreamer developers
+License: LGPL-2.1+
+ See /usr/share/common-licenses/LGPL-2.1.

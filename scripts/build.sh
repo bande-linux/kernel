@@ -40,6 +40,9 @@ compile)
         esac
     done
     "$repo/scripts/os-apple.sh" "$version" "$out"
+    apt-get install -y -qq --no-install-recommends gcc-arm-none-eabi binutils-arm-none-eabi meson ninja-build \
+        pkg-config libgstreamer-plugins-bad1.0-dev libgstreamer-plugins-base1.0-dev libgudev-1.0-dev dpkg-dev git > /dev/null
+    "$repo/scripts/avd-packages.sh" "$version" "$out"
     ls -l "$out"
     ;;
 *)

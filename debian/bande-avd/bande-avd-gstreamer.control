@@ -1,0 +1,12 @@
+Package: bande-avd-gstreamer
+Version: @VERSION@
+Architecture: arm64
+Maintainer: Mikael Hug <mikaelhug@gmail.com>
+Section: video
+Priority: optional
+Depends: @DEPENDS@
+Recommends: bande-avd-firmware
+Description: GStreamer plugins for hardware video decoding on the Mac mini M2
+ The v4l2codecs and videoparsersbad plugins of GStreamer's bad set, which
+ decode H.264, HEVC and VP9 on the M2's video decoder, without the rest of
+ the set and what it pulls in.

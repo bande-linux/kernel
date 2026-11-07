@@ -5,7 +5,7 @@ Maintainer: Mikael Hug <mikaelhug@gmail.com>
 Section: metapackages
 Priority: optional
 Depends: bande-desktop, linux-image-apple-arm64-16k (= @VERSION@)
-Recommends: bande-scripts, bande-usb-gadget, bande-nvram, bande-bless
+Recommends: bande-scripts, bande-usb-gadget, bande-nvram, bande-bless, bande-avd-firmware, bande-avd-gstreamer
 Description: Bande for the Mac mini M2
  Bande on Apple Silicon: the Bande desktop and system on Debian testing, with
  Debian's kernel built with the Bande Apple patches (the apple-arm64-16k

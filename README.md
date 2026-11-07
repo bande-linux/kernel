@@ -30,6 +30,7 @@ commits, so any change here gives a newer version):
   metapackages `linux-image-apple-arm64-16k` and `linux-base-apple-arm64-16k`. The ABI is
   `<upstream>+bande`, so no package name meets Debian's.
 - `bande-os-apple`.
+- `bande-avd-firmware` and `bande-avd-gstreamer`: hardware video decode (`scripts/avd-packages.sh`).
 
 The flavour is Debian's `arm64-16k` with `config/apple.config` on top and signing disabled (Macs
 have no UEFI Secure Boot). Headers are built but not published yet.
