@@ -1,12 +1,12 @@
 # Bande kernel
 
-Debian testing's kernel with the Bande patches for the Mac mini M2.
+Debian forky's kernel with the Bande patches for the Mac mini M2.
 
 This repository builds only the kernel for Apple machines: Debian's `linux` source with our Mac
 patches. Everyone else runs Debian's own kernel, so we never build or publish Debian's kernel
 without our patches. This repository holds no kernel tree. It holds what we add to Debian's: our
 patches, the few config options the Mac needs and a Debian flavour, `apple-arm64-16k`. Whenever
-Debian testing gets a new `linux` package of a series we have patches for, `follow-debian.yml`
+Debian forky gets a new `linux` package of a series we have patches for, `follow-debian.yml`
 builds that same source with Debian's own build system, and the Bande archive publishes it to
 the `apple` component.
 
@@ -23,7 +23,7 @@ tree, `bande-linux/linux`, is legacy: kept for its history, not developed any mo
 
 ## What gets built
 
-From `linux <debian-version>` in testing, `<debian-version>+bandeN` (N counts this repository's
+From `linux <debian-version>` in forky (or forky-security), `<debian-version>+bandeN` (N counts this repository's
 commits, so any change here gives a newer version):
 
 - `linux-image-<abi>-apple-arm64-16k`, with its `-binary`, `-modules` and `-base` parts, and the
@@ -38,13 +38,13 @@ have no UEFI Secure Boot). Headers are built but not published yet.
 
 `follow-debian.yml` runs hourly and on dispatch:
 
-1. `scripts/debian-version.sh` reads testing's `linux` version and `scripts/series.sh` our patch
-   series for it. When testing is on an older series than our newest patches (now: testing has
+1. `scripts/debian-version.sh` reads forky's `linux` version (the newer of forky and forky-security) and `scripts/series.sh` our patch
+   series for it. When forky is on an older series than our newest patches (now: forky has
    7.2, our patches are for 7.3), the run stops there with "no build: our patches are for a
    newer series": no build, nothing published. It resumes by itself in the first hourly run
-   after testing reaches the series. Otherwise `scripts/version.sh` gives our version of it and
+   after forky reaches the series. Otherwise `scripts/version.sh` gives our version of it and
    `scripts/published.sh` the version the archive serves. Equal: nothing to do.
-2. `scripts/build.sh fetch` gets Debian's source through apt, which checks it against testing's
+2. `scripts/build.sh fetch` gets Debian's source through apt, which checks it against forky's
    signed Release.
 3. `scripts/prepare.sh` adds the flavour, the `bande` release and our patches for Debian's
    series, and fails rather than leave any of them out. For a newer series than ours it first
@@ -97,7 +97,7 @@ publishing it; `scripts/local-build.sh` is the same locally.
 
 ## Building on the mini
 
-`scripts/local-build.sh <debian version> <dir> [step...]` runs CI's steps in a Debian testing
+`scripts/local-build.sh <debian version> <dir> [step...]` runs CI's steps in a Debian forky
 chroot. It needs no root and no containers: `mmdebstrap --mode=unshare` and a user namespace.
 `kernel-build` runs it through the build queue, on a free build machine and never the mini, and
 copies the debs back:
@@ -114,11 +114,11 @@ source and the build tree with debug info (32 GB). It takes about 2.5 h on the m
 compiler is the one Debian's source names (`gcc-16` for 7.3), installed in the chroot, not
 the mini's own. Clean up after a build.
 
-### Until Debian testing has 7.3
+### Until Debian forky has 7.3
 
-Our patches are for 7.3; testing has 7.2 and experimental 7.3~rc7, so CI builds nothing.
+Our patches are for 7.3; forky has 7.2 and experimental 7.3~rc7, so CI builds nothing.
 Until then, test kernels for the mini are local builds of experimental's 7.3~rc7 with our 7.3
-series, built as above and installed by hand (never published). Once testing reaches 7.3,
+series, built as above and installed by hand (never published). Once forky reaches 7.3,
 `follow-debian.yml` builds and publishes it by itself, and the mini follows the archive.
 
 ## Licence

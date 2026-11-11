@@ -2,7 +2,7 @@
 # series.sh <debian version>: the patches/<series> directory for that Debian kernel.
 # We only ever build Debian's kernel with our Mac patches, never a plain rebuild, so:
 #   exit 0  prints the directory: we have patches for its upstream series;
-#   exit 4  Debian is on an older series than our newest (testing lagging behind the series our
+#   exit 4  Debian is on an older series than our newest (forky lagging behind the series our
 #           patches were moved to): nothing to build until it catches up;
 #   exit 3  Debian is on a newer series than our newest: prints the newest directory, which
 #           prepare.sh copies to the new series and the patches need porting forward;

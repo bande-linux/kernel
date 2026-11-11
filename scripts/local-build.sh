@@ -1,7 +1,7 @@
 #!/bin/bash
 # local-build.sh <debian version> <dir> [step...]: the CI build on a Debian machine, without
-# root or containers: a Debian testing chroot made with mmdebstrap's unshare mode, entered
-# through a user namespace. Any Debian linux version works (testing, unstable, experimental),
+# root or containers: a Debian forky chroot made with mmdebstrap's unshare mode, entered
+# through a user namespace. Any Debian linux version works (forky, unstable, experimental),
 # like follow-debian.yml's test-build dispatch; nothing is published. <dir> must be reachable by
 # other users (/var/tmp/..., not under a private home), because the chroot belongs to your
 # subordinate uids. Steps, all but clean by default:
@@ -41,7 +41,7 @@ for step in "${steps[@]}"; do
         [ -d "$dir/chroot/etc" ] && continue
         mkdir -p "$dir"
         chmod 755 "$dir"
-        mmdebstrap --mode=unshare --variant=buildd --include=ca-certificates testing "$dir/chroot"
+        mmdebstrap --mode=unshare --variant=buildd --include=ca-certificates forky "$dir/chroot"
         ;;
     fetch)
         as_root rm -rf "$dir/work"

@@ -1,7 +1,7 @@
 #!/bin/bash
-# build.sh: run as root in debian:testing, in three steps sharing <work dir>.
+# build.sh: run as root in debian:forky, in three steps sharing <work dir>.
 #   build.sh fetch <debian version> <work dir>   Debian's linux source through apt, which checks
-#                                                it against testing's signed Release
+#                                                it against forky's signed Release
 #   (then scripts/prepare.sh <work dir>/linux-* <version>)
 #   build.sh compile <version> <work dir> <out>   the apple-arm64-16k flavour with Debian's own
 #                                                build, plus bande-os-apple, into <out>
@@ -13,7 +13,7 @@ profiles="pkg.linux.notools nodoc pkg.linux.nokerneldbg noudeb"
 case ${1:-} in
 fetch)
     debver=$2 work=$(realpath -m "$3")
-    printf 'Types: deb-src\nURIs: http://deb.debian.org/debian\nSuites: testing unstable experimental\nComponents: main\nSigned-By: /usr/share/keyrings/debian-archive-keyring.pgp\n' \
+    printf 'Types: deb-src\nURIs: http://deb.debian.org/debian\nSuites: forky unstable experimental\nComponents: main\nSigned-By: /usr/share/keyrings/debian-archive-keyring.pgp\n\nTypes: deb-src\nURIs: http://security.debian.org/debian-security\nSuites: forky-security\nComponents: main\nSigned-By: /usr/share/keyrings/debian-archive-keyring.pgp\n' \
         > /etc/apt/sources.list.d/debian-newer-src.sources
     apt-get update -qq
     apt-get install -y -qq --no-install-recommends devscripts quilt python3 python3-dacite \

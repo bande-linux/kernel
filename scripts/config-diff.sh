@@ -1,5 +1,5 @@
 #!/bin/bash
-# config-diff.sh <source dir>: run in debian:testing after build.sh compile.
+# config-diff.sh <source dir>: run in debian:forky after build.sh compile.
 # Proves our kernel is Debian's arm64-16k kernel plus config/apple.config and the series'
 # patches/<series>/apple.config: generates Debian's own arm64-16k
 # config from the same source with Debian's build, and fails if any option Debian sets differs

@@ -1,6 +1,6 @@
 #!/bin/bash
 # os-apple.sh <version> <out dir>: builds bande-os-apple, the metapackage that makes a Debian
-# testing install a Bande install for the Mac mini M2. It pulls in the Apple kernel and keeps
+# forky install a Bande install for the Mac mini M2. It pulls in the Apple kernel and keeps
 # Debian's own kernels, which can't run the Mac's hardware, from being installed beside it.
 set -euo pipefail
 version=$1 out=$(realpath -m "$2")

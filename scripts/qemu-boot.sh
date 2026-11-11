@@ -1,5 +1,5 @@
 #!/bin/bash
-# qemu-boot.sh <out dir>: run in debian:testing. Boots the built kernel in QEMU's arm64 virt
+# qemu-boot.sh <out dir>: run in debian:forky. Boots the built kernel in QEMU's arm64 virt
 # machine (TCG, 16k pages) through UEFI with a one-line busybox initramfs, and passes when it
 # reaches userspace. It catches kernels that don't boot; the Mac's own hardware isn't tested.
 set -euo pipefail

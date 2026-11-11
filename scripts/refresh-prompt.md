@@ -1,5 +1,5 @@
 You are refreshing the Bande kernel patches for a new Debian kernel. Bande builds Debian
-testing's `linux` source package with our patches for the Apple Silicon Mac mini M2 added after
+forky's `linux` source package with our patches for the Apple Silicon Mac mini M2 added after
 Debian's own patches. Debian has moved to a new version and at least one of our patches no
 longer applies. When Debian moved to a new upstream series, our series directory for it was
 just started as a copy of our previous series.

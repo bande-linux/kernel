@@ -1,5 +1,5 @@
 name: follow-debian
-run-name: "${{ github.event_name == 'schedule' && 'Hourly: follow the Debian testing kernel' || (inputs.debian_version != '' && format('Test build of Debian linux {0}', inputs.debian_version) || 'Build the Debian testing kernel') }}"
+run-name: "${{ github.event_name == 'schedule' && 'Hourly: follow the Debian forky kernel' || (inputs.debian_version != '' && format('Test build of Debian linux {0}', inputs.debian_version) || 'Build the Debian forky kernel') }}"
 
 on:
   schedule:
@@ -11,7 +11,7 @@ on:
         type: boolean
         default: false
       debian_version:
-        description: Test-build this Debian linux version (any suite) instead of testing's; never published
+        description: Test-build this Debian linux version (any suite) instead of forky's; never published
         default: ''
 
 permissions:
@@ -31,7 +31,7 @@ jobs:
         with:
           fetch-depth: 0
 
-      - name: Compare Debian testing with the archive
+      - name: Compare Debian forky with the archive
         id: versions
         env:
           FORCE: ${{ inputs.force }}
@@ -43,7 +43,7 @@ jobs:
           published=$(scripts/published.sh)
           build=true
           # We only build Debian's kernel with our Mac patches: while Debian is on an older series
-          # than our newest patches (testing behind experimental), there is nothing to build.
+          # than our newest patches (forky behind experimental), there is nothing to build.
           set +e
           scripts/series.sh "$debian" > /dev/null
           series_rc=$?
@@ -69,7 +69,7 @@ jobs:
     needs: check
     if: needs.check.outputs.build == 'true'
     concurrency:
-      group: follow-debian-${{ inputs.debian_version || 'testing' }}
+      group: follow-debian-${{ inputs.debian_version || 'forky' }}
       cancel-in-progress: false
     runs-on: ubuntu-24.04-arm
     timeout-minutes: 360
@@ -88,11 +88,11 @@ jobs:
           sudo rm -rf /usr/local/lib/android /usr/share/dotnet /opt/ghc /opt/hostedtoolcache /usr/local/share/boost
           df -h /
 
-      - name: Start the Debian testing container
+      - name: Start the Debian forky container
         run: |
           mkdir -p "$RUNNER_TEMP/work" "$RUNNER_TEMP/out"
           docker run -d --name build -v "$PWD:/repo" -v "$RUNNER_TEMP/work:/work" -v "$RUNNER_TEMP/out:/out" \
-            debian:testing sleep infinity
+            debian:forky sleep infinity
 
       - name: Fetch Debian's source
         run: docker exec build /repo/scripts/build.sh fetch "$DEBIAN_VERSION" /work
